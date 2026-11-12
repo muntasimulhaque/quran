@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import io.github.muntasimulhaque.quran.core.Arabic
+import io.github.muntasimulhaque.quran.core.WordGrammar
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.WordRoot
@@ -77,11 +79,25 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * wears. The word remains the subject under both (owner decision, this
  * session).
  *
+ * **The word's study lines stand under it, not behind a fold** (owner
+ * decision, this session). The root carries how many words in the Book speak
+ * it; below it come the dictionary form with its two counts and the grammar,
+ * one centered line each, in the shape the root already wears. They are
+ * drawn only when the word pack carries them, so a held pack from before the
+ * study lines draws the word, its meaning, and its root as it did, and a
+ * word the corpus gives no lemma says nothing rather than drawing an empty
+ * line. The grammar's words are the app's own translated grammar vocabulary,
+ * the same in both languages, and never a translation of scripture (owner
+ * decision, this session).
+ *
  * **While the word sounds, the word is washed** (owner decision, this
- * session). One word is a sample, not a session, so there is no capsule and
- * no notification left behind; the sheet gives the tap its answer where the
- * finger is. The word wears the reading's own recited-word mark, the same
- * rounded wash the verse uses, and it rests when the word does.
+ * session). One word is a sample, not a session: it is one clipped item on its
+ * own player, so it raises no capsule and leaves no notification behind, and
+ * the sheet gives the tap its answer where the finger is. A recitation that
+ * was already playing waits at the word and is given back when the clip ends,
+ * so the pill behind the sheet stands paused and then goes on. The word wears
+ * the reading's own recited-word mark, the same rounded wash the verse uses,
+ * and it rests when the word does.
  */
 internal data class OpenWord(
     val word: String,
@@ -92,6 +108,12 @@ internal data class OpenWord(
     val reference: String,
     /** The word's triliteral root; null for the third of the words with none. */
     val root: WordRoot? = null,
+    /**
+     * The word's grammar and lemma, when the word pack carries them. Null on
+     * a held pack from before the study lines, which then draws the word, its
+     * meaning, and its root, as it did (owner decision, this session).
+     */
+    val grammar: WordGrammar? = null,
     /** The ayah the word stands in, for the voice that says it. */
     val ayahNumber: Int = 0,
     /** The word's position in its ayah, which the timings name. */
@@ -279,8 +301,106 @@ internal fun WordSheet(
                             modifier = Modifier.align(Alignment.CenterVertically),
                         )
                     }
+                    // How much of the Book speaks this root. The count is in
+                    // the pack the sheet already read, and it is the one fact
+                    // that turns a root into a family the reader can feel
+                    // (owner decision, this session).
+                    if (root.wordsCount > 0) {
+                        Text(
+                            text = stringResource(
+                                R.string.reading_word_root_count,
+                                localizedDigits(root.wordsCount.toString()),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                    }
+                }
+            }
+            word.grammar?.let { grammar ->
+                // The dictionary form, when the corpus gives one: the word's
+                // own letters at the medallion's measure, and the Book's two
+                // counts for it. A pronoun and a disjoint letter have no
+                // lemma, and the sheet then says nothing rather than drawing
+                // a line with nothing behind it (owner decision, this
+                // session).
+                grammar.lemma?.let { lemma ->
+                    StudyLine(
+                        label = stringResource(R.string.reading_word_lemma),
+                        tag = "word-sheet-lemma",
+                    ) {
+                        Text(
+                            text = lemma,
+                            style = arabicStyle(
+                                hafs,
+                                TextSize.medallionAt(metrics.arabicSp),
+                                TextSize.medallionAt(metrics.arabicSp) * 2f,
+                                palette.ink,
+                            ),
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                        Text(
+                            text = stringResource(
+                                R.string.reading_word_lemma_count,
+                                localizedDigits(grammar.lemmaWords.toString()),
+                                localizedDigits(grammar.lemmaForms.toString()),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                    }
+                }
+                // What the word is, as a grammar reads it. The line is drawn
+                // only on a word pack that carries it, so an older pack is
+                // the sheet the reader already knows (owner decision, this
+                // session).
+                grammarPhrase(grammar)?.let { phrase ->
+                    StudyLine(
+                        label = stringResource(R.string.reading_word_grammar),
+                        tag = "word-sheet-grammar",
+                    ) {
+                        Text(
+                            text = phrase,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = palette.ink,
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+/**
+ * One study line: the sheet's label on the left of the value, both centered
+ * and wrapping together rather than overflowing at the largest system scale.
+ * The root's row is the same shape, so the lines under it read as one page
+ * (owner decision, this session).
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StudyLine(
+    label: String,
+    tag: String,
+    value: @Composable FlowRowScope.() -> Unit,
+) {
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Space.Block)
+            .testTag(tag),
+        horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(Space.Tight),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.align(Alignment.CenterVertically),
+        )
+        value()
     }
 }

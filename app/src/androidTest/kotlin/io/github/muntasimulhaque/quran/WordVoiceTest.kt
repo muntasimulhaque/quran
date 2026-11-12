@@ -99,8 +99,9 @@ class WordVoiceTest {
 
     /**
      * The speaker answers on the sheet and nowhere else. A word is a sample,
-     * not a session: no capsule rises behind the sheet while it sounds, and
-     * none is left paused after the word ends (owner decision, this session).
+     * not a session: it is one clipped item on its own player, so no capsule
+     * rises behind the sheet while it sounds, and none is left behind when the
+     * clip ends (owner decision, this session).
      */
     @Test
     fun theWordsVoiceRaisesNoCapsule() {
@@ -109,8 +110,10 @@ class WordVoiceTest {
             compose.onAllNodesWithTag("word-sheet-hear", useUnmergedTree = true)
                 .onFirst()
                 .performClick()
-            // The word is a second or so: past its end, the old rule would
-            // have left the capsule paused at the word's last millisecond.
+            // The word is a second or so. Past its end the sheet is the word
+            // and its gloss again, and the foot of the reading is bare: a word
+            // never stands in the session's playlist, so there is nothing it
+            // could leave paused there.
             Thread.sleep(2_500)
             assertTrue(
                 "the word's own voice must raise no capsule",

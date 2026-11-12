@@ -3,10 +3,8 @@ package io.github.muntasimulhaque.quran
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.ContextCompat
-import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
@@ -23,13 +21,13 @@ import io.github.muntasimulhaque.quran.data.PlaybackPosition
 import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.PlaybackService
+import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -40,16 +38,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The two custom commands the player keeps for the reading, pinned where they
- * can be exercised: the controller cannot set either itself, because both are
- * `ExoPlayer` facts and not things the `Player` interface a `MediaController`
- * speaks carries.
+ * The one custom command the player keeps for the reading, pinned where it can
+ * be exercised: the controller cannot set the stop after this ayah itself,
+ * because `setPauseAtEndOfMediaItems` is an `ExoPlayer` fact and not something
+ * the `Player` interface a `MediaController` speaks carries. It travels as a
+ * boolean.
  *
- * The first is the stop after this ayah, which travels as a boolean. The
- * second is the word's own voice, which travels as a media millisecond and is
- * watched by the service: the sheet asks to hear one word and no more, and the
- * pause must land at the word's end, on the word that was asked for, and never
- * on a verse the reader has moved on to (owner decision, this session).
+ * The word's own voice is not a command any more. A word is one clipped media
+ * item on its own player, so its end is the item's end, and the two legs below
+ * pin what the reading needs from that: the clip ends by itself and leaves the
+ * session's playlist and the saved place untouched, and a recitation that was
+ * playing waits at the word and is given back when the clip ends (owner
+ * decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackServiceTest {
@@ -89,97 +89,13 @@ class PlaybackServiceTest {
     }
 
     /**
-     * The word's stop, end to end, on real audio from the app's own assets:
-     * it pauses at the millisecond it was given, it does not pause once it has
-     * been taken off, and a pause from the reader's own transport takes it off
-     * as well, so a word heard on the sheet can never leave a pause waiting in
-     * the middle of a verse the reader is now hearing.
+     * A word's own voice on real audio from the app's own assets: the clip ends
+     * by itself, and the session's player is never handed the word at all, so
+     * the playlist, the capsule, and the saved place stand exactly as they
+     * were (owner decision, this session).
      */
     @Test
-    fun theWordStopPausesAtItsOffsetAndAPauseTakesItOff() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val audio = cacheAudio(context, "recitation/husary/001001.mp3", "word-stop.mp3")
-        // The reading is on the glass before the audio starts: the phone grants
-        // an audio focus request to the app that is in front of the reader,
-        // and an app in the background is refused it by the audio service's
-        // own hardening. Every real word is heard from the open reading, so
-        // this is the state the command is asked for in (owner decision, this
-        // session).
-        val reading = ActivityScenario.launch<MainActivity>(
-            Intent(context, MainActivity::class.java),
-        )
-        val (controller, future) = connect(context)
-        try {
-            assertTrue(
-                "the session must advertise the word's stop",
-                readMain {
-                    controller.availableSessionCommands
-                        .contains(SessionCommand(PlaybackService.COMMAND_PAUSE_AT, Bundle.EMPTY))
-                },
-            )
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                controller.setMediaItem(MediaItem.fromUri(Uri.fromFile(audio)))
-                controller.prepare()
-                controller.play()
-            }
-            assertTrue(
-                "the test audio must start playing",
-                await(controller, 20_000) { playing, position -> playing && position > 0 },
-            )
-
-            // A pause at one second: the player stops there, not at the end.
-            sendPauseAt(controller, context, 1_000L)
-            assertTrue(
-                "the word's stop must pause the player",
-                await(controller, 15_000) { playing, _ -> !playing },
-            )
-            val stopped = readMain { controller.currentPosition }
-            assertTrue(
-                "the stop must land at its millisecond, not before it and not at the item's end: $stopped",
-                stopped in 800L..3_000L,
-            )
-
-            // Taken off, the player runs past the old mark.
-            sendPauseAt(controller, context, -1L)
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                controller.seekTo(0L)
-                controller.play()
-            }
-            Thread.sleep(2_500)
-            assertTrue(
-                "a cleared stop must not pause the verse the reader went back to",
-                readMain { controller.playWhenReady },
-            )
-
-            // Armed and then paused by the reader's own transport: the stop
-            // goes with the pause, and a play after it is not cut short.
-            sendPauseAt(controller, context, 1_500L)
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                controller.pause()
-            }
-            Thread.sleep(200)
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                controller.seekTo(0L)
-                controller.play()
-            }
-            Thread.sleep(3_000)
-            assertTrue(
-                "a transport pause must take the word's stop off the player",
-                readMain { controller.playWhenReady },
-            )
-        } finally {
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                controller.pause()
-                controller.clearMediaItems()
-                controller.stop()
-            }
-            release(controller, future)
-            reading.close()
-        }
-    }
-
-    @Test
-    fun theWordsOwnVoiceStopsAtItsEnd() = runBlocking {
+    fun theWordsOwnClipEndsAndLeavesTheSessionAlone() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val reading = ActivityScenario.launch<MainActivity>(
             Intent(context, MainActivity::class.java),
@@ -195,45 +111,33 @@ class PlaybackServiceTest {
         // session).
         val place = PlaybackPosition("husary", 7, 1_234L)
         withContext(Dispatchers.IO) { PlaybackPositionStore(context).write(place) }
-        val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
-        val main = ContextCompat.getMainExecutor(context)
-        val watcherRef = AtomicReference<MediaController>()
-        val connected = CountDownLatch(1)
-        val built = MediaController.Builder(context, token).buildAsync()
-        built.addListener(
-            {
-                watcherRef.set(built.get())
-                connected.countDown()
-            },
-            main,
-        )
-        assertTrue("the watcher must connect", connected.await(20, TimeUnit.SECONDS))
-        val watcher = watcherRef.get()
+        val (watcher, future) = connect(context)
         try {
             assertTrue(
                 "the word must start",
                 withContext(Dispatchers.Main) { playback.hearWord("husary", 1, 1) },
             )
             assertTrue(
-                "the word must start playing",
-                await(watcher, 15_000) { playing, _ -> playing },
+                "the sheet must be told which word sounds",
+                awaitState(playback, 5_000) { it.sample != null },
             )
             assertTrue(
-                "the word must stop at its end",
-                await(watcher, 5_000) { playing, _ -> !playing },
+                "the word must end by itself",
+                awaitState(playback, 15_000) { it.sample == null },
             )
-            // The sample is over, so its player is over: no items, no capsule,
-            // and no notification left standing for one word (owner decision,
-            // this session).
+            // A word is not a session: the session's player never held it, so
+            // there is no item, no capsule, and no notification left standing
+            // for one word (owner decision, this session).
+            assertEquals(
+                "a word must never stand in the session's playlist",
+                0,
+                readMain { watcher.mediaItemCount },
+            )
             assertTrue(
-                "the sample must take its player with it",
-                await(watcher, 5_000) { _, _ ->
-                    readMain { watcher.mediaItemCount == 0 }
-                },
+                "a word must not start the session's player",
+                readMain { !watcher.playWhenReady },
             )
-            val state = readMain { playback.state.value }
-            assertNull("a sample must leave no capsule", state.sample)
-            assertNull("a sample must leave no ayah marked", state.ayahNumber)
+            assertNull("a sample must leave no ayah marked", readMain { playback.state.value.ayahNumber })
             assertEquals(
                 "a word's end is not the listening place",
                 place,
@@ -246,11 +150,72 @@ class PlaybackServiceTest {
                 watcher.stop()
             }
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                MediaController.releaseFuture(built)
+                playback.release()
+            }
+            release(watcher, future)
+            withContext(Dispatchers.IO) { PlaybackPositionStore(context).clear() }
+            scope.cancel()
+            reading.close()
+        }
+    }
+
+    /**
+     * A word heard over a recitation: the session waits at the word and is
+     * given back at its last millisecond, with the playlist it was playing
+     * still whole. The word is the fourth of Al-Fatiha's first ayah, which is
+     * the ayah's long one, so the pause has a window wide enough to read.
+     */
+    @Test
+    fun aWordHeardOverARecitationWaitsAndGivesItBack() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val reading = ActivityScenario.launch<MainActivity>(
+            Intent(context, MainActivity::class.java),
+        )
+        val store = PackStore(context)
+        store.install("reciter-husary")
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        val playback = PlaybackController(context, scope)
+        val database = ContentDatabase.open(context, PackCatalog.load(context), store.installed())
+        playback.attach(database)
+        val (watcher, future) = connect(context)
+        try {
+            withContext(Dispatchers.Main) { playback.play("husary", 1, resume = false) }
+            assertTrue(
+                "the recitation must start",
+                await(watcher, 20_000) { playing, _ -> playing },
+            )
+            assertTrue(
+                "the word must start",
+                withContext(Dispatchers.Main) { playback.hearWord("husary", 1, 4) },
+            )
+            assertTrue(
+                "the recitation must wait for the word",
+                await(watcher, 5_000) { playing, _ -> !playing },
+            )
+            assertTrue(
+                "the word must end by itself",
+                awaitState(playback, 15_000) { it.sample == null },
+            )
+            assertTrue(
+                "the recitation must be given back after the word",
+                await(watcher, 10_000) { playing, _ -> playing },
+            )
+            assertEquals(
+                "the word must not replace the reader's playlist",
+                7,
+                readMain { watcher.mediaItemCount },
+            )
+        } finally {
+            withContext(Dispatchers.Main) { playback.stop() }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                watcher.pause()
+                watcher.clearMediaItems()
+                watcher.stop()
             }
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
                 playback.release()
             }
+            release(watcher, future)
             withContext(Dispatchers.IO) { PlaybackPositionStore(context).clear() }
             scope.cancel()
             reading.close()
@@ -284,25 +249,18 @@ class PlaybackServiceTest {
         }
     }
 
-    private fun sendPauseAt(controller: MediaController, context: Context, atMs: Long) {
-        val main = ContextCompat.getMainExecutor(context)
-        val answered = CountDownLatch(1)
-        val result = AtomicReference<SessionResult>()
-        InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val sent = controller.sendCustomCommand(
-                SessionCommand(PlaybackService.COMMAND_PAUSE_AT, Bundle.EMPTY),
-                Bundle().apply { putLong(PlaybackService.ARG_PAUSE_AT_MS, atMs) },
-            )
-            sent.addListener(
-                {
-                    result.set(sent.get())
-                    answered.countDown()
-                },
-                main,
-            )
+    /** Waits for the controller's own state to say [condition]. */
+    private fun awaitState(
+        playback: PlaybackController,
+        timeoutMs: Long,
+        condition: (PlaybackUiState) -> Boolean,
+    ): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (readMain { condition(playback.state.value) }) return true
+            Thread.sleep(50)
         }
-        assertTrue("the session must answer the word's stop", answered.await(20, TimeUnit.SECONDS))
-        assertEquals(SessionResult.RESULT_SUCCESS, result.get().resultCode)
+        return false
     }
 
     /** The player's two facts, read on the main thread the player lives on. */
@@ -328,12 +286,4 @@ class PlaybackServiceTest {
         return false
     }
 
-    private fun cacheAudio(context: Context, asset: String, name: String): File {
-        val file = File(context.cacheDir, name)
-        if (file.isFile && file.length() > 0L) return file
-        context.assets.open(asset).use { input ->
-            file.outputStream().use { output -> input.copyTo(output) }
-        }
-        return file
-    }
 }

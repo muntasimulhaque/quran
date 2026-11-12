@@ -36,8 +36,8 @@ object PackSources {
         "tafsir-ibn-kathir-en" to listOf("tafsir-ibn-kathir-en"),
         "translation-al-bayan-bn" to listOf("translation-al-bayan-bn", "translation-al-bayan-bn-notes"),
         "tafsir-ibn-kathir-bn" to listOf("tafsir-ibn-kathir-bn"),
-        "words-en" to listOf("word-by-word-english", "surah-info-en"),
-        "words-bn" to listOf("word-by-word-bengali"),
+        "words-en" to listOf("word-by-word-english", "surah-info-en", "word-morphology"),
+        "words-bn" to listOf("word-by-word-bengali", "word-morphology"),
         // The root is one language-neutral table and travels beside the
         // word list the reader has (owner decision, this session).
         "word-root" to listOf("word-root"),

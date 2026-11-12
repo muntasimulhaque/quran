@@ -1,13 +1,14 @@
 {
-  "contentVersion": "1.7.0",
+  "contentVersion": "1.8.0",
   "ayahs": 6236,
   "words": 77429,
   "markers": 6235,
   "translations": 6236,
+  "grammar": 77429,
   "recitationSegmentsShifted": 468,
   "recitationSegmentsMapped": 64,
   "recitationSegmentsClamped": 724,
   "problems": 0,
-  "databaseBytes": 108531712,
-  "databaseSha256": "2605fb00d43ad813c3b5b7b53a0bfb766ad8f2e9360343a4b724eb26ffbd7090"
+  "databaseBytes": 112939008,
+  "databaseSha256": "7668312ba6177cc7951ee787ce706943087eb6a94f556d90cb89c5b755950283"
 }

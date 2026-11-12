@@ -470,6 +470,7 @@ internal fun AyahBlock(
                                                             tajweed = word.tajweed,
                                                             reference = row.ayah.verseKey,
                                                             root = row.roots.getOrNull(index),
+                                                            grammar = row.grammar.getOrNull(index),
                                                             ayahNumber = row.ayah.number,
                                                             position = row.words.getOrNull(index)?.position
                                                                 ?: 0,

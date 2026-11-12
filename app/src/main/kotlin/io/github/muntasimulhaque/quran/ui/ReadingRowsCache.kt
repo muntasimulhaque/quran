@@ -109,6 +109,14 @@ internal class ReadingRowsCache(
                     emptyMap()
                 }
                 val roots = open.wordRoots(numbers)
+                // The study lines are read only when the aid that opens the
+                // sheet is on: a word meaning the reader turned off is not a
+                // query the reading pays for (owner decision, this session).
+                val grammar = if (wordByWord) {
+                    open.wordGrammar(numbers, language())
+                } else {
+                    emptyMap()
+                }
                 val hears = hasAudio(surah)
                 ayahs.map { ayah ->
                     val drawn = words[ayah.number].orEmpty()
@@ -118,6 +126,7 @@ internal class ReadingRowsCache(
                         translations = lines[ayah.number].orEmpty(),
                         meanings = meanings[ayah.number].orEmpty(),
                         roots = drawn.map { roots[ayah.number]?.get(it.position) },
+                        grammar = drawn.map { grammar[ayah.number]?.get(it.position) },
                         hears = hears,
                     )
                 }
@@ -154,12 +163,18 @@ internal class ReadingRowsCache(
             emptyList()
         }
         val roots = open.wordRoots(listOf(ayahNumber))[ayahNumber].orEmpty()
+        val grammar = if (wordByWord) {
+            open.wordGrammar(listOf(ayahNumber), language())[ayahNumber].orEmpty()
+        } else {
+            emptyMap()
+        }
         val row = ReadingRow(
             ayah = ayah,
             words = words,
             translations = translations,
             meanings = meanings,
             roots = words.map { roots[it.position] },
+            grammar = words.map { grammar[it.position] },
             // The one-row surfaces are the size sample and the share card,
             // and neither opens the word sheet: the speaker is read with the
             // list, where the audio question can be asked off the frame.

@@ -29,8 +29,10 @@ import io.github.muntasimulhaque.quran.playback.PlaybackUiState
  *    "not now" exactly as its own close used to answer it.
  *
  * A word's own voice is not one of these: it is a sample, not a session, it
- * raises no capsule, and it ends itself. So a tap on the page has nothing to
- * put away while one sounds (owner decision, this session).
+ * raises no capsule of its own, and it ends itself. A recitation that waited
+ * for the word is still the reader's, so a tap on the page while a word sounds
+ * puts nothing away: the word finishes its clip and the recitation is given
+ * back where it stood (owner decision, this session).
  */
 internal enum class RaisedAnswer {
 
@@ -64,7 +66,8 @@ internal fun raisedAnswer(
         RaisedAnswer.Nothing
     }
     // A sample is a word's own voice, not a session: nothing at the foot
-    // answers it, and it takes itself away at the word's end.
+    // answers it, and it ends with its own clip (owner decision, this
+    // session).
     state.sample != null -> RaisedAnswer.Nothing
     state.error -> RaisedAnswer.StopRecitation
     state.downloadFailed -> RaisedAnswer.CancelDownload

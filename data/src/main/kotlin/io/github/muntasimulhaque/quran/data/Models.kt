@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.data
 
 import io.github.muntasimulhaque.quran.core.SearchQuery
+import io.github.muntasimulhaque.quran.core.WordGrammar
 
 data class Surah(
     val number: Int,
@@ -303,6 +304,12 @@ data class ReadingRow(
     /** Each drawn word's root, in the verse's order; null where it has none. */
     val roots: List<WordRoot?> = emptyList(),
     /**
+     * Each drawn word's grammar and lemma, in the verse's order; null where
+     * the held word list has no grammar row, so a sheet from an older pack is
+     * the word, its meaning, and its root (owner decision, this session).
+     */
+    val grammar: List<WordGrammar?> = emptyList(),
+    /**
      * Whether the surah's audio is on the device under the reader's reciter,
      * so the word sheet may offer the word's own voice. Read with the rows,
      * because a sheet that asked the disk on the tap would ask it on the
@@ -312,8 +319,9 @@ data class ReadingRow(
 )
 
 /**
- * A word's triliteral root: the letters as the page writes them, and the same
- * letters read out, so a reader who does not read Arabic script still meets
- * the root the sheet is describing (owner decision, this session).
+ * A word's triliteral root: the letters as the page writes them, the same
+ * letters read out, and how many words in the Quran carry them, so a reader
+ * who does not read Arabic script still meets the root the sheet is
+ * describing (owner decision, this session).
  */
-data class WordRoot(val arabic: String, val latin: String)
+data class WordRoot(val arabic: String, val latin: String, val wordsCount: Int = 0)

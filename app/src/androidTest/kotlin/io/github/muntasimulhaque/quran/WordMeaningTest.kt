@@ -121,6 +121,18 @@ class WordMeaningTest {
             compose.onAllNodesWithText("নামে", substring = true, useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
+        // The study lines the word pack carries: the dictionary form and the
+        // grammar, on the same sheet and in the reader's language. The word
+        // is 1:1's first, whose lemma and part of speech the corpus names
+        // (owner decision, this session).
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-lemma", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-grammar", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
 
         // The frame the head and the card are reviewed from. The sheet is its
         // own window, so the root at this moment is the sheet the reader sees.

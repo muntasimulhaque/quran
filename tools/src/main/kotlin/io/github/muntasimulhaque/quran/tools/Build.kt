@@ -1,16 +1,21 @@
 package io.github.muntasimulhaque.quran.tools
 
 import io.github.muntasimulhaque.quran.core.Arabic
+import io.github.muntasimulhaque.quran.core.GrammaticalCase
+import io.github.muntasimulhaque.quran.core.PartOfSpeech
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.TajweedCodec
+import io.github.muntasimulhaque.quran.core.WordForm
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.sql.Connection
+import java.util.zip.GZIPInputStream
 
 /**
  * Builds the read-only content database the app ships: the canonical text
@@ -49,6 +54,49 @@ class Build(private val root: File) {
         val code: String,
     )
 
+    /**
+     * One drawn word's grammar, in the codes the app draws.
+     *
+     * The corpus's own labels are read here and never reach the app: a label
+     * this build does not know is a failure, so the sheet can never draw a
+     * blank where a part of speech should be. Only the parts the sheet shows
+     * are carried; the export's other qualifiers describe the word's place
+     * in its sentence and are left out (owner decision, this session).
+     */
+    private data class GrammarRow(
+        val ayahNumber: Int,
+        val position: Int,
+        /** The lemma's own row, or null for a word the corpus gives none. */
+        val lemmaId: Int?,
+        val partOfSpeech: PartOfSpeech,
+        val grammaticalCase: GrammaticalCase?,
+        val form: WordForm?,
+        val passive: Boolean,
+        val pattern: String?,
+    )
+
+    /** One dictionary form, with the whole Book's counts for it. */
+    private data class LemmaRow(
+        val id: Int,
+        val text: String,
+        val words: Int,
+        val forms: Int,
+    )
+
+    /** The rows the sheet reads, and the lemmas they name. */
+    private data class Grammar(
+        val rows: List<GrammarRow>,
+        val lemmas: List<LemmaRow>,
+    )
+
+    /** The parts of speech whose own shape is a verb pattern. */
+    private val VERB_PARTS = setOf(
+        PartOfSpeech.PAST_VERB,
+        PartOfSpeech.PRESENT_VERB,
+        PartOfSpeech.IMPERATIVE_VERB,
+        PartOfSpeech.REQUEST_VERB,
+    )
+
     fun run(): Int {
         val manifest = loadManifest(root)
         output.mkdirs()
@@ -72,6 +120,11 @@ class Build(private val root: File) {
         // number, the same key the word lists use, so the merge of the four
         // QPC pairs needs no second rule (owner decision, this session).
         val roots = readRoots()
+        // The word's grammar and its lemma, keyed by the reading's own word
+        // number: the corpus divides the Book exactly as the page does, so
+        // the join needs no mapping and a division that drifts is a failure
+        // (owner decision, this session).
+        val grammar = readGrammar(ayahNumbers, words)
         val surahs = readSurahs()
         val navigation = readNavigation(ayahNumbers)
 
@@ -82,7 +135,7 @@ class Build(private val root: File) {
             schema(connection)
             insertSurahs(connection, surahs)
             val inserted = insertAyahsAndWords(
-                connection, words, ayahNumbers, wordLists, roots, navigation,
+                connection, words, ayahNumbers, wordLists, roots, grammar, navigation,
             )
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
@@ -113,7 +166,7 @@ class Build(private val root: File) {
             connection.createStatement().use { it.execute("VACUUM") }
         }
 
-        val report = report(database, manifest.contentVersion, words, ayahNumbers, translation.size)
+        val report = report(database, manifest.contentVersion, words, ayahNumbers, translation.size, grammar.rows.size)
         File(root, "content/build-report.json").writeText(report)
         if (problems.isEmpty()) {
             println("build: ${words.size} words, ${ayahNumbers.size} ayahs, ${translation.size} translations")
@@ -381,6 +434,157 @@ class Build(private val root: File) {
         return out
     }
 
+    /**
+     * The corpus's morphology: every drawn word's part of speech, case or
+     * mood, gender and number, passive voice, verb pattern, and lemma.
+     *
+     * The export divides the Book exactly as the page does, ayah for ayah and
+     * word for word, so the row is keyed by the reading's own word number and
+     * a division that drifts is a build failure rather than a sheet that
+     * silently says the wrong thing. The lemma's two counts are counted here,
+     * over the whole Book, because a dictionary form is only worth naming
+     * with how many words carry it and how many shapes they take (owner
+     * decision, this session).
+     */
+    private fun readGrammar(
+        ayahNumbers: Map<String, Int>,
+        words: List<Word>,
+    ): Grammar {
+        val file = sourceDir("word-morphology").firstWithExtension(".json.gz", ".json")
+        if (file == null) {
+            println("build: skipping word-morphology (source not present)")
+            return Grammar(emptyList(), emptyList())
+        }
+        val text = if (file.name.endsWith(".gz")) {
+            GZIPInputStream(file.inputStream().buffered()).bufferedReader().use { it.readText() }
+        } else {
+            file.readText()
+        }
+        val root = runCatching { Json.parseToJsonElement(text).jsonObject }.getOrElse { failure ->
+            fail("word-morphology: the export could not be read: ${failure.message}")
+            return Grammar(emptyList(), emptyList())
+        }
+        val ayahs = root["data"]?.jsonArray ?: run {
+            fail("word-morphology: the export has no data array")
+            return Grammar(emptyList(), emptyList())
+        }
+        val lemmaWords = HashMap<String, Int>(5_000)
+        val lemmaForms = HashMap<String, MutableSet<String>>(5_000)
+        for (ayah in ayahs) {
+            for (word in morphologyWords(ayah)) {
+                val stem = stem(word) ?: continue
+                val lemma = stem["lemma"]?.jsonPrimitive?.contentOrNull ?: continue
+                lemmaWords[lemma] = (lemmaWords[lemma] ?: 0) + 1
+                lemmaForms.getOrPut(lemma) { HashSet() } +=
+                    stem["form"]?.jsonPrimitive?.contentOrNull.orEmpty()
+            }
+        }
+        val rows = ArrayList<GrammarRow>(77_429)
+        // The lemma table is ordered by the letters themselves, so the ids
+        // the rows carry are the same on every run and a rebuild writes the
+        // same bytes (owner decision, this session).
+        val sortedLemmas = lemmaWords.keys.sorted()
+        val lemmaIds = HashMap<String, Int>(sortedLemmas.size * 2)
+        sortedLemmas.forEachIndexed { index, text -> lemmaIds[text] = index }
+        val lemmas = sortedLemmas.mapIndexed { index, text ->
+            LemmaRow(
+                id = index,
+                text = text,
+                words = lemmaWords.getValue(text),
+                forms = lemmaForms[text]?.size ?: 0,
+            )
+        }
+        for (ayah in ayahs) {
+            val surah = ayah.jsonObject["surah"]?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: continue
+            val number = ayah.jsonObject["ayah"]?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: continue
+            val ayahNumber = ayahNumbers["$surah:$number"] ?: run {
+                fail("word-morphology: $surah:$number is not in the Book")
+                continue
+            }
+            morphologyWords(ayah).forEachIndexed { index, word ->
+                val stem = stem(word) ?: return@forEachIndexed
+                val label = stem["pos"]?.jsonPrimitive?.contentOrNull.orEmpty()
+                val partOfSpeech = GrammarLabels.partOfSpeech[label]
+                if (partOfSpeech == null) {
+                    fail("word-morphology: $surah:$number word ${index + 1} names an unknown part of speech: $label")
+                    return@forEachIndexed
+                }
+                val caseLabel = stem["inflection"]?.jsonPrimitive?.contentOrNull
+                val grammaticalCase = caseLabel?.let {
+                    GrammarLabels.cases[it] ?: run {
+                        fail("word-morphology: $surah:$number word ${index + 1} names an unknown case: $it")
+                        null
+                    }
+                }
+                val qualifiers = stem["qualifiers"]?.jsonArray
+                    ?.mapNotNull { it.jsonPrimitive.contentOrNull }
+                    .orEmpty()
+                val lemma = stem["lemma"]?.jsonPrimitive?.contentOrNull
+                rows += GrammarRow(
+                    ayahNumber = ayahNumber,
+                    position = index + 1,
+                    lemmaId = lemma?.let { lemmaIds[it] },
+                    partOfSpeech = partOfSpeech,
+                    grammaticalCase = grammaticalCase,
+                    form = qualifiers.firstNotNullOfOrNull { GrammarLabels.forms[it] },
+                    passive = GrammarLabels.PASSIVE in qualifiers,
+                    // The pattern is a verb's own shape. A participle or a
+                    // verbal noun has one too, but the sheet's word for it is
+                    // "pattern" and a reader of grammar reads it as a verb's
+                    // (owner decision, this session).
+                    pattern = if (partOfSpeech in VERB_PARTS) {
+                        stem["pattern"]?.jsonPrimitive?.contentOrNull
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+        checkGrammarCoverage(rows, words, ayahNumbers)
+        return Grammar(rows, lemmas)
+    }
+
+    /** The morphology's words of one ayah, in the ayah's own order. */
+    private fun morphologyWords(ayah: kotlinx.serialization.json.JsonElement): List<JsonObject> =
+        ayah.jsonObject["morphology"]?.jsonObject?.get("words")?.jsonArray
+            ?.mapNotNull { it as? JsonObject }
+            .orEmpty()
+
+    /** The segment the word is: its stem, or its only part. */
+    private fun stem(word: JsonObject): JsonObject? {
+        val segments = word["segments"]?.jsonArray?.mapNotNull { it as? JsonObject }.orEmpty()
+        return segments.firstOrNull {
+            it["role"]?.jsonPrimitive?.contentOrNull == "stem"
+        } ?: segments.firstOrNull()
+    }
+
+    /**
+     * Every drawn word has exactly one grammar row, and every row names a
+     * word that is drawn. A corpus that drifts from the page is a failure,
+     * not a sheet with a hole in it.
+     */
+    private fun checkGrammarCoverage(
+        rows: List<GrammarRow>,
+        words: List<Word>,
+        ayahNumbers: Map<String, Int>,
+    ) {
+        val drawn = words.filterNot { it.marker }
+        val got = rows.mapTo(HashSet(rows.size * 2)) { "${it.ayahNumber}:${it.position}" }
+        val missing = drawn.filter { word ->
+            val number = ayahNumbers["${word.surah}:${word.ayah}"] ?: return@filter false
+            "$number:${word.position}" !in got
+        }
+        if (missing.isNotEmpty()) {
+            missing.take(5).forEach {
+                fail("word-morphology: ${it.surah}:${it.ayah} word ${it.position} has no grammar")
+            }
+            fail("word-morphology: ${missing.size} drawn words have no grammar")
+        }
+        if (rows.size != drawn.size) {
+            fail("word-morphology: ${rows.size} grammar rows for ${drawn.size} drawn words")
+        }
+    }
+
     /** One Buckwalter letter as the letter it is read as. */
     private fun buckwalter(letter: Char): String = when (letter) {
         '\'' , 'A', '|', '>', '<', '&', '}' -> "ʾ"
@@ -574,6 +778,21 @@ class Build(private val root: File) {
                     "arabic TEXT NOT NULL, latin TEXT NOT NULL, words_count INTEGER NOT NULL, " +
                     "PRIMARY KEY (ayah_number, position))",
             )
+            // The word's grammar and its dictionary form, keyed the way the
+            // root is, and carried inside the word list the reader turns on:
+            // the sheet's study lines arrive with the meanings that make the
+            // sheet open at all (owner decision, this session).
+            statement.execute(
+                "CREATE TABLE grammar_lemma (id INTEGER PRIMARY KEY, text TEXT NOT NULL, " +
+                    "words_count INTEGER NOT NULL, forms_count INTEGER NOT NULL)",
+            )
+            statement.execute(
+                "CREATE TABLE word_grammar (ayah_number INTEGER NOT NULL, position INTEGER NOT NULL, " +
+                    "lemma_id INTEGER, pos TEXT NOT NULL, inflection TEXT, form TEXT, " +
+                    "passive INTEGER NOT NULL, pattern TEXT, " +
+                    "PRIMARY KEY (ayah_number, position), " +
+                    "FOREIGN KEY (lemma_id) REFERENCES grammar_lemma(id))",
+            )
             statement.execute(
                 "CREATE TABLE pack (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, " +
                     "language TEXT NOT NULL, credit TEXT NOT NULL, license TEXT NOT NULL, version TEXT NOT NULL, " +
@@ -726,6 +945,7 @@ class Build(private val root: File) {
         ayahNumbers: Map<String, Int>,
         wordLists: Map<String, Map<String, String>>,
         roots: Map<String, Root>,
+        grammar: Grammar,
         nav: Navigation,
     ): Int {
         val grouped = LinkedHashMap<String, MutableList<Word>>(7000)
@@ -808,6 +1028,46 @@ class Build(private val root: File) {
             }
             statement.executeBatch()
             println("build: word roots: $inserted")
+        }
+
+        // The word's grammar and its lemma, one row per drawn word. Written
+        // beside the root so the sheet's lines come from one place, and
+        // ordered by the reading's own numbers so the bytes are the same on
+        // every run (owner decision, this session).
+        connection.prepareStatement(
+            "INSERT INTO grammar_lemma(id, text, words_count, forms_count) VALUES(?,?,?,?)",
+        ).use { statement ->
+            for (lemma in grammar.lemmas) {
+                statement.setInt(1, lemma.id)
+                statement.setString(2, lemma.text)
+                statement.setInt(3, lemma.words)
+                statement.setInt(4, lemma.forms)
+                statement.addBatch()
+            }
+            statement.executeBatch()
+            println("build: grammar lemmas: ${grammar.lemmas.size}")
+        }
+        connection.prepareStatement(
+            "INSERT INTO word_grammar(ayah_number, position, lemma_id, pos, inflection, form, " +
+                "passive, pattern) VALUES(?,?,?,?,?,?,?,?)",
+        ).use { statement ->
+            for (row in grammar.rows.sortedWith(compareBy({ it.ayahNumber }, { it.position }))) {
+                statement.setInt(1, row.ayahNumber)
+                statement.setInt(2, row.position)
+                if (row.lemmaId == null) {
+                    statement.setNull(3, java.sql.Types.INTEGER)
+                } else {
+                    statement.setInt(3, row.lemmaId)
+                }
+                statement.setString(4, row.partOfSpeech.code)
+                statement.setString(5, row.grammaticalCase?.code)
+                statement.setString(6, row.form?.code)
+                statement.setInt(7, if (row.passive) 1 else 0)
+                statement.setString(8, row.pattern)
+                statement.addBatch()
+            }
+            statement.executeBatch()
+            println("build: word grammar: ${grammar.rows.size}")
         }
 
         connection.prepareStatement(
@@ -1073,6 +1333,7 @@ class Build(private val root: File) {
         words: List<Word>,
         ayahs: Map<String, Int>,
         translations: Int,
+        grammar: Int,
     ): String {
         val markers = words.count { it.marker }
         return buildString {
@@ -1082,6 +1343,7 @@ class Build(private val root: File) {
             appendLine("  \"words\": ${words.size - markers},")
             appendLine("  \"markers\": $markers,")
             appendLine("  \"translations\": $translations,")
+            appendLine("  \"grammar\": $grammar,")
             appendLine("  \"recitationSegmentsShifted\": $recitationSegmentsShifted,")
             appendLine("  \"recitationSegmentsMapped\": $recitationSegmentsMapped,")
             appendLine("  \"recitationSegmentsClamped\": $recitationSegmentsClamped,")

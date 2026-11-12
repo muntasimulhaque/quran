@@ -13,7 +13,6 @@
     <string name="playback_play_pause">Play or pause</string>
     <string name="playback_next_ayah">Next ayah</string>
     <string name="playback_reciter_ready">Ready to play</string>
-    <string name="playback_change_reciter">Change reciter</string>
     <!-- The merged panel's first section: the voices a reader may hear. It
          leads the panel because the block that opens it leads with the
          reciter's name. -->

@@ -4,10 +4,12 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import io.github.muntasimulhaque.quran.core.TajweedCodec
 import java.io.File
+import java.util.zip.GZIPInputStream
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamConstants
 
@@ -82,6 +84,7 @@ class Verify(private val root: File) {
             "translation-al-bayan-bn-notes" -> checkAlBayanDocx(dataset.id, dir)
             "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> checkTafsirQul(dataset.id, dir)
             "word-by-word-english", "word-by-word-bengali" -> checkWordTranslation(dataset.id, dir)
+            "word-morphology" -> checkMorphology(dataset.id, dir)
             "recitation-minshawi", "recitation-husary" -> checkRecitation(dataset.id, dir)
             "metadata-surah-names" -> checkJsonKeys(dataset.id, dir, 114)
             "surah-names-bn" -> checkSurahNamesBn(dataset.id, dir)
@@ -379,6 +382,51 @@ class Verify(private val root: File) {
         openSqlite(db(dir)).use { connection ->
             val rows = connection.count("word_translation")
             if (rows < 83_000L) fail(id, "unexpectedly few word translations: $rows")
+        }
+    }
+
+    /**
+     * The morphology export: the whole Book, word for word, and every word a
+     * segment the sheet can name. The build reads the labels; this proves the
+     * shape they arrive in before anything is written.
+     */
+    private fun checkMorphology(id: String, dir: File) {
+        val file = dir.firstWithExtension(".json.gz", ".json")
+            ?: return fail(id, "no morphology export")
+        val text = if (file.name.endsWith(".gz")) {
+            GZIPInputStream(file.inputStream().buffered()).bufferedReader().use { it.readText() }
+        } else {
+            file.readText()
+        }
+        val root = runCatching { Json.parseToJsonElement(text).jsonObject }.getOrElse { failure ->
+            return fail(id, "the export could not be read: ${failure.message}")
+        }
+        val ayahs = root["data"]?.jsonArray ?: return fail(id, "the export has no data array")
+        if (ayahs.size != 6236) fail(id, "the export has ${ayahs.size} ayahs, expected 6236")
+        var words = 0
+        var withoutSegments = 0
+        var withoutPos = 0
+        for (ayah in ayahs) {
+            val list = ayah.jsonObject["morphology"]?.jsonObject?.get("words")?.jsonArray
+                ?: continue
+            for (word in list) {
+                words++
+                val segments = word.jsonObject["segments"]?.jsonArray
+                if (segments.isNullOrEmpty()) {
+                    withoutSegments++
+                    continue
+                }
+                val stem = segments.map { it.jsonObject }.firstOrNull {
+                    it["role"]?.jsonPrimitive?.contentOrNull == "stem"
+                } ?: segments.first().jsonObject
+                if (stem["pos"]?.jsonPrimitive?.contentOrNull.isNullOrBlank()) withoutPos++
+            }
+        }
+        if (words != 77_429) fail(id, "the export has $words words, expected 77,429")
+        if (withoutSegments != 0) fail(id, "$withoutSegments words have no segments")
+        if (withoutPos != 0) fail(id, "$withoutPos words have no part of speech")
+        if (withoutSegments == 0 && withoutPos == 0) {
+            println("verify: $id: ${ayahs.size} ayahs, $words words")
         }
     }
 

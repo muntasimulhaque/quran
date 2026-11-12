@@ -6,9 +6,13 @@ import android.database.CursorWrapper
 import android.database.MatrixCursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import io.github.muntasimulhaque.quran.core.GrammaticalCase
+import io.github.muntasimulhaque.quran.core.PartOfSpeech
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.SearchQuery
+import io.github.muntasimulhaque.quran.core.WordForm
+import io.github.muntasimulhaque.quran.core.WordGrammar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -347,14 +351,60 @@ class ContentDatabase private constructor(
         val chosen = rootPack() ?: return emptyMap()
         val inClause = ayahNumbers.joinToString(",")
         return query(
-            "SELECT ayah_number, position, arabic, latin FROM ${schema(chosen)}.word_root " +
+            "SELECT ayah_number, position, arabic, latin, words_count FROM ${schema(chosen)}.word_root " +
                 "WHERE ayah_number IN ($inClause) ORDER BY ayah_number, position",
             null,
         ).use { cursor ->
             val out = HashMap<Int, MutableMap<Int, WordRoot>>()
             while (cursor.moveToNext()) {
                 out.getOrPut(cursor.getInt(0)) { HashMap() }[cursor.getInt(1)] =
-                    WordRoot(cursor.getString(2) ?: "", cursor.getString(3) ?: "")
+                    WordRoot(
+                        cursor.getString(2) ?: "",
+                        cursor.getString(3) ?: "",
+                        cursor.getInt(4),
+                    )
+            }
+            out
+        }
+    }
+
+    /**
+     * Every word's grammar and lemma in a set of ayahs: ayah to position to
+     * the grammar. Read with the list the sheet belongs to, never on the tap.
+     *
+     * A held word list from before the grammar table answers with nothing
+     * rather than an exception, and the sheet draws the word, its meaning, and
+     * its root as it did, until the pack refreshes (owner decision, this
+     * session).
+     */
+    fun wordGrammar(
+        ayahNumbers: List<Int>,
+        language: String = "en",
+    ): Map<Int, Map<Int, WordGrammar>> {
+        if (ayahNumbers.isEmpty()) return emptyMap()
+        val chosen = meaningPack(language) ?: return emptyMap()
+        if (!hasTable(chosen, "word_grammar") || !hasTable(chosen, "grammar_lemma")) return emptyMap()
+        val pack = schema(chosen)
+        val inClause = ayahNumbers.joinToString(",")
+        return query(
+            "SELECT g.ayah_number, g.position, l.text, g.pos, g.inflection, g.form, g.passive, " +
+                "g.pattern, l.words_count, l.forms_count FROM $pack.word_grammar g " +
+                "LEFT JOIN $pack.grammar_lemma l ON l.id = g.lemma_id " +
+                "WHERE g.ayah_number IN ($inClause) ORDER BY g.ayah_number, g.position",
+            null,
+        ).use { cursor ->
+            val out = HashMap<Int, MutableMap<Int, WordGrammar>>()
+            while (cursor.moveToNext()) {
+                out.getOrPut(cursor.getInt(0)) { HashMap() }[cursor.getInt(1)] = WordGrammar(
+                    lemma = cursor.getString(2),
+                    partOfSpeech = PartOfSpeech.ofOrNull(cursor.getString(3)),
+                    grammaticalCase = GrammaticalCase.ofOrNull(cursor.getString(4)),
+                    form = WordForm.ofOrNull(cursor.getString(5)),
+                    passive = cursor.getInt(6) != 0,
+                    pattern = cursor.getString(7),
+                    lemmaWords = cursor.getInt(8),
+                    lemmaForms = cursor.getInt(9),
+                )
             }
             out
         }

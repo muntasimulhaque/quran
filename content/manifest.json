@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.7.0",
+  "contentVersion": "1.8.0",
   "note": "Machine-readable source of truth for bundled content.",
   "datasets": [
     {
@@ -415,6 +415,21 @@
       "path": "content/audio-edges.txt",
       "bytes": 353811,
       "sha256": "dd21e5f4fde6a3b62e630476bc5e7c05996d17f2de248edccdc53e28f1919a80",
+      "assetUrl": null
+    },
+    {
+      "id": "word-morphology",
+      "name": "Quranic morphology, word by word",
+      "source": "Quranic Arabic Corpus v0.4, via Quranpedia.net",
+      "url": "https://quranpedia.net/dumps/morphology.json.gz",
+      "format": "json.gz",
+      "license": "Quranic Arabic Corpus v0.4 by Dr. Kais Dukes, GNU GPL: attribution to corpus.quran.com is required; the structured export via Quranpedia.net, free to use in apps",
+      "licenseBn": "কুরআনিক আরবিক কর্পাস ০.৪, ড. কায়েস ডিউকস, GNU GPL: corpus.quran.com-এর উল্লেখ আবশ্যক; কাঠামোবদ্ধ রপ্তানি কুরআনপিডিয়া.নেট থেকে, অ্যাপে ব্যবহার অবাধ",
+      "credit": "Quranic Arabic Corpus (Dr. Kais Dukes), via Quranpedia.net",
+      "usedFor": "Every drawn word's part of speech, case or mood, gender and number, passive voice, verb pattern, and lemma, for the word sheet: 77,429 words, 4,763 lemmas",
+      "path": "content/raw/quranpedia/morphology.json.gz",
+      "bytes": 3666748,
+      "sha256": "b9c5d57caa14f1c49752a291de3328601b05715fed5d12c444be90c5c10d0e91",
       "assetUrl": null
     }
   ]

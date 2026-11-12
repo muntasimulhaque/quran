@@ -147,9 +147,12 @@ class Packs(private val root: File) {
             type = "words",
             name = "Word by word",
             language = "en",
-            credit = "Quran.com word by word, via the Quranic Universal Library",
-            creditBn = "Quran.com \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            version = "QUL",
+            credit = "Quran.com word by word, via the Quranic Universal Library; grammar from the Quranic Arabic Corpus (Dr. Kais Dukes)",
+            creditBn = "Quran.com শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
+            // Version 2 carries every word's grammar and lemma, beside its
+            // meaning: the sheet's study lines arrive with the word list the
+            // reader already turned on (owner decision, this session).
+            version = "QUL 2",
             shipped = false,
             ayahs = 6236,
         ),
@@ -158,9 +161,12 @@ class Packs(private val root: File) {
             type = "words",
             name = "Word by word",
             language = "bn",
-            credit = "Bangla word by word, via the Quranic Universal Library",
-            creditBn = "\u09ac\u09be\u0982\u09b2\u09be \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            version = "QUL",
+            credit = "Bangla word by word, via the Quranic Universal Library; grammar from the Quranic Arabic Corpus (Dr. Kais Dukes)",
+            creditBn = "বাংলা শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
+            // Version 2 carries every word's grammar and lemma, beside its
+            // meaning: the sheet's study lines arrive with the word list the
+            // reader already turned on (owner decision, this session).
+            version = "QUL 2",
             shipped = false,
             ayahs = 6236,
         ),
@@ -503,6 +509,18 @@ class Packs(private val root: File) {
                         )
                         statement.execute("CREATE INDEX word_meaning_ayah ON word_meaning(ayah_number, position)")
                         createFts(statement, "word_meaning_fts", "meaning_search", "word_meaning")
+                        // The word's grammar and lemma travel with the list
+                        // that opens the sheet, so the reader who turns word
+                        // meanings on gets the study lines in the same
+                        // download (owner decision, this session).
+                        statement.execute(
+                            "CREATE TABLE grammar_lemma AS SELECT id, text, words_count, forms_count " +
+                                "FROM src.grammar_lemma",
+                        )
+                        statement.execute(
+                            "CREATE TABLE word_grammar AS SELECT ayah_number, position, lemma_id, pos, " +
+                                "inflection, form, passive, pattern FROM src.word_grammar",
+                        )
                         // The surah introductions travel with the English list,
                         // so a second language does not carry them twice.
                         if (pack.language == "en") {

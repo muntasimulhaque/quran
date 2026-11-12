@@ -6,6 +6,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
+import io.github.muntasimulhaque.quran.core.PartOfSpeech
 import io.github.muntasimulhaque.quran.core.TajweedCodec
 import java.io.File
 
@@ -27,6 +28,11 @@ class CheckDb(private val root: File) {
         // and Husary, 6,236 rows each.
         Expectation("recitation_ayah", 12_472),
         Expectation("surah_info", 114),
+        // Every drawn word has one grammar row, and no row is for a word the
+        // page does not draw: the sheet's three study lines and the reading's
+        // words are one set (owner decision, this session).
+        Expectation("word_grammar", 77_429),
+        Expectation("grammar_lemma", 4_763),
     )
 
     fun run(): Int {
@@ -99,6 +105,7 @@ class CheckDb(private val root: File) {
             failures += badTajweed
             if (badTajweed == 0) println("checkdb: every ayah's tajweed code matches its text")
             failures += checkWordsAndMeanings(connection)
+            failures += checkWordGrammar(connection)
             failures += checkRecitationSegments(connection, catalogReciters)
             failures += checkBundledAudio(connection)
             // Every pack must cover every ayah, or the reader would meet a
@@ -162,6 +169,57 @@ class CheckDb(private val root: File) {
         }
         println("checkdb: content/quran.db verified, ${database.length()} bytes, $actualHash")
         return 0
+    }
+
+    /**
+     * The grammar table says only what the app draws: a known part of speech
+     * on every row, a passive flag that is a flag, and a row for every drawn
+     * word and no other.
+     */
+    private fun checkWordGrammar(connection: java.sql.Connection): Int {
+        var failures = 0
+        var unknown = 0
+        var badPassive = 0
+        connection.each("SELECT pos, passive FROM word_grammar") { rs ->
+            if (PartOfSpeech.ofOrNull(rs.getString(1)) == null) unknown++
+            val passive = rs.getInt(2)
+            if (passive != 0 && passive != 1) badPassive++
+        }
+        if (unknown != 0) {
+            println("checkdb: $unknown grammar row(s) name a part of speech the app does not know")
+            failures++
+        }
+        if (badPassive != 0) {
+            println("checkdb: $badPassive grammar row(s) carry a passive flag that is not 0 or 1")
+            failures++
+        }
+        val unjoined = connection.scalarLong(
+            "SELECT COUNT(*) FROM word_grammar g LEFT JOIN word w " +
+                "ON w.ayah_number = g.ayah_number AND w.position = g.position AND w.marker = 0 " +
+                "WHERE w.id IS NULL",
+        )
+        if (unjoined != 0L) {
+            println("checkdb: $unjoined grammar row(s) name a word the page does not draw")
+            failures++
+        }
+        val badLemma = connection.scalarLong(
+            "SELECT COUNT(*) FROM word_grammar g LEFT JOIN grammar_lemma l ON l.id = g.lemma_id " +
+                "WHERE g.lemma_id IS NOT NULL AND l.id IS NULL",
+        )
+        if (badLemma != 0L) {
+            println("checkdb: $badLemma grammar row(s) name a lemma that is not there")
+            failures++
+        }
+        val deadLemma = connection.scalarLong(
+            "SELECT COUNT(*) FROM grammar_lemma l LEFT JOIN word_grammar g ON g.lemma_id = l.id " +
+                "WHERE g.position IS NULL",
+        )
+        if (deadLemma != 0L) {
+            println("checkdb: $deadLemma lemma(s) are named by no word")
+            failures++
+        }
+        if (failures == 0) println("checkdb: grammar rows meet the drawn words, every part of speech known")
+        return failures
     }
 
     /** The ayah-number rows in the QUL word lists, in either numeral set. */

@@ -6,6 +6,18 @@ trackers, no accounts, nothing collected, ever.
 
 **Status:** 17.9 (versionCode 181) was submitted for Play review from commit `b1a16339`, taken from `build` run 43069746246, the newest green run on `main`. The signed bundle `quran-17.9-vc181.aab` has SHA-256 `66548c87cb969cb3f74239f2e94b9c12c18cf32c0abb6d0a17d2c063614be47e`, and `jarsigner` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` with SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6, 17.7, and 17.8 were signed with. The local evidence is the unit tests, lint, and `assembleDebug`, all green, and the local app instrumented suite 220 of 220 on `quran_phone` API 35; the green `build` run carried `fetch`, `checkdb`, and `search`. The instrumented suites run nightly in `instrumented.yml` and are signal, not a gate; the `build` workflow holds no emulator, and the store capture is local, with `screenshots.yml` dispatch-only and `continue-on-error`, so a hosted emulator can never fail a release. Content 1.7.0, database `content-db-2605fb00`, and the `pack-word-root-97fd42f4` pack are published. The Quran text, both translations, both tafsirs, the word lists, the root pack, and the audio are unchanged. The eight store frames carry no word-sample state, so the store set stands.
 
+**In 18.0.** The word meaning sheet studies the word. Under its root it names how many
+words in the Book speak that root, then the word's dictionary form with the Quran's own
+two counts for it, then the grammar: what the word is, its case or mood, its gender and
+number, its voice, and a verb's pattern. The lines stand directly under the root, as the
+root does, and only when the word pack carries them, so a pack held from before draws the
+sheet it always drew. The word's own voice is a real clip now: one media item whose end is
+the word's end, on its own player, so no stop is watched at a millisecond, nothing plays on
+past the word, and a recitation that was playing waits at the word and is given back when it
+ends. Content 1.8.0 adds the grammar and the dictionary forms (77,429 words, 4,763 lemmas)
+to the word packs, from the Quranic Arabic Corpus via Quranpedia; the Quran text, both
+translations, both tafsirs, the root pack, and the audio are unchanged.
+
 **In 17.9.** The word meaning sheet's speaker is a sample, not a session. A word's pronunciation no longer raises the playback capsule, so nothing is left paused behind the sheet or in the shade after the word ends; the sheet washes the word while it sounds, and the saved listening place is untouched. A recitation the reader started still has its pill. The Quran text, both translations, both tafsirs, the word lists, the root pack, and the audio are unchanged; content stays 1.7.0.
 
 **In 17.8.** The word root reaches the readers who already had word meanings on. The root pack was published with 17.7, but the app only asked for it while installing the word list itself, so a list already on the phone never requested it. It now joins the queue once and arrives on Wi-Fi after the first page, and turning word meanings off and on fetches it at once. The word sheet's speaker keeps to its word: the stop is sent with the media item it belongs to, so the service no longer takes it off when the word's own playback starts. The Quran text, both translations, both tafsirs, the word lists, the root pack, and the audio are unchanged; content stays 1.7.0.
