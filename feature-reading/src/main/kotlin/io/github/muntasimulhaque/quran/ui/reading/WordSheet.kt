@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.testTag
@@ -27,7 +26,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.WordGrammar
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
@@ -43,6 +45,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetHead
 import io.github.muntasimulhaque.quran.ui.kit.SheetPlace
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
+import io.github.muntasimulhaque.quran.ui.kit.sheetHeadActionInset
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -64,7 +67,9 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * call themselves one page opened two different ways (owner report, this
  * session). [SheetHead] measures the head by its name and lets the mark's
  * target reach outside that line, so no sheet with an action pays for it in
- * the air under its name.
+ * the air under its name. The scroll opens with [sheetHeadActionInset], the
+ * room that reach needs above the line, so the top edge never clips the
+ * target; the place keeps its 4 dp under the name.
  *
  * The speaker is quiet at rest and wears the accent while the word sounds,
  * which is the rule every door that turns in this app follows: the mark is
@@ -74,15 +79,16 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * **The entry is centered; the facts are not** (owner decision, this
  * session). The word the reader pressed and the one gloss this ayah gives it
  * are one subject, and a subject is centered as the reading centers a single
- * display line: the Quran's own 26 sp on its 2.0 line, the page ink and the
- * tajweed colors the reader has, then the gloss in the reader's language at
- * the translation's 16 sp, 4 dp under it. Under the entry, the study lines are
- * the app's facts about the word, so they take the app's own shape: the page's
- * left edge, the label at [SectionHead]'s 12, the value 4 dp under it, and a
- * count where the pack carries one, 4 dp under the value. The sheet had them
- * as sentences, each label inline with a 24 sp Arabic run and a count, so the
- * root outshouted the gloss and at the largest text step a label could orphan
- * on its own line (owner report, this session).
+ * display line: the Quran's own 26 sp on its 2.0 line, trimmed to the line's
+ * ink, the page ink and the tajweed colors the reader has, then the gloss in
+ * the reader's language at the translation's 16 sp, 8 dp under it. A
+ * [Space.Section] opens the study lines; [Space.Block] separates them. They
+ * are the app's facts about the word, so they take the app's own shape: the
+ * page's left edge, the label at [SectionHead]'s 12, the value 4 dp under it,
+ * and a count where the pack carries one, 4 dp under the value. The sheet had
+ * them as sentences, each label inline with a 24 sp Arabic run and a count, so
+ * the root outshouted the gloss and at the largest text step a label could
+ * orphan on its own line (owner report, this session).
  *
  * **A fact's Arabic is 20 of the Quran's 26** (owner decision, this session).
  * The word is the reading's own size and the gloss the translation's; a fact
@@ -90,7 +96,12 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * print's medallion and the reading's inline stand, a measure for Arabic
  * *inside* a verse's line and not for a fact under a gloss. Twenty is the
  * inline stand less a step, and it is the size a 13 sp value would carry with
- * Arabic half again as tall as the prose beside it.
+ * Arabic half again as tall as the prose beside it. The fact's own line is
+ * trimmed at both ends for the same reason: a word, a root, and a lemma are
+ * single-line facts, not a page of verses, so the sheet's air is the `Space`
+ * around them and never the reading's 2.0 leading. The root's Latin rendering
+ * sits on the Arabic's baseline, and the grammar phrase is a value at the
+ * 13 sp meta voice, so the facts read as one list.
  *
  * The root's Latin rendering belongs to the page that is read in Latin script:
  * a Bangla reader reads the root letters or nothing, and a line of Latin on a
@@ -195,6 +206,11 @@ internal fun WordSheet(
             }
         }
     }
+    // The action's 48 dp target reaches above the head's 26 dp line. The
+    // scroll's own top edge would clip it; this inset is the room it owes
+    // the target, and it follows the reader's type scale (owner decision,
+    // this session). A sheet with no action owes none.
+    val headInset = if (action != null) sheetHeadActionInset() else 0.dp
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -206,7 +222,12 @@ internal fun WordSheet(
                 // The gate rides with the scroll, so a long entry never
                 // bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot)
+                .padding(
+                    start = Space.Gutter,
+                    end = Space.Gutter,
+                    top = headInset,
+                    bottom = Space.SheetFoot,
+                )
                 .testTag("word-sheet"),
         ) {
             SheetHead(
@@ -233,7 +254,13 @@ internal fun WordSheet(
                 code = word.tajweed,
                 colors = palette.tajweed,
                 enabled = metrics.tajweed,
-                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, ink),
+                style = arabicStyle(
+                    hafs,
+                    metrics.arabicSp,
+                    metrics.arabicLineSp,
+                    ink,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 onTextLayout = { wordLayout = it },
@@ -265,8 +292,11 @@ internal fun WordSheet(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = Space.Tight),
+                    .padding(top = Space.Line),
             )
+            // The first fact opens the reference block with a section's air;
+            // the entry and the facts are two blocks, not one list.
+            var firstFact = true
             // The root, when the word has one: the letters the page writes,
             // their reading on the page that is read in Latin script, and how
             // much of the Book speaks that root. A bare fact, not a door: it
@@ -275,6 +305,7 @@ internal fun WordSheet(
                 Fact(
                     label = stringResource(R.string.reading_word_root),
                     tag = "word-sheet-root",
+                    top = if (firstFact) Space.Section else Space.Block,
                 ) {
                     // The letters wrap rather than clipping at the largest
                     // system scale, and the Latin rides their line where it
@@ -287,14 +318,20 @@ internal fun WordSheet(
                     ) {
                         Text(
                             text = root.arabic,
-                            style = arabicStyle(hafs, factSp, factSp * 2f, ink),
+                            style = arabicStyle(
+                                hafs,
+                                factSp,
+                                factSp * 2f,
+                                ink,
+                                trim = LineHeightStyle.Trim.Both,
+                            ),
                         )
                         if (root.latin.isNotBlank() && metrics.readingLanguage == "en") {
                             Text(
                                 text = root.latin,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = quiet,
-                                modifier = Modifier.align(Alignment.CenterVertically),
+                                modifier = Modifier.alignByBaseline(),
                             )
                         }
                     }
@@ -310,6 +347,7 @@ internal fun WordSheet(
                         )
                     }
                 }
+                firstFact = false
             }
             word.grammar?.let { grammar ->
                 // The dictionary form, when the corpus gives one: the word's
@@ -321,10 +359,17 @@ internal fun WordSheet(
                     Fact(
                         label = stringResource(R.string.reading_word_lemma),
                         tag = "word-sheet-lemma",
+                        top = if (firstFact) Space.Section else Space.Block,
                     ) {
                         Text(
                             text = lemma,
-                            style = arabicStyle(hafs, factSp, factSp * 2f, ink),
+                            style = arabicStyle(
+                                hafs,
+                                factSp,
+                                factSp * 2f,
+                                ink,
+                                trim = LineHeightStyle.Trim.Both,
+                            ),
                         )
                         Text(
                             text = stringResource(
@@ -337,6 +382,7 @@ internal fun WordSheet(
                             modifier = Modifier.padding(top = Space.Tight),
                         )
                     }
+                    firstFact = false
                 }
                 // What the word is, as a grammar reads it. The line is drawn
                 // only on a word pack that carries it, so an older pack is the
@@ -346,13 +392,15 @@ internal fun WordSheet(
                     Fact(
                         label = stringResource(R.string.reading_word_grammar),
                         tag = "word-sheet-grammar",
+                        top = if (firstFact) Space.Section else Space.Block,
                     ) {
                         Text(
                             text = phrase,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color = ink,
                         )
                     }
+                    firstFact = false
                 }
             }
         }
@@ -364,19 +412,25 @@ internal fun WordSheet(
  * it, and whatever the pack adds about the value (a count) 4 dp under that.
  *
  * The label is [SectionHead]'s voice, so it is a heading a screen reader can
- * jump to and it steps back from the value it names. [Space.Block] separates
- * one fact from the next, because two facts are two thoughts.
+ * jump to and it steps back from the value it names. [Space.Section] opens
+ * the first fact of a sheet; [Space.Block] separates the facts after it,
+ * because two facts are two thoughts.
+ *
+ * [top] is the room above the fact. It defaults to the block's, and the first
+ * fact passes the section's, so the centered entry and the left reference
+ * list read as two blocks rather than one long column.
  */
 @Composable
 private fun Fact(
     label: String,
     tag: String,
+    top: Dp = Space.Block,
     value: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = Space.Block)
+            .padding(top = top)
             .testTag(tag),
     ) {
         SectionHead(text = label)

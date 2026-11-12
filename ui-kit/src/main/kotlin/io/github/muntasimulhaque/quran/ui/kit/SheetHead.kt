@@ -1,10 +1,14 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -61,7 +65,7 @@ fun SheetHead(
         val title = measurables[0].measure(Constraints(maxWidth = titleWidth))
         layout(width = constraints.maxWidth, height = title.height) {
             title.place(0, 0)
-            // Centred on the name's line, so the mark reads as standing beside
+            // Centered on the name's line, so the mark reads as standing beside
             // the name even though its target reaches past the line's air.
             mark.place(
                 x = constraints.maxWidth - mark.width,
@@ -69,4 +73,37 @@ fun SheetHead(
             )
         }
     }
+}
+
+/**
+ * The top room an action head needs inside a sheet's scroll, for a name line
+ * of [titleLine].
+ *
+ * The action's target is [GlyphTarget] tall and is centered on the name's
+ * line, so it reaches half the difference above the head. A scroll clips at
+ * its first pixel; the caller gives its content this much top inset, and the
+ * target's whole height stays inside the scroll. The place under the name
+ * keeps [Space.Tight], because the inset moves the whole head and never
+ * pushes the place away from its name.
+ *
+ * The number follows the reader's type scale: 11 dp at the default 26 dp
+ * line, 4.5 dp at 39, and zero once the name's line reaches the target. The
+ * head itself is never measured at the target's height; the air is above the
+ * name, not under it (owner decision, this session).
+ */
+fun sheetHeadInsetFor(titleLine: Dp): Dp =
+    ((GlyphTarget - titleLine) / 2f).coerceAtLeast(0.dp)
+
+/**
+ * The top room an action head needs at the reader's current type scale, for
+ * a caller that places [SheetHead] inside a scrolling sheet.
+ *
+ * A caller with no action passes no inset. The word meaning sheet's speaker
+ * and the note sheet's Clear and Save are the two callers; a sheet with no
+ * action has no target above its line to make room for.
+ */
+@Composable
+fun sheetHeadActionInset(): Dp {
+    val line = MaterialTheme.typography.titleLarge.lineHeight
+    return with(LocalDensity.current) { sheetHeadInsetFor(line.toDp()) }
 }

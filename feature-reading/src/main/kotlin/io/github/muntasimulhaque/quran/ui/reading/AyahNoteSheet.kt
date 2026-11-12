@@ -43,6 +43,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetHead
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
+import io.github.muntasimulhaque.quran.ui.kit.sheetHeadActionInset
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.prose
@@ -129,10 +130,15 @@ private fun NoteEditor(
         delay(160)
         focus.requestFocus()
     }
+    // The head's Clear and Save are a 48 dp target on a 26 dp name line.
+    // The scroll's top edge owes the target the same room the word sheet's
+    // speaker gets, so the two action heads start on the same line (owner
+    // decision, this session).
+    val headInset = sheetHeadActionInset()
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Space.Gutter, vertical = 10.dp),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = headInset, bottom = 10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // The words at the left name the sheet by what the reader is
