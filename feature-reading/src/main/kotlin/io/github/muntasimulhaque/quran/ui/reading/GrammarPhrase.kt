@@ -17,6 +17,12 @@ import io.github.muntasimulhaque.quran.feature.reading.R
  * the app's own: they are the settled names of Arabic grammar in English
  * and in Bangla, not a translation of scripture (owner decision, this
  * session).
+ *
+ * The parts are separated by the app's middot, the mark it already puts
+ * between two facts in one line (the words page's "9.3 MB · word roots 2.1
+ * MB"). A comma joins clauses, so "Noun, nominative" read as one long
+ * description; the middot reads as three facts (owner decision, this
+ * session).
  */
 @Composable
 internal fun grammarPhrase(grammar: WordGrammar): String? {
@@ -27,7 +33,7 @@ internal fun grammarPhrase(grammar: WordGrammar): String? {
         if (grammar.passive) add(stringResource(R.string.reading_grammar_passive))
         grammar.pattern?.let { add(stringResource(R.string.reading_grammar_pattern, it)) }
     }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(", ")
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
 }
 
 private fun partOfSpeechLabel(value: PartOfSpeech): Int = when (value) {

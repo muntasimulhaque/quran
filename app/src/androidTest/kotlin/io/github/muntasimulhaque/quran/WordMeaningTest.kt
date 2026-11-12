@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
@@ -68,6 +69,12 @@ class WordMeaningTest {
             runBlocking {
                 SettingsStore(context).apply {
                     setUiLanguage("bn")
+                    // The frame is the page's own day, so the sheet is judged
+                    // on the ground the store set is captured on and the
+                    // frame does not change with whatever the last class left
+                    // behind (owner report: a capture class states its own
+                    // setup).
+                    setTheme(AppTheme.Light)
                     setTranslationPacks(setOf("translation-al-bayan-bn"))
                     setWordByWord(true)
                     setAyah(1)
@@ -85,6 +92,7 @@ class WordMeaningTest {
                     setShowTranslation(original.showTranslation)
                     setWordByWord(original.wordByWord)
                     original.uiLanguage?.let { setUiLanguage(it) }
+                    setTheme(original.theme)
                     for (role in TypeRole.entries) setTypeSize(role, original.sizeOf(role))
                 }
             }
@@ -134,12 +142,38 @@ class WordMeaningTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // The frame the head and the card are reviewed from. The sheet is its
-        // own window, so the root at this moment is the sheet the reader sees.
-        compose.waitForIdle()
-        val frame = compose.onRoot().captureToImage().asAndroidBitmap()
+        // The frame the head and the facts are reviewed from. The sheet is
+        // its own window, so the root at this moment is the sheet the reader
+        // sees. A sheet's semantics exist before its window has finished
+        // rising, and the 18.0 frame was taken mid-rise, so the frame is kept
+        // only when two captures in a row are identical: a settled sheet
+        // photographs the same twice (owner report, this session).
+        val frame = settle()
         File(screenshotOutputDirectory(), "word-meaning.png").outputStream().use { output ->
             frame.compress(Bitmap.CompressFormat.PNG, 100, output)
         }
+        frame.recycle()
+    }
+
+    /**
+     * The sheet's frame, once its arrival has stopped moving. Two captures in
+     * a row that are identical are a still sheet; a frame that arrives while
+     * the window is still rising is not evidence of anything.
+     */
+    private fun settle(): Bitmap {
+        var prior: Bitmap? = null
+        repeat(8) {
+            compose.waitForIdle()
+            Thread.sleep(600)
+            val frame = compose.onRoot().captureToImage().asAndroidBitmap()
+            val last = prior
+            prior = frame
+            if (last != null && last.sameAs(frame)) {
+                last.recycle()
+                return frame
+            }
+            last?.recycle()
+        }
+        throw AssertionError("the word sheet never settled")
     }
 }

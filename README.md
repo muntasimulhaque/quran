@@ -6,6 +6,21 @@ trackers, no accounts, nothing collected, ever.
 
 **Status:** 18.0 (versionCode 182) was submitted for Play review from commit `9fd58de8`, taken from `build` run 43180870506, the newest green run on `main`. The signed bundle `quran-18.0-vc182.aab` has SHA-256 `9c65bfc57f69df243e26c9dc4fab900e561aa94d5e061cdbfffbbae08ee81c46`, and `jarsigner` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` with SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 to 17.9 were signed with. The local evidence is the unit tests, lint, and `assembleDebug`, all green; `tools verify`, `build`, `packs`, `checkdb`, and `search`, all green; and the data instrumented suite 56 of 56 on `quran_phone` API 35. The app instrumented suite was attempted four times and could not finish on this machine: the AVD has no working display GPU (the emulator selects SwiftShader even with `-gpu host`, its window layer segfaults, and the device goes offline mid-run), so the run ends with `device 'emulator-5554' not found`. The classes that did finish passed except `AccessibilityTest`, which times out after 15 s in its Browse walk. The instrumented suites run nightly in `instrumented.yml` and are signal, not a gate; the `build` workflow holds no emulator, and the store capture is local, with `screenshots.yml` dispatch-only and `continue-on-error`, so a hosted emulator can never fail a release. Content 1.8.0, database `content-db-7668312b`, and the packs `pack-core-37aa5a58`, `pack-words-en-d1f3f145`, and `pack-words-bn-db48e5ce` are published. The eight store frames carry no word sheet, so the store set stands.
 
+**In 18.1.** The word sheet reads as one page. Its name and the ayah's place stand
+4 dp apart, the footnote sheet's own gap, because a sheet's head is now measured by
+its name: the speaker's 48 dp target reaches outside that line instead of making the
+head taller, and the note sheet's Clear and Save hang from its head's line the same
+way. The word and its gloss stay centered, and the three facts under them read as
+facts: Root, Dictionary form, and Grammar, each a label with its value 4 dp under it
+and its count under that, on the page's left edge, in both languages. The facts'
+Arabic is 20 of the Quran's 26, one step under the reading's inline stand, so the
+root no longer outshouts the gloss it belongs to. The counts say what they count: a
+root's words in the Quran, a dictionary form's words and forms. English says
+Dictionary form where it said Lemma, as Bangla already did, and the grammar's parts
+join on the app's middot. The Quran text, both translations, both tafsirs, the word
+lists, the root pack, the audio, and the database are unchanged; content stays
+1.8.0. Version 18.1 (183).
+
 **In 18.0.** The word meaning sheet studies the word. Under its root it names how many
 words in the Book speak that root, then the word's dictionary form with the Quran's own
 two counts for it, then the grammar: what the word is, its case or mood, its gender and

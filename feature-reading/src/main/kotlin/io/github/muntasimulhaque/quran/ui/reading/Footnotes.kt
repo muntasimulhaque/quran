@@ -19,8 +19,8 @@ import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.SheetHead
 import io.github.muntasimulhaque.quran.ui.kit.SheetPlace
-import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -53,7 +53,7 @@ internal data class OpenFootnote(
  * it wears the face the translation wears rather than the interface's, the
  * same voice the reader's own note is written in.
  *
- * The sheet names itself where every sheet does: [SheetTitle]'s 20 at
+ * The sheet names itself where every sheet does: [SheetHead]'s 20 at
  * SemiBold, then the place it annotates in the same 13 meta line the word
  * meaning sheet wears. The title is the sheet's name and the place is its
  * reference; the note is the subject under both (owner decision, this
@@ -90,15 +90,15 @@ internal fun FootnoteSheet(
                 .testTag("footnote-sheet"),
         ) {
             // A footnote is a sheet, so it names itself the way every
-            // sheet does: the app's one sheet title, then the place it
-            // annotates in the meta line. A reader who opened the wrong
-            // marker still knows it before reading a line.
-            SheetTitle(
+            // sheet does: the app's one head, then the place it annotates in
+            // the meta line. A reader who opened the wrong marker still knows
+            // it before reading a line. This sheet owns no action, so its
+            // head is the name alone.
+            SheetHead(
                 text = stringResource(
                     R.string.reading_footnote_heading,
                     localizedDigits(footnote.number.toString()),
                 ),
-                modifier = Modifier.fillMaxWidth(),
             )
             SheetPlace(
                 text = stringResource(

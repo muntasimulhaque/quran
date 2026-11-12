@@ -104,8 +104,8 @@
     <string name="reading_grammar_form_plural">Plural</string>
     <string name="reading_grammar_passive">Passive</string>
     <string name="reading_grammar_pattern">Pattern %1$s</string>
-    <string name="reading_word_lemma">Lemma</string>
+    <string name="reading_word_lemma">Dictionary form</string>
     <string name="reading_word_grammar">Grammar</string>
-    <string name="reading_word_root_count">%1$s words</string>
-    <string name="reading_word_lemma_count">%1$s words, %2$s forms</string>
+    <string name="reading_word_root_count">%1$s words in the Quran</string>
+    <string name="reading_word_lemma_count">%1$s words in %2$s forms</string>
 </resources>

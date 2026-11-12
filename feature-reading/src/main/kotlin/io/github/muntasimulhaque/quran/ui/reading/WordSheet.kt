@@ -2,13 +2,12 @@ package io.github.muntasimulhaque.quran.ui.reading
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.FlowRowScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -32,19 +31,19 @@ import androidx.compose.ui.text.style.TextAlign
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.WordGrammar
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
-import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.WordRoot
 import io.github.muntasimulhaque.quran.feature.reading.R
-import io.github.muntasimulhaque.quran.ui.kit.AppSheet
-import io.github.muntasimulhaque.quran.ui.kit.SheetPlace
-import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
-import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
-import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
-import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
+import io.github.muntasimulhaque.quran.ui.kit.SectionHead
+import io.github.muntasimulhaque.quran.ui.kit.SheetHead
+import io.github.muntasimulhaque.quran.ui.kit.SheetPlace
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
+import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
@@ -56,41 +55,56 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * A word the reader pressed and held, with the meaning the word list gives it
  * and the reference that says where it stands.
  *
- * The sheet is the footnote's container and the word aid's own page. Its
- * head is the footnote's head: the app's one sheet title at 20 SemiBold and
- * the place at 13, both on the page's 20 dp edge. Under it the card is
- * centered: one Arabic word and one short gloss are one entry, not a
- * paragraph. The word list's meanings are short (median nine characters, 99
- * percent under thirty), so the gloss is one line, and the rare longest is
- * two; the centered stack reads as one entry. The head takes the left edge
- * because every sheet in the app names itself there (owner decision, this
- * session).
+ * **The head is every sheet's head** (owner decision, this session). The name
+ * at [SheetHead]'s 20 SemiBold, the place 4 dp under it in [SheetPlace]'s meta
+ * line, both on the page's 20 dp edge: the footnote's own head, and the note's
+ * and the settings page's, drawn by the same rule. It was not: the speaker's
+ * 48 dp target made this head 48 dp tall under a 26 dp title, so the place
+ * stood 15 dp under the name where the footnote's stood 4, and two sheets that
+ * call themselves one page opened two different ways (owner report, this
+ * session). [SheetHead] measures the head by its name and lets the mark's
+ * target reach outside that line, so no sheet with an action pays for it in
+ * the air under its name.
  *
- * The word is the Quran's own word: the ayah's 26 sp on its 2.0 line, the
- * page ink, and the tajweed colors when the reader has them on. The meaning
- * is the reader's language in the translation's voice and size, 16 sp on the
- * reading's own line. The place is the app's own meta line under the sheet's
- * title. The sheet is not a second reading of the ayah; it holds the one word
- * the reader asked for and the place it holds (owner decision, this
- * session).
- *
- * The sheet names itself where every sheet does: [SheetTitle]'s 20 at
- * SemiBold, then the place in the same 13 meta line the footnote sheet
- * wears. The word remains the subject under both (owner decision, this
- * session).
- *
- * **The word's study lines stand under it, not behind a fold** (owner
- * decision, this session). The root carries how many words in the Book speak
- * it; below it come the dictionary form with its two counts and the grammar,
- * one centered line each, in the shape the root already wears. They are
- * drawn only when the word pack carries them, so a held pack from before the
- * study lines draws the word, its meaning, and its root as it did, and a
- * word the corpus gives no lemma says nothing rather than drawing an empty
- * line. The grammar's words are the app's own translated grammar vocabulary,
- * the same in both languages, and never a translation of scripture (owner
+ * The speaker is quiet at rest and wears the accent while the word sounds,
+ * which is the rule every door that turns in this app follows: the mark is
+ * lit because something is happening, not because it is a control (owner
  * decision, this session).
  *
- * **While the word sounds, the word is washed** (owner decision, this
+ * **The entry is centered; the facts are not** (owner decision, this
+ * session). The word the reader pressed and the one gloss this ayah gives it
+ * are one subject, and a subject is centered as the reading centers a single
+ * display line: the Quran's own 26 sp on its 2.0 line, the page ink and the
+ * tajweed colors the reader has, then the gloss in the reader's language at
+ * the translation's 16 sp, 4 dp under it. Under the entry, the study lines are
+ * the app's facts about the word, so they take the app's own shape: the page's
+ * left edge, the label at [SectionHead]'s 12, the value 4 dp under it, and a
+ * count where the pack carries one, 4 dp under the value. The sheet had them
+ * as sentences, each label inline with a 24 sp Arabic run and a count, so the
+ * root outshouted the gloss and at the largest text step a label could orphan
+ * on its own line (owner report, this session).
+ *
+ * **A fact's Arabic is 20 of the Quran's 26** (owner decision, this session).
+ * The word is the reading's own size and the gloss the translation's; a fact
+ * is reference material and may outrank neither. It stood at 24, which is the
+ * print's medallion and the reading's inline stand, a measure for Arabic
+ * *inside* a verse's line and not for a fact under a gloss. Twenty is the
+ * inline stand less a step, and it is the size a 13 sp value would carry with
+ * Arabic half again as tall as the prose beside it.
+ *
+ * The root's Latin rendering belongs to the page that is read in Latin script:
+ * a Bangla reader reads the root letters or nothing, and a line of Latin on a
+ * Bangla page is a third script the sheet never promised (owner decision, an
+ * earlier session).
+ *
+ * The lines stand directly under the entry and are drawn only when the word
+ * pack carries them, so a pack held from before draws the sheet it always
+ * drew; a word the corpus gives no lemma says nothing rather than drawing an
+ * empty line. The grammar's words are the app's own translated grammar
+ * vocabulary, the same in both languages, and never a translation of scripture
+ * (owner decision, this session).
+ *
+ * **While the word sounds, the word is washed** (owner decision, an earlier
  * session). One word is a sample, not a session: it is one clipped item on its
  * own player, so it raises no capsule and leaves no notification behind, and
  * the sheet gives the tap its answer where the finger is. A recitation that
@@ -111,7 +125,7 @@ internal data class OpenWord(
     /**
      * The word's grammar and lemma, when the word pack carries them. Null on
      * a held pack from before the study lines, which then draws the word, its
-     * meaning, and its root, as it did (owner decision, this session).
+     * meaning, and its root, as it did (owner decision, an earlier session).
      */
     val grammar: WordGrammar? = null,
     /** The ayah the word stands in, for the voice that says it. */
@@ -121,6 +135,17 @@ internal data class OpenWord(
     /** True when the surah's audio is on the device, so the mark can answer. */
     val canHear: Boolean = false,
 )
+
+/**
+ * A fact's Arabic as a share of the Quran's own size: 20 of 26 at the default.
+ *
+ * The word is the reading's 26 and the gloss the translation's 16; the facts
+ * under them are reference material. The reading's inline stand is 24 of 26,
+ * which is Arabic *inside* a verse's line; a fact takes one step further down
+ * so it can outrank neither the word nor its gloss (owner decision, this
+ * session).
+ */
+private const val FactArabicOfQuran = 20f / 26f
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -138,8 +163,38 @@ internal fun WordSheet(
     val sheetState = rememberExpandedSheetState()
     val palette = LocalPagePalette.current
     // The word's shaped line, so the wash can sit on the letters rather than
-    // on the width the sheet gives it (owner decision, this session).
+    // on the width the sheet gives it (owner decision, an earlier session).
     var wordLayout by remember(word.word) { mutableStateOf<TextLayoutResult?>(null) }
+    val ink = palette.ink
+    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
+    // A fact's own Arabic, read from the reader's step so the sheet follows
+    // the size they chose for the Quran (owner decision, this session).
+    val factSp = metrics.arabicSp * FactArabicOfQuran
+    // The mark is quiet at rest and lit while the word sounds: a door says its
+    // state in the accent, and at rest it asks for nothing (owner decision,
+    // this session).
+    val markTint = if (hearing) MaterialTheme.colorScheme.primary else quiet
+    val hear = onHear
+    // The head's one action, drawn only when the word's voice is on the
+    // device. The explicit type keeps the lambda composable.
+    val action: (@Composable () -> Unit)? = if (hear == null) {
+        null
+    } else {
+        {
+            GlyphButton(
+                description = stringResource(R.string.reading_hear_word),
+                onClick = hear,
+                tint = markTint,
+                modifier = Modifier.testTag("word-sheet-hear"),
+            ) {
+                IconGlyph(
+                    icon = Icon.Speaker,
+                    tint = markTint,
+                    modifier = Modifier.size(GlyphSize.Control),
+                )
+            }
+        }
+    }
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -148,50 +203,16 @@ internal fun WordSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                // The gate rides with the scroll, so a long meaning never
+                // The gate rides with the scroll, so a long entry never
                 // bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
                 .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot)
                 .testTag("word-sheet"),
         ) {
-            // The sheet names itself where every sheet does, and the one
-            // action it owns stands at the head's trailing edge: the title's
-            // line is left aligned, so the room beside it is the only room on
-            // the sheet that is not the entry's, and a reader looking for
-            // "hear it" looks where every other surface in the app keeps its
-            // own control. The mark and the title share one center, and the
-            // place stays under both on the page's own edge, so the head
-            // reads as one line with a door at its end (owner decision, this
-            // session).
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = Space.Block),
-                ) {
-                    SheetTitle(
-                        text = stringResource(R.string.reading_word_sheet_name),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                if (onHear != null) {
-                    GlyphButton(
-                        description = stringResource(R.string.reading_hear_word),
-                        onClick = onHear,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.testTag("word-sheet-hear"),
-                    ) {
-                        IconGlyph(
-                            icon = Icon.Speaker,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(GlyphSize.Control),
-                        )
-                    }
-                }
-            }
+            SheetHead(
+                text = stringResource(R.string.reading_word_sheet_name),
+                action = action,
+            )
             SheetPlace(
                 text = stringResource(
                     R.string.reading_sheet_where,
@@ -202,17 +223,17 @@ internal fun WordSheet(
                     .fillMaxWidth()
                     .padding(top = Space.Tight),
             )
-            // The word is the one subject on the sheet. It is drawn from the
-            // page's palette so the reader meets the same word and the same
-            // rule colors they pressed and held, at the ayah's own size, and
-            // it speaks the portable form rather than the print's encoding
+            // The entry is the sheet's one subject, so it is centered: the
+            // word at the Quran's own size, drawn from the page's palette so
+            // the reader meets the letters and the rule colors they pressed
+            // and held, in the portable form rather than the print's encoding
             // (owner decision, this session).
             TajweedText(
                 text = AnnotatedString(word.word),
                 code = word.tajweed,
                 colors = palette.tajweed,
                 enabled = metrics.tajweed,
-                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, palette.ink),
+                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, ink),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 onTextLayout = { wordLayout = it },
@@ -240,71 +261,43 @@ internal fun WordSheet(
                     metrics.translationSp,
                     metrics.translationLineSp,
                 ),
-                color = palette.ink,
+                color = ink,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Space.Tight),
             )
             // The root, when the word has one: the letters the page writes,
-            // and the same letters read out for a reader who does not read
-            // them. A bare line, not a door: it answers no tap (owner
-            // decision, this session).
-            //
-            // It wraps rather than overflows: three words in a row are one
-            // line at the app's own size and two at the largest system scale,
-            // and the sheet is the one surface a reader may reach at 200
-            // percent. A row would have clipped the letters at the right edge
-            // instead of folding them (owner decision, this session).
+            // their reading on the page that is read in Latin script, and how
+            // much of the Book speaks that root. A bare fact, not a door: it
+            // answers no tap (owner decision, an earlier session).
             word.root?.let { root ->
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Space.Block)
-                        .testTag("word-sheet-root"),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        Space.Line,
-                        Alignment.CenterHorizontally,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(Space.Tight),
+                Fact(
+                    label = stringResource(R.string.reading_word_root),
+                    tag = "word-sheet-root",
                 ) {
-                    Text(
-                        text = stringResource(R.string.reading_word_root),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                    )
-                    Text(
-                        text = root.arabic,
-                        // The root is a fragment, not a verse: the medallion's
-                        // own measure, which is the size the reading already
-                        // draws Arabic below the Quran's line (owner
-                        // decision, this session).
-                        style = arabicStyle(
-                            hafs,
-                            TextSize.medallionAt(metrics.arabicSp),
-                            TextSize.medallionAt(metrics.arabicSp) * 2f,
-                            palette.ink,
-                        ),
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                    )
-                    // The Latin rendering belongs to the page that is read in
-                    // Latin script: a Bangla reader reads the root letters or
-                    // nothing, and a line of Latin on a Bangla page is a third
-                    // script the sheet never promised (owner decision, this
+                    // The letters wrap rather than clipping at the largest
+                    // system scale, and the Latin rides their line where it
+                    // fits, under them where it does not (owner decision, this
                     // session).
-                    if (root.latin.isNotBlank() && metrics.readingLanguage == "en") {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Space.Line),
+                        verticalArrangement = Arrangement.spacedBy(Space.Tight),
+                    ) {
                         Text(
-                            text = root.latin,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            text = root.arabic,
+                            style = arabicStyle(hafs, factSp, factSp * 2f, ink),
                         )
+                        if (root.latin.isNotBlank() && metrics.readingLanguage == "en") {
+                            Text(
+                                text = root.latin,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = quiet,
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                            )
+                        }
                     }
-                    // How much of the Book speaks this root. The count is in
-                    // the pack the sheet already read, and it is the one fact
-                    // that turns a root into a family the reader can feel
-                    // (owner decision, this session).
                     if (root.wordsCount > 0) {
                         Text(
                             text = stringResource(
@@ -312,33 +305,26 @@ internal fun WordSheet(
                                 localizedDigits(root.wordsCount.toString()),
                             ),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            color = quiet,
+                            modifier = Modifier.padding(top = Space.Tight),
                         )
                     }
                 }
             }
             word.grammar?.let { grammar ->
                 // The dictionary form, when the corpus gives one: the word's
-                // own letters at the medallion's measure, and the Book's two
-                // counts for it. A pronoun and a disjoint letter have no
-                // lemma, and the sheet then says nothing rather than drawing
-                // a line with nothing behind it (owner decision, this
-                // session).
+                // own letters and the Book's two counts for it. A pronoun and
+                // a disjoint letter have no lemma, and the sheet then says
+                // nothing rather than drawing a line with nothing behind it
+                // (owner decision, this session).
                 grammar.lemma?.let { lemma ->
-                    StudyLine(
+                    Fact(
                         label = stringResource(R.string.reading_word_lemma),
                         tag = "word-sheet-lemma",
                     ) {
                         Text(
                             text = lemma,
-                            style = arabicStyle(
-                                hafs,
-                                TextSize.medallionAt(metrics.arabicSp),
-                                TextSize.medallionAt(metrics.arabicSp) * 2f,
-                                palette.ink,
-                            ),
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            style = arabicStyle(hafs, factSp, factSp * 2f, ink),
                         )
                         Text(
                             text = stringResource(
@@ -347,25 +333,24 @@ internal fun WordSheet(
                                 localizedDigits(grammar.lemmaForms.toString()),
                             ),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            color = quiet,
+                            modifier = Modifier.padding(top = Space.Tight),
                         )
                     }
                 }
                 // What the word is, as a grammar reads it. The line is drawn
-                // only on a word pack that carries it, so an older pack is
-                // the sheet the reader already knows (owner decision, this
+                // only on a word pack that carries it, so an older pack is the
+                // sheet the reader already knows (owner decision, an earlier
                 // session).
                 grammarPhrase(grammar)?.let { phrase ->
-                    StudyLine(
+                    Fact(
                         label = stringResource(R.string.reading_word_grammar),
                         tag = "word-sheet-grammar",
                     ) {
                         Text(
                             text = phrase,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = palette.ink,
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            color = ink,
                         )
                     }
                 }
@@ -375,32 +360,29 @@ internal fun WordSheet(
 }
 
 /**
- * One study line: the sheet's label on the left of the value, both centered
- * and wrapping together rather than overflowing at the largest system scale.
- * The root's row is the same shape, so the lines under it read as one page
- * (owner decision, this session).
+ * One fact about the word: its label on the page's edge, the value 4 dp under
+ * it, and whatever the pack adds about the value (a count) 4 dp under that.
+ *
+ * The label is [SectionHead]'s voice, so it is a heading a screen reader can
+ * jump to and it steps back from the value it names. [Space.Block] separates
+ * one fact from the next, because two facts are two thoughts.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun StudyLine(
+private fun Fact(
     label: String,
     tag: String,
-    value: @Composable FlowRowScope.() -> Unit,
+    value: @Composable ColumnScope.() -> Unit,
 ) {
-    FlowRow(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = Space.Block)
             .testTag(tag),
-        horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(Space.Tight),
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.align(Alignment.CenterVertically),
+        SectionHead(text = label)
+        Column(
+            modifier = Modifier.padding(top = Space.Tight),
+            content = value,
         )
-        value()
     }
 }

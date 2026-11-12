@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
@@ -40,6 +39,7 @@ import io.github.muntasimulhaque.quran.data.MAX_NOTE_LENGTH
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
+import io.github.muntasimulhaque.quran.ui.kit.SheetHead
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
@@ -139,40 +139,41 @@ private fun NoteEditor(
             // about to do: a fresh sheet invites the note, an existing one
             // edits what is already written. The two at the right wear the
             // app's button shape, so the name and the buttons are never
-            // mistaken for the same kind of word.
-            Text(
+            // mistaken for the same kind of word, and they hang from the
+            // head's line rather than making it taller (owner decision, this
+            // session).
+            SheetHead(
                 text = stringResource(
                     if (initial.isNullOrBlank()) R.string.card_note_take else R.string.card_note_edit,
                 ),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .weight(1f)
-                    .semantics { heading() },
-            )
-            if (!initial.isNullOrBlank()) {
-                TextButton(
-                    label = stringResource(R.string.action_clear),
-                    onClick = onClear,
-                    modifier = Modifier.padding(start = Space.Row),
-                    enabled = !saving,
-                    quiet = true,
-                )
-            }
-            TextButton(
-                label = stringResource(
-                    if (saving) R.string.reading_note_saving else R.string.reading_note_save,
-                ),
-                onClick = { onSave(draft.text.trim().takeIf { it.isNotEmpty() }) },
-                // Save and Clear are two standalone actions, so they stand
-                // the action gap apart (owner decision, this session). Save
-                // is the one act the sheet exists for, so it is the app's
-                // one prominent shape (owner decision, this session). It is
-                // disabled while the write is in flight, and while an empty
-                // draft has nothing to write and no note to clear.
-                modifier = Modifier.padding(start = Space.Action),
-                enabled = !saving && (draft.text.isNotBlank() || !initial.isNullOrBlank()),
-                prominent = true,
+                action = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (!initial.isNullOrBlank()) {
+                            TextButton(
+                                label = stringResource(R.string.action_clear),
+                                onClick = onClear,
+                                modifier = Modifier.padding(start = Space.Row),
+                                enabled = !saving,
+                                quiet = true,
+                            )
+                        }
+                        TextButton(
+                            label = stringResource(
+                                if (saving) R.string.reading_note_saving else R.string.reading_note_save,
+                            ),
+                            onClick = { onSave(draft.text.trim().takeIf { it.isNotEmpty() }) },
+                            // Save and Clear are two standalone actions, so they stand
+                            // the action gap apart (owner decision, this session). Save
+                            // is the one act the sheet exists for, so it is the app's
+                            // one prominent shape (owner decision, this session). It is
+                            // disabled while the write is in flight, and while an empty
+                            // draft has nothing to write and no note to clear.
+                            modifier = Modifier.padding(start = Space.Action),
+                            enabled = !saving && (draft.text.isNotBlank() || !initial.isNullOrBlank()),
+                            prominent = true,
+                        )
+                    }
+                },
             )
         }
         RoundedSelectionColors {

@@ -106,6 +106,6 @@
     <string name="reading_grammar_pattern">ওজন %1$s</string>
     <string name="reading_word_lemma">আভিধানিক রূপ</string>
     <string name="reading_word_grammar">ব্যাকরণ</string>
-    <string name="reading_word_root_count">%1$sটি শব্দ</string>
-    <string name="reading_word_lemma_count">%1$sটি শব্দ, %2$sটি রূপ</string>
+    <string name="reading_word_root_count">কুরআনে %1$sটি শব্দ</string>
+    <string name="reading_word_lemma_count">%1$sটি শব্দ, %2$sটি রূপে</string>
 </resources>
