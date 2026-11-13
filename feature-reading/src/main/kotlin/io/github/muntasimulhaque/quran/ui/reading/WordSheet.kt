@@ -28,7 +28,6 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.WordGrammar
@@ -81,10 +80,16 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * are one subject, and a subject is centered as the reading centers a single
  * display line: the Quran's own 26 sp on its 2.0 line, trimmed to the line's
  * ink, the page ink and the tajweed colors the reader has, then the gloss in
- * the reader's language at the translation's 16 sp, 8 dp under it. A
- * [Space.Section] opens the study lines; [Space.Block] separates them. They
- * are the app's facts about the word, so they take the app's own shape: the
- * page's left edge, the label at [SectionHead]'s 12, the value 4 dp under it,
+ * the reader's language at the translation's 16 sp, 8 dp under it.
+ * [Space.Section] opens every fact, because a fact is a block: its own head,
+ * its own value, its own count. It was a Section for the first and a
+ * [Space.Block] for the rest, and the owner's frame showed the failure: the
+ * count of one fact and the label of the next stood apart by almost the same
+ * air as a label and its own value, so the eye could not read where one fact
+ * ended and the next began (owner decision, this session). The entry above
+ * them is the block before the first. They are the app's facts about the
+ * word, so they take the app's own shape: the page's left edge, the label at
+ * [SectionHead]'s 12, the value 4 dp under it,
  * and a count where the pack carries one, 4 dp under the value. The sheet had
  * them as sentences, each label inline with a 24 sp Arabic run and a count, so
  * the root outshouted the gloss and at the largest text step a label could
@@ -294,9 +299,8 @@ internal fun WordSheet(
                     .fillMaxWidth()
                     .padding(top = Space.Line),
             )
-            // The first fact opens the reference block with a section's air;
-            // the entry and the facts are two blocks, not one list.
-            var firstFact = true
+            // Every fact opens with a section's air: a fact is a block, and
+            // the entry above them is the block before the first.
             // The root, when the word has one: the letters the page writes,
             // their reading on the page that is read in Latin script, and how
             // much of the Book speaks that root. A bare fact, not a door: it
@@ -305,7 +309,6 @@ internal fun WordSheet(
                 Fact(
                     label = stringResource(R.string.reading_word_root),
                     tag = "word-sheet-root",
-                    top = if (firstFact) Space.Section else Space.Block,
                 ) {
                     // The letters wrap rather than clipping at the largest
                     // system scale, and the Latin rides their line where it
@@ -347,7 +350,6 @@ internal fun WordSheet(
                         )
                     }
                 }
-                firstFact = false
             }
             word.grammar?.let { grammar ->
                 // The dictionary form, when the corpus gives one: the word's
@@ -359,7 +361,6 @@ internal fun WordSheet(
                     Fact(
                         label = stringResource(R.string.reading_word_lemma),
                         tag = "word-sheet-lemma",
-                        top = if (firstFact) Space.Section else Space.Block,
                     ) {
                         Text(
                             text = lemma,
@@ -382,7 +383,6 @@ internal fun WordSheet(
                             modifier = Modifier.padding(top = Space.Tight),
                         )
                     }
-                    firstFact = false
                 }
                 // What the word is, as a grammar reads it. The line is drawn
                 // only on a word pack that carries it, so an older pack is the
@@ -392,7 +392,6 @@ internal fun WordSheet(
                     Fact(
                         label = stringResource(R.string.reading_word_grammar),
                         tag = "word-sheet-grammar",
-                        top = if (firstFact) Space.Section else Space.Block,
                     ) {
                         Text(
                             text = phrase,
@@ -400,7 +399,6 @@ internal fun WordSheet(
                             color = ink,
                         )
                     }
-                    firstFact = false
                 }
             }
         }
@@ -413,27 +411,31 @@ internal fun WordSheet(
  *
  * The label is [SectionHead]'s voice, so it is a heading a screen reader can
  * jump to and it steps back from the value it names. [Space.Section] opens
- * the first fact of a sheet; [Space.Block] separates the facts after it,
- * because two facts are two thoughts.
- *
- * [top] is the room above the fact. It defaults to the block's, and the first
- * fact passes the section's, so the centered entry and the left reference
- * list read as two blocks rather than one long column.
+ * every fact, the first and the rest alike: a fact has its own head, so it is
+ * a block and it stands a block's break from the one before it, never the 16
+ * that separates two thoughts inside one block (owner decision, this
+ * session). The label carries a tag of its own beside the fact's, so a test
+ * can measure the room the fact opens with against the fact itself.
  */
 @Composable
 private fun Fact(
     label: String,
     tag: String,
-    top: Dp = Space.Block,
     value: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = top)
-            .testTag(tag),
+            // The tag rides outside the room the fact opens with, so the
+            // fact's own box carries it and a test can measure the label
+            // against it.
+            .testTag(tag)
+            .padding(top = Space.Section),
     ) {
-        SectionHead(text = label)
+        SectionHead(
+            text = label,
+            modifier = Modifier.testTag("$tag-label"),
+        )
         Column(
             modifier = Modifier.padding(top = Space.Tight),
             content = value,

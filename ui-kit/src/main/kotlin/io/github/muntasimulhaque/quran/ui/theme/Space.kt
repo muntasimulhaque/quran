@@ -47,7 +47,10 @@ object Space {
     /** Two thoughts in one block: the ayah and its word list. */
     val Block = 16.dp
 
-    /** Two blocks: one ayah and the next, a page and its heading. */
+    /**
+     * Two blocks: one ayah and the next, a page and its heading, and every
+     * fact on the word meaning sheet, each a labeled block of its own.
+     */
     val Section = 24.dp
 
     /** The room a sheet leaves under its last row. */

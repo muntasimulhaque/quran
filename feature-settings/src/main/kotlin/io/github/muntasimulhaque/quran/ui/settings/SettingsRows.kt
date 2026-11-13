@@ -23,8 +23,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * It wears the app's one head over a list, [SectionHead], so a group in the
  * settings sheet and a group in the pill's listening panel are one voice. The
- * air is this page's own: the hub opens a group with a block's room and closes
- * it with a line's.
+ * air is this page's own: the hub opens a group with a block's room plus a
+ * tight, [Space.Block] + [Space.Tight], 20 dp, and closes it with a line's.
+ *
+ * It is 20 and not a block's 16: the head's room above it belongs to the list
+ * under it, so the air over the first row is 20 (a line's 8 plus the row's own
+ * 12) and the air between two groups is 32 (the row's 12 plus the head's 20).
+ * The word meaning sheet's facts are the other job: a fact is a block, so it
+ * stands a section from the fact before it (owner decision, this session).
  */
 @Composable
 fun Group(title: String) {
