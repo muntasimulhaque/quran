@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -115,6 +116,21 @@ internal fun TransferWordsBlock(
  * offer, the transfer, and the recitation are one shape in three states. The
  * 2 dp lets the two lines keep their own leading as the air between them, and
  * the block stands inside a 48 dp target that the finger gets whole.
+ *
+ * **The two facts on the voice's line stand apart by the app's middot**
+ * (owner decision, this session). The size is not a quiet value of the
+ * voice, which is what the pace is: it is the second fact of the request,
+ * the way "Makki · 44 ayahs" and the Continue pill's own "Al-Baqarah ·
+ * 8.9 MB" already read. The mark is drawn between two texts rather than
+ * inside one string, so the voice is still the part that gives way and the
+ * size still never does, and it says nothing to a screen reader.
+ *
+ * **The turn stands at the block's foot, not beside the size** (owner
+ * report, this session). The block is the door in both of its homes, and
+ * its mark closes the block: the playing pill wears it at the foot of the
+ * place's line, and moving it beside the size would give one block two
+ * places for one mark. Beside a number it also reads as a picker for that
+ * number, and the offer's list is a choice of voice, not a size editor.
  *
  * **The offer borrows the block, and its size is the voice's** (owner
  * report, this session). The surah stands on the place line with no key, the
@@ -238,18 +254,30 @@ internal fun PlayingWordsBlock(
                     )
                 }
                 if (!price.isNullOrBlank()) {
+                    // The two facts of the request stand apart by the
+                    // interface's own middot, in the quiet tone it already
+                    // wears between two facts ("Makki · 44 ayahs"). It is a
+                    // separator, not a fact: the door does not speak it.
                     Text(
-                        text = price,
-                        // The offer's size is the voice's value, in the one
-                        // quiet slot beside the name that the pace wears and
-                        // that the offer's own voice list prices every voice
-                        // with. It is drawn after the name, so the voice
-                        // gives way and the size never does (owner report,
-                        // this session).
+                        text = VoiceSizeDot,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
-                        modifier = Modifier.padding(start = Space.Line),
+                        modifier = Modifier
+                            .padding(start = Space.Tight)
+                            .testTag("offer-price-dot")
+                            .clearAndSetSemantics { },
+                    )
+                    Text(
+                        text = price,
+                        // The offer's size is the voice's own value, drawn
+                        // after the name and its dot, so the voice gives way
+                        // and the size never does (owner report, this
+                        // session).
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.padding(start = Space.Tight),
                     )
                 }
             }
@@ -302,6 +330,16 @@ internal fun PlayingWordsBlock(
         }
     }
 }
+
+/**
+ * The interface's middot between the voice and the size it prices.
+ *
+ * It is a constant rather than a string resource for the same reason the
+ * word sheet's grammar phrase and the tajweed legend keep theirs: it is the
+ * separator the interface owns, and every language writes it with the same
+ * mark.
+ */
+private const val VoiceSizeDot = "·"
 
 /**
  * The pill's words on one line, for the voices that are not a recitation: who

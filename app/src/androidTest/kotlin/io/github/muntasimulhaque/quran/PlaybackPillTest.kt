@@ -1061,6 +1061,55 @@ class PlaybackPillTest {
     }
 
     /**
+     * The offer's two facts on the voice's line stand apart by the app's own
+     * middot, as "Makki · 44 ayahs" and the Continue pill's own line do
+     * (owner decision, this session). The mark is a separator, not a fact, so
+     * the door still speaks the two values and never the dot, and the turn
+     * keeps the block's foot where the playing pill wears it.
+     */
+    @Test
+    fun theOfferPutsTheAppsMiddotBetweenTheVoiceAndItsSize() {
+        showPill(
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 19,
+                surahName = "Maryam",
+                ayah = 1,
+                bytes = 22L * 1024 * 1024,
+                options = offerOptions(),
+            ),
+        )
+        val voice = compose.onNodeWithText("Husary", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val dot = compose.onNodeWithTag("offer-price-dot", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val size = compose.onNodeWithText(
+            formatBytes(22L * 1024 * 1024, Locale.US, "KB", "MB"),
+            useUnmergedTree = true,
+        ).getUnclippedBoundsInRoot()
+        assertTrue(
+            "the middot stands after the voice it follows: voice $voice, dot $dot",
+            dot.left.value >= voice.right.value - 0.5f,
+        )
+        assertTrue(
+            "the middot stands before the size it leads: dot $dot, size $size",
+            dot.right.value <= size.left.value + 0.5f,
+        )
+        val spoken = compose.onNodeWithTag("offer-words")
+            .fetchSemanticsNode()
+            .config
+            .getOrNull(SemanticsProperties.Text)
+            ?.joinToString(" ") { it.text }
+            .orEmpty()
+        assertFalse("the door must not speak the separator aloud: $spoken", spoken.contains("·"))
+        assertTrue(
+            "the door still reads both facts: $spoken",
+            spoken.contains("Husary") && spoken.contains(formatBytes(22L * 1024 * 1024, Locale.US, "KB", "MB")),
+        )
+    }
+
+    /**
      * The offer's line is the door to its own voice list (owner decision, this
      * session): the same reciter rows the playing pill carries, with what each
      * voice would still need for the offer's surah. A chosen voice reaches the

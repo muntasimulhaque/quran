@@ -29,6 +29,8 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.bookRowName
+import io.github.muntasimulhaque.quran.ui.theme.notePreviewLineSp
+import io.github.muntasimulhaque.quran.ui.theme.notePreviewSp
 import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -117,7 +119,11 @@ internal fun SavedList(
     texts: Map<Int, AyahText>,
     listState: LazyListState,
     listModifier: Modifier = Modifier,
-    /** The reader's translation size and line, so a note reads as they read. */
+    /**
+     * The reader's translation size and line. The preview is held at the
+     * reading's default by [notePreviewSp], so a row's name stays its largest
+     * line at every step.
+     */
     noteSp: Float,
     noteLineSp: Float,
     onAyah: (Int) -> Unit,
@@ -175,7 +181,7 @@ private fun PlaceRow(
     ayah: String?,
     detail: String? = null,
     note: String? = null,
-    /** The note's size; the default is the reading voice, for a row with no note. */
+    /** The note's size and line; the preview's own cap lives where it is drawn. */
     noteSp: Float = LocalReadingVoice.current.style.fontSize.value,
     noteLineSp: Float = LocalReadingVoice.current.style.lineHeight.value,
     onClick: () -> Unit,
@@ -235,17 +241,21 @@ private fun PlaceRow(
             }
         }
         if (!note.isNullOrBlank()) {
-            // The reader's own words are the one part of the row drawn in the
-            // reading ink and the reading face, and the only part allowed two
-            // lines: a note is how the place is recognised, while the place
-            // and the moment are its labels. It follows the translation's own
-            // size and line, so a reader who enlarged the reading does not
-            // meet their own words small again. The clamp is the same two
-            // lines on every row, so one long note cannot change the list's
-            // rhythm.
+            // The reader's own words are the row's content and the only part
+            // allowed two lines: a note is how the place is recognised, while
+            // the place and the moment are its labels. It is drawn in the
+            // reading's face at the reader's own translation size, so a reader
+            // who enlarged the reading does not meet their own words small
+            // again, and the preview is held at the reading's default so a
+            // note can never outgrow the row's own name (owner report, this
+            // session: see [notePreviewSp]). The clamp is the same two lines on
+            // every row, so one long note cannot change the list's rhythm.
             Text(
                 text = note,
-                style = LocalReadingVoice.current.prose(noteSp, noteLineSp),
+                style = LocalReadingVoice.current.prose(
+                    notePreviewSp(noteSp),
+                    notePreviewLineSp(noteLineSp),
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

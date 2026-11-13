@@ -227,4 +227,47 @@ class TypographyTest {
             )
         }
     }
+
+    /**
+     * A note's preview is the reader's own size, held at the reading's
+     * default: a row's name is 15 and stays its largest line, where the top
+     * step's 19.2 would turn the row's title into a caption under the
+     * reader's own words (owner report, this session).
+     */
+    @Test
+    fun aNotesPreviewNeverOutgrowsTheRowThatHoldsIt() {
+        val shipped = TextSize.sp(TypeRole.Translation, TextSize.DEFAULT)
+        for (step in TextSize.STEPS) {
+            val reader = TextSize.sp(TypeRole.Translation, step)
+            val preview = notePreviewSp(reader)
+            assertTrue(
+                "a $reader sp note was previewed at $preview sp",
+                preview <= shipped,
+            )
+            assertEquals(
+                "a $step step under the default keeps the size the reader chose",
+                minOf(reader, shipped),
+                preview,
+                0.001f,
+            )
+        }
+        assertEquals(
+            "the top step is held at the reading's own body",
+            shipped,
+            notePreviewSp(TextSize.sp(TypeRole.Translation, TextSize.STEPS.last())),
+            0.001f,
+        )
+        assertEquals(
+            "the preview stands one point over the Book's row name",
+            1f,
+            shipped - TypeLadder.BOOK_ROW_SP,
+            0.001f,
+        )
+        assertEquals(
+            "the line is held with the size",
+            TextSize.lineSp(TypeRole.Translation, TextSize.DEFAULT),
+            notePreviewLineSp(TextSize.lineSp(TypeRole.Translation, TextSize.STEPS.last())),
+            0.001f,
+        )
+    }
 }

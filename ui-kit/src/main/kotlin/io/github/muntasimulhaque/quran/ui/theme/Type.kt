@@ -618,6 +618,31 @@ fun bookRowName(): TextStyle {
 }
 
 /**
+ * The size a kept note is previewed at in a list: the reader's own
+ * translation size, held at the reading's default.
+ *
+ * A note is the reader's own words, so a list draws it in the reading's
+ * voice at the size the reader reads at, and it follows them down as far as
+ * they go (owner decision, an earlier session). It does not follow them up
+ * past the default. A row's name is 15, and the top two steps reach 17.6 and
+ * 19.2: the row's title would become its smallest line, and the place the
+ * reader is looking for would read as a caption under the note (owner
+ * report, this session). Held at the reading's own 16, the preview stands
+ * one point over the row's name, the same hair the default step already
+ * gives it, so no step can invert the row. The note's own sheet and its
+ * field still take the reader's full size, because that is where the note is
+ * written and read.
+ *
+ * The line is held with it, so a capped size never carries an uncapped line.
+ */
+fun notePreviewSp(translationSp: Float): Float =
+    minOf(translationSp, TextSize.sp(TypeRole.Translation, TextSize.DEFAULT))
+
+/** [notePreviewSp]'s companion: the line that belongs to the size it holds. */
+fun notePreviewLineSp(translationLineSp: Float): Float =
+    minOf(translationLineSp, TextSize.lineSp(TypeRole.Translation, TextSize.DEFAULT))
+
+/**
  * A small page's own name: an empty state, a credit, a language's name.
  * 16 at Medium in both scripts, one step over the interface body and under
  * the page title. It is the app's voice, so it never borrows the Book's

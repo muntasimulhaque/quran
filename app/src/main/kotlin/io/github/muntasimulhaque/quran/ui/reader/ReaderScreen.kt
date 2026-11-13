@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -36,6 +38,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
@@ -749,14 +752,12 @@ fun ReaderScreen(
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                     // The air above a surah's opening, and the whole of the
-                    // head's room: the page is drawn edge to edge and keeps no
-                    // inset for the system bar, so a page scrolled into the
-                    // middle of a surah puts its first line under the clock.
-                    // That is the page, not an oversight, and it stays: the
-                    // owner weighed an inset against the full-height page and
-                    // kept the page. The status bar icons sit over the page
-                    // itself; no paper scrim hides the text under them (owner
-                    // decision, this session).
+                    // head's room. The page is drawn edge to edge and keeps
+                    // no inset of its own for the system bar: the band above
+                    // the page covers the status bar's height in the page's
+                    // own color, so the opening keeps its 64 dp of air and a
+                    // scrolled line is cut at the page's edge rather than
+                    // standing under the clock (owner decision, this session).
                     contentPaddingTop = 64.dp,
                     contentPaddingBottom = readingFoot(
                         // Nothing is raised until the reader asks for a
@@ -770,6 +771,18 @@ fun ReaderScreen(
                 )
             }
         }
+
+        // The page's own band across the status bar. It is composed after the
+        // page it covers and under the summoned bar, which is raised above it
+        // by its own index, so a scrolled line is cut at the page's edge while
+        // the clock, the signal, and the battery stand on paper (owner report,
+        // this session: they stood on the Quran's own line). The band carries no
+        // pointer input, so a tap on it is still the page's tap.
+        StatusBand(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .testTag("status-band"),
+        )
 
         // The long press and its one-time note are gone with the gesture: the
         // ayah's own number is its door, visible on every ayah, and a
@@ -1034,6 +1047,36 @@ private val PageFoot = 32.dp
  */
 internal fun readingFoot(bottomStack: Dp, navigationBar: Dp): Dp =
     maxOf(bottomStack, PageFoot + navigationBar)
+
+/**
+ * The reading page's band across the system's status bar: the page's own
+ * ground, at the height the phone reports.
+ *
+ * It was weighed against the full-height page and kept off, so the status bar
+ * stood over the page itself; the icons then landed on the Quran's own line
+ * (owner report, this session). They now stand on the page's color, and the
+ * line under them is cut by the band the way a printed page ends rather than
+ * sitting half visible under a glyph. The measure is the inset and never a
+ * number: a phone with a cutout reports its own, a landscape phone whose bar
+ * stands on a side reports none, and a zero band is not drawn at all.
+ *
+ * The fill is `background`, the reading's own ground, so the band is invisible
+ * over the empty air a surah's opening keeps above its head (64 dp) and shows
+ * only what it hides. The system chooses its icons' ink from the theme's
+ * ground already (`isAppearanceLightStatusBars`), so the band owes the icons no
+ * second decision.
+ */
+@Composable
+private fun StatusBand(modifier: Modifier = Modifier) {
+    val statusBar = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    if (statusBar <= 0.dp) return
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(statusBar)
+            .background(MaterialTheme.colorScheme.background),
+    )
+}
 
 /**
  * The ayah whose own menu is open, and the door it hangs from.
