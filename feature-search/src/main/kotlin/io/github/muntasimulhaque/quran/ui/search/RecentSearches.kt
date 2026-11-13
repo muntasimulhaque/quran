@@ -149,9 +149,12 @@ internal fun RecentSearches(
  * The outer box is the target of both halves, at least 48 dp tall; the
  * capsule behind them is the label's line plus [Space.Line] above and below,
  * and it ends where the two halves end. The word's half wraps its own text and
- * keeps 8 dp of air after it, so the word's target owns the space after its
- * last letter and the X's target, the one that removes, begins 8 dp further
- * from the word (owner decision, this session). The chip's width is still the
+ * ends where the text ends: the two targets stand edge to edge, as the pill's
+ * transport does, and the air the reader sees is the X's own, since its 18 dp
+ * mark is centred in its 48 dp target and keeps 15 dp on each side. The half
+ * used to add 8 dp of its own after the last letter, which read as 23 dp
+ * before the X and 15 after it, where the field's clear mark stands 14 from
+ * the words (owner report, this session). The chip's width is still the
  * word's plus the X's 48 dp and never the row's (owner decision, this
  * session). The word's ripple is the pill's left half, and the X's ripple is
  * the circle at its end, so no press paints the invisible target. The X is
@@ -229,7 +232,7 @@ private fun RecentChip(
                         .clip(leftHalf)
                         .focusRing(queryPress, leftHalf)
                         .indication(queryPress, ripple(color = queryInk))
-                        .padding(start = Space.Row, end = Space.Line),
+                        .padding(start = Space.Row),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     Text(

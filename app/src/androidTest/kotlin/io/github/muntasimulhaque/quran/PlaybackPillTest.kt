@@ -125,10 +125,10 @@ import java.util.Locale
  *     offer centers its door line and its pair; the transfer keeps the words
  *     and the X at its ends. The place's line is whole at the app's text
  *     sizes, and the ayah's key is whole at every one.
- * 11. The offer prints the surah's own name whole in the line it shares with
- *     the reciter and the size, in either language: the size may give way at
- *     the end of the line, the name never does (owner decision, this
- *     session).
+ * 11. The offer prints the surah's own name whole on the place line, and the
+ *     voice's size whole beside the voice, in either language: the size is
+ *     the voice's value, so the voice is the only part that gives way (owner
+ *     report, this session).
  * 12. The transfer's X keeps the capsule's air at its end, and the block and
  *     the transport stand the app's row air apart, measured between the shapes
  *     the reader sees (owner decision).
@@ -141,11 +141,11 @@ import java.util.Locale
  * 15. The answer is the app's one round control: a 40 dp press circle inside
  *     its 48 dp target (owner decision, this session).
  * 16. The offer is one row, 64 dp tall: the whole two-line block is the door
- *     to the voice list, the reciter's name over the surah and its size, and
- *     Download is the only answer. The size stays on the line, and the block
- *     gives way only at the very longest place. An offer with no voice to
- *     offer keeps the block as a notice and draws no chevron (owner decision,
- *     this session).
+ *     to the voice list, the reciter's name and its size over the surah, and
+ *     Download is the only answer. The size stands with the voice it prices,
+ *     so a change of voice explains a change of price, and the place is whole
+ *     at both languages' longest. An offer with no voice to offer keeps the
+ *     block as a notice and draws no chevron (owner report, this session).
  * 17. Every door says its state: the pill's three doors speak Expanded and
  *     Collapsed the way the ayah's door and every disclosure row do, and
  *     their chevron turns up while the popup they opened is on the glass
@@ -185,11 +185,11 @@ class PlaybackPillTest {
         /** The offer state, when the leg is about the offer bar. */
         offer: ListenOffer? = null,
         /**
-         * The offer's own title, where a leg needs the real words in the
+         * The offer's own size, where a leg needs the real words in the
          * reader's language: the harness builds an English one by default,
          * and the test process's own strings are always English.
          */
-        offerTitle: String? = null,
+        offerPrice: String? = null,
         /** The reader's language, which is the voice and the digits. */
         language: UiLanguage = UiLanguage.English,
     ) {
@@ -199,9 +199,8 @@ class PlaybackPillTest {
                     PlaybackBar(
                         state = state,
                         offer = offer,
-                        offerTitle = offerTitle ?: offer?.let { pending ->
-                            "${pending.surahName} \u00b7 " +
-                                formatBytes(pending.bytes, Locale.US, "KB", "MB")
+                        offerPrice = offerPrice ?: offer?.let { pending ->
+                            formatBytes(pending.bytes, Locale.US, "KB", "MB")
                         }.orEmpty(),
                         reciterName = "Husary",
                         reciterId = "husary",
@@ -262,7 +261,7 @@ class PlaybackPillTest {
                     PlaybackBar(
                         state = state.value,
                         offer = null,
-                        offerTitle = "",
+                        offerPrice = "",
                         reciterName = "Husary",
                         reciterId = "husary",
                         reciterOptions = listOf(ListenOption("husary", "Husary", 0L)),
@@ -1100,10 +1099,14 @@ class PlaybackPillTest {
     )
 
     /**
-     * The offer prints the surah's own name whole in the line it shares with
-     * the reciter and the size, in the reader's own language: the name is what
-     * the reader reads, so it is the promise, and the size is what gives way
-     * when the line is at its longest (owner decision, this session).
+     * The offer prints the surah's own name whole on its place line, and the
+     * voice's own size whole beside the voice, in the reader's own language
+     * (owner report, this session). The size is a fact about the voice: the
+     * bytes are that reciter's timings plus that reciter's audio for the
+     * surah, the list the block opens prices every voice, and choosing a voice
+     * asks the offer again with that voice's size. The size used to share the
+     * place line with the surah, where the longest name made it the first
+     * thing an ellipsis took.
      *
      * The two names are the content's own longest in each language, and the
      * sizes are the packages' real bytes: `Al-Mumtahanah` at 9.0 MB, and
@@ -1123,11 +1126,11 @@ class PlaybackPillTest {
                 bytes = 9_395_684L,
                 options = offerOptions(),
             ),
-            offerTitle = "Al-Mumtahanah \u00b7 9.0 MB",
+            offerPrice = "9.0 MB",
         )
-        assertTheOfferPrintsTheNameWhole(
-            title = "Al-Mumtahanah \u00b7 9.0 MB",
-            name = "Al-Mumtahanah",
+        assertTheOfferPrintsThePlaceAndSizeWhole(
+            place = "Al-Mumtahanah",
+            size = "9.0 MB",
         )
     }
 
@@ -1145,11 +1148,44 @@ class PlaybackPillTest {
                 bytes = 6_077_998L,
                 options = offerOptions(),
             ),
-            offerTitle = "আল-মুতাফফিফীন \u00b7 ৫.৮ এমবি",
+            offerPrice = "৫.৮ এমবি",
         )
-        assertTheOfferPrintsTheNameWhole(
-            title = "আল-মুতাফফিফীন \u00b7 ৫.৮ এমবি",
-            name = "আল-মুতাফফিফীন",
+        assertTheOfferPrintsThePlaceAndSizeWhole(
+            place = "আল-মুতাফফিফীন",
+            size = "৫.৮ এমবি",
+        )
+    }
+
+    /**
+     * The size is never the part the line cuts (owner report, this session).
+     * The voice gives way, because the size stands after the name and before
+     * it there is only the name: at a name longer than any the two shipped
+     * reciters carry, the credit the app's own catalog prints,
+     * `Muhammad Siddiq Al-Minshawi`, the size is still whole and the name is
+     * the one an ellipsis takes.
+     */
+    @Test
+    fun theOfferNeverCutsTheSize() {
+        showPill(
+            pillWidth = Modifier.width(360.dp),
+            offer = ListenOffer(
+                reciter = "minshawi-full",
+                reciterName = "Muhammad Siddiq Al-Minshawi",
+                surah = 2,
+                surahName = "Al-Baqarah",
+                ayah = 1,
+                bytes = 177L * 1024 * 1024,
+                options = offerOptions(),
+            ),
+            offerPrice = "177 MB",
+        )
+        assertFalse(
+            "the size must be whole: ${layoutOf("177 MB")}",
+            layoutOf("177 MB").isLineEllipsized(0),
+        )
+        assertTrue(
+            "the voice must be the part that gives way",
+            layoutOf("Muhammad Siddiq Al-Minshawi").isLineEllipsized(0),
         )
     }
 
@@ -1502,30 +1538,31 @@ class PlaybackPillTest {
     }
 
     /**
-     * The offer must show the whole name in the line it shares with the size.
-     * The text's own layout is read back through the semantics action Compose
-     * gives every `Text`: `getLineEnd(0, visibleEnd = true)` is where the
-     * visible line stops, so an offset at least the name's own length means
-     * the ellipsis, if it came, fell on the size alone (owner decision, this
-     * session).
+     * The offer must print the place and the size whole, and the size must
+     * stand on the voice's line above the place (owner report, this session).
+     * The claim is read from the text's own layout through the semantics
+     * action Compose gives every `Text`: `isLineEllipsized` is true where the
+     * line gave something up, and the bounds are what the eye sees.
      */
-    private fun assertTheOfferPrintsTheNameWhole(title: String, name: String) {
-        val text = compose.onNodeWithText(title, useUnmergedTree = true).fetchSemanticsNode()
-        val layouts = mutableListOf<TextLayoutResult>()
-        assertTrue(
-            "the offer must report the title's own layout: $title",
-            text.config.contains(SemanticsActions.GetTextLayoutResult),
+    private fun assertTheOfferPrintsThePlaceAndSizeWhole(place: String, size: String) {
+        val placeLayout = layoutOf(place)
+        assertFalse(
+            "the offer must print the place whole: $placeLayout",
+            placeLayout.isLineEllipsized(0),
         )
-        val reported = text.config[SemanticsActions.GetTextLayoutResult].action?.invoke(layouts)
-        assertTrue(
-            "the title must hand its own layout to the test: $title",
-            reported == true && layouts.isNotEmpty(),
+        val sizeLayout = layoutOf(size)
+        assertFalse(
+            "the offer must print the size whole: $sizeLayout",
+            sizeLayout.isLineEllipsized(0),
         )
-        val visibleEnd = layouts.first().getLineEnd(0, visibleEnd = true)
+        val placeBounds = compose.onNodeWithText(place, useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val sizeBounds = compose.onNodeWithText(size, useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
         assertTrue(
-            "the offer must print the name whole: $name at offset ${name.length} " +
-                "of $title, which stops at $visibleEnd",
-            visibleEnd >= name.length,
+            "the size must stand with the voice, above the place: size $sizeBounds, " +
+                "place $placeBounds",
+            (sizeBounds.bottom - placeBounds.top).value <= 1f,
         )
     }
 }

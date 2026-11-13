@@ -45,21 +45,22 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * the capsule's 328. The one-row form already existed beside it: the pill's
  * own pending-download voice asks the same question in one 64 dp row. The
  * offer is that shape with the playing pill's own two-line block: the
- * reciter's name over the surah and its size, the turn closing the place
+ * reciter's name and its size over the surah, the turn closing the place
  * line, and Download as the one answer at the trailing end. The whole block
  * is the door, so the name is not the only part a finger can reach, and the
- * size stays whole instead of being the first thing an ellipsis takes. 8 dp,
- * the finger's 48 dp, and 8 dp are the height the playing pill already stands
- * at.
+ * size stands beside the voice it prices, where it is never the first thing
+ * an ellipsis takes. 8 dp, the finger's 48 dp, and 8 dp are the height the
+ * playing pill already stands at.
  *
  * **The block is the door, and the price is in view** (owner decision, this
  * session). The block opens the same reciter list the playing pill carries,
  * hung from the capsule's centre: the chosen voice's mark, and what each
  * voice would still need for this surah, so the choice is made with its price
  * in view. A chosen voice is the app's reciter, and the offer is asked again
- * with that voice's name and size, so the Download spends the size the reader
- * just saw. An offer with no published voice to offer keeps the block as a
- * notice, because a door with nothing behind it is a door that lies.
+ * with that voice's name and size, so the size beside the name changes with
+ * the name and the Download spends the size the reader just saw. An offer
+ * with no published voice to offer keeps the block as a notice, because a
+ * door with nothing behind it is a door that lies.
  *
  * **An offer has no X and no Not now** (owner decision, this session). A page
  * tap and Back put it away; the answer is Download or Retry, and the way out
@@ -79,7 +80,12 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 @Composable
 internal fun ListenOfferBar(
     offer: ListenOffer,
-    title: String,
+    /**
+     * The voice's price in the reader's words: the size the app formats for
+     * the reader's own language, drawn on the voice's line beside the name it
+     * prices. The block keeps the voice as the part that gives way.
+     */
+    price: String,
     onConfirm: () -> Unit,
     /** The one X the app keeps: abort a package on its way. */
     onCancelDownload: () -> Unit,
@@ -124,9 +130,9 @@ internal fun ListenOfferBar(
         if (progress == null) {
             // The ask is the pill's own one row: the words' block at the
             // leading end and the one answer at the trailing one. The block
-            // is the playing pill's lockup, so the surah is whole and only
-            // the size can give way at the very longest place (owner
-            // decision, this session).
+            // is the playing pill's lockup, and the size stands with the
+            // voice it prices, so the surah and the size are both whole
+            // (owner report, this session).
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -139,10 +145,11 @@ internal fun ListenOfferBar(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 PlayingWordsBlock(
-                    placeName = failure ?: title,
+                    placeName = failure ?: offer.surahName,
                     reciter = reciterShortName(offer.reciter, offer.reciterName),
                     reference = "",
                     speed = 1f,
+                    price = price,
                     onOpen = if (offer.options.isEmpty()) {
                         null
                     } else {

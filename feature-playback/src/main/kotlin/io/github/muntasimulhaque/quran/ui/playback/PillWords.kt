@@ -116,12 +116,18 @@ internal fun TransferWordsBlock(
  * 2 dp lets the two lines keep their own leading as the air between them, and
  * the block stands inside a 48 dp target that the finger gets whole.
  *
- * **The offer borrows the block** (owner decision, this session). The surah
- * and its size stand on the place line with no key, and the whole block is
- * the door to the offer's voice list, so the offer, the transfer, and the
- * recitation are one two-line lockup and the offer is the playing pill's own
- * height. The size is the fact the reader is spending; it stays on the line
- * instead of being the first thing an ellipsis takes.
+ * **The offer borrows the block, and its size is the voice's** (owner
+ * report, this session). The surah stands on the place line with no key, the
+ * size stands beside the reciter as the voice's own value, and the whole
+ * block is the door to the offer's voice list, so the offer, the transfer,
+ * and the recitation are one two-line lockup and the offer is the playing
+ * pill's own height. The size is the fact the reader is spending, and it is
+ * a fact about the voice: it changes with the reciter, the list this block
+ * opens prices every voice, and the offer is asked again with the size of the
+ * voice chosen there. On the place line it shared the line with the longest
+ * surah's name and was the first thing an ellipsis took; beside the voice the
+ * size is never cut, the voice is, and a change of price stands beside the
+ * name that explains it.
  *
  * **The door says its state** (owner decision, this session). The chevron is
  * [AppChevron]'s [ChevronRole.Expand], so it points down while the listening
@@ -137,12 +143,18 @@ internal fun PlayingWordsBlock(
     reciter: String,
     /**
      * The ayah's reference, already in the reader's digits. Empty on the
-     * offer, whose place line is the surah and its size and closes with the
-     * turn alone.
+     * offer, whose place line is the surah and closes with the turn alone.
      */
     reference: String,
     /** The reader's pace, drawn only when it is not the app's own 1x. */
     speed: Float,
+    /**
+     * The voice's own price, drawn beside its name: the size the app has
+     * already put in the reader's words for the package this voice would
+     * still need. The offer's line alone, because a recitation has nothing
+     * left to spend.
+     */
+    price: String? = null,
     /** The door the block is, or null where there is nothing to open. */
     onOpen: (() -> Unit)?,
     /** True while the listening panel is on the glass. */
@@ -198,8 +210,9 @@ internal fun PlayingWordsBlock(
         verticalArrangement = Arrangement.Center,
     ) {
         CompositionLocalProvider(LocalDensity provides capped) {
-            // The voice's line: who is reading, and how fast when the pace is
-            // not the app's own 1x. The voice is the part that gives way.
+            // The voice's line: who is reading, and its own values, the pace
+            // when it is not the app's own 1x and the offer's size. The voice
+            // is the part that gives way.
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = reciter,
@@ -224,12 +237,27 @@ internal fun PlayingWordsBlock(
                         modifier = Modifier.padding(start = Space.Line),
                     )
                 }
+                if (!price.isNullOrBlank()) {
+                    Text(
+                        text = price,
+                        // The offer's size is the voice's value, in the one
+                        // quiet slot beside the name that the pace wears and
+                        // that the offer's own voice list prices every voice
+                        // with. It is drawn after the name, so the voice
+                        // gives way and the size never does (owner report,
+                        // this session).
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.padding(start = Space.Line),
+                    )
+                }
             }
             // The place's line: the surah at the card's 14 Medium, its key,
             // and the turn. The place is never the thing an ellipsis takes.
-            // The offer borrows this line with no key and its size after the
-            // surah's name, so the block is the same two-line lockup in both
-            // of its homes.
+            // The offer borrows this line with no key, and its size stands
+            // with the voice, so the block is the same two-line lockup in
+            // both of its homes.
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!placeName.isNullOrBlank()) {
                     Text(

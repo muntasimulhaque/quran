@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 18.3 (versionCode 185)
+Version: 18.4 (versionCode 186)
 
 ## Listing
 
@@ -147,7 +147,7 @@ eight are a reader's path through the app rather than the app's own map. The
 reading frames carry the long read's palette: the seven tajweed families hold
 one weight, the paper ink is the reading's own 12:1 tone, and the night page's
 colors sit below the ink instead of glowing above it. The last frame is the
-one-row offer, 64 dp, the reciter's name over the surah and its size, the
+one-row offer, 64 dp, the reciter's name and its size over the surah, the
 whole block a door to the voice list, its capsule on the floating paper the
 pill already wears: the sheet's own white, 2 L* over the page and 7 L* over
 the washed block. The second frame's menu wears that same paper, and it is
@@ -177,8 +177,8 @@ What each set shows, in order:
    "Search in" door
 6. The Tajweed page: seven color families, each with its word and its rules
 7. The reading at night
-8. The recitation's own offer: the one-row capsule naming the reciter over the
-   surah and its size before a tap, the block a door to the voice list, with
+8. The recitation's own offer: the one-row capsule naming the reciter and its
+   size over the surah before a tap, the block a door to the voice list, with
    Download at its end
 
 The last frame is last on purpose. The offer stays on the reading until the

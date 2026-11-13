@@ -158,9 +158,7 @@ internal fun BottomStack(
             PlaybackBar(
                 state = playback,
                 offer = offer,
-                offerTitle = offer?.let { pending ->
-                    stringResource(R.string.playback_offer, pending.surahName, formatBytes(pending.bytes))
-                }.orEmpty(),
+                offerPrice = offer?.let { formatBytes(it.bytes) }.orEmpty(),
                 onOfferConfirm = { viewModel.confirmListen() },
                 reciterName = reciterName,
                 reciterId = reciterId,

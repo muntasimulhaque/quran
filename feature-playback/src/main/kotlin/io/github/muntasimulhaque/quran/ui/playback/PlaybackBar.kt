@@ -135,7 +135,11 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 fun PlaybackBar(
     state: PlaybackUiState,
     offer: ListenOffer?,
-    offerTitle: String,
+    /**
+     * The offer's size, already in the reader's words: the one fact the reader
+     * is spending, drawn beside the voice it prices.
+     */
+    offerPrice: String,
     reciterName: String,
     /** The reciter in use, by id, so the chooser can put its check on it. */
     reciterId: String? = null,
@@ -188,7 +192,7 @@ fun PlaybackBar(
     if (offer != null) {
         ListenOfferBar(
             offer = offer,
-            title = offerTitle,
+            price = offerPrice,
             onConfirm = onOfferConfirm,
             onCancelDownload = onOfferCancelDownload,
             onReciter = onReciter,

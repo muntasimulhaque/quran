@@ -140,7 +140,7 @@ class LargeTextTest {
                                 placeName = "Al-Baqarah",
                             ),
                             offer = null,
-                            offerTitle = "",
+                            offerPrice = "",
                             reciterName = "Husary",
                             reference = "2:255",
                             placeName = "Al-Baqarah",

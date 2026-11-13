@@ -144,6 +144,42 @@ class RecentSearchesTest {
     }
 
     /**
+     * The X stands beside the word it removes (owner report, this session).
+     *
+     * The chip's word half used to keep 8 dp of its own after the last
+     * letter, on top of the 15 the 18 dp mark leaves inside its 48 dp
+     * target, so the reader saw 23 dp before the X and 15 after it, where
+     * the field's clear mark stands 14 dp from the words. The word's half
+     * now ends where its text ends: the two targets stand edge to edge, as
+     * the pill's transport does, and the air the reader sees is the target's
+     * own on both sides of the mark.
+     */
+    @Test
+    fun theXStandsBesideItsWord() {
+        SearchHistory(context).record("mercy")
+        openSearch()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
+        }
+        val word = rule.onNodeWithText("mercy", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val remove = rule.onNodeWithContentDescription("Remove mercy")
+            .getUnclippedBoundsInRoot()
+        assertEquals(
+            "the word's half ends where its text ends, so the X begins there",
+            0f,
+            (remove.left - word.right).value,
+            1f,
+        )
+        assertEquals(
+            "the X's target is still the app's 48 dp",
+            48f,
+            (remove.right - remove.left).value,
+            1f,
+        )
+    }
+
+    /**
      * The caption belongs to its chips, not to the filter door above.
      *
      * The door's 48 dp target already spends its own air below the words, and
