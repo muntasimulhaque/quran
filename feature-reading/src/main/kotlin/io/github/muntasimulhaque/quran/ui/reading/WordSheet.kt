@@ -108,6 +108,13 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * sits on the Arabic's baseline, and the grammar phrase is a value at the
  * 13 sp meta voice, so the facts read as one list.
  *
+ * Both halves of that line declare the baseline, because a flow row aligns
+ * only the items that ask for it: with the Latin alone the letters kept the
+ * line's top and the reading floated above them, a line clear of the letters
+ * it reads, and the Root fact read as four lines rather than three (owner
+ * report, this session). The root's own air is unchanged either way: the fact
+ * is the Arabic's line box, and the Latin rides inside it.
+ *
  * The root's Latin rendering belongs to the page that is read in Latin script:
  * a Bangla reader reads the root letters or nothing, and a line of Latin on a
  * Bangla page is a third script the sheet never promised (owner decision, an
@@ -328,13 +335,22 @@ internal fun WordSheet(
                                 ink,
                                 trim = LineHeightStyle.Trim.Both,
                             ),
+                            // The letters declare the baseline too: a flow row
+                            // aligns only the items that ask, and with the
+                            // Latin alone the letters kept the line's top
+                            // (owner report, this session).
+                            modifier = Modifier
+                                .testTag("word-sheet-root-arabic")
+                                .alignByBaseline(),
                         )
                         if (root.latin.isNotBlank() && metrics.readingLanguage == "en") {
                             Text(
                                 text = root.latin,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = quiet,
-                                modifier = Modifier.alignByBaseline(),
+                                modifier = Modifier
+                                    .testTag("word-sheet-root-latin")
+                                    .alignByBaseline(),
                             )
                         }
                     }

@@ -29,7 +29,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The room between two facts on the word meaning sheet.
+ * The word sheet's facts, measured: the room between two of them, and the line
+ * the Root fact's reading rides.
  *
  * A fact is a block: its own head, its own value, its own count. So it opens
  * a [Space.Section] under whatever stands above it, never a [Space.Block],
@@ -44,6 +45,12 @@ import org.junit.runner.RunWith
  * is the room the fact opens with and the second is the room the reader sees
  * between one fact and the next. Both legs live here: the default step and the
  * largest, because the room is a dp and the type is not.
+ *
+ * The Root fact's reading is measured the same way and for the same reason:
+ * the transliteration shares the letters' baseline, so its box starts a few dp
+ * into theirs, where a Latin pinned to the line's top starts at zero. That was
+ * the sheet's one line that its KDoc promised and the code did not draw (owner
+ * report, this session).
  *
  * The sheet is its own window, so every node below is measured inside that
  * window: a difference between two of its bounds is the room on the glass,
@@ -69,39 +76,65 @@ class WordFactGapTest {
     fun theSectionsHoldAtTheLargestTypeStep() = atTheStep(TextSize.STEPS.last())
 
     /**
-     * Seeds [step], opens the first word of Al-Fatiha's own sheet, and holds
-     * the facts it drew to the rule.
+     * The transliteration rides the letters' line. Its box starts 9 dp into
+     * the Arabic's, where its own shallow baseline meets the letters' deep one,
+     * and never at the line's top, which is where it stood while only the
+     * Latin declared the alignment and the Root fact read as four lines.
      */
-    private fun atTheStep(step: Float) {
+    @Test
+    fun theRootsReadingRidesTheLettersLine() = atTheStep(TextSize.DEFAULT) {
+        val arabic = compose.onNodeWithTag("word-sheet-root-arabic", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val latin = compose.onNodeWithTag("word-sheet-root-latin", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val drop = latin.top.value - arabic.top.value
+        assertTrue(
+            "the transliteration must share the letters' line: its box starts $drop dp into " +
+                "the letters' box, where a Latin pinned to the line's top starts at 0",
+            drop > 4f,
+        )
+    }
+
+    /**
+     * Seeds [step], opens the first word of Al-Fatiha's own sheet, and holds
+     * the facts it drew to the rule, then whatever [check] adds.
+     */
+    private fun atTheStep(step: Float, check: () -> Unit = {}) {
         val original = runBlocking { SettingsStore(context).settings.first() }
         try {
             onTheSheet(step) { facts ->
-                assertTrue(
-                    "the sheet must draw two facts at least, found ${facts.size}",
-                    facts.size >= 2,
-                )
-                val boxes = facts.map { fact(it) }
-                val labels = facts.map { label(it) }
-                assertEquals(
-                    "the first fact must open a section under the entry, and " +
-                        "${facts.first()} opens ${labels.first().top.value - boxes.first().top.value} dp in",
-                    Space.Section.value,
-                    (labels.first().top - boxes.first().top).value,
-                    TOLERANCE,
-                )
-                for (index in 1 until facts.size) {
-                    val gap = labels[index].top.value - boxes[index - 1].bottom.value
-                    assertEquals(
-                        "two facts must stand a section apart, never a block's 16, and " +
-                            "${facts[index - 1]} stands $gap dp above ${facts[index]}",
-                        Space.Section.value,
-                        gap,
-                        TOLERANCE,
-                    )
-                }
+                assertTheRhythm(facts)
+                check()
             }
         } finally {
             restore(original)
+        }
+    }
+
+    /** Every fact opens a section, and the ones after the first stand one apart. */
+    private fun assertTheRhythm(facts: List<String>) {
+        assertTrue(
+            "the sheet must draw two facts at least, found ${facts.size}",
+            facts.size >= 2,
+        )
+        val boxes = facts.map { fact(it) }
+        val labels = facts.map { label(it) }
+        assertEquals(
+            "the first fact must open a section under the entry, and " +
+                "${facts.first()} opens ${labels.first().top.value - boxes.first().top.value} dp in",
+            Space.Section.value,
+            (labels.first().top - boxes.first().top).value,
+            TOLERANCE,
+        )
+        for (index in 1 until facts.size) {
+            val gap = labels[index].top.value - boxes[index - 1].bottom.value
+            assertEquals(
+                "two facts must stand a section apart, never a block's 16, and " +
+                    "${facts[index - 1]} stands $gap dp above ${facts[index]}",
+                Space.Section.value,
+                gap,
+                TOLERANCE,
+            )
         }
     }
 
