@@ -215,7 +215,7 @@ change, never left as a dead letter.
 ```bash
 ./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ./gradlew :data:connectedDebugAndroidTest   # content, storage, recitation manifest
-./gradlew :app:connectedDebugAndroidTest    # the app surfaces and the screenshot tour
+./gradlew :app:connectedDebugAndroidTest    # the release gate, on quran_phone
 ./gradlew :tools:run --args="help"          # the content pipeline, every step
 ```
 
@@ -227,12 +227,19 @@ release starts.
 ## Release
 
 The bundle, the store note, and the screenshots are one delivery, handed over
-together before the owner submits anything. A release requires the gates green
-plus one local instrumented run recorded in the hand-off, with the command and
-the counts. CI instrumented runs are signal, not a gate; they run only when
-dispatched in `instrumented.yml` and never hold a bundle. The note stands in
-the hand-over message itself as bare paragraphs under 500 characters, never
-only in a file.
+together before the owner submits anything. **The phone is the release gate**
+(owner decision, this session): `:app:connectedDebugAndroidTest` on
+`quran_phone`, with `:data:connectedDebugAndroidTest`, is the one instrumented
+run a release needs, and the tablets run only when the change is layout or
+width sensitive. The hand-over says which it was, so a skipped tablet is a
+decision and not an omission. While the work is in flight, build the
+instrumented APKs with `-Pquran.devPacks=screenshot` and run only the classes
+the change touches: the every-pack debug app is 197 MB of install, and the
+tour needs the light set. The full app suite runs once, on the every-pack
+build, immediately before the hand-off, and its counts are the ones recorded.
+CI instrumented runs are signal, not a gate; they run only when dispatched in
+`instrumented.yml` and never hold a bundle. The note stands in the hand-over
+message itself as bare paragraphs under 500 characters, never only in a file.
 The bundle comes from the newest green `build` run on `main`, not the first one
 after the version bump, and signing is proved by `jarsigner`'s words and its
 certificate SHA-256, never by exit code alone. Screenshots are collected
@@ -265,8 +272,17 @@ it.
 - The emulator runs here on three display-on AVDs (`quran_phone`,
   `quran_tablet7`, `quran_tablet10`) with the host GPU (`-gpu host`) and its
   window, so the instrumented suites have a home that is not CI and leave the
-  CPU to the suite. A software renderer is never used here; the CI runners keep
-  their own flags. `gh` is authenticated.
+  CPU to the suite. Every AVD boots from its quick-boot snapshot (the configs
+  carry `fastboot.forceColdBoot = no`), so launch with `-gpu host
+  -no-boot-anim` and never `-no-snapshot-save`: `adb emu kill` saves the
+  snapshot the next start loads, 6 s against a cold boot's 50. A snapshot the
+  boot refuses is refreshed by one start with `-no-snapshot-load` and a clean
+  exit. A software renderer is never used here; the CI runners keep their own
+  flags. `gh` is authenticated.
+- The 7 inch AVD's display is 800 x 1280 and the store set Play has is
+  1200 x 1920, the same page at 1.5 times the pixels, so its capture leg runs
+  with `adb shell wm size 1200x1920` and `wm density 320`, and both are reset
+  after the leg.
 - `python3` and `python` are the Store alias; the real interpreter is under
   `C:/Users/zn/AppData/Local/hermes/tools/`. Nothing in the build needs it.
 - Two tool calls in one block run in parallel. Never edit a file and read it in
