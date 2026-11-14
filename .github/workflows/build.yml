@@ -107,13 +107,17 @@ jobs:
             content/quran.db
           key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
 
+      # The database and the packs the tests read are fetched first: a cache
+      # miss (a new catalog entry) leaves content/quran.db absent, and a
+      # test that finds no root would fail on a missing file rather than on
+      # the thing it checks.
+      - name: Fetch content
+        run: ./gradlew :tools:run --args="fetch" --console=plain
+
       # The whole JVM suite, not only :core: a unit test that no run
       # executes is a rule nobody hears break.
       - name: Unit tests
         run: ./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest --console=plain
-
-      - name: Fetch content
-        run: ./gradlew :tools:run --args="fetch" --console=plain
 
       - name: Database check
         run: ./gradlew :tools:run --args="checkdb" --console=plain
