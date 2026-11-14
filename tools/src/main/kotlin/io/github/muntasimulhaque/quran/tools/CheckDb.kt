@@ -143,7 +143,14 @@ class CheckDb(private val root: File) {
                     )
                     failures++
                 }
-                for (entry in entries) {
+                // The word pronunciation pack is not a database: its 114 ZIPs
+                // live on their own release, and the manifest beside them is
+                // what the app reads. Its total and hash are proven by the
+                // tools test, so this gate counts the packs that are files.
+                val databaseEntries = entries.filter {
+                    it.jsonObject["type"]?.jsonPrimitive?.content != "word-audio"
+                }
+                for (entry in databaseEntries) {
                     val pack = entry.jsonObject
                     val id = pack["id"]?.jsonPrimitive?.content ?: continue
                     val file = File(root, "content/packs/$id.db")
@@ -158,7 +165,7 @@ class CheckDb(private val root: File) {
                         failures++
                     }
                 }
-                println("checkdb: catalog matches, ${entries.size} pack file(s) verified")
+                println("checkdb: catalog matches, ${databaseEntries.size} pack file(s) verified")
             }
         }
         failures += checkSaheehPack(surahByAyah)
