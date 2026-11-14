@@ -1597,6 +1597,10 @@ class ContentDatabase private constructor(
             PackType.Script -> mapOf(
                 "ayah" to setOf("number", "surah", "ayah", "verse_key", "text", "tajweed"),
             )
+            // The word pronunciation pack is a manifest of ZIPs and a folder
+            // of Opus files, not a SQLite database; its own store reads it and
+            // it never reaches the content database.
+            PackType.WordAudio -> emptyMap()
         }
     }
 }

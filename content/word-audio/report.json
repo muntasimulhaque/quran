@@ -1,0 +1,21 @@
+{
+    "version": 1,
+    "tag": "word-audio-alafasy",
+    "source": "QUL resource 118, Mishari Rashid al-Afasy, Ayah by Ayah",
+    "alignment": "quran-align 2016-11-24, Alafasy_128kbps.json",
+    "ayahs": 6236,
+    "words": 77429,
+    "plannedFiles": 77338,
+    "files": 77338,
+    "skipped": 91,
+    "failed": 0,
+    "merged": 23,
+    "joined": 4,
+    "missing": 11,
+    "extra": 2,
+    "zero": 21,
+    "short": 4,
+    "packs": 114,
+    "bytes": 368857550,
+    "failedWords": []
+}

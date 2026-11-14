@@ -1,8 +1,10 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.muntasimulhaque.quran.BuildConfig
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -47,6 +49,7 @@ internal fun ReaderSheets(
 ) {
     val context = LocalContext.current
     val wordsPack = ContentDatabase.wordsPackId(viewModel.readingLanguage)
+    val wordAudio by viewModel.wordAudioState.collectAsStateWithLifecycle()
     when (sheet) {
         ReaderSheet.None -> Unit
         ReaderSheet.Browse -> BrowseSheet(
@@ -141,6 +144,7 @@ internal fun ReaderSheets(
                     failure = setup.failure,
                 )
             },
+            wordAudio = wordAudio,
             recitations = viewModel.recitations,
             version = BuildConfig.VERSION_NAME,
             preview = { viewModel.sizePreviewRow() },

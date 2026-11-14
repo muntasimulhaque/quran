@@ -431,6 +431,51 @@
       "bytes": 3666748,
       "sha256": "b9c5d57caa14f1c49752a291de3328601b05715fed5d12c444be90c5c10d0e91",
       "assetUrl": null
+    },
+    {
+      "id": "quran-recitation-alafasy",
+      "name": "Mishari Rashid al-Afasy, Ayah by Ayah (word pronunciation source)",
+      "source": "Quranic Universal Library (QUL) by Tarteel",
+      "url": "https://qul.tarteel.ai/resources/recitation/118",
+      "format": "zip",
+      "license": "QUL: no copyright information for this resource; distributed via QUL",
+      "licenseBn": "QUL: এই সম্পদের কপিরাইট তথ্য নেই; QUL-এর মাধ্যমে বিতরণকৃত",
+      "credit": "Mishari Rashid al-Afasy, via the Quranic Universal Library",
+      "usedFor": "The audio source of the word pronunciation pack, one file per ayah; the app never ships the ayah files, only the word clips",
+      "path": "content/raw/qul/recitation-alafasy.zip",
+      "bytes": 1707052367,
+      "sha256": "38d247b3a2bf5f2ff1b54b601154612a8aa2799d50552e76398c25f8f8b37e3c",
+      "assetUrl": null
+    },
+    {
+      "id": "quran-align-alafasy",
+      "name": "quran-align word timings, Alafasy 128 kbps",
+      "source": "quran-align by cpfair",
+      "url": "https://github.com/cpfair/quran-align/releases/tag/release-2016-11-24",
+      "format": "json",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "licenseBn": "ক্রিয়েটিভ কমন্স অ্যাট্রিবিউশন ৪.০ আন্তর্জাতিক (CC BY 4.0)",
+      "credit": "Word timings by cpfair/quran-align",
+      "usedFor": "The word boundaries of the word pronunciation pack, one start and end for every drawn word that the aligner could place",
+      "path": "content/raw/quran-align/Alafasy_128kbps.json",
+      "bytes": 2317265,
+      "sha256": "55c1353848d8f3140abab72bb5d1d4533476a8219f6241079a425d232f001eb7",
+      "assetUrl": null
+    },
+    {
+      "id": "word-pronunciation-alafasy",
+      "name": "Word pronunciation, Mishari Rashid al-Afasy",
+      "source": "QUL resource 118, Ayah by Ayah, cut at quran-align word boundaries",
+      "url": "https://github.com/muntasimulhaque/quran/releases/tag/word-audio-alafasy",
+      "format": "opus",
+      "license": "Audio: QUL, no copyright information; word timings: CC BY 4.0",
+      "licenseBn": "অডিও: QUL, কপিরাইট তথ্য নেই; শব্দের সময়: CC BY 4.0",
+      "credit": "Mishari Rashid al-Afasy, via the Quranic Universal Library; word timings by quran-align",
+      "usedFor": "The word meaning sheet's pronunciation: one Opus file for each drawn word with a clean quran-align boundary, downloaded one surah at a time",
+      "path": "content/word-audio/manifest.json",
+      "bytes": 26243,
+      "sha256": "f9d8669624af9ec722d9671d1d342036fc01f045d1b99a3f02d38d9c1927857d",
+      "assetUrl": null
     }
   ]
 }

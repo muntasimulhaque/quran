@@ -234,18 +234,9 @@ class Build(private val root: File) {
      * recitation keep "إِلۡ يَاسِين" as one word. The old text merged that
      * name; the QPC export split it (owner report, the QPC rebuild audit).
      */
-    private data class QpcMerge(val surah: Int, val ayah: Int, val position: Int)
-
-    private val qpcMerges = listOf(
-        QpcMerge(2, 181, 3),
-        QpcMerge(8, 6, 4),
-        QpcMerge(13, 37, 8),
-        QpcMerge(37, 130, 3),
-    )
-
     private fun mergeQpcWords(words: List<Word>): List<Word> {
         val out = words.toMutableList()
-        for (merge in qpcMerges) {
+        for (merge in QpcWords.merges) {
             val index = out.indexOfFirst {
                 it.surah == merge.surah && it.ayah == merge.ayah && it.position == merge.position
             }
@@ -274,23 +265,6 @@ class Build(private val root: File) {
             }
         }
         return out
-    }
-
-    /**
-     * The source word number a recitation segment names, moved through the
-     * same merge the reading word went through. The second half of a joined
-     * pair names the joined word; every word after it moves down by one. The
-     * recitation export was timed against the word list, so its numbers are
-     * the source positions, not the reading's renumbered ones.
-     */
-    private fun recitationPosition(surah: Int, ayah: Int, source: Int): Int {
-        var position = source
-        for (merge in qpcMerges) {
-            if (merge.surah != surah || merge.ayah != ayah) continue
-            if (source == merge.position + 1) return merge.position
-            if (source > merge.position + 1) position -= 1
-        }
-        return position
     }
 
     private fun indexAyahs(words: List<Word>): LinkedHashMap<String, Int> {
@@ -1242,7 +1216,7 @@ class Build(private val root: File) {
                                     raw,
                                     regions,
                                     wordCounts[number] ?: 0,
-                                ) { source -> recitationPosition(surah, ayah, source) }
+                                ) { source -> QpcWords.position(surah, ayah, source) }
                                 if (correction.shifted) recitationSegmentsShifted += 1
                                 recitationSegmentsClamped += correction.clamped
                                 recitationSegmentsMapped += correction.mapped

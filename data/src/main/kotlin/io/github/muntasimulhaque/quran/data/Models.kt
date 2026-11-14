@@ -220,7 +220,10 @@ enum class PackType {
     Words,
 
     /** A word's root, one table for the whole Book. */
-    WordRoot;
+    WordRoot,
+
+    /** The word pronunciation pack: one audio file for each drawn word. */
+    WordAudio;
 
     companion object {
         fun of(raw: String): PackType = ofOrNull(raw) ?: Translation
@@ -233,6 +236,7 @@ enum class PackType {
             "recitation" -> Recitation
             "words" -> Words
             "word-root" -> WordRoot
+            "word-audio" -> WordAudio
             else -> null
         }
     }
@@ -310,12 +314,12 @@ data class ReadingRow(
      */
     val grammar: List<WordGrammar?> = emptyList(),
     /**
-     * Whether the surah's audio is on the device under the reader's reciter,
-     * so the word sheet may offer the word's own voice. Read with the rows,
-     * because a sheet that asked the disk on the tap would ask it on the
-     * frame (owner decision, this session).
+     * The word positions of this ayah whose pronunciation file is on the
+     * device. The sheet draws its speaker only for a word in this set, so a
+     * word the aligner could not place has no dead mark (owner decision,
+     * this session).
      */
-    val hears: Boolean = false,
+    val hearable: Set<Int> = emptySet(),
 )
 
 /**

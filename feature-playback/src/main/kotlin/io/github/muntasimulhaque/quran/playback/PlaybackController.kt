@@ -22,7 +22,6 @@ import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
 import io.github.muntasimulhaque.quran.core.RecitationQueue
 import io.github.muntasimulhaque.quran.core.SurahEnding
-import io.github.muntasimulhaque.quran.core.WordClip
 import io.github.muntasimulhaque.quran.core.surahEnding
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.DownloadError
@@ -34,6 +33,7 @@ import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SafePaths
+import io.github.muntasimulhaque.quran.data.WordAudioStore
 import io.github.muntasimulhaque.quran.data.WordSegment
 import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
@@ -83,6 +83,8 @@ class PlaybackController(
      * than by its top.
      */
     private val positionStore: PlaybackPositionStore = PlaybackPositionStore(context),
+    /** Where the word sheet's pronunciation file for a word lives. */
+    private val wordAudio: WordAudioStore = WordAudioStore(context),
 ) {
 
     private val store = RecitationStore(context)
@@ -140,12 +142,12 @@ class PlaybackController(
     private var stoppedAtAyahEnd = false
 
     /**
-     * The word's own player: one clipped word, and nothing else.
+     * The word's own player: one word file, and nothing else.
      *
      * A word is not a session, so it does not borrow the session's player. The
      * one player carries the reader's playlist, its pill, its notification, and
      * the place it was heard at, and a glance at a word must not take any of
-     * them away: a clip handed to that player would have to replace its items,
+     * them away: a word file handed to that player would have to replace its items,
      * and the reader's recitation would be gone with the word (owner report,
      * this session).
      */
@@ -261,7 +263,7 @@ class PlaybackController(
      */
     suspend fun play(recitation: String, ayahNumber: Int, resume: Boolean = true) {
         // A real Play is a session, and a word sample is not one: the word's
-        // clip goes first, and it does not give the old session back, because
+        // file goes first, and it does not give the old session back, because
         // the reader has just asked for this one (owner decision, this
         // session).
         finishSample(resume = false)
@@ -633,15 +635,15 @@ class PlaybackController(
     }
 
     /**
-     * The word's own voice: one word of the verse, in the reader's reciter,
-     * from the word's first sound to its last.
+     * The word's own voice: one word of the verse, from the word pronunciation
+     * pack, played from that word's own file to that file's end.
      *
      * The reader pressed and held a word and then asked to hear it, so the
-     * answer is that word and not the verse. It is one media item whose own
-     * end is the word's end, not a verse with a stop armed against it: nothing
-     * has to watch the position from another process, and no pause, focus
-     * change, or item transition can cancel the stop and leave the verse
-     * playing on (owner report, this session).
+     * answer is that word and not the verse. The file is already the word: the
+     * content build cut it from the Alafasy ayah audio at the quran-align
+     * boundary, so there is no region to interpret on the tap and no stop to
+     * watch in another process. A word the aligner could not place has no
+     * file, and the sheet draws no speaker for it.
      *
      * A word is a sample, not a session: it sounds on its own player, so the
      * reader's playlist, pill, notification, and saved place are not touched.
@@ -649,29 +651,19 @@ class PlaybackController(
      * last millisecond; one that was already paused was paused by the reader
      * and stays as they left it (owner decision, this session).
      *
-     * False when the audio or the word's own region is not on the device: the
-     * sheet only offers the mark for a surah it can hear, so this is the
-     * guard behind that mark rather than a state a reader meets.
+     * False when the word's file is not on the device: the sheet only offers
+     * the mark for a word whose file is here, so this is the guard behind that
+     * mark rather than a state a reader meets.
      */
-    suspend fun hearWord(recitation: String, ayahNumber: Int, position: Int): Boolean {
+    suspend fun hearWord(ayahNumber: Int, position: Int): Boolean {
         val database = content ?: return false
-        // The regions are half open and counted from the ayah's first drawn
-        // word: the word at position p is the region [p - 1, p). A region that
-        // spans two words (a joined pair) answers for both of them.
-        val index = position - 1
-        if (index < 0) return false
-        // The timings and the file are both disk work: the tap answers on the
-        // frame, so neither is read there (owner decision, this session).
-        val found = withContext(Dispatchers.IO) {
-            val audio = database.recitationAyah(recitation, ayahNumber) ?: return@withContext null
-            val segment = audio.segments.firstOrNull {
-                index >= it.wordFrom && index < it.wordTo
-            } ?: return@withContext null
-            val uri = store.uri(audio.audioPath) ?: return@withContext null
-            segment to uri
+        if (position < 1) return false
+        // The file and the ayah are disk work: the tap answers on the frame,
+        // so neither is read there (owner decision, this session).
+        val uri = withContext(Dispatchers.IO) {
+            val ayah = database.ayah(ayahNumber) ?: return@withContext null
+            wordAudio.uri(ayah.surah, ayah.ayah, position)
         } ?: return false
-        val (segment, uri) = found
-        val clip = WordClip.of(segment.startMs, segment.endMs)
         // A word heard while another sounds replaces it, and the session keeps
         // waiting: the pause for the first word is still the reader's one.
         val replacing = _state.value.sample != null
@@ -685,17 +677,7 @@ class PlaybackController(
                     if (resumeAfterSample) controller?.pause()
                 }
                 val player = samplePlayer()
-                player.setMediaItem(
-                    MediaItem.Builder()
-                        .setUri(uri)
-                        .setClippingConfiguration(
-                            MediaItem.ClippingConfiguration.Builder()
-                                .setStartPositionMs(clip.startMs)
-                                .setEndPositionMs(clip.endMs)
-                                .build(),
-                        )
-                        .build(),
-                )
+                player.setMediaItem(MediaItem.fromUri(uri))
                 player.prepare()
                 player.play()
             }
@@ -758,7 +740,7 @@ class PlaybackController(
      * The reader's own play and pause. A word's voice is not the session, so
      * this is only ever the recitation's transport: a tap here while a word
      * sounds is the reader reaching for their recitation, and the word ends
-     * with its own clip rather than answering for it (owner decision, this
+     * with its own file rather than answering for it (owner decision, this
      * session).
      */
     fun toggle() {
@@ -893,7 +875,7 @@ class PlaybackController(
     }
 
     /**
-     * The word's own voice is over, so its clip goes with it.
+     * The word's own voice is over, so its file goes with it.
      *
      * A word is heard, not kept: its item is cleared from the sample's own
      * player, and the state that washes the word on the sheet goes at the same
@@ -903,7 +885,7 @@ class PlaybackController(
      * is not touched here either (owner decision, this session).
      *
      * Like the sample player itself, this is called on the main thread: by the
-     * clip's own listener or by a door the reader pressed.
+     * word file's own listener or by a door the reader pressed.
      */
     private fun finishSample(resume: Boolean) {
         sample?.let { player ->

@@ -90,6 +90,7 @@ class ScreenshotVariantsTest {
                 settings.setTheme(AppTheme.Light)
                 for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
             }
+            File(context.filesDir, "word-audio/002").deleteRecursively()
         }
     }
 
@@ -196,6 +197,12 @@ class ScreenshotVariantsTest {
                 setTajweed(true)
             }
         }
+        // A one-byte stand-in for a word of this surah: the pronunciation
+        // pack is not in this build, and the reading's frame must not wait on
+        // a 25 MB download. The store only needs the name to know the surah
+        // is here; the sheet is not opened by this class.
+        File(context.filesDir, "word-audio/002").mkdirs()
+        File(context.filesDir, "word-audio/002/002_255_001.opus").writeBytes(ByteArray(1))
         Thread.sleep(500)
     }
 }

@@ -128,10 +128,10 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * (owner decision, this session).
  *
  * **While the word sounds, the word is washed** (owner decision, an earlier
- * session). One word is a sample, not a session: it is one clipped item on its
+ * session). One word is a sample, not a session: it is one word file on its
  * own player, so it raises no capsule and leaves no notification behind, and
  * the sheet gives the tap its answer where the finger is. A recitation that
- * was already playing waits at the word and is given back when the clip ends,
+ * was already playing waits at the word and is given back when the word ends,
  * so the pill behind the sheet stands paused and then goes on. The word wears
  * the reading's own recited-word mark, the same rounded wash the verse uses,
  * and it rests when the word does.

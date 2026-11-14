@@ -171,6 +171,22 @@
             "sha256": "97fd42f40087fa0cce27f8b7d08bc485e6aec11e48aad998d3afd4022b31c8d8",
             "tag": "pack-word-root-97fd42f4",
             "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-word-root-97fd42f4/word-root.db"
+        },
+        {
+            "id": "word-pronunciation-alafasy",
+            "type": "word-audio",
+            "name": "Word pronunciation",
+            "language": "ar",
+            "credit": "Mishari Rashid al-Afasy, via the Quranic Universal Library; word timings by quran-align",
+            "creditBn": "মিশারি রশিদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরির মাধ্যমে; শব্দের সময় quran-align",
+            "license": "QUL: no copyright information for this resource; distributed via QUL · Creative Commons Attribution 4.0 International (CC BY 4.0)",
+            "licenseBn": "QUL: এই সম্পদের কপিরাইট তথ্য নেই; QUL-এর মাধ্যমে বিতরণকৃত · ক্রিয়েটিভ কমন্স অ্যাট্রিবিউশন ৪.০ আন্তর্জাতিক (CC BY 4.0)",
+            "version": "1.0",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 368857550,
+            "sha256": "f9d8669624af9ec722d9671d1d342036fc01f045d1b99a3f02d38d9c1927857d",
+            "tag": "word-audio-alafasy"
         }
     ]
 }

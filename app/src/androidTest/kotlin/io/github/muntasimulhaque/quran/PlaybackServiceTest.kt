@@ -44,11 +44,11 @@ import org.junit.runner.RunWith
  * the `Player` interface a `MediaController` speaks carries. It travels as a
  * boolean.
  *
- * The word's own voice is not a command any more. A word is one clipped media
+ * The word's own voice is not a command any more. A word is one Opus file
  * item on its own player, so its end is the item's end, and the two legs below
- * pin what the reading needs from that: the clip ends by itself and leaves the
+ * pin what the reading needs from that: the word ends by itself and leaves the
  * session's playlist and the saved place untouched, and a recitation that was
- * playing waits at the word and is given back when the clip ends (owner
+ * playing waits at the word and is given back when the word ends (owner
  * decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
@@ -89,13 +89,13 @@ class PlaybackServiceTest {
     }
 
     /**
-     * A word's own voice on real audio from the app's own assets: the clip ends
+     * A word's own voice on real audio from the app's own assets: the word ends
      * by itself, and the session's player is never handed the word at all, so
      * the playlist, the capsule, and the saved place stand exactly as they
      * were (owner decision, this session).
      */
     @Test
-    fun theWordsOwnClipEndsAndLeavesTheSessionAlone() = runBlocking {
+    fun theWordsOwnFileEndsAndLeavesTheSessionAlone() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val reading = ActivityScenario.launch<MainActivity>(
             Intent(context, MainActivity::class.java),
@@ -115,7 +115,7 @@ class PlaybackServiceTest {
         try {
             assertTrue(
                 "the word must start",
-                withContext(Dispatchers.Main) { playback.hearWord("husary", 1, 1) },
+                withContext(Dispatchers.Main) { playback.hearWord(1, 1) },
             )
             assertTrue(
                 "the sheet must be told which word sounds",
@@ -186,7 +186,7 @@ class PlaybackServiceTest {
             )
             assertTrue(
                 "the word must start",
-                withContext(Dispatchers.Main) { playback.hearWord("husary", 1, 4) },
+                withContext(Dispatchers.Main) { playback.hearWord(1, 4) },
             )
             assertTrue(
                 "the recitation must wait for the word",

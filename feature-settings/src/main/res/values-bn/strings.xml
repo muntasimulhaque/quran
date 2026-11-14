@@ -30,11 +30,17 @@
     <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
     <string name="settings_row_translation">অনুবাদ</string>
     <string name="settings_show_translation_title">অনুবাদ দেখান</string>
-    <string name="settings_row_words">শব্দের অর্থ</string>
-    <string name="settings_title_words">শব্দের অর্থ</string>
-    <string name="settings_words_title">শব্দের অর্থ জানতে শব্দ চেপে ধরে রাখুন</string>
-    <string name="settings_words_lead">এটি চালু থাকলে পাঠে যেকোনো শব্দ চেপে ধরে রাখলে তার অর্থ দেখা যাবে।</string>
+    <string name="settings_row_words">শব্দের অর্থ ও উচ্চারণ</string>
+    <string name="settings_title_words">শব্দের অর্থ ও উচ্চারণ</string>
+    <string name="settings_words_title">শব্দের অর্থ ও উচ্চারণ জানতে শব্দ চেপে ধরে রাখুন</string>
+    <string name="settings_words_lead">এটি চালু থাকলে পাঠে যেকোনো শব্দ চেপে ধরে রাখলে তার অর্থ দেখা যাবে এবং উচ্চারণ শোনা যাবে।</string>
     <string name="settings_words_size_with_root">%1$s · মূল %2$s</string>
+    <string name="settings_words_pronunciation_size">উচ্চারণ %1$s এই সূরার জন্য · প্রায় %2$s পুরো কুরআনের জন্য</string>
+    <string name="settings_words_pronunciation_downloading">উচ্চারণ ডাউনলোড হচ্ছে · %1$s / %2$s</string>
+    <string name="settings_words_pronunciation_on_device">উচ্চারণ ফোনে আছে · %1$s এই সূরার জন্য · প্রায় %2$s পুরো কুরআনের জন্য</string>
+    <string name="settings_words_pronunciation_bundled">এই সূরার উচ্চারণ অ্যাপের সাথে আছে</string>
+    <string name="settings_words_pronunciation_waiting">উচ্চারণ %1$s এই সূরার জন্য · ওয়াই-ফাইয়ের অপেক্ষায় · প্রায় %2$s পুরো কুরআনের জন্য</string>
+    <string name="settings_words_pronunciation_failed">উচ্চারণ %1$s এই সূরার জন্য · ব্যর্থ, সুইচ বন্ধ করে আবার চালু করুন</string>
     <string name="settings_tajweed_title">তাজবীদ রঙ</string>
     <string name="settings_tajweed_lead">প্রতিটি রঙ এক দল নিয়ম; নামের পাশের শব্দটি পড়ারই একটি শব্দ। যে হরফগুলোতে রঙ আছে, নিয়মটি তাদেরই প্রযোজ্য; দলটির প্রতিটি নিয়মের নাম নিচে লেখা আছে।</string>
 
@@ -65,6 +71,7 @@
     <string name="about_pack_translation">%1$s অনুবাদ</string>
     <string name="about_pack_tafsir">%1$s তাফসীর</string>
     <string name="about_pack_words">%1$s শব্দের অর্থ</string>
+    <string name="about_pack_word_audio">শব্দের উচ্চারণ</string>
 
     <string name="credit_page_fonts">KFGQPC হাফস উসমানি লিপি</string>
     <string name="credit_page_fonts_by">বাদশাহ ফাহদ গ্লোরিয়াস কুরআন প্রিন্টিং কমপ্লেক্স, অপরিবর্তিত</string>

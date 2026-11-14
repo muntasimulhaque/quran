@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 18.5 (versionCode 187)
+Version: 18.6 (versionCode 188)
 
 ## Listing
 
@@ -184,6 +184,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (18.6, 498 characters)
+18.6 gives the word sheet its own voice. Its speaker now plays a recording made for that word, cut from Mishari Al-Afasy's recitation at quran-align's word boundaries, and stops at its end. The word meanings page is now Word meanings and pronunciation; its one switch fetches the meanings, roots, and pronunciation for the surah you read, later surahs on Wi-Fi, and Al-Fatiha ships. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.8, 487 characters)
 17.8 brings the word root to readers who already had word meanings on, and keeps a word's voice to that word. The root was in 17.7's content, but an existing word list never asked for it; it now arrives once on Wi-Fi after the first page, and turning word meanings off and on fetches it at once. The speaker on the word sheet stops at the word's end instead of playing on into the verse. Text, translations, tafsirs, word lists, and audio are unchanged. No ads, no trackers, no accounts.

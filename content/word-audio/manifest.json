@@ -1,0 +1,806 @@
+{
+    "version": 1,
+    "baseUrl": "https://github.com/muntasimulhaque/quran/releases/download",
+    "tag": "word-audio-alafasy",
+    "totalBytes": 368857550,
+    "packs": [
+        {
+            "surah": 1,
+            "asset": "words-001.zip",
+            "bytes": 160403,
+            "sha256": "799b601360d568b818f45b74f4fd21b9388205502c4a2178fadcc0563df2a85c",
+            "words": 29
+        },
+        {
+            "surah": 2,
+            "asset": "words-002.zip",
+            "bytes": 25895949,
+            "sha256": "5799850fb5c09dd53598cc48f48e5fc6f0031c6b18a6294d106064383b8b173d",
+            "words": 6111
+        },
+        {
+            "surah": 3,
+            "asset": "words-003.zip",
+            "bytes": 16638501,
+            "sha256": "513e55e35e30309662a5a8d626bd8de641fcc590951a38b32e9631f9b2a21f10",
+            "words": 3479
+        },
+        {
+            "surah": 4,
+            "asset": "words-004.zip",
+            "bytes": 16459563,
+            "sha256": "6f3a24e6d8785d0f6e756c0aace2f7255b178bd583a8c3720d062e3828ef6867",
+            "words": 3742
+        },
+        {
+            "surah": 5,
+            "asset": "words-005.zip",
+            "bytes": 12984874,
+            "sha256": "e11f458a5f22caf8144199d7dbff6cc02ce0352c0ffebd793fae52b588a86946",
+            "words": 2799
+        },
+        {
+            "surah": 6,
+            "asset": "words-006.zip",
+            "bytes": 14766107,
+            "sha256": "2847cd54d7a9a4e3eecd7bde83b408e2c540539850d52e0aace8e17c95561764",
+            "words": 3044
+        },
+        {
+            "surah": 7,
+            "asset": "words-007.zip",
+            "bytes": 16666757,
+            "sha256": "f42a8d8d822f25a388437f648bf89fc9df7e64c3b14540da9d6fd0fc21c654d3",
+            "words": 3313
+        },
+        {
+            "surah": 8,
+            "asset": "words-008.zip",
+            "bytes": 6431163,
+            "sha256": "7bcc9a1d7732de7a9915e764804e3c604c92b4d3fc937a7f67e805d39d8ddfcb",
+            "words": 1232
+        },
+        {
+            "surah": 9,
+            "asset": "words-009.zip",
+            "bytes": 12944779,
+            "sha256": "742341d777c3bd9b0d6c6aea2944ae002553d75ff5d12961b234a1bc671a6f80",
+            "words": 2495
+        },
+        {
+            "surah": 10,
+            "asset": "words-010.zip",
+            "bytes": 9507651,
+            "sha256": "eb1c19b6c06483c9dc3e06cbcb4fed085c33b149b5bc042092424c413663730c",
+            "words": 1831
+        },
+        {
+            "surah": 11,
+            "asset": "words-011.zip",
+            "bytes": 9852233,
+            "sha256": "dbda686f287e2d092b152ed460c8f24d480c0653b8c80c10fa3a752b33320693",
+            "words": 1904
+        },
+        {
+            "surah": 12,
+            "asset": "words-012.zip",
+            "bytes": 8928156,
+            "sha256": "a34e275b848938badefe3fa7d7fbd3300dd8960c2655a24e9b0bddb3fc9ac603",
+            "words": 1773
+        },
+        {
+            "surah": 13,
+            "asset": "words-013.zip",
+            "bytes": 4129317,
+            "sha256": "41f953231fbd17eb2a620d62a71f7a01b3d1c2dae9afeb38b9016c4e6e54494e",
+            "words": 845
+        },
+        {
+            "surah": 14,
+            "asset": "words-014.zip",
+            "bytes": 4095758,
+            "sha256": "0fa25b5ac8dcb0f7eb74691be8ec00f768b1232c4cdf3870b1a876f5840c58a9",
+            "words": 827
+        },
+        {
+            "surah": 15,
+            "asset": "words-015.zip",
+            "bytes": 3290821,
+            "sha256": "db088b0e0a2e9e668f8d4f90ecfe7537543fedb9fd6667e6adb89a8dfbc4473e",
+            "words": 655
+        },
+        {
+            "surah": 16,
+            "asset": "words-016.zip",
+            "bytes": 8819777,
+            "sha256": "37ce34f3258b423e6ec99bf8c19349856192015d6a85ec5ef65c717d53d78f85",
+            "words": 1844
+        },
+        {
+            "surah": 17,
+            "asset": "words-017.zip",
+            "bytes": 6779062,
+            "sha256": "deba218223e237d48945a151486fdbfa5601ab6f8153a73f43958c3d759c3fb7",
+            "words": 1555
+        },
+        {
+            "surah": 18,
+            "asset": "words-018.zip",
+            "bytes": 6878336,
+            "sha256": "fc405dee36813c3443e2817ef0dba16a290367dad3247f12e475f1732098078e",
+            "words": 1578
+        },
+        {
+            "surah": 19,
+            "asset": "words-019.zip",
+            "bytes": 4301370,
+            "sha256": "3a1330a0837c93bc9bdb0178e97f0043e46a5b392d7c192751de6aea4efec097",
+            "words": 961
+        },
+        {
+            "surah": 20,
+            "asset": "words-020.zip",
+            "bytes": 5569258,
+            "sha256": "f7c8676bac6aca081d33d4ba7718062aac50187ab26c85415cb65fa5355e3625",
+            "words": 1333
+        },
+        {
+            "surah": 21,
+            "asset": "words-021.zip",
+            "bytes": 5375282,
+            "sha256": "52abd3a1f59101798cb59e96180ba529739f68515e3640a190bf452d666eff0a",
+            "words": 1168
+        },
+        {
+            "surah": 22,
+            "asset": "words-022.zip",
+            "bytes": 6191418,
+            "sha256": "c5580be192df27fed4fb2acc7842a0c8a97ebbd7f709528d2690ae17b5fcd42b",
+            "words": 1274
+        },
+        {
+            "surah": 23,
+            "asset": "words-023.zip",
+            "bytes": 5064637,
+            "sha256": "763c563dba8b9bbeb803387dab9c2f88bda77148eed0ffd4766d12309f861fef",
+            "words": 1050
+        },
+        {
+            "surah": 24,
+            "asset": "words-024.zip",
+            "bytes": 6744148,
+            "sha256": "d524784677a50d0f8b617096835f39df4eb571749822d17a0e381c91310ae30d",
+            "words": 1316
+        },
+        {
+            "surah": 25,
+            "asset": "words-025.zip",
+            "bytes": 4043521,
+            "sha256": "a0501ecddf4a0dfd25515894fcf8e1f23702f07985a5ab3fc6cfc84b12ef4210",
+            "words": 893
+        },
+        {
+            "surah": 26,
+            "asset": "words-026.zip",
+            "bytes": 6727077,
+            "sha256": "f32d1b7fb856893ea59928e609d326870a547d1c27c7191c67cc0f434b4ab82a",
+            "words": 1317
+        },
+        {
+            "surah": 27,
+            "asset": "words-027.zip",
+            "bytes": 5875971,
+            "sha256": "429106d26fc517cc3834cc2e72e4ab56eb2a26f81307d510f5c22816d970b57b",
+            "words": 1150
+        },
+        {
+            "surah": 28,
+            "asset": "words-028.zip",
+            "bytes": 7138945,
+            "sha256": "75f553fd16ccea7c65ea585bb1ddf6a1f8dd3d852bed827c363edaee92f0315e",
+            "words": 1430
+        },
+        {
+            "surah": 29,
+            "asset": "words-029.zip",
+            "bytes": 4762358,
+            "sha256": "8581d831478564b15baa65dff6ddb609fb54aa5697d41bcad5a4286ba98e4b11",
+            "words": 976
+        },
+        {
+            "surah": 30,
+            "asset": "words-030.zip",
+            "bytes": 4053647,
+            "sha256": "08031c274266b481e750b7f677a9db4ed07b0c1d2c9d6057b902a8d9ff5ee375",
+            "words": 817
+        },
+        {
+            "surah": 31,
+            "asset": "words-031.zip",
+            "bytes": 2261748,
+            "sha256": "8e76fc5814d2d9546d5967961bed1b58caeac27ecb676a76ad65fc1c8afc5a7b",
+            "words": 546
+        },
+        {
+            "surah": 32,
+            "asset": "words-032.zip",
+            "bytes": 1650497,
+            "sha256": "a05e3ef75716670057a05da7e0a74545639d702b7751e69d337f41815b8366e0",
+            "words": 372
+        },
+        {
+            "surah": 33,
+            "asset": "words-033.zip",
+            "bytes": 5484637,
+            "sha256": "93a2dee699e7acb058139ba75edd539e479e9a4e18ef5a250a8f4bb85d31fb18",
+            "words": 1285
+        },
+        {
+            "surah": 34,
+            "asset": "words-034.zip",
+            "bytes": 3654888,
+            "sha256": "c13396ff75e52bbd774fd3a3fbe068a98b04216baa3cdd76468442b18081500a",
+            "words": 880
+        },
+        {
+            "surah": 35,
+            "asset": "words-035.zip",
+            "bytes": 3405706,
+            "sha256": "a2870ae2c980f51a18cd346769504f1c7baecc683bf114da2c2998887f6935c0",
+            "words": 775
+        },
+        {
+            "surah": 36,
+            "asset": "words-036.zip",
+            "bytes": 3683636,
+            "sha256": "818939901eac8ce71ad81737834812ea04fd378f57ead2c5af98f647dad384fe",
+            "words": 725
+        },
+        {
+            "surah": 37,
+            "asset": "words-037.zip",
+            "bytes": 4983768,
+            "sha256": "7267e66bcd6e5fc44e8ce32ae3f4b499f3e6f12cbf8cddc8b8210b050222c805",
+            "words": 860
+        },
+        {
+            "surah": 38,
+            "asset": "words-038.zip",
+            "bytes": 3480451,
+            "sha256": "fdf556600aff9532d09317a0b89fec008eb7e207d9e761e80a0e7305fbb2077b",
+            "words": 733
+        },
+        {
+            "surah": 39,
+            "asset": "words-039.zip",
+            "bytes": 5653731,
+            "sha256": "ee0f4494ae834ebbeaa42aac15e867ebf4876651f068102b5dd2db663d67f7e8",
+            "words": 1172
+        },
+        {
+            "surah": 40,
+            "asset": "words-040.zip",
+            "bytes": 5377633,
+            "sha256": "5858ae6847c36bfda85c04e433f088b5db642bf1be14981aec83015dbb057225",
+            "words": 1216
+        },
+        {
+            "surah": 41,
+            "asset": "words-041.zip",
+            "bytes": 4023320,
+            "sha256": "4753286c56911d90dfb376e1142cdd1091629374646c9c28f8a2a85b12d30619",
+            "words": 794
+        },
+        {
+            "surah": 42,
+            "asset": "words-042.zip",
+            "bytes": 3997050,
+            "sha256": "82f67fafff6c8b301d06e602c2c5482a30dd494bbbfafcbda2149d3c26c92f45",
+            "words": 860
+        },
+        {
+            "surah": 43,
+            "asset": "words-043.zip",
+            "bytes": 4192002,
+            "sha256": "6f0f134743199929600cd2f4d14e9cf1914850d73a95072cf99a6e3b22a0d2e4",
+            "words": 830
+        },
+        {
+            "surah": 44,
+            "asset": "words-044.zip",
+            "bytes": 1984589,
+            "sha256": "0804e4f2e73538900bcde64bf169b7ac261c92c2d7e0d1e1d7f3c297df65bf64",
+            "words": 346
+        },
+        {
+            "surah": 45,
+            "asset": "words-045.zip",
+            "bytes": 2235201,
+            "sha256": "3fecd12f1c2eb1f9c8d946215e502d65505127d2bfc6f8c5162e0b106e9876c7",
+            "words": 488
+        },
+        {
+            "surah": 46,
+            "asset": "words-046.zip",
+            "bytes": 3374040,
+            "sha256": "75692ced9bae8444524b0965d2fbf95ef5f71401c9ace51e58864e8ce8b79e30",
+            "words": 643
+        },
+        {
+            "surah": 47,
+            "asset": "words-047.zip",
+            "bytes": 2583439,
+            "sha256": "85a23b4505d0e186ce9f0ccf900fa6da2e9c83a67543d647deb1a56ac13939d4",
+            "words": 539
+        },
+        {
+            "surah": 48,
+            "asset": "words-048.zip",
+            "bytes": 2485219,
+            "sha256": "962cb8bc2337215aab28cf3d1a48d78cc335d2d5058556f642c01ff86c55ec29",
+            "words": 559
+        },
+        {
+            "surah": 49,
+            "asset": "words-049.zip",
+            "bytes": 1755546,
+            "sha256": "ff927102262fa3ecb351a7bb73925da9d073c5694b56845d493afa6b0457f17c",
+            "words": 347
+        },
+        {
+            "surah": 50,
+            "asset": "words-050.zip",
+            "bytes": 1963564,
+            "sha256": "799263e703918abaa8a87671b2a6e81c9c4276e5ef2676c2dac11ccbc7f81e03",
+            "words": 370
+        },
+        {
+            "surah": 51,
+            "asset": "words-051.zip",
+            "bytes": 1868556,
+            "sha256": "c8a7d01415a244414164ed5b650475a74e3e72d29650f68d83e1c6433ba995a6",
+            "words": 360
+        },
+        {
+            "surah": 52,
+            "asset": "words-052.zip",
+            "bytes": 1659971,
+            "sha256": "9ad531551bd3830bac207d7277c9135446759f050a571ab068ae943bbb9947aa",
+            "words": 312
+        },
+        {
+            "surah": 53,
+            "asset": "words-053.zip",
+            "bytes": 1596570,
+            "sha256": "f90096c3c53790842c832a83b0d39b285686f74db20ac71185f84f81e2f3322a",
+            "words": 359
+        },
+        {
+            "surah": 54,
+            "asset": "words-054.zip",
+            "bytes": 1610704,
+            "sha256": "470707e3731b57af043c5600fe60a6249f2c5c5bcf89ab399f48c35c6a3844a0",
+            "words": 342
+        },
+        {
+            "surah": 55,
+            "asset": "words-055.zip",
+            "bytes": 2341029,
+            "sha256": "f0a3357a83b7ce12558ea27dc764efe22bf26829496fb1edde8141b23a8f0c6e",
+            "words": 351
+        },
+        {
+            "surah": 56,
+            "asset": "words-056.zip",
+            "bytes": 2486435,
+            "sha256": "1bf56f5b754765d5a3d82cab675090db1fa4124740ad4d24cc002e2dbf8ff653",
+            "words": 379
+        },
+        {
+            "surah": 57,
+            "asset": "words-057.zip",
+            "bytes": 2901280,
+            "sha256": "d465914a36d10ac6c71a04e4dc3d09318117110dd681268865ce1ca5328b84aa",
+            "words": 574
+        },
+        {
+            "surah": 58,
+            "asset": "words-058.zip",
+            "bytes": 2136130,
+            "sha256": "dd6ad52bb65c4922442651d9d3acca913fb60e6d5bf7edf9a229e58680e02ab5",
+            "words": 472
+        },
+        {
+            "surah": 59,
+            "asset": "words-059.zip",
+            "bytes": 2198387,
+            "sha256": "58e1e202fe4adc3503a3c98d08a2c32b5a73de89ab6b7e27792c528095a4888d",
+            "words": 445
+        },
+        {
+            "surah": 60,
+            "asset": "words-060.zip",
+            "bytes": 1590968,
+            "sha256": "710d023ec54ca92c83a3e3b78d0d4c0b7e2a4c6d2c8e5e92a7ce0d565eedafd0",
+            "words": 348
+        },
+        {
+            "surah": 61,
+            "asset": "words-061.zip",
+            "bytes": 988117,
+            "sha256": "57a7cd576179105e2dd86c0c77600a2abdf96bcd3efa7e65da1c2773daea0f56",
+            "words": 217
+        },
+        {
+            "surah": 62,
+            "asset": "words-062.zip",
+            "bytes": 733002,
+            "sha256": "81669958a05c6b4136b6bab310cb421771ce669ba70f2e5b5bab6b49a648a5b6",
+            "words": 175
+        },
+        {
+            "surah": 63,
+            "asset": "words-063.zip",
+            "bytes": 887799,
+            "sha256": "a121dccd5e3788401bfebe595a1f95653bac27294addde484fcace7f0f0f5f27",
+            "words": 180
+        },
+        {
+            "surah": 64,
+            "asset": "words-064.zip",
+            "bytes": 1120009,
+            "sha256": "aa9a1a0e8f0f04f487247c2e63b8db66c080a7fd2bcfb01fe25a9e6588c4d36f",
+            "words": 241
+        },
+        {
+            "surah": 65,
+            "asset": "words-065.zip",
+            "bytes": 1236904,
+            "sha256": "d552e3dc8430113e385430441d8af8abf7effe31d71c8650c9b051bad7c06025",
+            "words": 285
+        },
+        {
+            "surah": 66,
+            "asset": "words-066.zip",
+            "bytes": 1250714,
+            "sha256": "3a7911edcbcde7ceec32ed583bebfe60658ed1218aa0b6801599587764d12f13",
+            "words": 249
+        },
+        {
+            "surah": 67,
+            "asset": "words-067.zip",
+            "bytes": 1515081,
+            "sha256": "11016d546fc72cb538cf2dc76d5196442241c3e9cfe06e8270dd5de571225058",
+            "words": 333
+        },
+        {
+            "surah": 68,
+            "asset": "words-068.zip",
+            "bytes": 1542568,
+            "sha256": "38caa4b7b314626b36b6e896c4691bbdb8a782a885aeee8ac7c7e23f2bca2fbf",
+            "words": 300
+        },
+        {
+            "surah": 69,
+            "asset": "words-069.zip",
+            "bytes": 1333343,
+            "sha256": "1a3edfeed83f9ab799c0599c81a2e9e470130480d9e9445d8ccfdd6fd230069f",
+            "words": 258
+        },
+        {
+            "surah": 70,
+            "asset": "words-070.zip",
+            "bytes": 1056032,
+            "sha256": "231f1066013561ac98a1faab2408ce7ba25c11a1591ea55c88351fc220cd6efa",
+            "words": 217
+        },
+        {
+            "surah": 71,
+            "asset": "words-071.zip",
+            "bytes": 942051,
+            "sha256": "57a11d5873f812b38d3220fe7b5ad112b376c8885ca8500f4b9b5287fe0553c8",
+            "words": 226
+        },
+        {
+            "surah": 72,
+            "asset": "words-072.zip",
+            "bytes": 1130027,
+            "sha256": "657804705d0630d5106c77400ede71f5ed1c529e9e740c077b79f0223fcc8efa",
+            "words": 285
+        },
+        {
+            "surah": 73,
+            "asset": "words-073.zip",
+            "bytes": 826399,
+            "sha256": "966550ae8323ff716159fc481ad61d90290b73cb1f333ee32c08d60acc0e93cb",
+            "words": 199
+        },
+        {
+            "surah": 74,
+            "asset": "words-074.zip",
+            "bytes": 1063795,
+            "sha256": "aa06796378418edd6ce710e568df2da35748d67c17697cea133adc171a3a60fb",
+            "words": 255
+        },
+        {
+            "surah": 75,
+            "asset": "words-075.zip",
+            "bytes": 652307,
+            "sha256": "608f0fc4bb4da27edcc941d14a0934522e916d1e52e24e76148069586e3245b5",
+            "words": 164
+        },
+        {
+            "surah": 76,
+            "asset": "words-076.zip",
+            "bytes": 1052184,
+            "sha256": "0d4d91b0fcceca1b2033d18e3aa37eb463ee474dc43b55e29bc976d9fbed7ac6",
+            "words": 243
+        },
+        {
+            "surah": 77,
+            "asset": "words-077.zip",
+            "bytes": 927237,
+            "sha256": "5ed1e27d1ee1bd13c45666f80efac52bcdd7e3253671e8df729ff9dc5b7a4d3a",
+            "words": 180
+        },
+        {
+            "surah": 78,
+            "asset": "words-078.zip",
+            "bytes": 889368,
+            "sha256": "9b3ec280fa88216f45357c982cba92aea80533c6a60475d456bd14e0a7526987",
+            "words": 173
+        },
+        {
+            "surah": 79,
+            "asset": "words-079.zip",
+            "bytes": 775704,
+            "sha256": "119e7d58e3aa4efed67dc6235c47074afcf1acd6b691f5e0bbfc5e0f293b7cc6",
+            "words": 179
+        },
+        {
+            "surah": 80,
+            "asset": "words-080.zip",
+            "bytes": 661834,
+            "sha256": "c70b2e5dcdba820e2fe34f46cd7e30e61150fca063bbef8236cbcc2168947d3a",
+            "words": 133
+        },
+        {
+            "surah": 81,
+            "asset": "words-081.zip",
+            "bytes": 445567,
+            "sha256": "6a59fbf1e1f7602579e5e9c37a17c7294a7806b7952dbc4b7457e095eba0f9a3",
+            "words": 104
+        },
+        {
+            "surah": 82,
+            "asset": "words-082.zip",
+            "bytes": 381154,
+            "sha256": "7ec1cf3f86834e41e241303e6777afd58ad99c3c09ff0b929815d183956c9117",
+            "words": 80
+        },
+        {
+            "surah": 83,
+            "asset": "words-083.zip",
+            "bytes": 993279,
+            "sha256": "42a6a18cbcd1f0e071d98c93c5e26b49a9a9b479146d44529973ad5a757ffa96",
+            "words": 169
+        },
+        {
+            "surah": 84,
+            "asset": "words-084.zip",
+            "bytes": 473031,
+            "sha256": "e62f493d7bb58318f7da59e48b92b652884baefe2a63d9684769d4c3ac4a8516",
+            "words": 107
+        },
+        {
+            "surah": 85,
+            "asset": "words-085.zip",
+            "bytes": 641189,
+            "sha256": "86be18e9f04ec1a6beee66d797789a4d95e86d7ba25215225f98557154f40901",
+            "words": 109
+        },
+        {
+            "surah": 86,
+            "asset": "words-086.zip",
+            "bytes": 281020,
+            "sha256": "9f0df82ac488e4e70b6c0b8fe20d832c3f6b92365975ba9a1a392c1473ea90bd",
+            "words": 61
+        },
+        {
+            "surah": 87,
+            "asset": "words-087.zip",
+            "bytes": 315015,
+            "sha256": "007d1d042f9ed3fb4bf69192b9bff65ec06cbe5289a69270aa53601edd20375e",
+            "words": 72
+        },
+        {
+            "surah": 88,
+            "asset": "words-088.zip",
+            "bytes": 376683,
+            "sha256": "a2aa2e49da6d3f68d369f1db5e479a6a616a31026577cd8dcf14a129e561be7c",
+            "words": 92
+        },
+        {
+            "surah": 89,
+            "asset": "words-089.zip",
+            "bytes": 611052,
+            "sha256": "c8555597c857610cc83c4c41857ef1f0c3bdc08375b71af16849e963f5692139",
+            "words": 137
+        },
+        {
+            "surah": 90,
+            "asset": "words-090.zip",
+            "bytes": 341828,
+            "sha256": "6e0f8d383b3d000eb28183d2d219952edfacea26b218b9d92844cf24e9baafff",
+            "words": 82
+        },
+        {
+            "surah": 91,
+            "asset": "words-091.zip",
+            "bytes": 227541,
+            "sha256": "2dc11782b8a76bbecc2d5f917edb533f14c097386033fa2b8fee2735d8a9fc01",
+            "words": 54
+        },
+        {
+            "surah": 92,
+            "asset": "words-092.zip",
+            "bytes": 330162,
+            "sha256": "cf5a5e6f4ff739518998f1c8dc4e1f4986af3b4de6fdbd3a90e1eab50124035a",
+            "words": 71
+        },
+        {
+            "surah": 93,
+            "asset": "words-093.zip",
+            "bytes": 181226,
+            "sha256": "2c3641cebc392c1285bdd02a0977320c1ecea4d2ffc3d97dffd34145c65f7f04",
+            "words": 40
+        },
+        {
+            "surah": 94,
+            "asset": "words-094.zip",
+            "bytes": 100451,
+            "sha256": "916ced8394bbb3f2c288ec3d1d1e3c06ac347d3a0b83b338baddc1666ef168e8",
+            "words": 27
+        },
+        {
+            "surah": 95,
+            "asset": "words-095.zip",
+            "bytes": 181909,
+            "sha256": "8d5fc94e75c978ccf79b0870734f1ae5ea836a8b328ceddaac9d91410b94d5f1",
+            "words": 34
+        },
+        {
+            "surah": 96,
+            "asset": "words-096.zip",
+            "bytes": 263480,
+            "sha256": "9edc70c02fe2477df0092e8a65a25cb5371500276e9331812a120b7041940325",
+            "words": 72
+        },
+        {
+            "surah": 97,
+            "asset": "words-097.zip",
+            "bytes": 117247,
+            "sha256": "8a867632e08fffd3f636c00a287a078849941c15f8764d269b036c37df458380",
+            "words": 30
+        },
+        {
+            "surah": 98,
+            "asset": "words-098.zip",
+            "bytes": 382861,
+            "sha256": "189a68f245ee97e0c6045abae9006697cb975186b32846f62e7f4ec8f4ffd5ee",
+            "words": 94
+        },
+        {
+            "surah": 99,
+            "asset": "words-099.zip",
+            "bytes": 156624,
+            "sha256": "52b0b4918316f23db6534d66cfe081376de2d71db5f03c1009098f4240535d4f",
+            "words": 36
+        },
+        {
+            "surah": 100,
+            "asset": "words-100.zip",
+            "bytes": 196405,
+            "sha256": "609f1f55886f3a8c96e8c3d1a55d8710a047f42901b4f8d7be5c345dfa4bf2ef",
+            "words": 40
+        },
+        {
+            "surah": 101,
+            "asset": "words-101.zip",
+            "bytes": 166845,
+            "sha256": "7c9043337a9df70444f731943c654422a0501238faa864555d020b7f33f1f2ed",
+            "words": 36
+        },
+        {
+            "surah": 102,
+            "asset": "words-102.zip",
+            "bytes": 168285,
+            "sha256": "b331298ee4898349633f06e45d999efc900f0af573bf570d60c7bdb14b20c6db",
+            "words": 28
+        },
+        {
+            "surah": 103,
+            "asset": "words-103.zip",
+            "bytes": 59559,
+            "sha256": "389f9cbfcef966a919e736852c035edf6d8360be5a26f3bfad7a932f878167d4",
+            "words": 14
+        },
+        {
+            "surah": 104,
+            "asset": "words-104.zip",
+            "bytes": 148080,
+            "sha256": "5b7f3157d5ab42d08d2c32eff7efc48f7a3581852956c3a3effffc83571d0374",
+            "words": 33
+        },
+        {
+            "surah": 105,
+            "asset": "words-105.zip",
+            "bytes": 129798,
+            "sha256": "66bb3c7facfee8d3831f37b62a316e7195ced863ff535087fbf619689a1bbc1e",
+            "words": 23
+        },
+        {
+            "surah": 106,
+            "asset": "words-106.zip",
+            "bytes": 103790,
+            "sha256": "9be11268ea52a752a602ad4efb1ef0c636ae946542b318bb1f27f277e5657854",
+            "words": 17
+        },
+        {
+            "surah": 107,
+            "asset": "words-107.zip",
+            "bytes": 163499,
+            "sha256": "650c01794f1aeb97cfad98955fc3ce7000d742786728975cd7a1ee17e8e7e332",
+            "words": 25
+        },
+        {
+            "surah": 108,
+            "asset": "words-108.zip",
+            "bytes": 46523,
+            "sha256": "9389305200e8968f74bcc83e67ad1b0235272ae8df88b8944c0c00600e864a36",
+            "words": 10
+        },
+        {
+            "surah": 109,
+            "asset": "words-109.zip",
+            "bytes": 152795,
+            "sha256": "7c3344397c6610a4cd25f6ec25a9099f0238020edf0f604a0c8fffdeafd2c1e0",
+            "words": 26
+        },
+        {
+            "surah": 110,
+            "asset": "words-110.zip",
+            "bytes": 80682,
+            "sha256": "a90c1c8c90ae2d3ab18b04ab8c3ce14919f78196cf3b62160d1818563d93f0a6",
+            "words": 19
+        },
+        {
+            "surah": 111,
+            "asset": "words-111.zip",
+            "bytes": 98070,
+            "sha256": "22cbd96f25e2f6b6c528bcb949db2b46f1dead810bad9ac97617701dd30368bf",
+            "words": 23
+        },
+        {
+            "surah": 112,
+            "asset": "words-112.zip",
+            "bytes": 39006,
+            "sha256": "44e082d8f6760a87f99c822d469574b4f0b52fc34695fededfbd4de195e20eb5",
+            "words": 15
+        },
+        {
+            "surah": 113,
+            "asset": "words-113.zip",
+            "bytes": 75304,
+            "sha256": "c99f5c36a4626ba998664aaffe4be4f55e5d3dfeebf2b23b40ec7bf964d387e5",
+            "words": 23
+        },
+        {
+            "surah": 114,
+            "asset": "words-114.zip",
+            "bytes": 145581,
+            "sha256": "e294d86e000a631ea69c5f1d583cd33ce149c55e12ef93bb3b3e98d9e4c28910",
+            "words": 20
+        }
+    ]
+}

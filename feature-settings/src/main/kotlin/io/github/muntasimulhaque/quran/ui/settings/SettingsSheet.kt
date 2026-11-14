@@ -23,6 +23,7 @@ import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
+import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
@@ -83,6 +84,7 @@ fun SettingsSheet(
     settings: AppSettings,
     packs: List<ContentPack>,
     packSetup: PackSetupState?,
+    wordAudio: WordAudioState = WordAudioState(),
     recitations: List<Recitation>,
     version: String,
     preview: suspend () -> ReadingRow?,
@@ -212,6 +214,7 @@ fun SettingsSheet(
                         packs = packs,
                         packSetup = packSetup,
                         actions = actions,
+                        wordAudio = wordAudio,
                     )
                     SettingsPage.Tajweed -> TajweedPage(sample = tajweedSample)
                     SettingsPage.About -> AboutPage(

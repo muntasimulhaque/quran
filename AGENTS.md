@@ -50,8 +50,10 @@ change, never left as a dead letter.
    from this project's own GitHub Releases, and only on the reader's word. Both
    translations ship inside the app; the tafsir arrives on the reader's word
    (unmetered only when the phone is on cellular), the word list arrives with
-   the tap that turns it on, a recitation package arrives for one surah after
-   Play and the shown size (or after a standing Continue to the next surah),
+   the tap that turns it on, a word's pronunciation arrives for the surah being
+   read with that same tap and for a later surah only unmetered, a recitation
+   package arrives for one surah after Play and the shown size (or after a
+   standing Continue to the next surah),
    and a held pack refreshes quietly only when the app is newer, only unmetered,
    only after the first page is readable. No other host is ever contacted, and
    there is no analytics or telemetry. No WebView.
@@ -138,8 +140,8 @@ change, never left as a dead letter.
 | `feature-settings/` | the settings hub and its pages |
 | `ui-kit/` | the theme and palettes, the hand-drawn icons, the shared rows and shapes, the small formatters |
 | `content-assets/` | the faces the app ships |
-| `tools/` | the offline pipeline (`--args="help"` lists it); `tools/icons/forge.py` draws every icon and the feature graphic |
-| `content/` | `quran.db`, `packs/`, `bundled/`, `manifest.json`, `recitation-manifest.json`, `catalog.json`, `build-report.json`, `surah-names-bn.json`, `audio-sources.json`, `audit-report.md`; `raw/` is local and gitignored |
+| `tools/` | the offline pipeline (`--args="help"` lists it), with `word-audio` cutting the pronunciation pack; `tools/icons/forge.py` draws every icon and the feature graphic |
+| `content/` | `quran.db`, `packs/`, `bundled/`, `word-audio/`, `manifest.json`, `recitation-manifest.json`, `catalog.json`, `build-report.json`, `surah-names-bn.json`, `audio-sources.json`, `audit-report.md`; `raw/` is local and gitignored |
 | `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `docs/` | the Pages site and the privacy policy Play links to |

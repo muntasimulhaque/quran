@@ -43,11 +43,11 @@ data class PlaybackUiState(
     /**
      * The word whose own voice is sounding, or null while no sample is.
      *
-     * A word is a sample, not a session: it is one clipped item on its own
+     * A word is a sample, not a session: it is one word file on its own
      * player, it raises no capsule of its own, and it leaves no place to come
      * back to. The reading washes that word on the sheet while it sounds. A
      * recitation that was playing waits at the word and is given back when the
-     * clip ends; the sample itself takes nothing away from the session (owner
+     * word ends; the sample itself takes nothing away from the session (owner
      * decision, this session).
      */
     val sample: WordSample? = null,

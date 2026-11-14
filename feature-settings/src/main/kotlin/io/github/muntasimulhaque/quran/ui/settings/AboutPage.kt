@@ -102,7 +102,16 @@ fun AboutPage(
         // them here as well printed the same two voices twice, once as raw
         // catalog rows and once as the app's own credits (owner decision, an
         // earlier session).
-        packs.filter { (it.shipped || it.installed) && it.type != PackType.Recitation }
+        //
+        // The word pronunciation pack is named from the first page even
+        // before it is downloaded, because the app carries Al-Fatiha's 29
+        // words in its own assets: the voice is already on the device, and
+        // the reader who hears it is owed whose it is (owner decision, this
+        // session).
+        packs.filter {
+            (it.shipped || it.installed || it.type == PackType.WordAudio) &&
+                it.type != PackType.Recitation
+        }
             .forEach { pack ->
                 val maker = packLine(pack.credit, pack.creditBn)
                 val versionLine = pack.version
@@ -255,6 +264,9 @@ private fun packKind(pack: ContentPack): String {
         PackType.Translation -> stringResource(R.string.about_pack_translation, language)
         PackType.Tafsir -> stringResource(R.string.about_pack_tafsir, language)
         PackType.Words -> stringResource(R.string.about_pack_words, language)
+        // The pronunciation pack is one voice for every word, so it is named
+        // by what it is rather than by the language of the text it speaks.
+        PackType.WordAudio -> stringResource(R.string.about_pack_word_audio)
         else -> language
     }
 }

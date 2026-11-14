@@ -31,7 +31,7 @@ import java.util.Locale
  * session advertises to the controller on connect, and answers in
  * `onCustomCommand` (owner decision).
  *
- * A word's own voice is not here at all: one word is a clipped item on the
+ * A word's own voice is not here at all: one word is its own file on the
  * reader's own sample player, which no session and no notification carry, so
  * nothing at this level ever watches a position or stops a verse at a
  * millisecond (owner decision, this session).

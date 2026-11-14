@@ -32,6 +32,8 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.WordAudioState
+import io.github.muntasimulhaque.quran.data.WordAudioStore
 import io.github.muntasimulhaque.quran.data.forLanguage
 import io.github.muntasimulhaque.quran.data.leadingWith
 import io.github.muntasimulhaque.quran.data.withLanguage
@@ -83,7 +85,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val languagePreference = LanguagePreference(application)
     private val savedStore = SavedStore(application)
     private val lastReadStore = LastReadStore(application)
-    private val playback = PlaybackController(application, viewModelScope)
+    private val wordAudioStore = WordAudioStore(application)
+    private val playback = PlaybackController(application, viewModelScope, wordAudio = wordAudioStore)
+    private val wordAudio = WordAudioDownloads(
+        context = application,
+        scope = viewModelScope,
+        store = wordAudioStore,
+        onInstalled = { clearRowCache() },
+    )
 
     /**
      * What the reader is told after an act with no visible result of its own.
@@ -156,6 +165,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /** Where the reader has been reading, one row per reading, newest first. */
     val lastRead: StateFlow<List<ReadPlace>> = lastReadStore.places
     val playbackState: StateFlow<PlaybackUiState> = playback.state
+    val wordAudioState: StateFlow<WordAudioState> = wordAudio.state
 
     /**
      * The word the reciter is on at this moment, and the wait to the next
@@ -248,7 +258,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         database = { library.database },
         translationPacks = { enabledTranslationPacks },
         language = { readingLanguage },
-        hasAudio = { surah -> library.hasSurahAudio(settings.recitation, surah) },
+        wordAudioPositions = { surah -> wordAudio.positions(surah) },
     )
 
     /**
@@ -364,6 +374,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         juzAt = JuzIndex.of(opening.juzStarts, TOTAL_AYAHS)
         val openingAyah = opening.settings.ayah
         activePlaceId = lastReadStore.record(openingAyah, surahOf(openingAyah)?.number ?: 1)
+        wordAudio.setEnabled(opening.settings.wordByWord)
+        wordAudio.onSurah(surahOf(openingAyah)?.number ?: 1)
     }
 
     /** The library turned over: the player attaches to the new one. */
@@ -374,6 +386,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // read (owner decision, this session).
         surahIndexByNumber = null
         clearRowCache()
+        wordAudio.onSurah(surahOf(settings.ayah)?.number ?: 1)
     }
 
     /**
@@ -394,9 +407,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             PackType.Tafsir -> if (pack.id !in settings.tafsirPacks) toggleTafsirPack(pack.id)
             PackType.Recitation ->
                 selectRecitation(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX))
-            PackType.Words -> if (!settings.wordByWord) {
-                settings = settings.copy(wordByWord = true)
-                viewModelScope.launch { settingsStore.setWordByWord(true) }
+            PackType.Words -> {
+                if (!settings.wordByWord) {
+                    settings = settings.copy(wordByWord = true)
+                    viewModelScope.launch { settingsStore.setWordByWord(true) }
+                }
+                wordAudio.setEnabled(true)
             }
             else -> Unit
         }
@@ -413,6 +429,18 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             setTranslationPacks(settings.translationPacks - pack.id)
         }
         if (pack.id in settings.tafsirPacks) toggleTafsirPack(pack.id)
+        if (pack.type == PackType.Words) {
+            wordAudio.setEnabled(false)
+            wordAudio.clear()
+            if (settings.wordByWord) {
+                settings = settings.copy(wordByWord = false)
+                clearRowCache()
+                viewModelScope.launch {
+                    settingsStore.setWordByWord(false)
+                    settingsStore.removePendingPacks(setOf(ContentDatabase.WORD_ROOT_PACK))
+                }
+            }
+        }
         if (fallbackReciter != null) {
             settings = settings.copy(recitation = fallbackReciter)
             // The voice the page was measured under is gone, so the rows are
@@ -475,6 +503,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         settings = settings.copy(ayah = ayah)
         viewModelScope.launch { settingsStore.setAyah(ayah) }
         notePlace(ayah)
+        wordAudio.onSurah(surahOf(ayah)?.number ?: 1)
     }
 
     /**
@@ -536,6 +565,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // A jump lands on the ayah's own top. The place is the ayah alone, so
         // there is no depth to carry across.
         settings = settings.copy(ayah = clamped)
+        wordAudio.onSurah(surah ?: 1)
         viewModelScope.launch {
             settingsStore.setAyah(clamped)
             if (surah != null) activePlaceId = lastReadStore.record(clamped, surah)
@@ -746,6 +776,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setWordByWord(show: Boolean) {
         if (!show) {
             settings = settings.copy(wordByWord = false)
+            wordAudio.setEnabled(false)
             clearRowCache()
             viewModelScope.launch {
                 settingsStore.setWordByWord(false)
@@ -775,6 +806,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             settings = settings.copy(wordByWord = true)
             clearRowCache()
             viewModelScope.launch { settingsStore.setWordByWord(true) }
+            wordAudio.setEnabled(true)
             return
         }
         library.install(pack.id, select = true)
@@ -1249,7 +1281,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * answer to a tap rather than a state to explain.
      */
     fun hearWord(ayahNumber: Int, position: Int) {
-        viewModelScope.launch { playback.hearWord(settings.recitation, ayahNumber, position) }
+        viewModelScope.launch { playback.hearWord(ayahNumber, position) }
     }
 
     fun togglePlayback() = playback.toggle()
@@ -1285,6 +1317,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // single-activity app's SQLiteOpenHelper. The library retires its own
         // connection without waiting on the main thread.
         library.retire()
+        wordAudio.retire()
     }
 
     private companion object {

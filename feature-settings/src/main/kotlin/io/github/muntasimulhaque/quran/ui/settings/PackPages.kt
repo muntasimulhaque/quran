@@ -4,16 +4,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -135,6 +141,7 @@ fun WordsPage(
     packs: List<ContentPack>,
     packSetup: PackSetupState?,
     actions: SettingsActions,
+    wordAudio: WordAudioState = WordAudioState(),
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         val pack = wantedWordsPack(settings, packs)
@@ -156,6 +163,20 @@ fun WordsPage(
             // list to fetch; a language with none keeps it disabled.
             enabled = pack != null,
         )
+        if (wordAudio.surah > 0) {
+            Spacer(Modifier.height(Space.Line))
+            Text(
+                text = pronunciationLine(wordAudio),
+                // The switch's own value voice, on the row's own edge: the
+                // line is a fact about the aid, not a second control.
+                modifier = Modifier.padding(
+                    start = Space.Gutter - SheetRowGutter,
+                    end = Space.Row - SheetRowGutter,
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (pack != null) {
             Spacer(Modifier.height(Space.Block))
             PackChoiceRow(
@@ -181,5 +202,34 @@ fun WordsPage(
             )
         }
         Spacer(Modifier.height(Space.Section))
+    }
+}
+
+/**
+ * The pronunciation line: the current surah's size and state, and the whole
+ * Book's size, so the toggle's cost is visible before the tap. It is a line,
+ * not a row: the word list row below is still the one pack control.
+ */
+@Composable
+private fun pronunciationLine(state: WordAudioState): String {
+    val surah = formatBytes(state.bytes)
+    val book = formatBytes(state.totalBytes)
+    return when {
+        state.installed && state.bundled ->
+            stringResource(R.string.settings_words_pronunciation_bundled)
+        state.installed ->
+            stringResource(R.string.settings_words_pronunciation_on_device, surah, book)
+        state.failed ->
+            stringResource(R.string.settings_words_pronunciation_failed, surah)
+        state.waiting ->
+            stringResource(R.string.settings_words_pronunciation_waiting, surah, book)
+        state.read > 0 ->
+            stringResource(
+                R.string.settings_words_pronunciation_downloading,
+                formatBytes(state.read),
+                surah,
+            )
+        else ->
+            stringResource(R.string.settings_words_pronunciation_size, surah, book)
     }
 }

@@ -23,6 +23,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.io.File
 import org.junit.runner.RunWith
 
 /**
@@ -30,10 +31,10 @@ import org.junit.runner.RunWith
  * it cannot.
  *
  * A speaker that plays nothing is a dead button, so the sheet draws it only
- * for a surah whose audio is on the device under the reader's reciter. This
- * class holds the two sides of that rule: Al-Fatiha, whose fourteen ayahs the
- * app carries, and Al-Baqarah, whose audio arrives only when the reader asks
- * for it and is not on the device in this run (owner decision, this session).
+ * for a word whose pronunciation file is on the device. This
+ * class holds the two sides of that rule: Al-Fatiha, whose first 29 words the
+ * app carries, and Al-Baqarah, whose word pack is not here in this run
+ * (owner decision, this session).
  *
  * Each leg saves the reader's settings before it runs and puts them back
  * after, because every instrumented class in a run shares one process and one
@@ -55,6 +56,7 @@ class WordVoiceTest {
         val store = PackStore(context)
         store.install("words-en")
         store.install("word-root")
+        fakeSurahWord()
         runBlocking {
             SettingsStore(context).apply {
                 setUiLanguage("en")
@@ -68,6 +70,7 @@ class WordVoiceTest {
 
     @After
     fun restore() {
+        clearFakeSurahWord()
         runBlocking {
             SettingsStore(context).apply {
                 setAyah(original.ayah)
@@ -80,11 +83,11 @@ class WordVoiceTest {
     }
 
     /**
-     * Al-Fatiha's audio ships with the app, so the sheet's one control is
+     * Al-Fatiha's first 29 words ship with the app, so the sheet's one control
      * here: the word can be heard without a download.
      */
     @Test
-    fun theSpeakerIsDrawnForASurahWhoseAudioIsHere() {
+    fun theSpeakerIsDrawnForABundledWord() {
         atAyah(FATIHA_FIRST)
         onTheSheetOf("بِسۡمِ") {
             compose.waitUntil(timeoutMillis = 30_000) {
@@ -96,9 +99,9 @@ class WordVoiceTest {
 
     /**
      * The speaker answers on the sheet and nowhere else. A word is a sample,
-     * not a session: it is one clipped item on its own player, so no capsule
+     * not a session: it is one word file on its own player, so no capsule
      * rises behind the sheet while it sounds, and none is left behind when the
-     * clip ends (owner decision, this session).
+     * word ends (owner decision, this session).
      */
     @Test
     fun theWordsVoiceRaisesNoCapsule() {
@@ -131,7 +134,7 @@ class WordVoiceTest {
      * is right to draw no line.
      */
     @Test
-    fun theSpeakerIsLeftOutForASurahWhoseAudioIsNot() {
+    fun theSpeakerIsLeftOutForAWordWhoseFileIsNot() {
         atAyah(BAQARAH_SEVENTH)
         onTheSheetOf("خَتَمَ") {
             // The sheet is drawn and its root is named: the absence is the
@@ -142,11 +145,22 @@ class WordVoiceTest {
                     .fetchSemanticsNodes().isNotEmpty(),
             )
             assertTrue(
-                "a surah with no audio must offer no speaker",
+                "a word with no pronunciation file must offer no speaker",
                 compose.onAllNodesWithTag("word-sheet-hear", useUnmergedTree = true)
                     .fetchSemanticsNodes().isEmpty(),
             )
         }
+    }
+
+
+    /** A one-byte stand-in for a word file the app would otherwise fetch. */
+    private fun fakeSurahWord() {
+        val folder = File(context.filesDir, "word-audio/002").apply { mkdirs() }
+        File(folder, "002_007_002.opus").writeBytes(ByteArray(1))
+    }
+
+    private fun clearFakeSurahWord() {
+        File(context.filesDir, "word-audio/002").deleteRecursively()
     }
 
     private fun atAyah(number: Int) {

@@ -43,6 +43,13 @@ object PackSources {
         "word-root" to listOf("word-root"),
         "reciter-minshawi" to listOf("recitation-minshawi"),
         "reciter-husary" to listOf("recitation-husary"),
+        // The word pronunciation pack is cut from QUL Alafasy ayah audio at
+        // quran-align boundaries. Both are credited; the app ships only the
+        // word clips.
+        "word-pronunciation-alafasy" to listOf(
+            "quran-recitation-alafasy",
+            "quran-align-alafasy",
+        ),
     )
 
     fun datasets(packId: String): List<String> = sources[packId].orEmpty()

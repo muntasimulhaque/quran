@@ -18,6 +18,7 @@ fun main(args: Array<String>) {
             Audio(root).run(args.drop(1))
         }
         "build" -> Build(root).run()
+        "word-audio" -> WordAudio(root).run(args.drop(1))
         "fonts" -> Fonts(root).run()
         "packs" -> when (args.getOrNull(1)) {
             "publish" -> Packs(root).publish()
@@ -26,10 +27,11 @@ fun main(args: Array<String>) {
         "fetch" -> Fetch(root).run()
         "checkdb" -> CheckDb(root).run()
         "help", "--help" -> {
-            println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs>")
+            println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs|word-audio>")
         println("       tools packs [build|publish]")
         println("       tools audio [sample|bundle|packs|publish|edges]")
         println("       tools audio edges [resume]")
+        println("       tools word-audio [plan|build [surahs]|publish]")
             0
         }
         else -> {

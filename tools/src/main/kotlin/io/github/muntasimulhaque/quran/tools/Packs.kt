@@ -8,6 +8,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.Search
@@ -186,6 +187,24 @@ class Packs(private val root: File) {
         ),
     )
 
+    /**
+     * The word pronunciation pack. It has no database of its own: its
+     * manifest names one ZIP per surah, and the Al-Fatiha files ride in the
+     * app's assets. The catalog entry is what the About page reads for the
+     * voice, the source, and the CC BY 4.0 timing credit.
+     */
+    private val wordAudioPack = Pack(
+        id = "word-pronunciation-alafasy",
+        type = "word-audio",
+        name = "Word pronunciation",
+        language = "ar",
+        credit = "Mishari Rashid al-Afasy, via the Quranic Universal Library; word timings by quran-align",
+        creditBn = "মিশারি রশিদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরির মাধ্যমে; শব্দের সময় quran-align",
+        version = "1.0",
+        shipped = false,
+        ayahs = 6236,
+    )
+
     fun run(): Int {
         if (!database.exists()) {
             println("packs: content/quran.db is missing; run tools build first")
@@ -211,6 +230,10 @@ class Packs(private val root: File) {
                 )
             }
         }
+        wordAudioEntry(manifest)?.let { entry ->
+            entries += entry
+            println("packs: ${wordAudioPack.id} ${entry["bytes"]} bytes, tag $WORD_AUDIO_TAG")
+        }
         val json = buildJsonObject {
             put("version", 1)
             put("baseUrl", "https://github.com/muntasimulhaque/quran/releases/download")
@@ -219,7 +242,7 @@ class Packs(private val root: File) {
         catalog.writeText(
             Json { prettyPrint = true }.encodeToString(JsonElement.serializer(), json),
         )
-        println("packs: ${packs.size} pack(s) written, catalog at content/catalog.json")
+        println("packs: ${entries.size} pack(s) written, catalog at content/catalog.json")
         return 0
     }
 
@@ -239,6 +262,7 @@ class Packs(private val root: File) {
         for (entry in entries) {
             val pack = entry.jsonObject
             val id = pack["id"]?.jsonPrimitive?.content ?: continue
+            if (pack["type"]?.jsonPrimitive?.content == "word-audio") continue
             val tag = pack["tag"]?.jsonPrimitive?.content ?: continue
             val file = File(directory, "$id.db")
             if (!file.exists()) {
@@ -601,6 +625,31 @@ class Packs(private val root: File) {
         }
     }
 
+    private fun wordAudioEntry(manifest: Manifest): JsonObject? {
+        val file = File(content, "word-audio/manifest.json")
+        if (!file.isFile) return null
+        val header = runCatching { Json.parseToJsonElement(file.readText()).jsonObject }.getOrNull()
+            ?: return null
+        val total = header["totalBytes"]?.jsonPrimitive?.longOrNull ?: 0L
+        val hash = sha256(file)
+        return buildJsonObject {
+            put("id", wordAudioPack.id)
+            put("type", wordAudioPack.type)
+            put("name", wordAudioPack.name)
+            put("language", wordAudioPack.language)
+            put("credit", wordAudioPack.credit)
+            put("creditBn", wordAudioPack.creditBn)
+            put("license", licenseOf(manifest, wordAudioPack.id))
+            put("licenseBn", licenseOfBn(manifest, wordAudioPack.id))
+            put("version", wordAudioPack.version)
+            put("shipped", wordAudioPack.shipped)
+            put("ayahs", wordAudioPack.ayahs)
+            put("bytes", total)
+            put("sha256", hash)
+            put("tag", WORD_AUDIO_TAG)
+        }
+    }
+
     private fun sourcePath(): String = database.absolutePath.replace('\\', '/')
 
     private fun runGh(command: List<String>): Int = runCatching {
@@ -617,5 +666,8 @@ class Packs(private val root: File) {
 
         /** Only reached when a pack has no dataset recorded. */
         const val NO_LICENSE = "No license recorded"
+
+        /** The release the word pronunciation pack is published to. */
+        const val WORD_AUDIO_TAG = "word-audio-alafasy"
     }
 }

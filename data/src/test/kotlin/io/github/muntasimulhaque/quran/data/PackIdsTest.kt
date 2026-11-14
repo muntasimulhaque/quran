@@ -44,6 +44,7 @@ class PackIdsTest {
             "recitation" to PackType.Recitation,
             "words" to PackType.Words,
             "word-root" to PackType.WordRoot,
+            "word-audio" to PackType.WordAudio,
         )
         names.forEach { (wire, type) ->
             assertEquals(type, PackType.of(wire))

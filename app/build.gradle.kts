@@ -68,6 +68,8 @@ val devPackAssets = layout.buildDirectory.dir("generated/devPackAssets")
 val contentDir = rootProject.file("content")
 val contentPacksDir = File(contentDir, "packs")
 val contentBundledAudioDir = File(contentDir, "bundled/audio/recitation")
+val contentBundledWordAudioDir = File(contentDir, "bundled/word-audio")
+val contentWordAudioManifest = File(contentDir, "word-audio/manifest.json")
 val contentFontsHafsDir = File(contentDir, "work/fonts-hafs")
 val contentBuildReport = File(contentDir, "build-report.json")
 val contentCatalogFile = File(contentDir, "catalog.json")
@@ -133,6 +135,14 @@ abstract class PrepareContentAssets : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val bundledAudioDir: DirectoryProperty
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val bundledWordAudioDir: DirectoryProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val wordAudioManifestFile: RegularFileProperty
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -203,6 +213,32 @@ abstract class PrepareContentAssets : DefaultTask() {
             throw GradleException("the bundled Al-Fatiha audio has ${bundledFiles.size} mp3 file(s), expected 14")
         }
         bundledAudio.copyRecursively(File(out, "recitation"), overwrite = true)
+        // The word pronunciation pack: the manifest names one ZIP per surah,
+        // and Al-Fatiha's own 29 files ride in the assets so the first page's
+        // sheet has its speaker before any download.
+        val wordAudioManifest = wordAudioManifestFile.get().asFile
+        if (!wordAudioManifest.isFile) {
+            throw GradleException(
+                "the word pronunciation manifest is missing; run ./gradlew :tools:run --args=\"word-audio build\"",
+            )
+        }
+        val bundledWordAudio = bundledWordAudioDir.get().asFile
+        if (!bundledWordAudio.isDirectory) {
+            throw GradleException(
+                "the bundled Al-Fatiha words are missing; run ./gradlew :tools:run --args=\"word-audio build\"",
+            )
+        }
+        val bundledWordFiles = bundledWordAudio.walkTopDown()
+            .filter { it.isFile && it.extension == "opus" }
+            .toList()
+        if (bundledWordFiles.size != 29) {
+            throw GradleException(
+                "the bundled Al-Fatiha words have ${bundledWordFiles.size} opus file(s), expected 29",
+            )
+        }
+        val wordAudioOut = File(out, "word-audio").apply { mkdirs() }
+        wordAudioManifest.copyTo(File(wordAudioOut, "manifest.json"), overwrite = true)
+        bundledWordAudio.copyRecursively(wordAudioOut, overwrite = true)
         // Development builds carry every pack, so the whole app works with no
         // network at all while it is being built and tested. They are written
         // to the debug variant's own asset directory, never to the main one.
@@ -241,7 +277,7 @@ abstract class PrepareContentAssets : DefaultTask() {
 val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentAssets") {
     group = "content"
     description = "Copies the core pack, the shipped packs, the catalog, the text font, " +
-        "the recitation manifest, and the bundled Al-Fatiha audio."
+        "the recitation manifest, the bundled Al-Fatiha audio, and the word pronunciation manifest and words."
     dependsOn(":tools:fetchAssets")
     leanScreenshot.set(leanDevPacks)
     packNames.set(screenshotPacks)
@@ -252,6 +288,8 @@ val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentA
     audioEdgesFile.fileValue(rootProject.file("content/audio-edges.txt"))
     packsDir.fileValue(contentPacksDir)
     bundledAudioDir.fileValue(contentBundledAudioDir)
+    bundledWordAudioDir.fileValue(contentBundledWordAudioDir)
+    wordAudioManifestFile.fileValue(contentWordAudioManifest)
     fontsHafsDir.fileValue(contentFontsHafsDir)
     contentAssetsOut.set(contentAssets)
     devPackAssetsOut.set(devPackAssets)
@@ -277,8 +315,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 187
-        versionName = "18.5"
+        versionCode = 188
+        versionName = "18.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
