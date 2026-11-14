@@ -1,26 +1,42 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import kotlinx.coroutines.launch
 
 /**
  * Translations: more than one may be on, and each one reads in its own column
@@ -134,6 +150,19 @@ fun TafsirsPage(
  * fetch nothing is a switch that lies. The translations page keeps its own
  * master switch disabled until a pack is installed, because there the switch
  * cannot choose which translation to fetch; here there is exactly one list.
+ *
+ * **The page names the switch, prices the list, and keeps the voices to one
+ * row** (owner decision, this session). It carried a sentence under the switch
+ * repeating the row's own name, and a line pricing the pronunciation for the
+ * surah being read. The first was cut after two lines by the row's rule for a
+ * value, and a value is not a sentence; the second reported a pack with no
+ * control on this page, about a surah the page cannot choose, and it showed
+ * the price of the voices even with the aid off. Both are gone. What is left
+ * is the switch, the list it fetches with its own size, and, when the reader
+ * has downloaded any, the voices on the device with the one act they allow:
+ * taking them back. A transfer says so in one short line, because a failure
+ * that said nothing would be silent, and the page owns no other state line: a
+ * word with no voice says so under its own speaker.
  */
 @Composable
 fun WordsPage(
@@ -142,6 +171,7 @@ fun WordsPage(
     packSetup: PackSetupState?,
     actions: SettingsActions,
     wordAudio: WordAudioState = WordAudioState(),
+    wordVoices: suspend () -> WordAudioOnDevice = { WordAudioOnDevice() },
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         val pack = wantedWordsPack(settings, packs)
@@ -153,9 +183,18 @@ fun WordsPage(
         // size once it is on the device (owner decision, this session).
         val root = packs.firstOrNull { it.id == ContentDatabase.WORD_ROOT_PACK }
         val rootToCome = root != null && !root.installed
+        // The voices the reader has downloaded, read again when a pack
+        // lands or leaves, and never on a progress tick: a folder holds up to
+        // six thousand files and the count changes only when one arrives
+        // (owner decision, this session).
+        var voices by remember { mutableStateOf(WordAudioOnDevice()) }
+        LaunchedEffect(wordAudio.surah, wordAudio.installed) { voices = wordVoices() }
+        val scope = rememberCoroutineScope()
         ToggleRow(
             title = stringResource(R.string.settings_words_title),
-            subtitle = packSetupLine(setup) ?: stringResource(R.string.settings_words_lead),
+            // The value is the list's own transfer while it runs, and nothing
+            // otherwise: a name and its switch need no sentence.
+            subtitle = packSetupLine(setup),
             checked = settings.wordByWord && installed,
             onChange = actions.onWordByWord,
             switchTag = "switch-words-page",
@@ -163,16 +202,18 @@ fun WordsPage(
             // list to fetch; a language with none keeps it disabled.
             enabled = pack != null,
         )
-        if (wordAudio.surah > 0) {
+        pronunciationLine(wordAudio)?.let { line ->
             Spacer(Modifier.height(Space.Line))
             Text(
-                text = pronunciationLine(wordAudio),
+                text = line,
                 // The switch's own value voice, on the row's own edge: the
                 // line is a fact about the aid, not a second control.
-                modifier = Modifier.padding(
-                    start = Space.Gutter - SheetRowGutter,
-                    end = Space.Row - SheetRowGutter,
-                ),
+                modifier = Modifier
+                    .padding(
+                        start = Space.Gutter - SheetRowGutter,
+                        end = Space.Row - SheetRowGutter,
+                    )
+                    .testTag("words-audio-line"),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -201,35 +242,78 @@ fun WordsPage(
                 onCancel = actions.onPackSetupCancel,
             )
         }
+        if (voices.present) {
+            Spacer(Modifier.height(Space.Section))
+            VoicesRow(
+                voices = voices,
+                onRemove = {
+                    scope.launch {
+                        actions.onRemoveWordVoices()
+                        voices = wordVoices()
+                    }
+                },
+            )
+        }
         Spacer(Modifier.height(Space.Section))
     }
 }
 
 /**
- * The pronunciation line: the current surah's size and state, and the whole
- * Book's size, so the toggle's cost is visible before the tap. It is a line,
- * not a row: the word list row below is still the one pack control.
+ * The voices on the device: one row, because the app fetched them a surah at
+ * a time and the page's one act is to take them all back. The bundled
+ * Al-Fatiha is the app's own asset and is not counted, so the number is the
+ * reader's downloads and the Remove leaves the first page's voice alone.
  */
 @Composable
-private fun pronunciationLine(state: WordAudioState): String {
+private fun VoicesRow(voices: WordAudioOnDevice, onRemove: () -> Unit) {
+    val remove = stringResource(R.string.settings_voices_remove)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = ChoiceRowNameInset, end = ChoiceRowTrailingInset),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.settings_voices_row, voices.surahs),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = formatBytes(voices.bytes),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = Space.Tight),
+            )
+        }
+        TextButton(
+            label = stringResource(R.string.pack_action_remove),
+            onClick = onRemove,
+            modifier = Modifier
+                .padding(start = Space.Row)
+                .semantics { contentDescription = remove },
+            quiet = true,
+        )
+    }
+}
+
+/**
+ * The pronunciation line, only while it can be acted on: a transfer that is
+ * running, and one that failed. What is on the device is the voices row's
+ * business, and a word with no voice says so under its own speaker.
+ */
+@Composable
+private fun pronunciationLine(state: WordAudioState): String? {
     val surah = formatBytes(state.bytes)
-    val book = formatBytes(state.totalBytes)
     return when {
-        state.installed && state.bundled ->
-            stringResource(R.string.settings_words_pronunciation_bundled)
-        state.installed ->
-            stringResource(R.string.settings_words_pronunciation_on_device, surah, book)
         state.failed ->
-            stringResource(R.string.settings_words_pronunciation_failed, surah)
-        state.waiting ->
-            stringResource(R.string.settings_words_pronunciation_waiting, surah, book)
-        state.read > 0 ->
+            stringResource(R.string.settings_words_pronunciation_failed)
+        state.read > 0 && !state.installed && state.surah > 0 ->
             stringResource(
                 R.string.settings_words_pronunciation_downloading,
                 formatBytes(state.read),
                 surah,
             )
-        else ->
-            stringResource(R.string.settings_words_pronunciation_size, surah, book)
+        else -> null
     }
 }

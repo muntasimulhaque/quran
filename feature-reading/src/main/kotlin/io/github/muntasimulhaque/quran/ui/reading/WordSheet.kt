@@ -21,18 +21,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.WordGrammar
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
+import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.WordRoot
+import io.github.muntasimulhaque.quran.data.WordVoice
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
@@ -42,6 +45,7 @@ import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
 import io.github.muntasimulhaque.quran.ui.kit.SectionHead
 import io.github.muntasimulhaque.quran.ui.kit.SheetHead
 import io.github.muntasimulhaque.quran.ui.kit.SheetPlace
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetHeadActionInset
@@ -74,6 +78,20 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * which is the rule every door that turns in this app follows: the mark is
  * lit because something is happening, not because it is a control (owner
  * decision, this session).
+ *
+ * **Every word offers its voice, and the tap is the ask** (owner decision,
+ * this session). The mark used to be drawn only for a word whose file was
+ * already on the device, so a surah whose voices were still on their way drew
+ * a sheet with no speaker at all, which reads as a broken sheet rather than a
+ * word waiting for its pack. The speaker now stands for every word: when the
+ * file is here it sounds, and when the surah's pack is not the tap fetches it
+ * without a question, because a press on a speaker is approval enough. The
+ * line under the gloss answers the press where the finger still is: the
+ * transfer and its two sizes while the pack arrives, the word's own silence
+ * when the aligner cut it no clip, and a transfer that did not arrive. It
+ * stands centered under the gloss because the entry above it is the sheet's
+ * one subject and the answer belongs to the word that was pressed. The
+ * speaker is quiet while the pack is on its way: nothing is sounding yet.
  *
  * **The entry is centered; the facts are not** (owner decision, this
  * session). The word the reader pressed and the one gloss this ayah gives it
@@ -155,8 +173,8 @@ internal data class OpenWord(
     val ayahNumber: Int = 0,
     /** The word's position in its ayah, which the timings name. */
     val position: Int = 0,
-    /** True when the surah's audio is on the device, so the mark can answer. */
-    val canHear: Boolean = false,
+    /** The surah the word stands in: the pack the speaker asks for. */
+    val surah: Int = 0,
 )
 
 /**
@@ -178,10 +196,13 @@ internal fun WordSheet(
     metrics: ReadingMetrics,
     hafs: FontFamily,
     onDismiss: () -> Unit,
-    /** The word's own voice, when the audio for it is on the device. */
-    onHear: (() -> Unit)? = null,
+    /** The word's own voice, which every word offers: the tap is the ask. */
+    onHear: () -> Unit = {},
     /** True while this word's own voice is sounding. */
     hearing: Boolean = false,
+    /** What the tap has to say, and what the pack it asks for weighs. */
+    voice: WordVoice = WordVoice.Ready,
+    voiceAudio: WordAudioState? = null,
 ) {
     val sheetState = rememberExpandedSheetState()
     val palette = LocalPagePalette.current
@@ -197,32 +218,52 @@ internal fun WordSheet(
     // state in the accent, and at rest it asks for nothing (owner decision,
     // this session).
     val markTint = if (hearing) MaterialTheme.colorScheme.primary else quiet
-    val hear = onHear
-    // The head's one action, drawn only when the word's voice is on the
-    // device. The explicit type keeps the lambda composable.
-    val action: (@Composable () -> Unit)? = if (hear == null) {
-        null
-    } else {
-        {
-            GlyphButton(
-                description = stringResource(R.string.reading_hear_word),
-                onClick = hear,
+    // The pack this word's voice travels in, when the state is about this
+    // surah: a state left over from the surah the reader just left says
+    // nothing about this one.
+    val pack = voiceAudio?.takeIf { it.surah == word.surah }
+    // What the press has to answer with. The transfer's own sizes come from
+    // the manifest and the bytes already here, so the line counts up under
+    // the finger (owner decision, this session).
+    val voiceLine: String? = when {
+        voice == WordVoice.Missing -> stringResource(R.string.reading_word_voice_missing)
+        voice == WordVoice.Failed -> stringResource(R.string.reading_word_voice_failed)
+        voice != WordVoice.Preparing -> null
+        pack?.failed == true -> stringResource(R.string.reading_word_voice_failed)
+        // The sizes are drawn from the first byte read, so the line never
+        // promises a weight before the transfer has one to count.
+        pack != null && pack.bytes > 0 && pack.read > 0 -> stringResource(
+            R.string.reading_word_voice_waiting,
+            formatBytes(pack.read),
+            formatBytes(pack.bytes),
+        )
+        else -> stringResource(R.string.reading_word_voice_asking)
+    }
+    // The counting line counts in the ear too if it is a live region, so it
+    // is not one; the two sentences a reader acts on are (owner decision,
+    // this session, accessibility).
+    val counting = voice == WordVoice.Preparing && pack?.failed != true
+    // The head's one action. Every word offers its voice, so the sheet always
+    // owes the mark the room its target reaches above the name.
+    val action: @Composable () -> Unit = {
+        GlyphButton(
+            description = stringResource(R.string.reading_hear_word),
+            onClick = onHear,
+            tint = markTint,
+            modifier = Modifier.testTag("word-sheet-hear"),
+        ) {
+            IconGlyph(
+                icon = Icon.Speaker,
                 tint = markTint,
-                modifier = Modifier.testTag("word-sheet-hear"),
-            ) {
-                IconGlyph(
-                    icon = Icon.Speaker,
-                    tint = markTint,
-                    modifier = Modifier.size(GlyphSize.Control),
-                )
-            }
+                modifier = Modifier.size(GlyphSize.Control),
+            )
         }
     }
     // The action's 48 dp target reaches above the head's 26 dp line. The
     // scroll's own top edge would clip it; this inset is the room it owes
     // the target, and it follows the reader's type scale (owner decision,
-    // this session). A sheet with no action owes none.
-    val headInset = if (action != null) sheetHeadActionInset() else 0.dp
+    // this session).
+    val headInset = sheetHeadActionInset()
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -306,6 +347,22 @@ internal fun WordSheet(
                     .fillMaxWidth()
                     .padding(top = Space.Line),
             )
+            // The answer to the speaker's press, under the word it is about.
+            voiceLine?.let { line ->
+                Text(
+                    text = line,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = quiet,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Space.Line)
+                        .testTag("word-sheet-voice")
+                        .semantics {
+                            if (!counting) liveRegion = LiveRegionMode.Polite
+                        },
+                )
+            }
             // Every fact opens with a section's air: a fact is a block, and
             // the entry above them is the block before the first.
             // The root, when the word has one: the letters the page writes,

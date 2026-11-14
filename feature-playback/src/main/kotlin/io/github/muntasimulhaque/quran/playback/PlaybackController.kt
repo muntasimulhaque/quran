@@ -643,7 +643,7 @@ class PlaybackController(
      * content build cut it from the Alafasy ayah audio at the quran-align
      * boundary, so there is no region to interpret on the tap and no stop to
      * watch in another process. A word the aligner could not place has no
-     * file, and the sheet draws no speaker for it.
+     * file, and the sheet says so when its speaker is pressed.
      *
      * A word is a sample, not a session: it sounds on its own player, so the
      * reader's playlist, pill, notification, and saved place are not touched.
@@ -651,9 +651,9 @@ class PlaybackController(
      * last millisecond; one that was already paused was paused by the reader
      * and stays as they left it (owner decision, this session).
      *
-     * False when the word's file is not on the device: the sheet only offers
-     * the mark for a word whose file is here, so this is the guard behind that
-     * mark rather than a state a reader meets.
+     * False when the word's file is not on the device: the sheet's speaker is
+     * drawn for every word, so this is the guard behind a press that has
+     * nothing to play yet, not a state a reader meets without an answer.
      */
     suspend fun hearWord(ayahNumber: Int, position: Int): Boolean {
         val database = content ?: return false

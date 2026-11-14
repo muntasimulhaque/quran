@@ -27,14 +27,16 @@ import java.io.File
 import org.junit.runner.RunWith
 
 /**
- * The word sheet's one control, offered where it can answer and left out where
- * it cannot.
+ * The word sheet's one control, offered for every word.
  *
- * A speaker that plays nothing is a dead button, so the sheet draws it only
- * for a word whose pronunciation file is on the device. This
- * class holds the two sides of that rule: Al-Fatiha, whose first 29 words the
- * app carries, and Al-Baqarah, whose word pack is not here in this run
- * (owner decision, this session).
+ * A press on the speaker is the reader's ask, so the mark stands on every
+ * word: a word whose file is here sounds, a word whose surah has not arrived
+ * fetches the surah, and a word the alignment cut no clip for says so rather
+ * than playing nothing (owner decision, this session). This class holds the
+ * three sides it can hold without a network: Al-Fatiha, whose first 29 words
+ * the app carries; Al-Baqarah, whose word pack is not here in this run, so its
+ * speaker must still be drawn; and a surah installed with one word file and a
+ * word it does not cover, which must answer with the missing-recording line.
  *
  * Each leg saves the reader's settings before it runs and puts them back
  * after, because every instrumented class in a run shares one process and one
@@ -124,31 +126,52 @@ class WordVoiceTest {
     }
 
     /**
-     * Al-Baqarah's audio is a download the reader has not asked for in this
-     * run, so the mark is absent and the sheet is the word, its gloss, and its
-     * root: a button that answered nothing is worse than no button.
+     * Al-Baqarah's audio is a download the reader has not asked for, and the
+     * speaker is drawn anyway: the press is the ask, so the sheet never opens
+     * without its one control (owner decision, this session).
      *
      * The word is 2:7's first, which has a root (kh-t-m), because the sheet's
-     * root line is what proves the sheet is whole while the mark is missing:
-     * a demonstrative or a relative pronoun has no root at all, and its sheet
-     * is right to draw no line.
+     * root line proves the sheet is whole while the voice is a download away.
      */
     @Test
-    fun theSpeakerIsLeftOutForAWordWhoseFileIsNot() {
+    fun theSpeakerIsDrawnForAWordWhoseSurahIsNot() {
         atAyah(BAQARAH_SEVENTH)
         onTheSheetOf("خَتَمَ") {
-            // The sheet is drawn and its root is named: the absence is the
-            // mark's, not the sheet's.
             assertTrue(
                 "the sheet must name the word's root",
                 compose.onAllNodesWithTag("word-sheet-root", useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty(),
             )
             assertTrue(
-                "a word with no pronunciation file must offer no speaker",
+                "a word whose surah is not here must still offer its speaker",
                 compose.onAllNodesWithTag("word-sheet-hear", useUnmergedTree = true)
-                    .fetchSemanticsNodes().isEmpty(),
+                    .fetchSemanticsNodes().isNotEmpty(),
             )
+        }
+    }
+
+    /**
+     * The pack is on the device and this word has no clip in it, so the press
+     * answers with the word's own silence and not with a dead mark or a
+     * download it does not need. The one fake file is the pack's proof that
+     * the surah is here; the word under the finger is not the one it covers.
+     */
+    @Test
+    fun theSheetSaysAWordTheAlignmentCutNoClipFor() {
+        atAyah(BAQARAH_SEVENTH)
+        onTheSheetOf("خَتَمَ") {
+            compose.onAllNodesWithTag("word-sheet-hear", useUnmergedTree = true)
+                .onFirst()
+                .performClick()
+            compose.waitUntil(timeoutMillis = 30_000) {
+                compose.onAllNodesWithTag("word-sheet-voice", useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onAllNodesWithText(
+                "no recording of its own",
+                substring = true,
+                useUnmergedTree = true,
+            ).onFirst().assertExists()
         }
     }
 

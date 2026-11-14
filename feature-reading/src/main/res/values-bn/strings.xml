@@ -45,7 +45,13 @@
     <string name="reading_footnote_heading">টীকা %1$s</string>
     <string name="reading_word_sheet_name">শব্দের অর্থ</string>
     <string name="reading_word_root">মূল</string>
-    <string name="reading_hear_word">এই আয়াতে শব্দটি শুনুন</string>
+    <string name="reading_hear_word">শব্দটির উচ্চারণ শুনুন</string>
+    <!-- স্পিকারের উত্তর, অর্থের নিচে: এই সূরার উচ্চারণ আসছে, শব্দটির নিজের
+         রেকর্ডিং নেই, অথবা উচ্চারণ আসেনি। -->
+    <string name="reading_word_voice_waiting">এই সূরার উচ্চারণ আসছে · %1$s / %2$s</string>
+    <string name="reading_word_voice_asking">এই সূরার উচ্চারণ আসছে</string>
+    <string name="reading_word_voice_missing">এই শব্দের আলাদা কোনো রেকর্ডিং নেই।</string>
+    <string name="reading_word_voice_failed">এই সূরার উচ্চারণ আসেনি। আবার চেষ্টা করতে স্পিকার চাপুন।</string>
     <string name="reading_sheet_where">%1$s %2$s</string>
     <string name="reading_door_noted">টীকা আছে</string>
     <string name="reading_grammar_pos_noun">ইসম (বিশেষ্য)</string>

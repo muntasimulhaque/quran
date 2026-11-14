@@ -51,9 +51,10 @@ change, never left as a dead letter.
    translations ship inside the app; the tafsir arrives on the reader's word
    (unmetered only when the phone is on cellular), the word list arrives with
    the tap that turns it on, a word's pronunciation arrives for the surah being
-   read with that same tap and for a later surah only unmetered, a recitation
-   package arrives for one surah after Play and the shown size (or after a
-   standing Continue to the next surah),
+   read with that same tap or with a press on any word's speaker, and for a
+   later surah quietly and only unmetered, a recitation package arrives for one
+   surah after Play and the shown size (or after a standing Continue to the
+   next surah),
    and a held pack refreshes quietly only when the app is newer, only unmetered,
    only after the first page is readable. No other host is ever contacted, and
    there is no analytics or telemetry. No WebView.

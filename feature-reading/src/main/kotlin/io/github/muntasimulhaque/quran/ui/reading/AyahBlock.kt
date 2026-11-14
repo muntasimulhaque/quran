@@ -474,9 +474,7 @@ internal fun AyahBlock(
                                                             ayahNumber = row.ayah.number,
                                                             position = row.words.getOrNull(index)?.position
                                                                 ?: 0,
-                                                            canHear = row.hearable.contains(
-                                                                row.words.getOrNull(index)?.position ?: 0,
-                                                            ),
+                                                            surah = row.ayah.surah,
                                                         ),
                                                     )
                                                 }

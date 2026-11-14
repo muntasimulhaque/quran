@@ -32,8 +32,10 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.WordAudioStore
+import io.github.muntasimulhaque.quran.data.WordVoice
 import io.github.muntasimulhaque.quran.data.forLanguage
 import io.github.muntasimulhaque.quran.data.leadingWith
 import io.github.muntasimulhaque.quran.data.withLanguage
@@ -91,7 +93,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         context = application,
         scope = viewModelScope,
         store = wordAudioStore,
-        onInstalled = { clearRowCache() },
+        onInstalled = { surah -> onWordAudioInstalled(surah) },
     )
 
     /**
@@ -166,6 +168,17 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val lastRead: StateFlow<List<ReadPlace>> = lastReadStore.places
     val playbackState: StateFlow<PlaybackUiState> = playback.state
     val wordAudioState: StateFlow<WordAudioState> = wordAudio.state
+
+    /**
+     * What the word sheet says about the word's voice, set by the tap on its
+     * speaker. Ready is the rest: a word whose file is here sounds, and the
+     * sheet says nothing about it before the tap.
+     */
+    var wordVoice by mutableStateOf(WordVoice.Ready)
+        private set
+
+    /** The word a tap asked for, waiting for its surah's pack to arrive. */
+    private var pendingWord: PendingWord? = null
 
     /**
      * The word the reciter is on at this moment, and the wait to the next
@@ -258,7 +271,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         database = { library.database },
         translationPacks = { enabledTranslationPacks },
         language = { readingLanguage },
-        wordAudioPositions = { surah -> wordAudio.positions(surah) },
     )
 
     /**
@@ -431,7 +443,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (pack.id in settings.tafsirPacks) toggleTafsirPack(pack.id)
         if (pack.type == PackType.Words) {
             wordAudio.setEnabled(false)
-            wordAudio.clear()
             if (settings.wordByWord) {
                 settings = settings.copy(wordByWord = false)
                 clearRowCache()
@@ -1275,14 +1286,99 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * The reader's tap on the word sheet's speaker: the one word they asked
-     * about, in their own reciter, and nothing after it. The sheet only
-     * offers the mark when the surah's audio is on the device, so this is the
-     * answer to a tap rather than a state to explain.
+     * The word sheet's speaker. Every word offers it, so the tap is the ask:
+     * a word whose file is here sounds, a word whose surah has not arrived
+     * fetches the surah and sounds when it lands, and a word the aligner cut
+     * no clip for says so instead of playing nothing.
+     *
+     * The file, the pack, and the manifest are disk work, so the three
+     * answers are read on a worker and the sheet answers on the next frame
+     * (owner decision, this session).
      */
     fun hearWord(ayahNumber: Int, position: Int) {
-        viewModelScope.launch { playback.hearWord(ayahNumber, position) }
+        viewModelScope.launch {
+            val ask = withContext(Dispatchers.IO) {
+                if (position < 1) return@withContext null
+                val ayah = library.database?.ayah(ayahNumber) ?: return@withContext null
+                // The pack is asked first, and the word only when the pack is
+                // here: a pack that has just finished is one the word's file
+                // is checked against, and a pack that is still on its way is
+                // one listing rather than two (owner decision, this session).
+                val installed = wordAudio.isInstalled(ayah.surah)
+                WordAsk(
+                    surah = ayah.surah,
+                    installed = installed,
+                    hasFile = installed && wordAudio.hasWord(ayah.surah, ayah.ayah, position),
+                    hasPack = wordAudio.hasPack(ayah.surah),
+                )
+            } ?: return@launch
+            when {
+                ask.hasFile -> {
+                    pendingWord = null
+                    wordVoice = WordVoice.Ready
+                    playback.hearWord(ayahNumber, position)
+                }
+                ask.installed -> {
+                    // The surah's voices are on the device and this word has
+                    // none of its own: the reciter runs it into the next.
+                    pendingWord = null
+                    wordVoice = WordVoice.Missing
+                }
+                !ask.hasPack -> {
+                    // The published manifest names no package for this surah,
+                    // so there is nothing to wait for (a broken asset, never
+                    // the shipped app).
+                    pendingWord = null
+                    wordVoice = WordVoice.Failed
+                }
+                else -> {
+                    pendingWord = PendingWord(ayahNumber, position, ask.surah)
+                    wordVoice = WordVoice.Preparing
+                    wordAudio.request(ask.surah, unmeteredOnly = false)
+                }
+            }
+        }
     }
+
+    /**
+     * The surah's voices arrived. A tap that was waiting for them sounds now,
+     * and only while the sheet is still on that word: a reader who closed the
+     * sheet is not handed a voice they are no longer looking at (owner
+     * decision, this session).
+     */
+    private fun onWordAudioInstalled(surah: Int) {
+        val waiting = pendingWord ?: return
+        if (waiting.surah != surah) return
+        pendingWord = null
+        wordVoice = WordVoice.Ready
+        viewModelScope.launch { playback.hearWord(waiting.ayah, waiting.position) }
+    }
+
+    /** The word sheet closed: a tap waiting on a pack is forgotten, not played. */
+    fun closeWordSheet() {
+        pendingWord = null
+        wordVoice = WordVoice.Ready
+    }
+
+    /** Everything downloaded, for the page that offers to remove it. */
+    suspend fun wordAudioOnDevice(): WordAudioOnDevice =
+        withContext(Dispatchers.IO) { wordAudio.onDevice() }
+
+    /** The reader's ask to free the voices: the downloaded surahs, and no more. */
+    suspend fun removeWordAudio() {
+        pendingWord = null
+        wordVoice = WordVoice.Ready
+        withContext(Dispatchers.IO) { wordAudio.clear() }
+    }
+
+    private data class PendingWord(val ayah: Int, val position: Int, val surah: Int)
+
+    private data class WordAsk(
+        val surah: Int,
+        val hasFile: Boolean,
+        val installed: Boolean,
+        val hasPack: Boolean,
+    )
 
     fun togglePlayback() = playback.toggle()
 

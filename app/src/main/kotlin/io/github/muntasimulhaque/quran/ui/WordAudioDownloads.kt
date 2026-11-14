@@ -5,6 +5,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import io.github.muntasimulhaque.quran.data.WordAudioDownloader
 import io.github.muntasimulhaque.quran.data.WordAudioManifest
+import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
+import io.github.muntasimulhaque.quran.data.WordAudioPackage
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.WordAudioStore
 import kotlinx.coroutines.CancellationException
@@ -21,17 +23,20 @@ import kotlinx.coroutines.withContext
 /**
  * The word pronunciation downloads, one surah at a time.
  *
- * The word meanings toggle is the reader's word for the pair. Turning it on
- * asks for the surah being read on the network the reader is on, because the
- * tap is the ask and the page has shown the size. Every surah the reader
- * reaches afterwards arrives quietly on an unmetered connection, after the
- * page is readable, the way the root pack does, and the moment Wi-Fi arrives
- * a surah that was waiting starts. Turning the aid off cancels a transfer
- * still in flight and keeps the packs already here.
+ * Two acts are the reader's word for the pair. The word meanings toggle asks
+ * for the surah being read on the network the reader is on, because the tap is
+ * the ask. And the word sheet's speaker may be pressed for any word: the tap
+ * is approval enough, so a surah whose voices are not here is fetched then and
+ * the word sounds when its pack lands (owner decision, this session).
  *
- * The state is the one line the word meanings page reads: the current
- * surah's size, what the whole Book would weigh, and whether the surah is
- * downloaded, bundled, waiting for Wi-Fi, or failed.
+ * Every surah the reader reaches afterwards arrives quietly on an unmetered
+ * connection, after the page is readable, the way the root pack does, and the
+ * moment Wi-Fi arrives a surah that was waiting starts. Turning the aid off
+ * cancels a transfer still in flight and keeps the packs already here.
+ *
+ * The state is what the words page and the word sheet read: the current
+ * surah's size, the bytes already here, and whether the surah is installed,
+ * waiting for Wi-Fi, or failed.
  *
  * Every question about the disk is asked on a worker. A surah's folder holds
  * up to six thousand files, so listing it on the frame the reader turned the
@@ -43,10 +48,17 @@ internal class WordAudioDownloads(
     private val store: WordAudioStore = WordAudioStore(context),
     private val manifest: WordAudioManifest = WordAudioManifest.load(context),
     private val onInstalled: (Int) -> Unit = {},
+    /**
+     * The one transfer. It is a value and not a call to the downloader so a
+     * test can hand in a pack it writes itself, and the tap's whole path
+     * (fetch, commit, publish, hand back) is measured with no network (owner
+     * decision, this session).
+     */
+    private val fetch: suspend (WordAudioPackage, (Long, Long) -> Unit) -> Result<Unit> =
+        { pack, onProgress -> WordAudioDownloader(context).download(pack, onProgress) },
 ) {
 
-    private val downloader = WordAudioDownloader(context)
-    private val _state = MutableStateFlow(WordAudioState(totalBytes = manifest.totalBytes()))
+    private val _state = MutableStateFlow(WordAudioState())
     val state: StateFlow<WordAudioState> = _state.asStateFlow()
 
     private var job: Job? = null
@@ -141,19 +153,27 @@ internal class WordAudioDownloads(
             _state.value = WordAudioState(
                 surah = surah,
                 bytes = pack.bytes,
-                totalBytes = manifest.totalBytes(),
             )
-            val result = downloader.download(pack) { read, total ->
-                _state.update {
-                    it.copy(
-                        surah = surah,
-                        bytes = pack.bytes,
-                        read = read,
-                        installed = false,
-                        failed = false,
-                        waiting = false,
-                        totalBytes = total,
-                    )
+            // The line under the finger counts in whole kilobytes, and the
+            // reading stands behind it, so the transfer publishes one state
+            // per percent rather than one per socket read (owner decision,
+            // this session).
+            val result = fetch(pack) { read, total ->
+                val step = (total / 100).coerceAtLeast(1L)
+                _state.update { previous ->
+                    val counting = previous.surah == surah && previous.read > 0
+                    if (counting && read < total && read - previous.read < step) {
+                        previous
+                    } else {
+                        previous.copy(
+                            surah = surah,
+                            bytes = pack.bytes,
+                            read = read,
+                            installed = false,
+                            failed = false,
+                            waiting = false,
+                        )
+                    }
                 }
             }
             pendingSurah = null
@@ -176,12 +196,21 @@ internal class WordAudioDownloads(
         refresh(current)
     }
 
-    fun positions(surah: Int): Map<Int, Set<Int>> = store.positions(surah)
+    /** True when this word's own file is on the device, bundled or downloaded. */
+    fun hasWord(surah: Int, ayah: Int, position: Int): Boolean =
+        store.uri(surah, ayah, position) != null
 
-    fun remove(surah: Int) {
-        store.remove(surah)
-        refresh(surah)
-    }
+    /** True when the published manifest carries a package for this surah. */
+    fun hasPack(surah: Int): Boolean = surah in 1..114 && manifest.packageFor(surah) != null
+
+    /** True when this surah's words are on the device, bundled or downloaded. */
+    fun isInstalled(surah: Int): Boolean = store.isInstalled(surah)
+
+    /**
+     * Everything downloaded, for the page that offers to remove it. The
+     * bundled Al-Fatiha is the app's own asset and is never counted.
+     */
+    fun onDevice(): WordAudioOnDevice = store.onDevice()
 
     fun clear() {
         job?.cancel()
@@ -204,9 +233,7 @@ internal class WordAudioDownloads(
         return WordAudioState(
             surah = surah,
             bytes = pack?.bytes ?: 0,
-            totalBytes = manifest.totalBytes(),
             installed = surah in 1..114 && store.isInstalled(surah),
-            bundled = surah in 1..114 && store.isBundled(surah),
         )
     }
 

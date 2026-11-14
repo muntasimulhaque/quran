@@ -313,13 +313,6 @@ data class ReadingRow(
      * the word, its meaning, and its root (owner decision, this session).
      */
     val grammar: List<WordGrammar?> = emptyList(),
-    /**
-     * The word positions of this ayah whose pronunciation file is on the
-     * device. The sheet draws its speaker only for a word in this set, so a
-     * word the aligner could not place has no dead mark (owner decision,
-     * this session).
-     */
-    val hearable: Set<Int> = emptySet(),
 )
 
 /**

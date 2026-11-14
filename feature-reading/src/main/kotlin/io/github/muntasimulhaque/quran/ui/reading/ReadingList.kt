@@ -21,6 +21,8 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.data.WordAudioState
+import io.github.muntasimulhaque.quran.data.WordVoice
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
@@ -58,6 +60,11 @@ fun ReadingList(
     wordAid: Boolean = metrics.wordByWord,
     /** The word sheet's speaker: one word of the verse, in the reader's voice. */
     onHearWord: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
+    /** What the speaker's press has to say, and what its pack weighs. */
+    wordVoice: WordVoice = WordVoice.Ready,
+    wordAudio: WordAudioState? = null,
+    /** The word sheet closed: a press still waiting on a pack is forgotten. */
+    onWordClosed: () -> Unit = {},
     /** The reader's place: the ayah, which the list shows and never corrects. */
     place: Int,
     hasTranslation: Boolean,
@@ -209,6 +216,9 @@ fun ReadingList(
         word = word,
         onWord = { word = it },
         onHearWord = onHearWord,
+        wordVoice = wordVoice,
+        wordAudio = wordAudio,
+        onWordClosed = onWordClosed,
         modifier = modifier,
     )
 }

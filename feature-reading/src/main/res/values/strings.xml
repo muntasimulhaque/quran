@@ -45,7 +45,16 @@
     <string name="reading_footnote_heading">Footnote %1$s</string>
     <string name="reading_word_sheet_name">Word meaning</string>
     <string name="reading_word_root">Root</string>
-    <string name="reading_hear_word">Hear this word in the ayah</string>
+    <string name="reading_hear_word">Hear this word</string>
+    <!-- The speaker's answer under the gloss: the surah's voices on their
+         way, the word itself when the alignment cut it no clip, and a
+         transfer that did not arrive. The speaker stands on every word now,
+         so these are the four things a press can say (owner decision, this
+         session). -->
+    <string name="reading_word_voice_waiting">Getting the voices of this surah · %1$s of %2$s</string>
+    <string name="reading_word_voice_asking">Getting the voices of this surah</string>
+    <string name="reading_word_voice_missing">This word has no recording of its own.</string>
+    <string name="reading_word_voice_failed">The voices for this surah did not arrive. Tap the speaker to try again.</string>
     <string name="reading_sheet_where">%1$s %2$s</string>
     <string name="reading_door_noted">Has a note</string>
     <string name="reading_grammar_pos_noun">Noun</string>

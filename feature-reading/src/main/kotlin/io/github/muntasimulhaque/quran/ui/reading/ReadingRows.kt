@@ -35,6 +35,8 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
+import io.github.muntasimulhaque.quran.data.WordAudioState
+import io.github.muntasimulhaque.quran.data.WordVoice
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
@@ -101,6 +103,11 @@ internal fun ReadingRows(
     onWord: (OpenWord?) -> Unit,
     /** The word sheet's speaker: one word of the verse, in the reader's voice. */
     onHearWord: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
+    /** What the speaker's press has to say, and what its pack weighs. */
+    wordVoice: WordVoice = WordVoice.Ready,
+    wordAudio: WordAudioState? = null,
+    /** The sheet closed: a press still waiting on a pack is forgotten. */
+    onWordClosed: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     // The stored place is the ayah, so the list opens on it and needs nothing
@@ -351,13 +358,14 @@ internal fun ReadingRows(
             surahName = surah.nameSimple,
             metrics = metrics,
             hafs = hafs,
-            onDismiss = { onWord(null) },
-            onHear = if (open.canHear) {
-                { onHearWord(open.ayahNumber, open.position) }
-            } else {
-                null
+            onDismiss = {
+                onWordClosed()
+                onWord(null)
             },
+            onHear = { onHearWord(open.ayahNumber, open.position) },
             hearing = open.ayahNumber == hearingAyah && open.position == hearingWord,
+            voice = wordVoice,
+            voiceAudio = wordAudio,
         )
     }
 }

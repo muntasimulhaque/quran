@@ -36,19 +36,17 @@
     <string name="settings_row_words">Word meanings and pronunciation</string>
     <string name="settings_title_words">Word meanings and pronunciation</string>
     <string name="settings_words_title">Press and hold a word for its meaning and pronunciation</string>
-    <string name="settings_words_lead">When this is on, press and hold any word in the reading to see its meaning and hear its pronunciation.</string>
     <!-- The word list and the roots that travel with it: the two sizes the
          one tap fetches, so the reader sees the whole price of the aid. -->
     <string name="settings_words_size_with_root">%1$s · word roots %2$s</string>
-    <!-- The pronunciation line under the one switch: the current surah's
-         size and state, and the whole Book's size. The switch is the reader's
-         word for the pair; the line is its shown price. -->
-    <string name="settings_words_pronunciation_size">Pronunciation %1$s for this surah · about %2$s for the Book</string>
-    <string name="settings_words_pronunciation_downloading">Pronunciation downloading · %1$s of %2$s</string>
-    <string name="settings_words_pronunciation_on_device">Pronunciation on device · %1$s for this surah · about %2$s for the Book</string>
-    <string name="settings_words_pronunciation_bundled">Pronunciation bundled for this surah</string>
-    <string name="settings_words_pronunciation_waiting">Pronunciation %1$s for this surah · waits for Wi-Fi · about %2$s for the Book</string>
-    <string name="settings_words_pronunciation_failed">Pronunciation %1$s for this surah · failed, retry with the switch</string>
+    <!-- The pronunciation line under the one switch: only while a transfer
+         runs or after one fails, because the voices on the device have their
+         own row and a word with no voice says so on its own sheet. -->
+    <string name="settings_words_pronunciation_downloading">Getting the pronunciation · %1$s of %2$s</string>
+    <string name="settings_words_pronunciation_failed">Pronunciation did not arrive. Tap the speaker on any word to try again.</string>
+    <!-- The voices the reader downloaded, and the one act they allow. -->
+    <string name="settings_voices_row">Downloaded voices (%1$d)</string>
+    <string name="settings_voices_remove">Remove downloaded word voices</string>
     <string name="settings_tajweed_title">Tajweed colors</string>
     <string name="settings_tajweed_lead">Each color is one family of rules, and the word beside its name is from the reading. The colored letters are the ones the rule touches; every rule the family covers is named under it.</string>
 

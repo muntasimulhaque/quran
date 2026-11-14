@@ -116,9 +116,10 @@ class WordAudioStore(private val context: Context) {
 
     /**
      * The word positions that have a file, per ayah of this surah, downloaded
-     * or bundled. The reading asks this once per surah and keeps the answer
-     * in its rows, so a word whose clip the aligner could not place draws no
-     * speaker rather than a dead one.
+     * or bundled. The store keeps it per surah, and the word sheet's press is
+     * what reads it: a word whose clip the aligner could not place says so
+     * rather than playing nothing, and a file that lands while the reader is
+     * in the surah is here on the next press.
      *
      * The answer is keyed by the ayah inside the surah, not by the running
      * ayah number, because that is what the file name carries and what the
@@ -162,13 +163,29 @@ class WordAudioStore(private val context: Context) {
         assetListCache.remove(surah)
     }
 
-    fun remove(surah: Int): Int {
-        if (surah !in 1..114) return 0
-        val folder = SafePaths.childUnder(imported, folder(surah)) ?: return 0
-        val files = folder.listFiles()?.size ?: 0
-        folder.deleteRecursively()
-        invalidate(surah)
-        return files
+    /**
+     * The surahs whose words the reader has downloaded, and what they weigh.
+     * The bundled Al-Fatiha is the app's own asset, so it is not counted here:
+     * this is the number the page can offer to remove.
+     *
+     * A staging or half-committed folder is not a surah: the unpack leaves
+     * `.staging`, `<surah>.new`, and `<surah>.old` beside the committed
+     * folders, and none of those names is a number, so a transfer in flight
+     * is never counted as a complete one.
+     */
+    fun onDevice(): WordAudioOnDevice {
+        val folders = imported.listFiles { file -> file.isDirectory }.orEmpty()
+        var surahs = 0
+        var bytes = 0L
+        for (folder in folders) {
+            val number = folder.name.toIntOrNull() ?: continue
+            if (number !in 1..114) continue
+            val files = folder.listFiles { file -> file.isFile }.orEmpty()
+            if (files.isEmpty()) continue
+            surahs++
+            bytes += files.sumOf { it.length() }
+        }
+        return WordAudioOnDevice(surahs, bytes)
     }
 
     /** Removes every downloaded word, keeping the bundled Al-Fatiha assets. */
@@ -390,16 +407,46 @@ class WordAudioDownloader(private val context: Context) {
 }
 
 /**
- * What the word meanings page says about the pronunciation pack: the current
- * surah's size and state, and the whole Book's size for the one line.
+ * The downloaded word voices on the device: how many surahs, and their bytes.
+ * The bundled Al-Fatiha is not a download and is not counted.
+ */
+data class WordAudioOnDevice(val surahs: Int = 0, val bytes: Long = 0) {
+    val present: Boolean get() = surahs > 0
+}
+
+/**
+ * What the word sheet says about the voice of the word it is showing, after
+ * the reader pressed the speaker.
+ *
+ * The speaker is drawn for every word, because a tap is the reader's ask:
+ * when the file is here it sounds, and when the surah's pack is not it arrives
+ * without a question. These four are what the tap can mean.
+ * - [Ready]: the word's file is on the device, or the tap has just played it.
+ * - [Preparing]: this tap is waiting for the surah's pack to arrive.
+ * - [Missing]: the pack is here and the aligner cut no clip for this word, so
+ *   the sheet says so instead of playing nothing.
+ * - [Failed]: the pack did not arrive; a second tap asks again.
+ */
+enum class WordVoice {
+    Ready,
+    Preparing,
+    Missing,
+    Failed,
+}
+
+/**
+ * What the words page and the word sheet read about the pronunciation pack:
+ * the surah in hand, what its voices weigh, the bytes already here, and
+ * whether the pack has arrived, is waiting for an unmetered connection, or
+ * failed. The voices already downloaded are counted apart, by
+ * [WordAudioOnDevice], because they are the reader's own files and not the
+ * state of the one transfer this describes.
  */
 data class WordAudioState(
     val surah: Int = 0,
     val bytes: Long = 0,
     val read: Long = 0,
-    val totalBytes: Long = 0,
     val installed: Boolean = false,
-    val bundled: Boolean = false,
     val failed: Boolean = false,
     val waiting: Boolean = false,
 )

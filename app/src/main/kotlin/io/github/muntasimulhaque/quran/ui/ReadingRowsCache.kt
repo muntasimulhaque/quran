@@ -33,8 +33,6 @@ internal class ReadingRowsCache(
     private val translationPacks: () -> List<ContentPack>,
     /** The reader's own language: the word meanings speak it and no other. */
     private val language: () -> String,
-    /** The word positions with a pronunciation file, per ayah of a surah. */
-    private val wordAudioPositions: suspend (Int) -> Map<Int, Set<Int>> = { emptyMap() },
 ) {
 
     /**
@@ -117,7 +115,6 @@ internal class ReadingRowsCache(
                 } else {
                     emptyMap()
                 }
-                val hearable = wordAudioPositions(surah)
                 ayahs.map { ayah ->
                     val drawn = words[ayah.number].orEmpty()
                     ReadingRow(
@@ -127,7 +124,6 @@ internal class ReadingRowsCache(
                         meanings = meanings[ayah.number].orEmpty(),
                         roots = drawn.map { roots[ayah.number]?.get(it.position) },
                         grammar = drawn.map { grammar[ayah.number]?.get(it.position) },
-                        hearable = hearable[ayah.ayah].orEmpty(),
                     )
                 }
             }.getOrElse { failure ->
@@ -175,10 +171,6 @@ internal class ReadingRowsCache(
             meanings = meanings,
             roots = words.map { roots[it.position] },
             grammar = words.map { grammar[it.position] },
-            // The one-row surfaces are the size sample and the share card,
-            // and neither opens the word sheet: the speaker is read with the
-            // list, where the audio question can be asked off the frame.
-            hearable = emptySet(),
         )
         synchronized(lock) {
             if (generation != readUnder) return null

@@ -56,6 +56,33 @@ class WordAudioStoreTest {
         assertNull(store.uri(0, 1, 1))
     }
 
+    /**
+     * The page's own count: the surahs the reader downloaded and their bytes.
+     * The bundled Al-Fatiha is the app's asset and is never counted, and a
+     * folder the unpack left behind is not a surah a reader can play.
+     */
+    @Test
+    fun onDeviceCountsTheDownloadedSurahsAndIgnoresTheUnpackSLeftovers() {
+        val store = WordAudioStore(context)
+        val before = store.onDevice()
+        val folder = File(context.filesDir, "word-audio/003").apply { mkdirs() }
+        File(folder, "003_001_001.opus").writeBytes(ByteArray(100))
+        // The three names the unpack leaves beside a committed folder.
+        File(context.filesDir, "word-audio/.staging/004.new").mkdirs()
+        File(context.filesDir, "word-audio/003.new").mkdirs()
+        File(context.filesDir, "word-audio/003.old").mkdirs()
+        try {
+            val after = store.onDevice()
+            assertEquals(before.surahs + 1, after.surahs)
+            assertEquals(before.bytes + 100, after.bytes)
+        } finally {
+            folder.deleteRecursively()
+            File(context.filesDir, "word-audio/.staging").deleteRecursively()
+            File(context.filesDir, "word-audio/003.new").deleteRecursively()
+            File(context.filesDir, "word-audio/003.old").deleteRecursively()
+        }
+    }
+
     @Test
     fun everyBundledFileIsAnOpusStreamThePlatformCanRead() {
         val store = WordAudioStore(context)

@@ -155,6 +155,11 @@ fun ReaderScreen(
         saved.filter { it.marked }.map { it.ayahNumber }.toSet()
     }
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
+    // The surah's voices on their way, for the word sheet's own line. The
+    // line is the only reader of it: the state moves on a page turn, a press,
+    // and a transfer's percent, and on nothing else (owner decision, this
+    // session).
+    val wordAudio by viewModel.wordAudioState.collectAsStateWithLifecycle()
 
     // The bar is the reader's ask and stays until they put it away or start
     // moving the page. No timer, no first-run reveal.
@@ -656,6 +661,9 @@ fun ReaderScreen(
                     cachedRows = { viewModel.cachedRows(it) },
                     onReadAhead = { viewModel.readAheadSurah(it) },
                     onHearWord = { ayah, position -> viewModel.hearWord(ayah, position) },
+                    wordVoice = viewModel.wordVoice,
+                    wordAudio = wordAudio,
+                    onWordClosed = { viewModel.closeWordSheet() },
                     metrics = settings.readingMetrics(),
                     reveal = revealForSurah,
                     place = settings.ayah,

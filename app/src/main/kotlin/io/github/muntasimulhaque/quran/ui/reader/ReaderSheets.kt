@@ -145,6 +145,9 @@ internal fun ReaderSheets(
                 )
             },
             wordAudio = wordAudio,
+            // The voices the reader has downloaded, counted where the page
+            // that offers to remove them reads it.
+            wordVoices = { viewModel.wordAudioOnDevice() },
             recitations = viewModel.recitations,
             version = BuildConfig.VERSION_NAME,
             preview = { viewModel.sizePreviewRow() },
@@ -203,6 +206,7 @@ internal fun ReaderSheets(
                 onRemoveDownloads = { recitation, surah ->
                     viewModel.removeDownloads(recitation, surah)
                 },
+                onRemoveWordVoices = { viewModel.removeWordAudio() },
             ),
             onDismiss = onDismiss,
         )

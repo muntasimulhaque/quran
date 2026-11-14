@@ -396,8 +396,8 @@ class WordAudio(private val root: File) {
      * Builds one ayah's word files. A failed ffmpeg pass is retried one word
      * at a time, so a single damaged frame leaves one word without a file
      * instead of taking the ayah's other words with it. The words that still
-     * fail are returned and named in the report; the app draws no speaker for
-     * them.
+     * fail are returned and named in the report; the app says such a word has
+     * no recording of its own.
      */
     private fun buildAyah(out: File, ayahPlan: AyahPlan): List<Int> {
         if (ayahPlan.clips.isEmpty()) return emptyList()

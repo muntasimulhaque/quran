@@ -14,6 +14,7 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
 import io.github.muntasimulhaque.quran.ui.settings.WordsPage
@@ -110,5 +111,31 @@ class WordsSwitchTest {
         }
         compose.onNodeWithTag("switch-words-page").assertIsNotEnabled()
         compose.onNodeWithTag("pack-action-add", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    /**
+     * The voices the reader downloaded: one row that says how many surahs and
+     * what they weigh, and the one act they allow. The row is drawn for
+     * downloads only, so a fresh page carries nothing to remove (owner
+     * decision, this session).
+     */
+    @Test
+    fun theDownloadedVoicesSayWhatTheyWeighAndCanGo() {
+        var removed = 0
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light, language = UiLanguage.English) {
+                WordsPage(
+                    settings = AppSettings(uiLanguage = "en", wordByWord = true),
+                    packs = listOf(missing),
+                    packSetup = null,
+                    actions = SettingsActions(onRemoveWordVoices = { removed++ }),
+                    wordVoices = { WordAudioOnDevice(surahs = 12, bytes = 39_845_888) },
+                )
+            }
+        }
+        compose.onNodeWithText("Downloaded voices (12)").assertExists()
+        compose.onNodeWithText("38 MB").assertExists()
+        compose.onNodeWithText("Remove").performClick()
+        assertEquals("the page must ask once", 1, removed)
     }
 }
