@@ -50,9 +50,11 @@ import kotlin.math.roundToInt
  * picture as a caption; a reader could not know what they were sending or
  * choose the plain words instead (owner report). Here the real card
  * is drawn at its own scale as a preview, and the doors are named: **Share
- * image** (the default) and **Share text**. The preview is the same
- * composable the capture draws, so what the reader sees is what the picture
- * will be, not a second drawing that can drift from it.
+ * text** first, and **Share image** (the default) last, the app's one order
+ * for a pair, so the eye ends on the default rather than meeting it first.
+ * The preview is the same composable the capture draws, so what the reader
+ * sees is what the picture will be, not a second drawing that can drift
+ * from it.
  *
  * The sheet carries no heading. It used to open with the ayah's reference in
  * a title above the card, which the card already prints under the surah's
@@ -141,13 +143,13 @@ internal fun AyahShareSheet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TextButton(
-                        label = stringResource(R.string.share_image),
-                        onClick = { onShareImage(cardWidth) },
-                    )
-                    TextButton(
                         label = stringResource(R.string.share_text),
                         onClick = onShareText,
                         quiet = true,
+                    )
+                    TextButton(
+                        label = stringResource(R.string.share_image),
+                        onClick = { onShareImage(cardWidth) },
                     )
                 }
             }

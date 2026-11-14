@@ -23,7 +23,6 @@ import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
-import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
@@ -58,8 +57,8 @@ data class SettingsActions(
     val onRemovePack: (String) -> Unit = {},
     val onPackSetupCancel: () -> Unit = {},
     val onRemoveDownloads: suspend (String, Int) -> Unit = { _, _ -> },
-    /** The reader's ask to take back the word voices they downloaded. */
-    val onRemoveWordVoices: suspend () -> Unit = {},
+    /** The reader's ask to take back one surah's word voices. */
+    val onRemoveWordVoice: suspend (Int) -> Unit = {},
 )
 
 /** A pack the reader asked for, while it downloads. */
@@ -89,7 +88,7 @@ fun SettingsSheet(
     packSetup: PackSetupState?,
     wordAudio: WordAudioState = WordAudioState(),
     /** What the reader has downloaded of the word voices, read on the page. */
-    wordVoices: suspend () -> WordAudioOnDevice = { WordAudioOnDevice() },
+    wordVoices: suspend () -> List<DownloadedSurah> = { emptyList() },
     recitations: List<Recitation>,
     version: String,
     preview: suspend () -> ReadingRow?,

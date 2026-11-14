@@ -164,9 +164,9 @@ class WordAudioStore(private val context: Context) {
     }
 
     /**
-     * The surahs whose words the reader has downloaded, and what they weigh.
-     * The bundled Al-Fatiha is the app's own asset, so it is not counted here:
-     * this is the number the page can offer to remove.
+     * The surahs whose words the reader has downloaded, each with its bytes.
+     * The bundled Al-Fatiha is the app's own asset, so it is not here: this is
+     * the list the page can offer to take back.
      *
      * A staging or half-committed folder is not a surah: the unpack leaves
      * `.staging`, `<surah>.new`, and `<surah>.old` beside the committed
@@ -174,26 +174,30 @@ class WordAudioStore(private val context: Context) {
      * is never counted as a complete one.
      */
     fun onDevice(): WordAudioOnDevice {
-        val folders = imported.listFiles { file -> file.isDirectory }.orEmpty()
-        var surahs = 0
-        var bytes = 0L
-        for (folder in folders) {
-            val number = folder.name.toIntOrNull() ?: continue
-            if (number !in 1..114) continue
-            val files = folder.listFiles { file -> file.isFile }.orEmpty()
-            if (files.isEmpty()) continue
-            surahs++
-            bytes += files.sumOf { it.length() }
-        }
-        return WordAudioOnDevice(surahs, bytes)
+        val rows = imported.listFiles { file -> file.isDirectory }.orEmpty()
+            .mapNotNull { folder ->
+                val number = folder.name.toIntOrNull() ?: return@mapNotNull null
+                if (number !in 1..114) return@mapNotNull null
+                val files = folder.listFiles { file -> file.isFile }.orEmpty()
+                if (files.isEmpty()) null else WordAudioSurah(number, files.sumOf { it.length() })
+            }
+            .sortedBy { it.surah }
+        return WordAudioOnDevice(rows)
     }
 
-    /** Removes every downloaded word, keeping the bundled Al-Fatiha assets. */
-    fun clear(): Int {
-        val files = imported.listFiles()?.size ?: 0
-        imported.deleteRecursively()
-        positionsCache.clear()
-        return files
+    /**
+     * Removes one surah's downloaded words and leaves the rest. The folder is
+     * left empty rather than deleted, the way the reciter's own removal leaves
+     * it: an empty folder is not a surah, and a half-finished folder beside it
+     * is never touched.
+     */
+    fun remove(surah: Int): Int {
+        if (surah !in 1..114) return 0
+        val folder = File(imported, folder(surah))
+        val files = folder.listFiles { file -> file.isFile }.orEmpty()
+        files.forEach { it.delete() }
+        invalidate(surah)
+        return files.size
     }
 
     private fun fileName(surah: Int, ayah: Int, position: Int): String =
@@ -407,12 +411,15 @@ class WordAudioDownloader(private val context: Context) {
 }
 
 /**
- * The downloaded word voices on the device: how many surahs, and their bytes.
- * The bundled Al-Fatiha is not a download and is not counted.
+ * The downloaded word voices on the device: the surahs, each with its bytes.
+ * The bundled Al-Fatiha is not a download and is not here.
  */
-data class WordAudioOnDevice(val surahs: Int = 0, val bytes: Long = 0) {
-    val present: Boolean get() = surahs > 0
+data class WordAudioOnDevice(val rows: List<WordAudioSurah> = emptyList()) {
+    val bytes: Long get() = rows.sumOf { it.bytes }
 }
+
+/** One surah's downloaded word voices, and what its folder weighs. */
+data class WordAudioSurah(val surah: Int, val bytes: Long)
 
 /**
  * What the word sheet says about the voice of the word it is showing, after

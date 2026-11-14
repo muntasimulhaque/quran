@@ -3,11 +3,9 @@ package io.github.muntasimulhaque.quran.ui.settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -190,34 +190,28 @@ fun AppTheme.name(): String = stringResource(
 )
 
 /**
- * The size of one kind of text: its name and its scale on one line, the ends
- * showing the smallest and the largest the kind can be, and the chosen stop
- * filled. The sample above the rows is the reader's own ayah, so a change is
- * judged on the page it is about to change.
+ * The size of one kind of text: its name on one line, and its scale under it,
+ * with the ends showing the smallest and the largest the kind can be and the
+ * chosen stop filled. The sample above the rows is the reader's own ayah, so a
+ * change is judged on the page it is about to change.
  *
- * The row used to be a name with a 250 dp pill of five 48 dp cells under it, a
- * line of its own for every kind of text. The cells were the targets the
- * accessibility rule asked for, and the name moved above them for it; the rail
- * is one target that fits beside the name, so the kinds of text come down by
- * a line each and the page still offers every size (owner decision, this
- * session). The smallest and largest marks at the ends say which way the scale
- * runs, and the chosen stop's halo says where the reader is.
+ * **The name stands over its rail** (owner decision, this session). It used to
+ * keep a fixed 120 dp column beside the rail, and the two end marks a fixed
+ * slot each: at 200 percent on a phone the column took half the row, the name
+ * ellipsized, and on a narrow glass the marks were dropped to keep the rail
+ * alive, which took away the one thing that says which way the scale runs.
+ * Over the rail, the name has the page's whole width and the rail has what is
+ * left after its two marks at every text size. The pace in the listening menu
+ * already draws its label over the same [ScaleRow] (owner decision, the
+ * forty-seventh session), so this is one control learned once in both places,
+ * not a second shape.
  *
- * **The rails are one length** (owner report, this session). The label
- * and the two end marks used to take their own intrinsic width, so "Quran
- * text" left a longer rail than a longer name and the page read as
- * different controls. The label now keeps a fixed column and each mark a
- * fixed slot, both scaled with the system font scale, so the rail between
- * them is the same on every row of a given page. On a tablet the page is
- * wider and every rail is longer together; the equality is what the eye
- * reads, not one dp value. The label's single line ellipsizes if a translation
- * or a larger font outgrows the column, and the marks stay centred in their
- * slots so a wide Arabic alef and a narrow Latin A start the rail on one
- * line.
+ * **The rails are one length.** Each one starts on the gutter plus its mark and
+ * ends on the mirror, whatever its name says, so two controls on one page read
+ * as one measure. The name is a row's name and wears the same voice as every
+ * other row's name; it is silent to a screen reader, because the rail already
+ * speaks it, and the drawn text would otherwise be read twice.
  */
-private val SizeLabel = 120.dp
-
-/** The slot one end mark keeps, so the rail's two ends never move. */
 private val SizeMarkSlot = 24.dp
 
 @Composable
@@ -236,78 +230,49 @@ fun SizeRow(
         },
     )
     val scale = if (role == TypeRole.Arabic) 0.75f else 1f
-    val fontScale = LocalDensity.current.fontScale
-    BoxWithConstraints(
+    val markSlot = SizeMarkSlot * LocalDensity.current.fontScale
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = gutter, end = gutter, top = Space.Block),
     ) {
-        // The rail's own floor is 48 dp. The label and the two end marks
-        // scale with the system font, but they may not eat the rail: at 200
-        // percent on a 360 dp phone the old fixed columns needed 392 dp
-        // before the rail began. The label gives way first, and the two end
-        // marks are the first thing to go when even that is not enough; the
-        // rail keeps its floor either way (owner decision, the consistency
-        // audit).
-        val railFloor = 48.dp
-        val labelSlot = (SizeLabel * fontScale)
-            .coerceAtMost(((maxWidth - railFloor) * 0.55f).coerceAtLeast(0.dp))
-        val wantedMark = SizeMarkSlot * fontScale
-        val markSlot = if (maxWidth - labelSlot - Space.Line - railFloor >= wantedMark * 2) {
-            wantedMark
-        } else {
-            0.dp
-        }
-        Row(
+        Text(
+            text = label,
+            // A control's name wears the same words every other row's name
+            // wears, so the sheet reads as one voice. The rail under it speaks
+            // the same name, so the drawn line is silent to a screen reader.
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = label,
-                // A control's name wears the same words every other row's name
-                // wears, so the sheet reads as one voice (owner decision, the
-                // theme and consistency session). The column is the rail's
-                // leading line: the names may be different lengths, the rails
-                // may not start on different ones.
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.width(labelSlot),
-                maxLines = 1,
-                softWrap = false,
-                overflow = TextOverflow.Ellipsis,
-            )
-            ScaleRow(
-                label = label,
-                steps = TextSize.STEPS,
-                value = step,
-                onSelect = onChange,
-                startMark = {
-                    if (markSlot > 0.dp) {
-                        SizeMark(role, TextSize.STEPS.first(), scale, Modifier.width(markSlot))
-                    }
-                },
-                endMark = {
-                    if (markSlot > 0.dp) {
-                        SizeMark(role, TextSize.STEPS.last(), scale, Modifier.width(markSlot))
-                    }
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = Space.Line),
-            )
-        }
+                .clearAndSetSemantics { testTag = "size-label" },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        ScaleRow(
+            label = label,
+            steps = TextSize.STEPS,
+            value = step,
+            onSelect = onChange,
+            startMark = {
+                SizeMark(role, TextSize.STEPS.first(), scale, Modifier.width(markSlot))
+            },
+            endMark = {
+                SizeMark(role, TextSize.STEPS.last(), scale, Modifier.width(markSlot))
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Space.Line),
+        )
     }
 }
 
 /**
  * One end of a size scale: the letter at the size that end offers, in the
- * script it is read in. The Arabic and the aid's word are drawn at three
- * quarters, so the largest still fits the row; the others at their own size,
- * as the sample ayah above is drawn. [modifier] is the fixed mark slot, and
- * the letter stands on its middle so two marks of different scripts read on
- * one line.
+ * script it is read in. The Arabic is drawn at three quarters, so the largest
+ * still fits the row; the others at their own size, as the sample ayah above
+ * is drawn. [modifier] is the fixed mark slot, and the letter stands on its
+ * middle so two marks of different scripts read on one line.
  */
 @Composable
 private fun SizeMark(

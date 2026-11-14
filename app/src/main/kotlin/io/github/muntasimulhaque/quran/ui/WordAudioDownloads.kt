@@ -207,16 +207,20 @@ internal class WordAudioDownloads(
     fun isInstalled(surah: Int): Boolean = store.isInstalled(surah)
 
     /**
-     * Everything downloaded, for the page that offers to remove it. The
-     * bundled Al-Fatiha is the app's own asset and is never counted.
+     * Everything downloaded, for the page that offers to remove it, one surah
+     * at a time. The bundled Al-Fatiha is the app's own asset and is never
+     * counted.
      */
     fun onDevice(): WordAudioOnDevice = store.onDevice()
 
-    fun clear() {
-        job?.cancel()
-        job = null
-        pendingSurah = null
-        store.clear()
+    /**
+     * The reader's tap to take back one surah's voices. The page reads the
+     * device again after it, so the row goes when its files are gone; the
+     * current surah's state is read again too, because the aid may be looking
+     * at the surah the reader just emptied.
+     */
+    fun remove(surah: Int) {
+        store.remove(surah)
         refresh(current)
     }
 

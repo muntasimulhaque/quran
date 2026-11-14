@@ -130,23 +130,24 @@ internal fun BottomStack(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                if (setup.failed) {
-                    TextButton(
-                        label = stringResource(R.string.action_retry),
-                        onClick = { viewModel.installPack(setup.pack.id) },
-                    )
-                }
                 TextButton(
                     label = stringResource(
                         if (setup.failed) R.string.action_close else R.string.action_cancel,
                     ),
                     onClick = { viewModel.cancelPackSetup() },
-                    // Retry and Close are two standalone actions, so they
-                    // stand the action gap apart (owner decision, this
-                    // session).
-                    modifier = Modifier.padding(start = Space.Action),
+                    // The way out leads and the act trails, the app's one order
+                    // for a pair, so a download that failed reads Close then
+                    // Retry. The two standalone actions stand the action gap
+                    // apart (owner decision, this session).
                     quiet = true,
                 )
+                if (setup.failed) {
+                    TextButton(
+                        label = stringResource(R.string.action_retry),
+                        onClick = { viewModel.installPack(setup.pack.id) },
+                        modifier = Modifier.padding(start = Space.Action),
+                    )
+                }
             }
         }
         val offer = viewModel.listenOffer

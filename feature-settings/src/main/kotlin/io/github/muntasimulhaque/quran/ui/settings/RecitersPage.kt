@@ -2,15 +2,12 @@ package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,11 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -36,12 +30,9 @@ import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
-import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
-import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
 /**
@@ -190,7 +181,11 @@ private fun ReciterDownloads(
                     }
                 }
             }
-            DownloadedSurahRow(row = row, onRemove = remove)
+            DownloadedSurahRow(
+                row = row,
+                removeAction = stringResource(R.string.settings_downloaded_remove, row.name),
+                onRemove = remove,
+            )
         }
     }
     Spacer(Modifier.height(Space.Block))
@@ -224,72 +219,3 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int?, onClick: () -> Unit
         )
     }
 }
-
-/** One surah on the device: its name, its size, and the one action it has. */
-@Composable
-private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: (() -> Unit)?) {
-    val remove = stringResource(R.string.settings_downloaded_remove, row.name)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            // The row is already as tall as a finger needs, because the
-            // Remove action brings its own touch target; the surah names sit
-            // close together so the list reads as one block. The Remove ends
-            // on the choice row's trailing rail, the same rail a pack's
-            // Remove and Add use, so the sheet's file actions stand on one
-            // line (owner decision, this session).
-            .padding(start = ChoiceRowNameInset, end = ChoiceRowTrailingInset),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        // The size is under its name, the way every row in the sheet reads:
-        // it stood in a right-hand column, the last row in the sheet that
-        // still answered a name with a value beside it (owner decision, the
-        // theme and consistency session).
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = row.name,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = formatBytes(row.bytes),
-                // A size is the row's value, so it wears the caption, not a
-                // source line (owner decision, this session).
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Space.Tight),
-            )
-        }
-        if (onRemove != null) {
-            // A list of identical Remove buttons needs each one to say what it
-            // removes; the button's own word is the same on every row, so the
-            // name of the surah is said beside it (owner decision, the theme
-            // and consistency session).
-            TextButton(
-                label = stringResource(R.string.pack_action_remove),
-                onClick = onRemove,
-                modifier = Modifier
-                    .padding(start = Space.Row)
-                    .semantics { contentDescription = remove },
-                quiet = true,
-            )
-        } else {
-            // A bundled surah cannot be removed: its files are the app's own
-            // assets. The row still says what it is and what it weighs, and
-            // the word takes the place the button cannot.
-            Box(
-                modifier = Modifier
-                    .padding(start = Space.Row)
-                    .height(48.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.settings_downloaded_bundled),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-

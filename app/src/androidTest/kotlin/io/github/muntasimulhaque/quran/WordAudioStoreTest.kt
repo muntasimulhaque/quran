@@ -57,13 +57,19 @@ class WordAudioStoreTest {
     }
 
     /**
-     * The page's own count: the surahs the reader downloaded and their bytes.
-     * The bundled Al-Fatiha is the app's asset and is never counted, and a
+     * The page's own list: the surahs the reader downloaded, each with its
+     * bytes. The bundled Al-Fatiha is the app's asset and is never here, and a
      * folder the unpack left behind is not a surah a reader can play.
      */
     @Test
-    fun onDeviceCountsTheDownloadedSurahsAndIgnoresTheUnpackSLeftovers() {
+    fun onDeviceListsTheDownloadedSurahsAndIgnoresTheUnpackSLeftovers() {
         val store = WordAudioStore(context)
+        // The app's files outlive a test run, so the two folders this leg reads
+        // are emptied first and its own leftovers are cleaned in the finally.
+        File(context.filesDir, "word-audio/003").deleteRecursively()
+        File(context.filesDir, "word-audio/.staging").deleteRecursively()
+        File(context.filesDir, "word-audio/003.new").deleteRecursively()
+        File(context.filesDir, "word-audio/003.old").deleteRecursively()
         val before = store.onDevice()
         val folder = File(context.filesDir, "word-audio/003").apply { mkdirs() }
         File(folder, "003_001_001.opus").writeBytes(ByteArray(100))
@@ -73,13 +79,39 @@ class WordAudioStoreTest {
         File(context.filesDir, "word-audio/003.old").mkdirs()
         try {
             val after = store.onDevice()
-            assertEquals(before.surahs + 1, after.surahs)
+            assertEquals(before.rows.size + 1, after.rows.size)
             assertEquals(before.bytes + 100, after.bytes)
+            assertTrue(after.rows.any { it.surah == 3 && it.bytes == 100L })
         } finally {
             folder.deleteRecursively()
             File(context.filesDir, "word-audio/.staging").deleteRecursively()
             File(context.filesDir, "word-audio/003.new").deleteRecursively()
             File(context.filesDir, "word-audio/003.old").deleteRecursively()
+        }
+    }
+
+    /**
+     * One surah's Remove takes that surah and leaves the rest: the page's
+     * per-surah door gives every row its own act, so the store must not clear
+     * the folder the reader did not name.
+     */
+    @Test
+    fun removingOneSurahLeavesTheOthers() {
+        val store = WordAudioStore(context)
+        File(context.filesDir, "word-audio/003").deleteRecursively()
+        File(context.filesDir, "word-audio/004").deleteRecursively()
+        val three = File(context.filesDir, "word-audio/003").apply { mkdirs() }
+        val four = File(context.filesDir, "word-audio/004").apply { mkdirs() }
+        File(three, "003_001_001.opus").writeBytes(ByteArray(100))
+        File(four, "004_001_001.opus").writeBytes(ByteArray(200))
+        try {
+            assertEquals("one file leaves the surah", 1, store.remove(3))
+            val after = store.onDevice()
+            assertTrue("the named surah is gone", after.rows.none { it.surah == 3 })
+            assertTrue("its neighbour stays", after.rows.any { it.surah == 4 })
+        } finally {
+            three.deleteRecursively()
+            four.deleteRecursively()
         }
     }
 

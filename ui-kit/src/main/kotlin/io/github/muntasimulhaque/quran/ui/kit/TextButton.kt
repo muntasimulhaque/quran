@@ -37,7 +37,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  *
  * Two tones, one shape: the primary tone carries what the reader came to do
  * (Save, Add, Retry, Download), and the quiet tone carries what ends or
- * removes (Clear, Cancel, Remove).
+ * removes (Clear, Cancel, Remove), or the lesser of two answers (the share
+ * sheet's Share text).
  *
  * **A surface that asks one question has one prominent answer** (owner
  * decision, this session). The wash is right for a door among doors, but a
@@ -77,12 +78,18 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * Two text buttons side by side stand `Space.Action` (20 dp) apart between
  * their pills: each is a standalone action, so the pair reads as two answers
  * and the gap belongs between the shapes the reader sees, not between the
- * invisible 48 dp targets each one keeps. The share card's two doors, the
- * reminder dialog's Set and Cancel, the remove question, a note's Clear and
- * Save, and the pill's Retry and Close all read that one action gap. The app's
- * other side-by-side gap, `Space.Line` (8 dp), belongs to a cluster of
- * same-kind small controls, the search and Browse chips, where the eye reads
- * one group (owner decision, this session).
+ * invisible 48 dp targets each one keeps. **The quiet word leads and the
+ * filled answer trails** (owner decision, this session): the way out or the
+ * lesser answer is the first shape, and the surface's answer is the last, so
+ * the pair ends on what the surface exists for and the filled shape is never
+ * the one the eye meets first. The rule is written in leading and trailing
+ * terms, so it follows the layout direction. The share sheet's Share text and
+ * Share image, the time page's Cancel and Set, the remove question's Remove
+ * and Keep, a note's Clear and Save, the reminder card's Not now and Turn on,
+ * and the download band's Close and Retry all read that one gap and that one
+ * order. The app's other side-by-side gap, `Space.Line` (8 dp), belongs to a
+ * cluster of same-kind small controls, the search and Browse chips, where the
+ * eye reads one group (owner decision, this session).
  *
  * A pair inside Material's own dialog is not outside the rule: the platform
  * lays two dialog buttons [DialogButtonSpacing] apart, so the caller asks for

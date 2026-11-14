@@ -32,7 +32,6 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
-import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.WordAudioStore
 import io.github.muntasimulhaque.quran.data.WordVoice
@@ -1360,15 +1359,29 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         wordVoice = WordVoice.Ready
     }
 
-    /** Everything downloaded, for the page that offers to remove it. */
-    suspend fun wordAudioOnDevice(): WordAudioOnDevice =
-        withContext(Dispatchers.IO) { wordAudio.onDevice() }
+    /**
+     * Everything downloaded, for the page that offers to remove it: one row
+     * per surah, named in the reader's own language and weighed by its own
+     * folder. The bundled Al-Fatiha is the app's own asset and is not here.
+     */
+    suspend fun wordAudioOnDevice(): List<DownloadedSurah> = withContext(Dispatchers.IO) {
+        val byNumber = surahs.associateBy { it.number }
+        val application = getApplication<Application>()
+        wordAudio.onDevice().rows.map { row ->
+            DownloadedSurah(
+                surah = row.surah,
+                name = byNumber[row.surah]?.nameSimple
+                    ?: application.getString(R.string.surah_fallback_name, row.surah),
+                bytes = row.bytes,
+            )
+        }.sortedBy { it.surah }
+    }
 
-    /** The reader's ask to free the voices: the downloaded surahs, and no more. */
-    suspend fun removeWordAudio() {
+    /** The reader's ask to free one surah's voices, and no more. */
+    suspend fun removeWordAudio(surah: Int) {
         pendingWord = null
         wordVoice = WordVoice.Ready
-        withContext(Dispatchers.IO) { wordAudio.clear() }
+        withContext(Dispatchers.IO) { wordAudio.remove(surah) }
     }
 
     private data class PendingWord(val ayah: Int, val position: Int, val surah: Int)

@@ -13,19 +13,25 @@ import io.github.muntasimulhaque.quran.ui.reader.ShareCard
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The share sheet's two doors stand on the app's one action gap.
+ * The share sheet's two doors stand on the app's one action gap, in the app's
+ * one order.
  *
- * They stood 12 dp apart while the reminder dialog's Set and Cancel stood 20,
- * because the platform lays its own dialog actions 8 dp apart and the app added
- * its whole gap on top. The owner's eye called the dialog's pair the good one
- * and the sheet's pair too tight, so the gap moved to the number the dialog
- * already drew and every pair in the app stands on it now (owner decision, this
+ * They stood 12 dp apart while the time page's pair stood 20, because the
+ * platform lays its own dialog actions 8 dp apart and the app added its whole
+ * gap on top. The owner's eye called the dialog's pair the good one and the
+ * sheet's pair too tight, so the gap moved to the number the dialog already
+ * drew and every pair in the app stands on it now (owner decision, this
  * session).
+ *
+ * The order is the other half: the quiet door leads and the default trails, so
+ * Share text stands first and Share image, the door the sheet is for, ends the
+ * pair (owner decision, this session).
  *
  * Both doors are wider than the 48 dp target each one keeps, so the node a
  * reader taps is the pill a reader sees and the two bounds below are the
@@ -59,14 +65,18 @@ class ActionGapTest {
             compose.onAllNodesWithText(image).fetchSemanticsNodes().isNotEmpty() &&
                 compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
         }
-        val first = compose.onNodeWithText(image).getUnclippedBoundsInRoot()
-        val second = compose.onNodeWithText(text).getUnclippedBoundsInRoot()
+        val first = compose.onNodeWithText(text).getUnclippedBoundsInRoot()
+        val second = compose.onNodeWithText(image).getUnclippedBoundsInRoot()
 
         assertEquals(
             "the two doors stand the app's action gap apart",
             Space.Action.value,
             (second.left - first.right).value,
             0.5f,
+        )
+        assertTrue(
+            "the quiet door leads and the default trails",
+            first.left < second.left,
         )
     }
 

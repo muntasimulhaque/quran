@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 18.7 (versionCode 189)
+Version: 18.8 (versionCode 190)
 
 ## Listing
 
@@ -184,6 +184,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (18.8, 490 characters)
+18.8 gives the size controls the page. Each name stands over its rail, and the two end marks stay at every text size. The words page names its switch after the feature, teaches the long press under it, and draws its one list as a file row. Downloaded pronunciation is now a door that lists each surah with its own Remove. A pair of buttons reads the quiet word first and the answer last. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (18.7, 498 characters)
 18.7 puts the word sheet's speaker on every word. Press it and the word sounds; if its surah's voices are not on the device, the pack downloads then, the size counting under the meaning, and the word plays when it lands. A word the recitation runs together says it has no recording. The words page now offers to remove the downloaded voices, and its cut-off sentence and Book-wide size are gone. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.

@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,26 +17,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackType
-import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
+import io.github.muntasimulhaque.quran.ui.kit.ActionPill
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
+import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
+import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.launch
@@ -129,14 +133,13 @@ fun TafsirsPage(
 
 /**
  * The word list, on its own page: the switch that opens a word's meaning on
- * its own sheet, and the one list the reading speaks.
+ * its own sheet, the one list the reading speaks, and the pronunciation the
+ * reader has downloaded.
  *
  * The list is the reader's language's list and no other, so the page shows
  * one pack and not a catalog: there is nothing to choose between, and a
  * second list would only invite a reader to read the Quran in a language they
- * did not ask for. The row is still a choice row, because its tap is the crop
- * of the aid that sits behind the same question as the switch above it
- * (owner decision, this session).
+ * did not ask for.
  *
  * **The switch is the ask** (owner decision, this session). A fresh install
  * carries no word list, and the switch used to stand disabled until the pack
@@ -151,18 +154,36 @@ fun TafsirsPage(
  * master switch disabled until a pack is installed, because there the switch
  * cannot choose which translation to fetch; here there is exactly one list.
  *
- * **The page names the switch, prices the list, and keeps the voices to one
- * row** (owner decision, this session). It carried a sentence under the switch
- * repeating the row's own name, and a line pricing the pronunciation for the
- * surah being read. The first was cut after two lines by the row's rule for a
- * value, and a value is not a sentence; the second reported a pack with no
- * control on this page, about a surah the page cannot choose, and it showed
- * the price of the voices even with the aid off. Both are gone. What is left
- * is the switch, the list it fetches with its own size, and, when the reader
- * has downloaded any, the voices on the device with the one act they allow:
- * taking them back. A transfer says so in one short line, because a failure
- * that said nothing would be silent, and the page owns no other state line: a
- * word with no voice says so under its own speaker.
+ * **The switch carries the feature's name, and the gesture is a lead** (owner
+ * decision, this session). The row used to be titled with the instruction
+ * "Press and hold a word for its meaning and pronunciation", a sentence in the
+ * size and weight every other row's name wears, wrapped beside its switch. The
+ * name is the one the hub already uses, and the instruction, which is the only
+ * door to the word sheet, stands under it as the page's lead, the way the
+ * Tajweed page opens with its own.
+ *
+ * **The one list is a file row, not a choice row** (owner decision, this
+ * session). There is nothing to choose between: the switch is the choice, and
+ * the row is the file that choice needs. It carried a radio, the reciter's
+ * one-answer mark, with `selected` set to the file's presence, so the same row
+ * drew an empty check ring and installed on a fresh page, then a filled radio
+ * and toggled the switch once the file was here. It now reads as the reciter's
+ * downloaded surahs read: its name, its size, Add or Retry while it is not
+ * here, Remove when it is. The whole row is the add while the file is absent,
+ * and the pill at the trailing end names the act.
+ *
+ * **The pronunciation is a door over its own surahs** (owner decision, this
+ * session). It was one row, "Downloaded voices (12)" and a total size, with
+ * one Remove for all of them: a count the reader could not act on, a word that
+ * belongs to the reciter, and a leading column the choice rows use with no
+ * mark in it. The page now uses the reciter page's own shape: a disclosure
+ * that says how many surahs are on the device, and under it one row per surah
+ * with its name, its size, and its own Remove. The count is the door's, and
+ * every Remove says which surah it takes. The bundled Al-Fatiha is the app's
+ * own asset and is not counted, because the page's one act is to take back
+ * what the reader downloaded. A transfer says so in one short line, because a
+ * failure that said nothing would be silent, and the page owns no other state
+ * line: a word with no voice says so under its own speaker.
  */
 @Composable
 fun WordsPage(
@@ -171,7 +192,7 @@ fun WordsPage(
     packSetup: PackSetupState?,
     actions: SettingsActions,
     wordAudio: WordAudioState = WordAudioState(),
-    wordVoices: suspend () -> WordAudioOnDevice = { WordAudioOnDevice() },
+    wordVoices: suspend () -> List<DownloadedSurah> = { emptyList() },
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         val pack = wantedWordsPack(settings, packs)
@@ -185,13 +206,13 @@ fun WordsPage(
         val rootToCome = root != null && !root.installed
         // The voices the reader has downloaded, read again when a pack
         // lands or leaves, and never on a progress tick: a folder holds up to
-        // six thousand files and the count changes only when one arrives
+        // six thousand files and the list changes only when one arrives
         // (owner decision, this session).
-        var voices by remember { mutableStateOf(WordAudioOnDevice()) }
+        var voices by remember { mutableStateOf<List<DownloadedSurah>>(emptyList()) }
         LaunchedEffect(wordAudio.surah, wordAudio.installed) { voices = wordVoices() }
         val scope = rememberCoroutineScope()
         ToggleRow(
-            title = stringResource(R.string.settings_words_title),
+            title = stringResource(R.string.settings_row_words),
             // The value is the list's own transfer while it runs, and nothing
             // otherwise: a name and its switch need no sentence.
             subtitle = packSetupLine(setup),
@@ -218,9 +239,24 @@ fun WordsPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        // The gesture that opens a word's own sheet is a page lead, not the
+        // switch's name: the name is the feature, and this is how the feature
+        // is used (owner decision, this session).
+        Text(
+            text = stringResource(R.string.settings_words_lead),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = Space.Gutter,
+                    end = Space.Gutter,
+                    top = Space.Line,
+                ),
+        )
         if (pack != null) {
             Spacer(Modifier.height(Space.Block))
-            PackChoiceRow(
+            WordListRow(
                 pack = pack,
                 subtitle = if (rootToCome && root != null) {
                     stringResource(
@@ -231,24 +267,19 @@ fun WordsPage(
                 } else {
                     packSizeLine(pack)
                 },
-                // The one list the reading speaks: a check says the file is
-                // here, and the switch above says whether it is drawn.
-                selected = installed,
-                radio = true,
-                setup = packSetup?.takeIf { it.packId == pack.id },
-                onActivate = { actions.onWordByWord(!settings.wordByWord) },
+                setup = setup,
                 onInstall = { actions.onInstallPack(pack.id) },
                 onRemove = { actions.onRemovePack(pack.id) },
                 onCancel = actions.onPackSetupCancel,
             )
         }
-        if (voices.present) {
+        if (voices.isNotEmpty()) {
             Spacer(Modifier.height(Space.Section))
-            VoicesRow(
-                voices = voices,
-                onRemove = {
+            PronunciationDownloads(
+                surahs = voices,
+                onRemove = { surah ->
                     scope.launch {
-                        actions.onRemoveWordVoices()
+                        actions.onRemoveWordVoice(surah)
                         voices = wordVoices()
                     }
                 },
@@ -259,48 +290,155 @@ fun WordsPage(
 }
 
 /**
- * The voices on the device: one row, because the app fetched them a surah at
- * a time and the page's one act is to take them all back. The bundled
- * Al-Fatiha is the app's own asset and is not counted, so the number is the
- * reader's downloads and the Remove leaves the first page's voice alone.
+ * The one list as a file row: its name, its size, and the one act its file
+ * allows. There is no choice mark, because the page has no choice to make;
+ * the switch above is the aid's on and off. While the file is absent the whole
+ * row is the add, and the pill at its trailing end names what the row will do,
+ * the way a pack row that is not here names its act. The installed row is not
+ * a door: Remove is the only thing it can do. A transfer is a status, so the
+ * row stops answering a finger and Cancel is the one control.
  */
 @Composable
-private fun VoicesRow(voices: WordAudioOnDevice, onRemove: () -> Unit) {
-    val remove = stringResource(R.string.settings_voices_remove)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = ChoiceRowNameInset, end = ChoiceRowTrailingInset),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.settings_voices_row, voices.surahs),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
+private fun WordListRow(
+    pack: ContentPack,
+    subtitle: String,
+    setup: PackSetupState?,
+    onInstall: () -> Unit,
+    onRemove: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val busy = setup != null && !setup.failed
+    val failed = setup?.failed == true
+    val clickable = !pack.installed
+    // The disabled text button's target ends on the choice row's rail inside
+    // the surface's inset; a row with no surface keeps the page's own gutter.
+    val leading = if (clickable) Space.Gutter - SheetRowGutter else Space.Gutter
+    val trailing = if (clickable) {
+        ChoiceRowTrailingInset - SheetRowGutter
+    } else {
+        ChoiceRowTrailingInset
+    }
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (clickable) {
+                        Modifier.sheetRow(onClick = onInstall, enabled = !busy)
+                    } else {
+                        Modifier
+                    },
+                )
+                .minimumInteractiveComponentSize()
+                .padding(
+                    start = leading,
+                    end = trailing,
+                    top = Space.Row,
+                    bottom = Space.Row,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RowName(
+                title = contentPackName(pack.id, pack.name),
+                value = subtitle,
+                modifier = Modifier.weight(1f).padding(end = Space.Row),
             )
-            Text(
-                text = formatBytes(voices.bytes),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Space.Tight),
+            when {
+                busy -> {
+                    val progress = setup?.progress
+                    Text(
+                        text = if (progress == null) {
+                            stringResource(R.string.settings_pack_preparing)
+                        } else {
+                            stringResource(
+                                R.string.settings_pack_downloading,
+                                (progress * 100).toInt(),
+                            )
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    TextButton(
+                        label = stringResource(R.string.settings_cancel),
+                        onClick = onCancel,
+                        modifier = Modifier.padding(start = Space.Row),
+                        quiet = true,
+                    )
+                }
+                pack.installed -> TextButton(
+                    label = stringResource(R.string.pack_action_remove),
+                    onClick = onRemove,
+                    quiet = true,
+                    pillTag = "pack-action-remove",
+                )
+                else -> ActionPill(
+                    label = stringResource(
+                        if (failed) R.string.pack_action_retry else R.string.pack_action_add,
+                    ),
+                    modifier = Modifier.testTag(
+                        if (failed) "pack-action-retry" else "pack-action-add",
+                    ),
+                )
+            }
+        }
+        if (busy) {
+            // The same 2 dp line the pill and the pack row carry, so a download
+            // has one shape wherever it is shown (owner decision, this
+            // session).
+            DownloadLine(
+                progress = setup?.progress ?: 0f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = Space.Gutter,
+                        end = Space.Gutter,
+                        top = Space.Tight,
+                        bottom = Space.Line,
+                    )
+                    .height(2.dp),
             )
         }
-        TextButton(
-            label = stringResource(R.string.pack_action_remove),
-            onClick = onRemove,
-            modifier = Modifier
-                .padding(start = Space.Row)
-                .semantics { contentDescription = remove },
-            quiet = true,
-        )
     }
 }
 
 /**
+ * The pronunciation on the device, behind the reciter page's own door: a
+ * count, the chevron that says it opens, and one row per surah with its own
+ * Remove. The door is the list's count, not a total size, because a number a
+ * reader cannot act on says nothing (owner decision, this session).
+ */
+@Composable
+private fun PronunciationDownloads(
+    surahs: List<DownloadedSurah>,
+    onRemove: (Int) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    DisclosureRow(
+        expanded = open,
+        onToggle = { open = !open },
+    ) {
+        Text(
+            text = stringResource(R.string.settings_pronunciation_label, surahs.size),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+    if (!open) return
+    surahs.forEach { row ->
+        DownloadedSurahRow(
+            row = row,
+            start = Space.Gutter,
+            removeAction = stringResource(R.string.settings_pronunciation_remove, row.name),
+            onRemove = { onRemove(row.surah) },
+        )
+    }
+    Spacer(Modifier.height(Space.Block))
+}
+
+/**
  * The pronunciation line, only while it can be acted on: a transfer that is
- * running, and one that failed. What is on the device is the voices row's
- * business, and a word with no voice says so under its own speaker.
+ * running, and one that failed. What is on the device is the door's business,
+ * and a word with no voice says so under its own speaker.
  */
 @Composable
 private fun pronunciationLine(state: WordAudioState): String? {

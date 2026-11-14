@@ -267,15 +267,15 @@ internal fun ReadingReminderOffer(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
-                label = stringResource(R.string.reading_reminder_turn_on),
-                onClick = onTurnOn,
-                prominent = true,
-            )
-            TextButton(
                 label = stringResource(R.string.reading_reminder_not_now),
                 onClick = onNotNow,
-                modifier = Modifier.padding(start = Space.Action),
                 quiet = true,
+            )
+            TextButton(
+                label = stringResource(R.string.reading_reminder_turn_on),
+                onClick = onTurnOn,
+                modifier = Modifier.padding(start = Space.Action),
+                prominent = true,
             )
         }
     }

@@ -552,15 +552,15 @@ private fun TafsirOffer(
         )
         Row(modifier = Modifier.padding(top = Space.Block)) {
             TextButton(
-                label = stringResource(R.string.card_tafsir_add, formatBytes(pack.bytes)),
-                onClick = { onInstall(pack.id) },
-                prominent = true,
-            )
-            TextButton(
                 label = stringResource(R.string.card_tafsir_not_now),
                 onClick = onDismiss,
-                modifier = Modifier.padding(start = Space.Action),
                 quiet = true,
+            )
+            TextButton(
+                label = stringResource(R.string.card_tafsir_add, formatBytes(pack.bytes)),
+                onClick = { onInstall(pack.id) },
+                modifier = Modifier.padding(start = Space.Action),
+                prominent = true,
             )
         }
     }

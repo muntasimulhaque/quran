@@ -32,16 +32,17 @@
     <string name="settings_show_translation_title">অনুবাদ দেখান</string>
     <string name="settings_row_words">শব্দের অর্থ ও উচ্চারণ</string>
     <string name="settings_title_words">শব্দের অর্থ ও উচ্চারণ</string>
-    <string name="settings_words_title">শব্দের অর্থ ও উচ্চারণ জানতে শব্দ চেপে ধরে রাখুন</string>
+    <string name="settings_words_lead">শব্দের অর্থ ও উচ্চারণ জানতে শব্দ চেপে ধরে রাখুন</string>
     <string name="settings_words_size_with_root">%1$s · মূল %2$s</string>
     <!-- উচ্চারণের লাইনটি সুইচের নিচে, কেবল ডাউনলোড চলার সময় বা ব্যর্থ হলে:
          ডিভাইসে থাকা উচ্চারণের নিজের সারি আছে, আর যে শব্দের উচ্চারণ নেই তা
          তার নিজের শিটেই বলে। -->
     <string name="settings_words_pronunciation_downloading">উচ্চারণ আসছে · %1$s / %2$s</string>
     <string name="settings_words_pronunciation_failed">উচ্চারণ আসেনি। আবার চেষ্টা করতে যেকোনো শব্দের স্পিকার চাপুন।</string>
-    <!-- রিডার যে উচ্চারণগুলো ডাউনলোড করেছে, এবং তাদের একমাত্র কাজ। -->
-    <string name="settings_voices_row">ডাউনলোড করা উচ্চারণ (%1$d)</string>
-    <string name="settings_voices_remove">ডাউনলোড করা শব্দের উচ্চারণ মুছে ফেলুন</string>
+    <!-- রিডার যে উচ্চারণগুলো ডাউনলোড করেছে, তিলাওয়াতকারীর পাতার নিজের দরজার
+         আকারে: সূরার সংখ্যা, আর প্রতিটি সূরার নিজের মুছুন। -->
+    <string name="settings_pronunciation_label">ডাউনলোড করা উচ্চারণ (%1$d)</string>
+    <string name="settings_pronunciation_remove">%1$s-এর উচ্চারণ মুছুন</string>
     <string name="settings_tajweed_title">তাজবীদ রঙ</string>
     <string name="settings_tajweed_lead">প্রতিটি রঙ এক দল নিয়ম; নামের পাশের শব্দটি পড়ারই একটি শব্দ। যে হরফগুলোতে রঙ আছে, নিয়মটি তাদেরই প্রযোজ্য; দলটির প্রতিটি নিয়মের নাম নিচে লেখা আছে।</string>
 

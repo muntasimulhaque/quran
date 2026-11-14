@@ -149,6 +149,31 @@ class SettingsRowAlignmentTest {
     }
 
     /**
+     * The size name stands over its rail, not beside it. The name used to keep
+     * a fixed column and the rail was what was left of the row; at a large
+     * system font the column ate the rail and the end marks were dropped. The
+     * name now opens the block and the rail has the row's whole width under it
+     * (owner decision, this session).
+     */
+    @Test
+    fun theSizeNameStandsOverItsRail() {
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light) {
+                SizeRow(TypeRole.Translation, 1f) {}
+            }
+        }
+
+        val label = compose.onNodeWithTag("size-label", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val rail = compose.onNodeWithTag("scale-rail", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        assertTrue(
+            "the name stands over its rail, not beside it",
+            label.bottom <= rail.top + 1.dp,
+        )
+    }
+
+    /**
      * A row that carries a switch is as tall as a row that does not: the
      * switch owes the finger its target, and it does not owe the row its
      * height. The hub read as two rhythms alternating down the sheet until

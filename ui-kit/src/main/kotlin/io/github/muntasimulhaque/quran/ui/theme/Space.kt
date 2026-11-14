@@ -33,14 +33,16 @@ object Space {
      * The gap is measured pill to pill, not target to target, because the two
      * answers are read as two shapes and the invisible 48 dp each one keeps is
      * not part of what the eye separates. Every pair in the app stands on this
-     * one number: the share card's two doors, the reminder dialog's Set and
-     * Cancel, the remove question, the note's Clear and Save, the pill's Retry
-     * and Close. It was 12 dp, and the reminder dialog's pair drew 20 (the
-     * platform lays its own action row 8 dp apart and the app added the 12 on
-     * top), which is the one the owner's eye approved (owner decision, this
-     * session). The shapes are 36 dp tall at the default type, so 20 dp between them reads as
-     * two answers; 12 read as one crowded pair, and a pair that changes width
-     * with a platform constant is not a decision at all.
+     * one number: the share sheet's two doors, the time page's Cancel and Set,
+     * the remove question, the note's Clear and Save, the reminder card's Not
+     * now and Turn on, and the download band's Close and Retry. It was 12 dp,
+     * and the time page's pair drew 20 (the platform lays its own action row 8
+     * dp apart and the app added the 12 on top), which is the one the owner's
+     * eye approved (owner decision, this session). The shapes are 36 dp tall
+     * at the default type, so 20 dp between them reads as two answers; 12 read
+     * as one crowded pair, and a pair that changes width with a platform
+     * constant is not a decision at all. The order of the pair is the button's
+     * own rule: the quiet word leads and the filled answer trails.
      */
     val Action = 20.dp
 

@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -12,9 +13,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.UiLanguage
-import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
 import io.github.muntasimulhaque.quran.ui.settings.WordsPage
@@ -25,7 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The words page's one switch on a fresh install.
+ * The words page's one switch on a fresh install, and its file rows.
  *
  * A fresh install carries no word list, so the switch used to stand disabled
  * until the pack was added: a dead control under the name of the feature,
@@ -33,6 +34,10 @@ import org.junit.runner.RunWith
  * that turns the aid on" the rule names: it fetches the one list, stays off
  * while the list is on its way, says the transfer under the finger, and turns
  * on when the list lands (owner decision, this session).
+ *
+ * The pronunciation is the reciter page's shape: a door that says how many
+ * surahs are on the device, and one row per surah with its own Remove (owner
+ * decision, this session).
  *
  * The page is composed on its own, so the legs need no device reading and no
  * network: the pack's state is handed in.
@@ -114,28 +119,41 @@ class WordsSwitchTest {
     }
 
     /**
-     * The voices the reader downloaded: one row that says how many surahs and
-     * what they weigh, and the one act they allow. The row is drawn for
-     * downloads only, so a fresh page carries nothing to remove (owner
-     * decision, this session).
+     * The pronunciation the reader downloaded: a door that says how many
+     * surahs, and under it one row per surah with its own Remove. The bundled
+     * Al-Fatiha is not a download, so it is not counted (owner decision, this
+     * session).
      */
     @Test
-    fun theDownloadedVoicesSayWhatTheyWeighAndCanGo() {
-        var removed = 0
+    fun theDownloadedPronunciationSaysWhichSurahsAndCanGo() {
+        var voices = listOf(
+            DownloadedSurah(surah = 2, name = "Al-Baqarah", bytes = 39_845_888),
+            DownloadedSurah(surah = 1, name = "Al-Fatihah", bytes = 208_000),
+        )
+        var removed = -1
         compose.setContent {
             QuranTheme(theme = AppTheme.Light, language = UiLanguage.English) {
                 WordsPage(
                     settings = AppSettings(uiLanguage = "en", wordByWord = true),
                     packs = listOf(missing),
                     packSetup = null,
-                    actions = SettingsActions(onRemoveWordVoices = { removed++ }),
-                    wordVoices = { WordAudioOnDevice(surahs = 12, bytes = 39_845_888) },
+                    actions = SettingsActions(
+                        onRemoveWordVoice = { surah ->
+                            removed = surah
+                            voices = voices.filterNot { it.surah == surah }
+                        },
+                    ),
+                    wordVoices = { voices },
                 )
             }
         }
-        compose.onNodeWithText("Downloaded voices (12)").assertExists()
+        compose.onNodeWithText("Downloaded pronunciation (2)").assertExists().performClick()
+        compose.onNodeWithText("Al-Baqarah").assertExists()
         compose.onNodeWithText("38 MB").assertExists()
-        compose.onNodeWithText("Remove").performClick()
-        assertEquals("the page must ask once", 1, removed)
+        compose.onNodeWithContentDescription("Remove the pronunciation of Al-Baqarah")
+            .performClick()
+        assertEquals("the row says which surah it takes", 2, removed)
+        compose.waitForIdle()
+        compose.onAllNodesWithText("Al-Baqarah").assertCountEquals(0)
     }
 }
