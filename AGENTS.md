@@ -217,8 +217,8 @@ change, never left as a dead letter.
 
 ```bash
 ./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
-./gradlew :data:connectedDebugAndroidTest   # content, storage, recitation manifest
-./gradlew :app:connectedDebugAndroidTest    # the release gate, on quran_phone
+./gradlew :data:connectedDebugAndroidTest   # an instrumented audit, never a release gate
+./gradlew :app:connectedDebugAndroidTest    # an instrumented audit, never a release gate
 ./gradlew :tools:run --args="help"          # the content pipeline, every step
 ```
 
@@ -229,43 +229,49 @@ release starts.
 
 ## Release
 
-The bundle, the store note, and the screenshots are one delivery, handed over
-together before the owner submits anything. **The phone is the release gate**
-(owner decision, this session): `:app:connectedDebugAndroidTest` on
-`quran_phone`, with `:data:connectedDebugAndroidTest`, is the one instrumented
-run a release needs, and the tablets run only when the change is layout or
-width sensitive. The hand-over says which it was, so a skipped tablet is a
-decision and not an omission. While the work is in flight, build the
-instrumented APKs with `-Pquran.devPacks=screenshot` and run only the classes
-the change touches: the every-pack debug app is 197 MB of install, and the
-tour needs the light set. The full app suite runs once, on the every-pack
-build, immediately before the hand-off, and its counts are the ones recorded.
-CI instrumented runs are signal, not a gate; they run only when dispatched in
-`instrumented.yml` and never hold a bundle. The note stands in the hand-over
-message itself as bare paragraphs under 500 characters, never only in a file.
-The bundle comes from the newest green `build` run on `main`, not the first one
-after the version bump, and signing is proved by `jarsigner`'s words and its
-certificate SHA-256, never by exit code alone. Screenshots are collected
-locally and are the delivery's, never a hosted emulator's: one Gradle call per
-form factor, on `quran_phone`, `quran_tablet7`, and `quran_tablet10` in turn,
-with
+A release is three steps and no more.
+
+1. **Gates.** The unit tests, lint, and `assembleDebug` that `build.yml` runs
+   on `main` are the gate. Nothing else gates a release.
+2. **Version and record.** `versionCode` by 1, `versionName` up one tenth
+   within the major line (never 0.10, never two digits). Write the release
+   notes and the README status; the hand-off record follows the run.
+3. **Push and hand over.** The push to `main` lets `build.yml` produce the
+   signed bundle. From the newest green run on `main`, download
+   `quran-signed-aab` into `play-store/aab/` with its `.sha256`, and give the
+   store note in the hand-over message itself, as bare paragraphs under 500
+   characters.
+
+When a visible surface changed and a phone set is wanted, capture the phone
+frames only, with
 
 ```bash
 ./gradlew :app:connectedDebugAndroidTest -Pquran.devPacks=screenshot \
   -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest,io.github.muntasimulhaque.quran.WordMeaningTest
 ```
 
-the frames collected from
+on `quran_phone`, collect the frames from
 `app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/<AVD>/`
-before the next leg because a second call replaces the folder. The eight store
-frames are read and committed to `play-store/screenshots/<form factor>/`; the
-store set in `play-store/screenshots/` comes from that run. The capture is
-whole from that run whenever visible UI changed, all three form factors, eight
-frames each, every frame read; without a visible change the hand-over says so
-and nothing is captured. A hosted emulator is a signal, never a gate:
-`screenshots.yml` is dispatch-only and `continue-on-error`, and no workflow may
-stop a release on a hosted emulator. Delete the hand-off copy in `play-store/aab/` once Play has
-it.
+before another call replaces them, read the eight, and commit them to
+`play-store/screenshots/phone/`. When no visible surface changed, the
+committed phone set stands.
+
+**Not in the per-release path, ever again.** The full app instrumented suite
+is an occasional audit or a manual dispatch, never a release requirement. A
+width-sensitive change gets one targeted class on one tablet, not the full
+suite. The store capture is phone frames only; the 7-inch and 10-inch listings
+are optional, and their sets stand as last captured.
+
+A change that genuinely touches runtime behavior may run the affected classes
+on the phone, and the hand-off says so. Otherwise the instrumented work is
+skipped, and the hand-off says it was skipped.
+
+The bundle comes from the newest green `build` run on `main`, not the first
+one after the version bump, and signing is proved by `jarsigner`'s words and
+its certificate SHA-256, never by exit code alone. Delete the hand-off copy in
+`play-store/aab/` once Play has it. CI instrumented runs are signal, not a
+gate; they run only when dispatched in `instrumented.yml` and never hold a
+bundle.
 
 ## This machine
 
@@ -283,9 +289,9 @@ it.
   exit. A software renderer is never used here; the CI runners keep their own
   flags. `gh` is authenticated.
 - The 7 inch AVD's display is 800 x 1280 and the store set Play has is
-  1200 x 1920, the same page at 1.5 times the pixels, so its capture leg runs
-  with `adb shell wm size 1200x1920` and `wm density 320`, and both are reset
-  after the leg.
+  1200 x 1920, the same page at 1.5 times the pixels. When that optional set is
+  captured, the leg runs with `adb shell wm size 1200x1920` and `wm density
+  320`, and both are reset after the leg.
 - `python3` and `python` are the Store alias; the real interpreter is under
   `C:/Users/zn/AppData/Local/hermes/tools/`. Nothing in the build needs it.
 - Two tool calls in one block run in parallel. Never edit a file and read it in
