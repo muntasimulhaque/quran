@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 18.6 (versionCode 188)
+Version: 18.7 (versionCode 189)
 
 ## Listing
 
@@ -22,7 +22,7 @@ drawn in the printed mushaf's seven color families and a Tajweed page that
 explains every color in English and Bangla. The reading gives each ayah its
 Saheeh International translation with the original footnotes; when word
 meanings are turned on, pressing and holding any word opens its meaning in a
-quiet sheet, with the ayah named above it; and the ayah card opens Ibn Kathir
+quiet sheet, with the ayah named above it and the word's own recording a press away; and the ayah card opens Ibn Kathir
 in English, with the Quran quotations set apart. Bangla readers
 get the Al-Bayan Simple Translation, Ibn Kathir in Bangla, Bangla word
 meanings, and the surah names in Bengali script, and the whole interface can
@@ -184,6 +184,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (18.7, 498 characters)
+18.7 puts the word sheet's speaker on every word. Press it and the word sounds; if its surah's voices are not on the device, the pack downloads then, the size counting under the meaning, and the word plays when it lands. A word the recitation runs together says it has no recording. The words page now offers to remove the downloaded voices, and its cut-off sentence and Book-wide size are gone. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (18.6, 498 characters)
 18.6 gives the word sheet its own voice. Its speaker now plays a recording made for that word, cut from Mishari Al-Afasy's recitation at quran-align's word boundaries, and stops at its end. The word meanings page is now Word meanings and pronunciation; its one switch fetches the meanings, roots, and pronunciation for the surah you read, later surahs on Wi-Fi, and Al-Fatiha ships. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
