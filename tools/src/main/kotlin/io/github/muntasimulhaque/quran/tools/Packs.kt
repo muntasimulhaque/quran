@@ -152,8 +152,11 @@ class Packs(private val root: File) {
             creditBn = "Quran.com শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
             // Version 2 carries every word's grammar and lemma, beside its
             // meaning: the sheet's study lines arrive with the word list the
-            // reader already turned on (owner decision, this session).
-            version = "QUL 2",
+            // reader already turned on. Version 3 carries the lemma index the
+            // places page reads, so a dictionary form's places are one lookup
+            // rather than a pass over the whole list (owner decision, this
+            // session).
+            version = "QUL 3",
             shipped = false,
             ayahs = 6236,
         ),
@@ -166,8 +169,9 @@ class Packs(private val root: File) {
             creditBn = "বাংলা শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
             // Version 2 carries every word's grammar and lemma, beside its
             // meaning: the sheet's study lines arrive with the word list the
-            // reader already turned on (owner decision, this session).
-            version = "QUL 2",
+            // reader already turned on. Version 3 carries the lemma index the
+            // places page reads (owner decision, this session).
+            version = "QUL 3",
             shipped = false,
             ayahs = 6236,
         ),
@@ -181,7 +185,12 @@ class Packs(private val root: File) {
             language = "ar",
             credit = "Quranic morphology, via the Quranic Universal Library",
             creditBn = "\u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u09ae\u09b0\u09ab\u09cb\u09b2\u099c\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            version = "QUL",
+            // Version 2 writes every root's count from its own rows, so the
+            // count the sheet names is the list the door opens, and adds the
+            // root index the places page reads. The source's own count
+            // disagreed for fourteen roots; the pack's rows are the app's
+            // truth (owner decision, this session).
+            version = "QUL 2",
             shipped = false,
             ayahs = 6236,
         ),
@@ -545,6 +554,13 @@ class Packs(private val root: File) {
                             "CREATE TABLE word_grammar AS SELECT ayah_number, position, lemma_id, pos, " +
                                 "inflection, form, passive, pattern FROM src.word_grammar",
                         )
+                        // The places page reads one dictionary form's words
+                        // across the Book; the index makes that read one
+                        // lookup. A pack built before it answers the same
+                        // rows through a scan (owner decision, this session).
+                        statement.execute(
+                            "CREATE INDEX word_grammar_lemma ON word_grammar(lemma_id)",
+                        )
                         // The surah introductions travel with the English list,
                         // so a second language does not carry them twice.
                         if (pack.language == "en") {
@@ -564,11 +580,20 @@ class Packs(private val root: File) {
                         statement.execute("CREATE INDEX recitation_ayah_ayah ON recitation_ayah(ayah_number)")
                     }
                     "word-root" -> {
+                        // The count is the pack's own rows, not the source's
+                        // field: the number the sheet names and the places
+                        // the door opens are one number. The source's field
+                        // disagreed for fourteen roots, and the rows are what
+                        // the reader sees (owner decision, this session).
                         statement.execute(
-                            "CREATE TABLE word_root AS SELECT ayah_number, position, arabic, latin, " +
-                                "words_count FROM src.word_root",
+                            "CREATE TABLE word_root AS SELECT r.ayah_number, r.position, r.arabic, " +
+                                "r.latin, c.words_count FROM src.word_root r " +
+                                "JOIN (SELECT arabic, COUNT(*) AS words_count FROM src.word_root " +
+                                "GROUP BY arabic) c ON c.arabic = r.arabic",
                         )
                         statement.execute("CREATE INDEX word_root_ayah ON word_root(ayah_number, position)")
+                        // The places page looks a root up by its letters.
+                        statement.execute("CREATE INDEX word_root_arabic ON word_root(arabic)")
                     }
                 }
             }

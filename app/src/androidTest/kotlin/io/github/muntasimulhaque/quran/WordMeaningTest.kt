@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppSettings
@@ -158,6 +159,77 @@ class WordMeaningTest {
             frame.compress(Bitmap.CompressFormat.PNG, 100, output)
         }
         frame.recycle()
+    }
+
+    /**
+     * The dictionary form's places: the count line is the door, the page is
+     * the sheet's second page, and a place is the reading's next stop.
+     *
+     * 1:1's first word is the dictionary form اسْم. Its places open with the
+     * word the reader is on (1:1), and Al-Baqarah 2:31 is the second place in
+     * the Book's order. The tap on that place must put the sheet away, move
+     * the reading to 2:31, and write the reader's place. The frame is the
+     * page's evidence, not only the semantics tree (owner decision, this
+     * session).
+     */
+    @Test
+    fun theDictionaryFormsPlacesOpenAndLandOnTheAyah() {
+        val page = compose.activity.getString(ReadingR.string.reading_page_description)
+        compose.waitUntil(timeoutMillis = 180_000) {
+            compose.onAllNodesWithContentDescription(page)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithText("بِسۡمِ", substring = true, useUnmergedTree = true)
+            .onFirst()
+            .holdTheFirstWord()
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-lemma-door", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithTag("word-sheet-lemma-door", useUnmergedTree = true)
+            .onFirst()
+            .performClick()
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-places", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-place-38-3", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        val frame = settle()
+        File(screenshotOutputDirectory(), "word-places.png").outputStream().use { output ->
+            frame.compress(Bitmap.CompressFormat.PNG, 100, output)
+        }
+        frame.recycle()
+        // The page's back returns to the word, and the door opens the same
+        // page again: the reader's way back is not a dismissal of the sheet
+        // (owner decision, this session).
+        compose.onAllNodesWithContentDescription(
+            compose.activity.getString(ReadingR.string.reading_word_places_back),
+            useUnmergedTree = true,
+        ).onFirst().performClick()
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithTag("word-sheet-lemma-door", useUnmergedTree = true)
+            .onFirst()
+            .performClick()
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-place-38-3", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithTag("word-sheet-place-38-3", useUnmergedTree = true)
+            .onFirst()
+            .performClick()
+        compose.waitUntil(timeoutMillis = 60_000) {
+            runBlocking { SettingsStore(context).settings.first().ayah } == 38
+        }
     }
 
     /**

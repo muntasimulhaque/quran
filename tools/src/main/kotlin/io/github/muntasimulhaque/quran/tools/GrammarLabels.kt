@@ -20,6 +20,13 @@ import io.github.muntasimulhaque.quran.core.WordForm
  * itself, so they are left where they are. The counts beside each label are
  * from the current export and are there to show how much of the Book a label
  * covers (owner decision, this session).
+ *
+ * The 2026-11-14 export leaves nine rows' inline labels in the corpus's own
+ * tag language, the same meaning under a different name. Those tags are read
+ * here as the parts they name; where a tag is coarser than the Arabic label it
+ * replaced (a noun that is a participle, a preposition that is a particle) the
+ * build's GrammarErrata restores the fuller value the same word carried before
+ * (owner decision, this session).
  */
 object GrammarLabels {
 
@@ -68,6 +75,15 @@ object GrammarLabels {
         "حرف صلة" to PartOfSpeech.CONNECTIVE_PARTICLE, // 15
         "اسم فعل" to PartOfSpeech.VERB_NOUN, // 13
         "حرف دعاء" to PartOfSpeech.INVOCATION_PARTICLE, // 12
+        // The 2026-11-14 export's raw tags on the nine rows at 70:1 and
+        // 78:30. The tag names the broader part; GrammarErrata restores the
+        // finer label the same word carried in the previous export (owner
+        // decision, this session).
+        "morphology.tags.N" to PartOfSpeech.NOUN,
+        "morphology.tags.P" to PartOfSpeech.PREPOSITION,
+        "morphology.tags.V morphology.tenses.PERF" to PartOfSpeech.PAST_VERB,
+        "morphology.tags.V morphology.tenses.IMPF" to PartOfSpeech.PRESENT_VERB,
+        "morphology.tags.V morphology.tenses.IMPV" to PartOfSpeech.IMPERATIVE_VERB,
     )
 
     val cases: Map<String, GrammaticalCase> = mapOf(
@@ -75,6 +91,10 @@ object GrammarLabels {
         "مجرور" to GrammaticalCase.GENITIVE, // 12625
         "منصوب" to GrammaticalCase.ACCUSATIVE, // 11860
         "مجزوم" to GrammaticalCase.JUSSIVE, // 1419
+        "morphology.cases.NOM" to GrammaticalCase.NOMINATIVE,
+        "morphology.cases.GEN" to GrammaticalCase.GENITIVE,
+        "morphology.cases.ACC" to GrammaticalCase.ACCUSATIVE,
+        "morphology.moods.SUBJ" to GrammaticalCase.ACCUSATIVE,
     )
 
     /**

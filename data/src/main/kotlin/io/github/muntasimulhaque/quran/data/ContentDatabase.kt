@@ -410,6 +410,74 @@ class ContentDatabase private constructor(
         }
     }
 
+    /**
+     * Every place a root stands in, in the Book's order.
+     *
+     * One row for each drawn word the root pack gives this root, and the word
+     * as the page writes it there. The pack's own index over the root makes
+     * the read one lookup; a root pack from before the index answers with the
+     * same rows through a scan, so an old install is slower and never empty
+     * (owner decision, this session).
+     *
+     * The list's length is the count the word sheet promised: the pack's
+     * `words_count` is written from these rows, not from the source's own
+     * field, which disagreed for fourteen roots (owner decision, this
+     * session).
+     */
+    fun wordRootPlaces(arabic: String): List<WordPlace> {
+        if (arabic.isBlank()) return emptyList()
+        val chosen = rootPack() ?: return emptyList()
+        return query(
+            "SELECT w.ayah_number, w.surah, w.ayah, w.position, w.text " +
+                "FROM ${schema(chosen)}.word_root r " +
+                "JOIN word w ON w.ayah_number = r.ayah_number AND w.position = r.position " +
+                "WHERE r.arabic = ? ORDER BY w.ayah_number, w.position",
+            arrayOf(arabic),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) add(wordPlaceOf(cursor))
+            }
+        }
+    }
+
+    /**
+     * Every place a dictionary form stands in, in the Book's order, read from
+     * the word list the sheet's lemma came from.
+     *
+     * The form is named by its letters, which are unique in the corpus, so the
+     * page needs no id of its own. A held list from before the grammar table
+     * answers with nothing rather than an exception, exactly as the sheet's
+     * lemma line does, and the door is only drawn when that line is (owner
+     * decision, this session).
+     */
+    fun wordLemmaPlaces(lemma: String, language: String = "en"): List<WordPlace> {
+        if (lemma.isBlank()) return emptyList()
+        val chosen = meaningPack(language) ?: return emptyList()
+        if (!hasTable(chosen, "word_grammar") || !hasTable(chosen, "grammar_lemma")) return emptyList()
+        val pack = schema(chosen)
+        return query(
+            "SELECT w.ayah_number, w.surah, w.ayah, w.position, w.text " +
+                "FROM $pack.word_grammar g " +
+                "JOIN $pack.grammar_lemma l ON l.id = g.lemma_id " +
+                "JOIN word w ON w.ayah_number = g.ayah_number AND w.position = g.position " +
+                "WHERE l.text = ? ORDER BY w.ayah_number, w.position",
+            arrayOf(lemma),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) add(wordPlaceOf(cursor))
+            }
+        }
+    }
+
+    /** One place row: the running ayah, the surah and its ayah, the word. */
+    private fun wordPlaceOf(cursor: Cursor): WordPlace = WordPlace(
+        ayahNumber = cursor.getInt(0),
+        surah = cursor.getInt(1),
+        ayah = cursor.getInt(2),
+        position = cursor.getInt(3),
+        word = cursor.getString(4) ?: "",
+    )
+
     /** The word by word aid for one ayah. */
     fun wordMeanings(ayahNumber: Int, language: String = "en"): List<WordMeaning> {
         val chosen = meaningPack(language)

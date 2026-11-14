@@ -426,10 +426,10 @@
       "license": "Quranic Arabic Corpus v0.4 by Dr. Kais Dukes, GNU GPL: attribution to corpus.quran.com is required; the structured export via Quranpedia.net, free to use in apps",
       "licenseBn": "কুরআনিক আরবিক কর্পাস ০.৪, ড. কায়েস ডিউকস, GNU GPL: corpus.quran.com-এর উল্লেখ আবশ্যক; কাঠামোবদ্ধ রপ্তানি কুরআনপিডিয়া.নেট থেকে, অ্যাপে ব্যবহার অবাধ",
       "credit": "Quranic Arabic Corpus (Dr. Kais Dukes), via Quranpedia.net",
-      "usedFor": "Every drawn word's part of speech, case or mood, gender and number, passive voice, verb pattern, and lemma, for the word sheet: 77,429 words, 4,763 lemmas",
+      "usedFor": "Every drawn word's part of speech, case or mood, gender and number, passive voice, verb pattern, and lemma, for the word sheet: 77,429 words, 4,763 lemmas. Quranpedia's 2026-11-14 export, whose lemmas, forms, and grammar match the export the database was built from; nine words at 70:1 and 78:30 carry that export's fuller labels, which the new export left in the corpus's raw tags, and the build's GrammarErrata restores them",
       "path": "content/raw/quranpedia/morphology.json.gz",
-      "bytes": 3666748,
-      "sha256": "b9c5d57caa14f1c49752a291de3328601b05715fed5d12c444be90c5c10d0e91",
+      "bytes": 3667019,
+      "sha256": "5f81353bce91ef95fe8001e98807967f32632194d508cc637f2748d0348bd317",
       "assetUrl": null
     },
     {

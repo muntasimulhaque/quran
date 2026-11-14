@@ -664,6 +664,23 @@ fun ReaderScreen(
                     wordVoice = viewModel.wordVoice,
                     wordAudio = wordAudio,
                     onWordClosed = { viewModel.closeWordSheet() },
+                    surahNameOf = { number ->
+                        viewModel.surahs.firstOrNull { it.number == number }?.nameSimple
+                            ?: number.toString()
+                    },
+                    onOpenPlace = { ayah, position ->
+                        // The place the reader chose is the reading's next
+                        // stop: the word sheet has gone, and the word wears
+                        // the same reveal a search arrival gives it (owner
+                        // decision, this session).
+                        reveal = ReadingReveal(ayah = ayah, words = setOf(position))
+                        viewModel.jumpToAyah(ayah)
+                        chrome = false
+                        menu = null
+                        cardAyah = null
+                        cardTafsirPack = null
+                        cardNote = null
+                    },
                     metrics = settings.readingMetrics(),
                     reveal = revealForSurah,
                     place = settings.ayah,

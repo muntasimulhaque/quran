@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 18.8 (versionCode 190)
+Version: 18.9 (versionCode 191)
 
 ## Listing
 
@@ -22,7 +22,9 @@ drawn in the printed mushaf's seven color families and a Tajweed page that
 explains every color in English and Bangla. The reading gives each ayah its
 Saheeh International translation with the original footnotes; when word
 meanings are turned on, pressing and holding any word opens its meaning in a
-quiet sheet, with the ayah named above it and the word's own recording a press away; and the ayah card opens Ibn Kathir
+quiet sheet, with the ayah named above it, the word's own recording a press
+away, and its root and dictionary form with every place either stands in a tap
+away; and the ayah card opens Ibn Kathir
 in English, with the Quran quotations set apart. Bangla readers
 get the Al-Bayan Simple Translation, Ibn Kathir in Bangla, Bangla word
 meanings, and the surah names in Bengali script, and the whole interface can

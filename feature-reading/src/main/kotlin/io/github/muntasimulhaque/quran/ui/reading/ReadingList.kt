@@ -65,6 +65,10 @@ fun ReadingList(
     wordAudio: WordAudioState? = null,
     /** The word sheet closed: a press still waiting on a pack is forgotten. */
     onWordClosed: () -> Unit = {},
+    /** The surah's own name at a reference, for the places page's groups. */
+    surahNameOf: (Int) -> String = { "" },
+    /** A place the reader chose on the word sheet: the reading jumps there. */
+    onOpenPlace: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     /** The reader's place: the ayah, which the list shows and never corrects. */
     place: Int,
     hasTranslation: Boolean,
@@ -219,6 +223,8 @@ fun ReadingList(
         wordVoice = wordVoice,
         wordAudio = wordAudio,
         onWordClosed = onWordClosed,
+        surahNameOf = surahNameOf,
+        onOpenPlace = onOpenPlace,
         modifier = modifier,
     )
 }

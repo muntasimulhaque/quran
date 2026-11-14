@@ -419,6 +419,13 @@ class Build(private val root: File) {
      * over the whole Book, because a dictionary form is only worth naming
      * with how many words carry it and how many shapes they take (owner
      * decision, this session).
+     *
+     * The 2026-11-14 export leaves nine rows at 70:1 and 78:30 in the
+     * corpus's raw tags, with a code where a verb's pattern stands. The tags
+     * are read as the parts they name and [GrammarErrata] restores the fuller
+     * labels the same words carried in the export the database was built
+     * from, so the source can move without the sheet losing a participle, a
+     * particle, or a pattern (owner decision, this session).
      */
     private fun readGrammar(
         ayahNumbers: Map<String, Int>,
@@ -477,17 +484,27 @@ class Build(private val root: File) {
             }
             morphologyWords(ayah).forEachIndexed { index, word ->
                 val stem = stem(word) ?: return@forEachIndexed
+                // The nine rows at 70:1 and 78:30 carry the corpus's raw tags
+                // and a code where the pattern stands. The map reads the tag's
+                // broad part; the erratum restores the finer label, the gender,
+                // and the pattern the same words carried before (owner
+                // decision, this session).
+                val erratum = GrammarErrata["$surah:$number:${index + 1}"]
                 val label = stem["pos"]?.jsonPrimitive?.contentOrNull.orEmpty()
-                val partOfSpeech = GrammarLabels.partOfSpeech[label]
+                val partOfSpeech = erratum?.partOfSpeech ?: GrammarLabels.partOfSpeech[label]
                 if (partOfSpeech == null) {
                     fail("word-morphology: $surah:$number word ${index + 1} names an unknown part of speech: $label")
                     return@forEachIndexed
                 }
                 val caseLabel = stem["inflection"]?.jsonPrimitive?.contentOrNull
-                val grammaticalCase = caseLabel?.let {
-                    GrammarLabels.cases[it] ?: run {
-                        fail("word-morphology: $surah:$number word ${index + 1} names an unknown case: $it")
-                        null
+                val grammaticalCase = if (erratum != null) {
+                    erratum.grammaticalCase
+                } else {
+                    caseLabel?.let {
+                        GrammarLabels.cases[it] ?: run {
+                            fail("word-morphology: $surah:$number word ${index + 1} names an unknown case: $it")
+                            null
+                        }
                     }
                 }
                 val qualifiers = stem["qualifiers"]?.jsonArray
@@ -500,13 +517,19 @@ class Build(private val root: File) {
                     lemmaId = lemma?.let { lemmaIds[it] },
                     partOfSpeech = partOfSpeech,
                     grammaticalCase = grammaticalCase,
-                    form = qualifiers.firstNotNullOfOrNull { GrammarLabels.forms[it] },
+                    form = if (erratum != null) {
+                        erratum.form
+                    } else {
+                        qualifiers.firstNotNullOfOrNull { GrammarLabels.forms[it] }
+                    },
                     passive = GrammarLabels.PASSIVE in qualifiers,
                     // The pattern is a verb's own shape. A participle or a
                     // verbal noun has one too, but the sheet's word for it is
                     // "pattern" and a reader of grammar reads it as a verb's
                     // (owner decision, this session).
-                    pattern = if (partOfSpeech in VERB_PARTS) {
+                    pattern = if (erratum != null) {
+                        erratum.pattern
+                    } else if (partOfSpeech in VERB_PARTS) {
                         stem["pattern"]?.jsonPrimitive?.contentOrNull
                     } else {
                         null

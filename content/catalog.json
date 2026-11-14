@@ -130,13 +130,13 @@
             "creditBn": "Quran.com শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
             "license": "Distributed via QUL · Quranic Arabic Corpus v0.4 by Dr. Kais Dukes, GNU GPL: attribution to corpus.quran.com is required; the structured export via Quranpedia.net, free to use in apps",
             "licenseBn": "QUL-এর মাধ্যমে বিতরণ · কুরআনিক আরবিক কর্পাস ০.৪, ড. কায়েস ডিউকস, GNU GPL: corpus.quran.com-এর উল্লেখ আবশ্যক; কাঠামোবদ্ধ রপ্তানি কুরআনপিডিয়া.নেট থেকে, অ্যাপে ব্যবহার অবাধ",
-            "version": "QUL 2",
+            "version": "QUL 3",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 9740288,
-            "sha256": "d1f3f145a65ca56986428877de9127e8efbe42cd59cf4c78f8dcb7f8f5bdfc50",
-            "tag": "pack-words-en-d1f3f145",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-d1f3f145/words-en.db"
+            "bytes": 10555392,
+            "sha256": "e1fa6684f2f07db19df013c0da553b67c10c3f152a5aff067c29a69359076e85",
+            "tag": "pack-words-en-e1fa6684",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-e1fa6684/words-en.db"
         },
         {
             "id": "words-bn",
@@ -147,13 +147,13 @@
             "creditBn": "বাংলা শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
             "license": "Distributed via QUL · Quranic Arabic Corpus v0.4 by Dr. Kais Dukes, GNU GPL: attribution to corpus.quran.com is required; the structured export via Quranpedia.net, free to use in apps",
             "licenseBn": "QUL-এর মাধ্যমে বিতরণ · কুরআনিক আরবিক কর্পাস ০.৪, ড. কায়েস ডিউকস, GNU GPL: corpus.quran.com-এর উল্লেখ আবশ্যক; কাঠামোবদ্ধ রপ্তানি কুরআনপিডিয়া.নেট থেকে, অ্যাপে ব্যবহার অবাধ",
-            "version": "QUL 2",
+            "version": "QUL 3",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 11796480,
-            "sha256": "db48e5ce0ec1ccb56bbae8a1d7f26f1b5e42e6d002d8817a65d8b4a30eb9a281",
-            "tag": "pack-words-bn-db48e5ce",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-db48e5ce/words-bn.db"
+            "bytes": 12611584,
+            "sha256": "6e620b106e41016c50079e86ca33dc66f616a4ae684061de3f55192af3ed0793",
+            "tag": "pack-words-bn-6e620b10",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-6e620b10/words-bn.db"
         },
         {
             "id": "word-root",
@@ -164,13 +164,13 @@
             "creditBn": "কুরআনিক মরফোলজি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
             "license": "Distributed via QUL",
             "licenseBn": "QUL-এর মাধ্যমে বিতরণ",
-            "version": "QUL",
+            "version": "QUL 2",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 2154496,
-            "sha256": "97fd42f40087fa0cce27f8b7d08bc485e6aec11e48aad998d3afd4022b31c8d8",
-            "tag": "pack-word-root-97fd42f4",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-word-root-97fd42f4/word-root.db"
+            "bytes": 2981888,
+            "sha256": "f15b9ef1fefc1c2f2fc93a5655fdad2322628b0bf9784f9297176fddf868af3c",
+            "tag": "pack-word-root-f15b9ef1",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-word-root-f15b9ef1/word-root.db"
         },
         {
             "id": "word-pronunciation-alafasy",

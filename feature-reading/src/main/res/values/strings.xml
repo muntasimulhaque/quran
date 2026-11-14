@@ -115,6 +115,30 @@
     <string name="reading_grammar_pattern">Pattern %1$s</string>
     <string name="reading_word_lemma">Dictionary form</string>
     <string name="reading_word_grammar">Grammar</string>
-    <string name="reading_word_root_count">%1$s words in the Quran</string>
-    <string name="reading_word_lemma_count">%1$s words in %2$s forms</string>
+    <!-- The count is the word sheet's door to the places (owner decision,
+         this session). A count of one is a real count: a root can be one
+         word, and a dictionary form can be one word in one form. -->
+    <plurals name="reading_word_root_count">
+        <item quantity="one">%1$s word in the Quran</item>
+        <item quantity="other">%1$s words in the Quran</item>
+    </plurals>
+    <plurals name="reading_word_lemma_words">
+        <item quantity="one">%1$s word</item>
+        <item quantity="other">%1$s words</item>
+    </plurals>
+    <plurals name="reading_word_lemma_forms">
+        <item quantity="one">%1$s form</item>
+        <item quantity="other">%1$s forms</item>
+    </plurals>
+    <string name="reading_word_lemma_count">%1$s in %2$s</string>
+    <!-- The places page: the count's answer, in the word sheet's own window. -->
+    <string name="reading_word_places_back">Back to the word</string>
+    <string name="reading_word_places_current">Your place</string>
+    <string name="reading_word_places_empty">The word list on this device does not carry the places of this word.</string>
+    <string name="reading_word_places_failed">The places could not be read from the word list.</string>
+    <string name="reading_word_places_retry">Try again</string>
+    <plurals name="reading_word_places_count">
+        <item quantity="one">%1$s place</item>
+        <item quantity="other">%1$s places</item>
+    </plurals>
 </resources>

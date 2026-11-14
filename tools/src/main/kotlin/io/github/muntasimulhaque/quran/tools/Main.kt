@@ -119,7 +119,19 @@ fun extract(file: File, destination: File): File {
 
 private const val MAX_ENTRIES = 10_000
 private const val MAX_FILE_BYTES = 256L * 1024 * 1024
-private const val MAX_TOTAL_BYTES = 512L * 1024 * 1024
+
+/**
+ * The room a source archive may unpack to.
+ *
+ * The QUL al-Afasy recitation package is 1.7 GB of audio and is one of the
+ * pinned sources; the guard is against an archive that lies about its
+ * contents, not against the project's own audio. The ceiling has to hold the
+ * largest source plus the rest of the pipeline's work, so it is four
+ * gigabytes. It was 512 MB, which stopped `verify` at the recitation package
+ * and left every source after it unextracted, including the metadata and the
+ * timings the content build reads (owner report, this session).
+ */
+private const val MAX_TOTAL_BYTES = 4L * 1024 * 1024 * 1024
 
 fun File.firstWithExtension(vararg extensions: String): File? =
     walkTopDown().firstOrNull { f -> extensions.any { f.name.endsWith(it, ignoreCase = true) } }

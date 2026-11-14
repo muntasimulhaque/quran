@@ -108,6 +108,10 @@ internal fun ReadingRows(
     wordAudio: WordAudioState? = null,
     /** The sheet closed: a press still waiting on a pack is forgotten. */
     onWordClosed: () -> Unit = {},
+    /** The surah's own name at a reference, for the places page's groups. */
+    surahNameOf: (Int) -> String = { "" },
+    /** A place the reader chose on the word sheet: the reading jumps there. */
+    onOpenPlace: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     // The stored place is the ayah, so the list opens on it and needs nothing
@@ -356,12 +360,15 @@ internal fun ReadingRows(
         WordSheet(
             word = open,
             surahName = surah.nameSimple,
+            surahNameOf = surahNameOf,
             metrics = metrics,
             hafs = hafs,
+            content = content,
             onDismiss = {
                 onWordClosed()
                 onWord(null)
             },
+            onOpenPlace = onOpenPlace,
             onHear = { onHearWord(open.ayahNumber, open.position) },
             hearing = open.ayahNumber == hearingAyah && open.position == hearingWord,
             voice = wordVoice,
