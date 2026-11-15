@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -275,6 +277,13 @@ private fun PlaceRow(
  * A moment in plain words: the reader reads this list to find a place they
  * left, and "yesterday" is a better answer than a timestamp. Each unit is its
  * own plural, so a count of one reads as one.
+ *
+ * The count gives way to a date once it stops meaning anything (owner
+ * decision, this session). The week was the last unit and it had no ceiling, so
+ * a place left two years ago read "104 weeks ago": a number the reader has to
+ * divide by fifty-two before it means a season. Four weeks is the last week a
+ * reader can still count, and after it the date is shorter and truer, in the
+ * locale's own medium form ("12 March" in English, "১২ মার্চ" in Bangla).
  */
 @Composable
 private fun moment(at: Long, now: Long = System.currentTimeMillis()): String {
@@ -290,9 +299,18 @@ private fun moment(at: Long, now: Long = System.currentTimeMillis()): String {
             val days = minutes / (60 * 24)
             pluralStringResource(R.plurals.last_read_days, days.toInt(), days)
         }
-        else -> {
+        minutes < 60 * 24 * 28 -> {
             val weeks = minutes / (60 * 24 * 7)
             pluralStringResource(R.plurals.last_read_weeks, weeks.toInt(), weeks)
+        }
+        else -> {
+            val context = LocalContext.current
+            val locale = LocalConfiguration.current.locales[0]
+            remember(at, locale) {
+                android.text.format.DateFormat.getMediumDateFormat(
+                    context,
+                ).format(java.util.Date(at))
+            }
         }
     }
 }

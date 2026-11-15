@@ -141,8 +141,28 @@ private fun ReciterDownloads(
     val scope = rememberCoroutineScope()
     var open by remember(recitation) { mutableStateOf(false) }
     var downloaded by remember(recitation) { mutableStateOf<List<DownloadedSurah>?>(null) }
+    // The file the reader asked to remove and whose size is worth a question.
+    // Null when nothing is being asked (owner decision, this session).
+    var pending by remember(recitation) { mutableStateOf<DownloadedSurah?>(null) }
     LaunchedEffect(recitation) {
         downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
+    }
+    // What removing one file does, whichever answer it came from: the reader's
+    // one tap on a small file, or the answer to the question a large one
+    // raises.
+    fun removeOne(row: DownloadedSurah) {
+        scope.launch {
+            actions.onRemoveDownloads(recitation, row.surah)
+            // Whatever the removal did, the list is read from the device again:
+            // the row goes when its files are gone.
+            val left = downloadedSurahs(recitation).sortedBy { it.surah }
+            downloaded = left
+            // The last downloaded file is the pack's own reason to stay, so it
+            // goes with the file. A bundled surah is not a download and keeps
+            // the timings it plays through. The voice row above stays either
+            // way, and the next Play fetches the pack again if it left.
+            if (left.isEmpty()) onRemovePack()
+        }
     }
     ReciterDownloadsDoor(open = open, count = downloaded?.size) { open = !open }
     val rows = downloaded ?: return
@@ -166,18 +186,15 @@ private fun ReciterDownloads(
                 null
             } else {
                 {
-                    scope.launch {
-                        actions.onRemoveDownloads(recitation, row.surah)
-                        // Whatever the removal did, the list is read from the
-                        // device again: the row goes when its files are gone.
-                        val left = downloadedSurahs(recitation).sortedBy { it.surah }
-                        downloaded = left
-                        // The last downloaded file is the pack's own reason to
-                        // stay, so it goes with the file. A bundled surah is
-                        // not a download and keeps the timings it plays
-                        // through. The voice row above stays either way, and
-                        // the next Play fetches the pack again if it left.
-                        if (left.isEmpty()) onRemovePack()
+                    // A surah's recitation is tens of megabytes of audio that
+                    // took minutes to arrive and cannot be given back without
+                    // another download, so it is asked about; a few megabytes
+                    // are fetched again in seconds and the reader meant it
+                    // (owner decision, this session).
+                    if (row.bytes >= AskBeforeRemoving) {
+                        pending = row
+                    } else {
+                        removeOne(row)
                     }
                 }
             }
@@ -188,6 +205,17 @@ private fun ReciterDownloads(
             )
         }
     }
+    // The question rises over the page the row stands on, the way the saved
+    // ayah's question rises over Browse.
+    RemoveDownloadSheet(
+        pending = pending,
+        onConfirm = {
+            val asked = pending
+            pending = null
+            if (asked != null) removeOne(asked)
+        },
+        onDismiss = { pending = null },
+    )
     Spacer(Modifier.height(Space.Block))
 }
 

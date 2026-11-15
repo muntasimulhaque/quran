@@ -29,8 +29,8 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.bookRowName
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -179,7 +179,7 @@ internal fun SurahRow(
             .then(
                 if (current) {
                     Modifier.background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected),
+                        LocalPagePalette.current.selected,
                     )
                 } else {
                     Modifier
@@ -227,7 +227,7 @@ internal fun JuzRow(
             .then(
                 if (current) {
                     Modifier.background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected),
+                        LocalPagePalette.current.selected,
                     )
                 } else {
                     Modifier

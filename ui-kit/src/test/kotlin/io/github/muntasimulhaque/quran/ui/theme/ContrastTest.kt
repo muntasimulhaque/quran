@@ -35,11 +35,11 @@ class ContrastTest {
         // not (owner decision, the long read session).
         assertReadable(LightPage.ink, PaperBackground)
         assertReadable(LightPage.ink, PaperSurface)
-        assertReadable(LightPage.ink, blend(LightScheme.primary, PaperBackground, Wash.Selected))
+        assertReadable(LightPage.ink, PaperSelected)
         assertReadable(PaperMuted, PaperBackground)
         assertReadable(PaperMuted, PaperSurface)
         assertSheetGrounds(LightScheme)
-        assertFloatingGrounds(LightScheme, day = true)
+        assertFloatingGrounds(LightScheme, PaperSelected, day = true)
         assertReadable(Gold, PaperBackground)
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
@@ -68,7 +68,7 @@ class ContrastTest {
         // of them is measured on the full mark, which is the strongest ground
         // the palette allows (owner decision, this session).
         assertTajweedOn(PaperTajweed, PaperSurface)
-        assertTajweedOnWash(PaperTajweed, PaperBackground, LightScheme.primary, Wash.Selected)
+        assertTajweedOnWash(PaperTajweed, PaperBackground, PaperSelected, 1f)
         assertTajweedOnWash(
             PaperTajweed,
             PaperBackground,
@@ -79,14 +79,15 @@ class ContrastTest {
             LightPage.ink,
             blend(LightPage.highlight, PaperBackground, LightPage.highlight.alpha),
         )
-        // The search result's match wash: the result line is ink, not a
-        // family, for the reason the class notes. The sheet is the ground
-        // the wash is laid over.
-        assertReadable(PaperInk, blend(LightScheme.primary, PaperSurface, Wash.Match))
+        // The found word's ground: the result line is ink, not a family, for
+        // the reason the class notes, and the ground is the page's own warm
+        // tone rather than a tint of the accent (owner decision, this session).
+        assertReadable(PaperInk, PaperMatch)
+        assertReadable(LightPage.ink, PaperMatch)
         // Browse's current row wears the selected wash under its quiet words,
         // so the muted voice is measured on that ground too (owner decision,
         // this session).
-        assertReadable(PaperMuted, blend(LightScheme.primary, PaperSurface, Wash.Selected))
+        assertReadable(PaperMuted, PaperSelected)
         // The quiet ground every button, off chip, and typed field stands on:
         // the muted voice is measured on the ink wash itself, not only on the
         // scheme's named slots (owner decision, this session).
@@ -101,8 +102,8 @@ class ContrastTest {
         // masthead at 0.9 of the interface word.
         assertReadable(blend(LightPage.introInk, PaperBackground, LightPage.introInk.alpha), PaperBackground)
         assertReadable(
-            blend(LightPage.introInk, blend(LightScheme.primary, PaperBackground, Wash.Selected), LightPage.introInk.alpha),
-            blend(LightScheme.primary, PaperBackground, Wash.Selected),
+            blend(LightPage.introInk, PaperSelected, LightPage.introInk.alpha),
+            PaperSelected,
         )
         assertReadable(blend(LightPage.mastheadInk, PaperBackground, LightPage.mastheadInk.alpha), PaperBackground)
         // The reading's copy selection, which is the page's own word mark and
@@ -215,7 +216,7 @@ class ContrastTest {
         assertReadable(NightMuted, NightBackground)
         assertReadable(NightMuted, NightSurface)
         assertSheetGrounds(DarkScheme)
-        assertFloatingGrounds(DarkScheme, day = false)
+        assertFloatingGrounds(DarkScheme, NightSelected, day = false)
         assertReadable(NightGold, NightBackground)
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
@@ -234,7 +235,7 @@ class ContrastTest {
         assertReadable(NightTajweed.idgham, NightBackground)
         assertReadable(NightTajweed.madda, NightBackground)
         assertTajweedOn(NightTajweed, NightSurface)
-        assertTajweedOnWash(NightTajweed, NightBackground, DarkScheme.primary, Wash.Selected)
+        assertTajweedOnWash(NightTajweed, NightBackground, NightSelected, 1f)
         assertTajweedOnWash(
             NightTajweed,
             NightBackground,
@@ -242,10 +243,11 @@ class ContrastTest {
             DarkPage.highlight.alpha,
         )
         assertReadable(NightInk, blend(DarkPage.highlight, NightBackground, DarkPage.highlight.alpha))
-        assertReadable(NightInk, blend(DarkScheme.primary, NightSurface, Wash.Match))
+        assertReadable(NightInk, NightMatch)
+        assertReadable(NightText, NightMatch)
         // The night sheet's current row, on the same selected wash (owner
         // decision, this session).
-        assertReadable(NightMuted, blend(DarkScheme.primary, NightSurface, Wash.Selected))
+        assertReadable(NightMuted, NightSelected)
         // The quiet ground and the chosen search source, as on the day sheet
         // (owner decision, this session).
         assertReadable(NightMuted, blend(NightText, NightSurface, Wash.Door))
@@ -253,8 +255,8 @@ class ContrastTest {
         // The same two tones on the night page.
         assertReadable(blend(DarkPage.introInk, NightBackground, DarkPage.introInk.alpha), NightBackground)
         assertReadable(
-            blend(DarkPage.introInk, blend(DarkScheme.primary, NightBackground, Wash.Selected), DarkPage.introInk.alpha),
-            blend(DarkScheme.primary, NightBackground, Wash.Selected),
+            blend(DarkPage.introInk, NightSelected, DarkPage.introInk.alpha),
+            NightSelected,
         )
         assertReadable(blend(DarkPage.mastheadInk, NightBackground, DarkPage.mastheadInk.alpha), NightBackground)
         // The night reading's copy selection, the same word mark the reciter's
@@ -318,10 +320,10 @@ class ContrastTest {
      * here, so a palette edit fails on the machine and not on a reader's eyes
      * (owner decision, this session).
      */
-    private fun assertFloatingGrounds(scheme: ColorScheme, day: Boolean) {
+    private fun assertFloatingGrounds(scheme: ColorScheme, selected: Color, day: Boolean) {
         val floating = scheme.surfaceContainerHigh
         val page = scheme.background
-        val block = blend(scheme.primary, page, Wash.Selected)
+        val block = selected
         assertReadable(scheme.onSurface, floating)
         // The one rule both grounds share: a floating paper is above the page
         // and above the block it is raised over, never a shade of either.
@@ -357,9 +359,9 @@ class ContrastTest {
      * over.
      *
      * A menu is never raised over the plain page: the ayah whose menu is open
-     * paints its own block at [Wash.Selected] of the accent. The day's block is
-     * L* 92.9 and the sheet's white stands dE76 7.2 from it; the night's block
-     * is L* 15.6 and the one-step night paper stands dE76 5.9 from it. The 17.3
+     * paints its own block in [PaperSelected]. The day's block is L* 92.9 and
+     * the sheet's white stands dE76 8.7 from it; the night's block is L* 15.6
+     * and the one-step night paper stands dE76 5.9 from it. The 17.3
      * tone that read as a veil stood dE76 4.2 from the block while it held every
      * ratio it was asked for, because the two tones sat at one lightness and
      * differed only in a chroma that no WCAG ratio can see. The direction is

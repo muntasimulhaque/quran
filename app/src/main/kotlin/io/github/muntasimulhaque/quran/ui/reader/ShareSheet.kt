@@ -150,6 +150,15 @@ internal fun AyahShareSheet(
                     TextButton(
                         label = stringResource(R.string.share_image),
                         onClick = { onShareImage(cardWidth) },
+                        // The image is the card's default door, so it is the
+                        // surface's one prominent answer: the same solid accent
+                        // the note's Save, the tafsir's Add, the reminder's Turn
+                        // on, and the download's Continue wear. It was the
+                        // button tone, a 10 percent accent tint, which reads in
+                        // this app as "a door among doors" and sat beside a
+                        // quiet pill as one of two equal choices while the copy
+                        // called it the default (owner decision, this session).
+                        prominent = true,
                     )
                 }
             }

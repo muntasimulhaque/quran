@@ -101,7 +101,11 @@ change, never left as a dead letter.
     no dialog before the text, no feature that asks a choice before the reading.
     The reminder is offered after the first surah, never before it. The bar
     carries the place and is asked for, never resident: it leaves when the
-    reader moves the page, and the page between visits is bare. Cold start
+    reader moves the page, and the page is bare. The one exception is the first
+    surah a reader ever opens, which carries one sentence naming the tap that
+    brings the bar: a reader who has never seen the app cannot guess a gesture
+    nothing on the glass mentions, and the first tap answers the sentence and
+    puts it away for good. Cold start
     lands on readable text with no spinner, the reading is a scroll through
     rows already measured, and nothing blocks the main thread. No streaks,
     badges, social, or guilt.
@@ -255,6 +259,20 @@ on `quran_phone`, collect the frames from
 before another call replaces them, read the eight, and commit them to
 `play-store/screenshots/phone/`. When no visible surface changed, the
 committed phone set stands.
+
+When the Bangla interface changed, one separate leg photographs it, on the
+same phone:
+
+```bash
+./gradlew :app:connectedDebugAndroidTest -Pquran.devPacks=screenshot \
+  -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.BanglaCaptureTest
+```
+
+It writes `bn-01-reading` and `bn-02-settings` and hands the app back in the
+language it found it in. Those frames are evidence and are not committed to
+the store, whose set is English: Bengali's longer lines are what a settings
+row held to two lines and a button held to one can break, and they are the
+only way to see it.
 
 **Not in the per-release path, ever again.** The full app instrumented suite
 is an occasional audit or a manual dispatch, never a release requirement. A

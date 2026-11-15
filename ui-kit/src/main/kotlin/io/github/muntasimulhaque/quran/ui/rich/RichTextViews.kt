@@ -38,7 +38,6 @@ import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.title
 
@@ -195,7 +194,10 @@ fun HighlightedText(
     // reader searched it (owner decision, this session).
     val voice = LocalReadingVoice.current
     val resolvedStyle = style ?: voice.prose(sizeSp = sizeSp, lineSp = lineSp)
-    val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
+    // The found word's ground is the page's own warm tone and no longer a tint
+    // of the accent: on the day sheet the tint measured a real blue, the only
+    // cool ground left in the app (owner decision, this session).
+    val wash = LocalPagePalette.current.match
     val weight = FontWeight.Medium
     Text(
         text = buildAnnotatedString {
@@ -403,6 +405,23 @@ private fun annotated(
                 // it takes the sentence's size and sits in the line. At the
                 // quotation's size it stood a third above the words around it
                 // (owner decision, this session).
+                //
+                // It reads a little low against capital letters, and that is
+                // the glyph, not the layout: measured on the 19.0 store frame
+                // at 1080 x 1920, the line carrying it is 42 px tall against
+                // 41 and 39 for its neighbours in the same paragraph, its
+                // baseline is the same row as theirs, and the only ink under
+                // that baseline is 7 to 16 px of descender, which is what a "p"
+                // or a "y" puts there on every other line. U+FDFA is a stacked
+                // phrase with no ascender, so its mass sits between the
+                // x-height and the baseline while the caps beside it start at
+                // cap height. Nothing about it clips, crowds the next line, or
+                // grows the line box, and it is left alone with this note so
+                // the next session does not open it again: the only lever a
+                // baseline shift would offer is a couple of pixels of optical
+                // alignment, bought by re-growing the honourific-only blocks
+                // that were deliberately given the body's own line (owner
+                // decision, this session).
                 withStyle(
                     SpanStyle(
                         fontFamily = KitabBody,

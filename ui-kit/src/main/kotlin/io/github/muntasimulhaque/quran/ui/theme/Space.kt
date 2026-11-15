@@ -15,6 +15,18 @@ import androidx.compose.ui.unit.dp
  * The ladder is vertical. The three numbers under it are the page: how far a
  * word stands from the edge of the glass, how wide the page it stands on is
  * allowed to be, and how far a wash reaches past its words.
+ *
+ * **The air above a head is more than the air under it, and the air under it is
+ * more than the air inside the block** (owner decision, this session). The
+ * reading's block is a head, the verse, and the meaning under it; when the
+ * three gaps fall within a few dp of each other the page stops grouping them,
+ * and an ayah's number reads as a caption between two paragraphs rather than
+ * as the head of the verse below. The head's own 48 dp target holds its room
+ * above the words it names, so the number sits [Tight] from its verse while the
+ * verse stands [Block] from its meaning and two verses stand [Row] and
+ * [Row] apart. A surface that adds a head of its own (the tajweed legend's
+ * families) keeps the same order: the smallest gap inside a family, a larger
+ * one between them.
  */
 object Space {
 

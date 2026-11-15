@@ -62,7 +62,7 @@
 
     <string name="content_problem_title">কুরআনের লেখা খোলা যায়নি</string>
     <string name="content_problem_storage_title">কুরআনের লেখা খোলার জায়গা নেই</string>
-    <string name="content_problem_body">এই ডিভাইসে এমন কিছু আছে যা অ্যাপকে তার নিজের কনটেন্ট পড়তে বাধা দিচ্ছে। কিছুই হারায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে।</string>
+    <string name="content_problem_body">কিছুই হারায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে। বারবার এমন হলে অ্যাপটি বন্ধ করে আবার খুলুন।</string>
     <string name="content_problem_storage_body">এই ফোনে লেখাটির জন্য জায়গা দরকার। কিছু জায়গা খালি করে আবার চেষ্টা করুন। কিছুই হারায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে।</string>
     <string name="content_problem_retry">আবার চেষ্টা করুন</string>
 

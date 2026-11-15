@@ -60,13 +60,14 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  * under it every rule it covers, named and explained.
  *
  * A rule is one paragraph, not two lines: the name runs into its sentence in
- * the page's ink and the app's medium weight, and the sentence follows after
- * the app's own middot in the quiet tone, so eighteen rules cost eighteen
- * short paragraphs instead of eighteen headings and eighteen notes with a
- * block of air between each pair. The middot is the separator the interface
- * already uses between a name and its fact ("Al-Kahf · 18:10"); it is neither
- * a period nor a danda, so it belongs to neither language's sentence (owner
- * decision, this build).
+ * the page's ink and the app's medium weight, and a period ends the name before
+ * the sentence begins. The middot is gone from this page (owner decision, this
+ * session). It was defended as the app's separator between a name and its fact,
+ * which is true of `Al-Kahf · 18:10` because both halves are facts; a sentence
+ * is not a fact, and a wrapped one left the dot floating in the middle of a
+ * line. The weight change and the period say the step, and eighteen rules cost
+ * eighteen short paragraphs instead of eighteen headings and eighteen notes
+ * with a block of air between each pair.
  *
  * The page used to print all eighteen names, a sentence for each, and one
  * sentence for the family above them, which said the same thing twice for the
@@ -106,6 +107,24 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  * family's name is a heading to a screen reader, so TalkBack moves from family
  * to family instead of hearing every rule in order (owner decision, this
  * session).
+ *
+ * **A family is closer to its own rules than to the next family** (owner
+ * decision, this session). The head stood [Space.Line] over the first rule's
+ * [Space.Block], and the family's block kept [Space.Section] under its last
+ * one: 24 dp to its own rules and 24 dp to the next family, so a family's name
+ * was measurably as far from its rules as from a different family's, and the
+ * eye grouped the wrong pairs. The first rule now begins 12 dp under its head
+ * and the next family begins 24 dp under the last rule, which is the same
+ * order the reading keeps: the smallest gap inside a group, a larger one
+ * between groups. The lead paragraph's own foot is [Space.Section] too, so the
+ * list starts as cleanly as one family ends.
+ *
+ * **The rules are the legend's detail, not its subject** (owner decision, this
+ * session). A rule's sentence is explanatory prose, so it takes the meta
+ * voice's 13 where the family, its sample word, and the page's own name are the
+ * things the reader came to see. The page had every line at 15, which made
+ * eighteen explanations the loudest thing on a page that exists to show seven
+ * colors.
  */
 @Composable
 fun TajweedPage(
@@ -139,7 +158,9 @@ fun TajweedPage(
                     start = Space.Gutter,
                     end = Space.Gutter,
                     top = Space.Line,
-                    bottom = Space.Block,
+                    // The list starts as cleanly as one family ends: the lead is
+                    // the page's own head, so its foot is a family's foot.
+                    bottom = Space.Section,
                 ),
             )
         }
@@ -243,22 +264,22 @@ private fun FamilyRules(family: TajweedFamily) {
             Rule(
                 name = stringResource(rule.label()),
                 sentence = stringResource(rule.note()),
-                modifier = Modifier.padding(top = if (index == 0) Space.Block else Space.Line),
+                modifier = Modifier.padding(top = if (index == 0) Space.Tight else Space.Line),
             )
         }
     }
 }
 
 /**
- * One rule: its name in the page's ink and the app's medium weight, the
- * app's own middot, and its sentence after it in the quiet tone, on one
- * paragraph.
+ * One rule: its name in the page's ink and the app's medium weight, a period,
+ * and its sentence after it in the quiet tone, on one paragraph.
  *
  * The name is a run-in head, so a reader scanning for a word they have heard
  * finds it at the start of a line without the page paying for a line of its
  * own, and the sentence that explains it follows to the end of the same
- * thought. The middot marks the step from the name to its sentence, in the
- * one separator the app already uses between a name and its fact.
+ * thought. A period ends the name and lets the sentence begin, which is what a
+ * definition does in either of the app's languages; a middot between them read
+ * as two data fields joined for want of a word.
  */
 @Composable
 private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) {
@@ -270,13 +291,15 @@ private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) 
             withStyle(SpanStyle(color = quiet)) { append(RuleDivider) }
             withStyle(SpanStyle(color = quiet)) { append(sentence) }
         },
-        style = MaterialTheme.typography.bodyMedium,
+        // An explanation is the page's detail: it stands one step under the
+        // family it explains, so eighteen of them do not outshout seven.
+        style = MaterialTheme.typography.bodySmall,
         modifier = modifier,
     )
 }
 
-/** The step from a rule's name to its sentence: the app's own separator. */
-private const val RuleDivider = " · "
+/** The step from a rule's name to its sentence: the end of a name. */
+private const val RuleDivider = ". "
 
 /** The family's name in the reader's language. */
 private fun TajweedFamily.title(): Int = when (this) {

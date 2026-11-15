@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.0 (versionCode 192)
+Version: 19.1 (versionCode 193)
 
 ## Listing
 
@@ -103,16 +103,17 @@ for.
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
 - Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
-- 7 inch tablet screenshots: `screenshots/tablet7/` (1200 x 1920), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
+
+The seven inch set is pulled, and the reason is in the capture record below.
+Play falls back to the phone set on a seven inch tablet.
 
 Play's current rule for preview assets is a JPEG or 24-bit PNG, 320 to 3840
 pixels on each side, and a long side no more than twice the short side. Both
-tablet sets stand inside it: the 7 inch set is 1200 x 1920, the 16:10 shape
-turned upright, and the 10 inch set is 2560 x 1800, 1.42:1. The 16:9 and 9:16
-shapes are Play's recommendation for large-screen placements, not a
-submission requirement, so the tablet sets keep the shapes their real screens
-give them.
+sets stand inside it: the phone set is the 9:16 shape, and the ten inch set is
+2560 x 1800, 1.42:1. The 16:9 and 9:16 shapes are Play's recommendation for
+large-screen placements, not a submission requirement, so the ten inch set keeps
+the shape its real screen gives it.
 
 The icon and the feature graphic are the app's own mark: an open book on its
 rehal, the owner's own reference drawing, redrawn clean for this app as
@@ -141,44 +142,60 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The two tablet sets are from capture run 42981599083 on 17.7, green on
-both legs; the phone set is still 17.6's, because this run's phone leg lost
-its emulator. The 17.5 run was the last complete set: all three legs green,
-eleven frames each (twelve on the ten inch screen), every frame read. The
-eight are a reader's path through the app rather than the app's own map. The
-reading frames carry the long read's palette: the seven tajweed families hold
-one weight, the paper ink is the reading's own 12:1 tone, and the night page's
-colors sit below the ink instead of glowing above it. The last frame is the
-one-row offer, 64 dp, the reciter's name and its size over the surah, the
-whole block a door to the voice list, its capsule on the floating paper the
-pill already wears: the sheet's own white, 2 L* over the page and 7 L* over
-the washed block. The second frame's menu wears that same paper, and it is
-read against the washed block it hangs over without a border. The ayah's own
-door is its number at the head, in the app's blue, with the app's one chevron
-4 dp after it: the menu it opens is the app's one popup, and the verse is not
-a button, so a tap on the page puts the menu away and chooses nothing.
-In the second frame that chevron has turned up on the washed card, which is
-the whole of the door's open state. The rest keep their
-composition, on the shared pill measure. No frame carries the version line,
-because the settings hub is not one of the eight.
+The sets were captured on this machine on 19.0: the phone set on `quran_phone`
+(1080 x 1920) and the ten inch set on `quran_tablet10` (2560 x 1800), both green,
+every frame read. The seven inch set is pulled. Its AVD's status bar draws one
+network group per modem and the image reports three, so every frame of that set
+read "3G 3G 3G"; leaving demo mode instead brought a shield and a key glyph up
+beside the clock. A store frame is not a test rig's face, so the set comes back
+when that AVD is rebuilt with one modem.
+
+Every frame is a screen capture of the whole display, the reading's included, so
+the status bar, the sheet's own window, and the app agree. The bar is the demo's
+on every leg: 9:41, a full battery, and no notification icons, set before the
+tour starts.
+
+The eight are a reader's path through the app rather than the app's own map, and
+the first one is the app's face: the surah's name, its juz, and the three doors,
+over the verse with its translation and its tajweed colors. The chosen thing on
+the page is the paper's own warm tone and not a tint of the accent, so the one
+block that says "this verse" says it in the page's voice. The seven tajweed
+families hold one weight, the paper ink is the reading's own 12:1 tone, and the
+night page's colors sit below the ink instead of glowing above it. A verse's
+number is its head, in the app's blue, with the app's one chevron beside it, and
+the printed medallion closes a verse only on a page that draws the Quran alone:
+so a verse carries one number, and that number is the door. The last frame is
+the one-row offer, 64 dp, the reciter's name and its size over the surah, the
+whole block a door to the voice list, its capsule on the floating paper the pill
+already wears. The share card's Share image is the solid accent, the one answer
+that surface exists to ask for.
+
+The fifth frame is the Tajweed page and not the settings hub, which was the
+first choice. The hub's last row carries the version, and a store frame that
+dates itself is wrong the day the next release ships: on a phone the About row
+falls below the fold, on a tablet all ten rows fit, so a frame built on the
+phone's luck broke on its own tablet. The page that explains the first frame's
+colors takes the slot, and no frame carries the version line.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
 creating the emulator, waits for the emulated storage to mount before the test
-starts, and uploads each set as its own artifact, so the store images always
-match the shipped build. Run it from the Actions tab, or let it run when the UI
-changes.
+starts, and uploads each set as its own artifact. Its frames are signal: the
+committed sets are the ones captured here, because a hosted emulator's status
+bar and its timing are its own. Run it from the Actions tab, or let it run when
+the UI changes.
 
 What each set shows, in order:
 
-1. The reading at rest: its translation and its tajweed colors, with no bar over the page
-2. The ayah's own actions, opened from the number at its head
-3. The share card the app hands out
-4. The tafsir open on its passage, with the source line above it
-5. Search reading a reference ("kahf 10"), with the places it reads behind the
+1. The reading with its own chrome up: the surah's name, its juz, and the three doors
+2. The tafsir open on its passage, with the source line above it
+3. Search reading a reference ("kahf 10"), with the places it reads behind the
    "Search in" door
-6. The Tajweed page: seven color families, each with its word and its rules
-7. The reading at night
+4. Saved: the reader's own notes under the places they were written on
+5. The Tajweed page: seven color families, each with a word from the reading and
+   its rules
+6. The reading at night
+7. The share card the app hands out, with Share image as its solid answer
 8. The recitation's own offer: the one-row capsule naming the reciter and its
    size over the surah before a tap, the block a door to the voice list, with
    Download at its end
@@ -186,6 +203,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.1, 497 characters)
+19.1 puts the number on its verse: at the head of the line, not floating between two verses, and one number per verse, the one you tap. The chosen verse and a found word are the page's warm tone instead of blue. Word meanings are offered where the reading arrives, the first page says once that a tap brings the bar, Saved names a date instead of 104 weeks ago, and a large download asks first. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (18.8, 490 characters)
 18.8 gives the size controls the page. Each name stands over its rail, and the two end marks stay at every text size. The words page names its switch after the feature, teaches the long press under it, and draws its one list as a file row. Downloaded pronunciation is now a door that lists each surah with its own Remove. A pair of buttons reads the quiet word first and the answer last. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
@@ -315,7 +335,6 @@ something Play would reject.
 | `icon-512.png` | 512 x 512 | store icon |
 | `feature-graphic-1024x500.png` | 1024 x 500 | feature graphic |
 | `screenshots/phone/*.png` | 1080 x 1920 | phone screenshots (8) |
-| `screenshots/tablet7/*.png` | 1200 x 1920 | 7 inch tablet screenshots (8) |
 | `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
 
 

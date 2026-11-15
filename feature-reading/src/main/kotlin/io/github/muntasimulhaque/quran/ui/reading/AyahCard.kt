@@ -557,7 +557,7 @@ private fun TafsirOffer(
                 quiet = true,
             )
             TextButton(
-                label = stringResource(R.string.card_tafsir_add, formatBytes(pack.bytes)),
+                label = stringResource(R.string.card_tafsir_add),
                 onClick = { onInstall(pack.id) },
                 modifier = Modifier.padding(start = Space.Action),
                 prominent = true,

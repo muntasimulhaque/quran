@@ -85,7 +85,6 @@ import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.prose
 import kotlinx.coroutines.Dispatchers
@@ -1027,7 +1026,8 @@ private fun PlaceRow(
     val palette = LocalPagePalette.current
     val ink = palette.ink
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
-    val primary = MaterialTheme.colorScheme.primary
+    val selected = palette.selected
+    val accent = MaterialTheme.colorScheme.primary
     val currentState = stringResource(R.string.reading_word_places_current)
     Row(
         modifier = Modifier
@@ -1035,7 +1035,7 @@ private fun PlaceRow(
             .sheetRow(onClick = { onOpenPlace(place.ayahNumber, place.position) })
             .then(
                 if (current) {
-                    Modifier.background(primary.copy(alpha = Wash.Selected))
+                    Modifier.background(selected)
                 } else {
                     Modifier
                 },
@@ -1048,7 +1048,7 @@ private fun PlaceRow(
     ) {
         ReferenceLabel(
             text = localizedDigits(place.reference),
-            color = if (current) primary else quiet,
+            color = if (current) accent else quiet,
         )
         Text(
             text = place.word,

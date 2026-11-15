@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -77,13 +79,22 @@ fun ThemeRow(
                     .selectable(
                         selected = theme == selected,
                         interactionSource = press,
+                        // The press is drawn on the circle, not here: Material's
+                        // own indication shapes itself to this column, which is
+                        // a tall rounded rectangle around the swatch, its name,
+                        // and the 48 dp target neither of them fills. Every
+                        // other selectable in the app turns it off for the same
+                        // reason and draws the ripple on the shape the reader
+                        // sees; this row was the one that still let it through
+                        // (owner report, this session).
+                        indication = null,
                         role = Role.RadioButton,
                     ) {
                         onSelect(theme)
                     }
                     .padding(horizontal = 6.dp, vertical = Space.Line),
             ) {
-                ThemeSwatch(theme = theme, chosen = theme == selected)
+                ThemeSwatch(theme = theme, chosen = theme == selected, press = press)
                 Text(
                     text = theme.name(),
                     // A swatch's name is a label, not a row's value: it wears
@@ -117,9 +128,24 @@ fun ThemeRow(
  * the page and on the sheet, so a pale page on a pale sheet and a dark page
  * on a dark sheet both keep their circle (owner report; measured again in
  * the consistency audit).
+ *
+ * **The press is the circle** (owner report, this session). Material's own
+ * indication draws on the selectable's box, which here is the swatch, its name
+ * under it, and the invisible 48 dp target around both: a tall rounded
+ * rectangle that belongs to nothing the reader can see, flashing where no
+ * control is drawn. The row turns that indication off and paints the ripple on
+ * the 54 dp circle instead, so a tap answers on the thing that was tapped, the
+ * way a button's pill does. The name is part of the target and stays silent,
+ * because the circle is the control and the word under it is its caption: that
+ * is already the grammar of the row, since only the circle carries the chosen
+ * ring.
  */
 @Composable
-private fun ThemeSwatch(theme: AppTheme, chosen: Boolean) {
+private fun ThemeSwatch(
+    theme: AppTheme,
+    chosen: Boolean,
+    press: MutableInteractionSource,
+) {
     Box(
         modifier = Modifier
             .size(54.dp)
@@ -133,7 +159,9 @@ private fun ThemeSwatch(theme: AppTheme, chosen: Boolean) {
                 } else {
                     Modifier
                 },
-            ),
+            )
+            .clip(CircleShape)
+            .indication(press, ripple(color = MaterialTheme.colorScheme.primary, bounded = true)),
         contentAlignment = Alignment.Center,
     ) {
         Box(

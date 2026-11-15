@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
@@ -43,7 +44,11 @@ internal fun translationName(settings: AppSettings, packs: List<ContentPack>): S
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
         chosen.size == 1 -> contentPackName(chosen.first().id, chosen.first().name)
-        else -> stringResource(R.string.settings_chosen_count, chosen.size)
+        else -> pluralStringResource(
+            R.plurals.settings_translation_count,
+            chosen.size,
+            chosen.size,
+        )
     }
 }
 
@@ -54,7 +59,7 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
         chosen.size == 1 -> contentPackName(chosen.first().id, chosen.first().name)
-        else -> stringResource(R.string.settings_chosen_count, chosen.size)
+        else -> pluralStringResource(R.plurals.settings_tafsir_count, chosen.size, chosen.size)
     }
 }
 

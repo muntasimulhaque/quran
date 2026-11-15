@@ -406,6 +406,10 @@ private fun WordListRow(
  * count, the chevron that says it opens, and one row per surah with its own
  * Remove. The door is the list's count, not a total size, because a number a
  * reader cannot act on says nothing (owner decision, this session).
+ *
+ * A surah's voices are asked about before they go when they are worth asking
+ * about, by the same 20 MB rule a recitation keeps (owner decision, this
+ * session).
  */
 @Composable
 private fun PronunciationDownloads(
@@ -413,6 +417,8 @@ private fun PronunciationDownloads(
     onRemove: (Int) -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
+    // The file whose size is worth a question. Null when nothing is asked.
+    var pending by remember { mutableStateOf<DownloadedSurah?>(null) }
     DisclosureRow(
         expanded = open,
         onToggle = { open = !open },
@@ -429,9 +435,20 @@ private fun PronunciationDownloads(
             row = row,
             start = Space.Gutter,
             removeAction = stringResource(R.string.settings_pronunciation_remove, row.name),
-            onRemove = { onRemove(row.surah) },
+            onRemove = {
+                if (row.bytes >= AskBeforeRemoving) pending = row else onRemove(row.surah)
+            },
         )
     }
+    RemoveDownloadSheet(
+        pending = pending,
+        onConfirm = {
+            val asked = pending
+            pending = null
+            if (asked != null) onRemove(asked.surah)
+        },
+        onDismiss = { pending = null },
+    )
     Spacer(Modifier.height(Space.Block))
 }
 

@@ -78,7 +78,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 @Composable
 internal fun AyahBlock(
@@ -203,11 +202,11 @@ internal fun AyahBlock(
     // ayah-level recitation wash was removed when the word wash came back,
     // because the two tints together put the seven rule colors under their
     // contrast floor (owner decision, this session).
-    val wash = if (isSelected) {
-        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
-    } else {
-        Color.Transparent
-    }
+    //
+    // The wash is the page's own warm tone and not a tint of the accent, so
+    // the one surface that says "this verse is the one you are acting on"
+    // says it in the paper's voice (owner decision, this session).
+    val wash = if (isSelected) palette.selected else Color.Transparent
     // The padding belongs to the paper, so the gaps between ayahs still
     // answer a tap with the reading chrome. The block is set apart by the
     // room around it, not by a rule: the app draws no separators.
@@ -372,7 +371,17 @@ internal fun AyahBlock(
                     row,
                     playing,
                     recitedWord,
-                    true,
+                    // One number per verse, and it is the number the reader can
+                    // tap. A page that draws a translation carries the
+                    // reference line at the head of the block, and that line is
+                    // the door, so the verse needs no second number closing it.
+                    // A page that draws the Quran alone has no head, so the
+                    // face's own medallion is the number and the door. The
+                    // medallion used to close every verse, which put the same
+                    // key twice on a page that carries a translation: once as
+                    // the head's control and once as the print's mark, 40 dp
+                    // apart (owner decision, this session).
+                    arabicOnly,
                     ornamentStyle,
                     revealWords,
                     revealMeanings,

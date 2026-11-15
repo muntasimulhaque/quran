@@ -98,6 +98,14 @@ fun SettingsSheet(
     exactGrantWithheld: () -> Boolean,
     actions: SettingsActions,
     onDismiss: () -> Unit,
+    /**
+     * The page the sheet opens on, when something other than the hub asked for
+     * a page. A door that names a missing pack (the reading's word meanings
+     * door, the ayah card's tafsir offer) lands on the page that has it, rather
+     * than on a hub the reader has to navigate after being told to come here
+     * (owner decision, this session).
+     */
+    initialPage: SettingsPage? = null,
 ) {
     val sheetState = rememberExpandedSheetState()
     // The page survives the window, not only the composition. A change of
@@ -106,7 +114,7 @@ fun SettingsSheet(
     // page and came back to the reading. The open page and the open credits
     // are written into the saved state, so the sheet comes back up where the
     // choice was made, in the language just chosen.
-    var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
+    var page by rememberSaveable { mutableStateOf<SettingsPage?>(initialPage) }
     // A page opened from the hub steps back to the hub on Back.
     val back: () -> Unit = { page = null }
     val hubScroll = rememberScrollState()

@@ -3,9 +3,20 @@
     <string name="reading_page_description">Reading</string>
     <string name="reading_add_translation">Add a translation to read this surah in your language</string>
     <string name="reading_action_add">Add</string>
+    <!-- The one gesture the reading keeps, said once: the bar is asked for and
+         never resident, and a reader who has never seen the app has no way to
+         reach the index, the search, or the settings. The first tap anywhere on
+         the page answers it, and the sentence never returns (owner decision,
+         this session). -->
+    <string name="reading_tap_hint">Tap the page for the index, search, and settings</string>
+    <!-- The word meanings are the one aid the reading never mentions, because
+         they are a Settings row and nothing else. The door stands where the
+         reading arrives, and leaves for good once the list is on the device
+         (owner decision, this session). -->
+    <string name="reading_add_words">Add word meanings to read each word on its own</string>
     <string name="reading_revelation_makki">Makki</string>
     <string name="reading_revelation_madani">Madani</string>
-    <string name="reading_surah_meta">%1$s  ·  %2$d ayahs</string>
+    <string name="reading_surah_meta">%1$s · %2$d ayahs</string>
     <string name="reading_about_surah">About this surah</string>
     <string name="reading_hide">Hide</string>
     <string name="reading_surah_complete">%1$s complete</string>
@@ -22,8 +33,8 @@
     <string name="card_add_tafsir">Add a tafsir to read this ayah deeper</string>
     <string name="card_opening_pack">Opening %1$s…</string>
     <string name="card_tafsir_missing">This tafsir has no passage for this ayah.</string>
-    <string name="card_tafsir_offer_body">The commentary in this language, %1$s. It downloads once and then works offline.</string>
-    <string name="card_tafsir_add">Add · %1$s</string>
+    <string name="card_tafsir_offer_body">The commentary in this language. It is %1$s, downloads once, and then works offline.</string>
+    <string name="card_tafsir_add">Add</string>
     <string name="card_tafsir_not_now">Not now</string>
     <string name="card_note_take">Take a note</string>
     <string name="card_note_edit">Edit note</string>
@@ -37,7 +48,7 @@
 
 
     <string name="reading_reminder_title">One ayah a day</string>
-    <string name="reading_reminder_body">A quiet ayah once a day, at a time you choose. You can change it or turn it off in Settings.</string>
+    <string name="reading_reminder_body">A quiet ayah once a day, at a time you choose.</string>
     <string name="reading_reminder_turn_on">Turn on</string>
     <string name="reading_reminder_not_now">Not now</string>
 

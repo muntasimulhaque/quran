@@ -762,6 +762,21 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * The reading's one gesture has been taught: the tap that brings the bar.
+     *
+     * The sentence that names the gesture stands at the foot of the first
+     * surah a reader opens, and the first tap anywhere on the page answers it.
+     * The write is the last thing a tap does, so the page moves in the frame
+     * the finger is in and the setting lands behind it (owner decision, this
+     * session).
+     */
+    fun markBarTaught() {
+        if (settings.barTaught) return
+        settings = settings.copy(barTaught = true)
+        viewModelScope.launch { settingsStore.setBarTaught(true) }
+    }
+
+    /**
      * The moment the daily reminder arrives, in the reader's own local time.
      *
      * Moving the moment asks for the notification permission too, on the same

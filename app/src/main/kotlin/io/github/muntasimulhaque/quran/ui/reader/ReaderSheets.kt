@@ -18,6 +18,7 @@ import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
+import io.github.muntasimulhaque.quran.ui.settings.SettingsPage
 import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 
 /**
@@ -44,8 +45,10 @@ internal fun ReaderSheets(
     /** A search result arrives with the evidence the reading should show. */
     onSearchResult: (SearchArrival) -> Unit,
     onPendingRemove: (Int) -> Unit,
-    /** Puts a row removed from Browse back, with its own Undo. */
+    /** A row removed from Browse is put back, with its own Undo. */
     onRestoreSaved: (SavedAyah) -> Unit,
+    /** The settings page a door outside Settings asked for, if any. */
+    settingsPage: SettingsPage? = null,
 ) {
     val context = LocalContext.current
     val wordsPack = ContentDatabase.wordsPackId(viewModel.readingLanguage)
@@ -209,6 +212,7 @@ internal fun ReaderSheets(
                 onRemoveWordVoice = { surah -> viewModel.removeWordAudio(surah) },
             ),
             onDismiss = onDismiss,
+            initialPage = settingsPage,
         )
     }
 }

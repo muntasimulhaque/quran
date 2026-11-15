@@ -167,6 +167,19 @@ data class AppSettings(
      */
     val reminderAnswered: Boolean = true,
     /**
+     * Whether the reading has taught the one gesture it keeps.
+     *
+     * The bar is asked for and never resident, and nothing on a bare page
+     * says that the page answers a tap: a reader who has never seen the app
+     * before has no way to reach the index, the search, or the settings. So
+     * the first surah a reader opens carries one quiet sentence that names
+     * the gesture, and the first tap writes the teaching as done. False on a
+     * fresh install so the sentence stands where it is needed, and true
+     * forever after: after one tap the page is bare again and stays bare
+     * (owner decision, this session).
+     */
+    val barTaught: Boolean = false,
+    /**
      * The minute of the day the reminder arrives, in the reader's own local
      * time: minutes from midnight, so one whole number carries the hour and
      * the minute and the picker has nothing to reconcile.
@@ -339,6 +352,7 @@ class SettingsStore(private val context: Context) {
             tajweed = preferences[TAJWEED] ?: false,
             dailyAyah = preferences[DAILY_AYAH] ?: false,
             reminderAnswered = preferences[REMINDER_ANSWERED] ?: true,
+            barTaught = preferences[BAR_TAUGHT] ?: false,
             dailyAyahMinute = storedDailyMinute(preferences),
         )
     }
@@ -470,6 +484,11 @@ class SettingsStore(private val context: Context) {
     /** Writes the one-time reminder offer as answered, once. */
     suspend fun setReminderAnswered(answered: Boolean) {
         context.settingsStore.edit { it[REMINDER_ANSWERED] = answered }
+    }
+
+    /** Writes the reading's one gesture as taught, once, at the first tap. */
+    suspend fun setBarTaught(taught: Boolean) {
+        context.settingsStore.edit { it[BAR_TAUGHT] = taught }
     }
 
     /** The moment the daily reminder arrives: minutes from midnight. */
@@ -713,6 +732,9 @@ class SettingsStore(private val context: Context) {
         val DAILY_AYAH = booleanPreferencesKey("daily_ayah")
         /** Whether the one-time reminder offer has been answered. */
         val REMINDER_ANSWERED = booleanPreferencesKey("reminder_answered")
+
+        /** Whether the reading has taught the tap that brings the bar. */
+        val BAR_TAUGHT = booleanPreferencesKey("bar_taught")
 
         /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")

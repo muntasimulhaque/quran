@@ -41,6 +41,7 @@ import android.os.Build
 import androidx.test.core.app.ActivityScenario
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.PackStore
+import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -349,9 +350,22 @@ class ScreenshotTest {
 
     @Test
     fun walkTheReading() {
-        prepareTheLibrary()
-        ActivityScenario.launch(MainActivity::class.java).use {
-            runTheTour()
+        // The library, the reader's note, and the phone's own chrome are all
+        // this test's setup, so all three are taken down with it: every class
+        // in a run shares one process, one store, and one phone.
+        try {
+            prepareTheLibrary()
+            ActivityScenario.launch(MainActivity::class.java).use {
+                runTheTour()
+            }
+        } finally {
+            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            runBlocking {
+                SavedStore(context).apply {
+                    TOUR_NOTES.forEach { (ayah, _) -> unsave(ayah) }
+                    close()
+                }
+            }
         }
     }
 
@@ -388,6 +402,37 @@ class ScreenshotTest {
     }
 
     /**
+     * Puts the phone's own chrome into the state a shop window can show: one
+     * clock on every frame, a full battery, and no notification icons.
+     *
+     * The demo mode is SystemUI's own broadcast, and some builds drop it. Every
+     * command is therefore best effort: a phone that ignores them keeps its own
+     * clock, and the frames still settle, which is the difference between a
+     * listing that reads as two phones and one that does not (owner decision,
+     * this session).
+     *
+     * The network is drawn by the demo broadcast as one group per modem, and
+     * every AVD here reports one modem except the seven inch image, which
+     * reports three: on that image the demo bar is "3G 3G 3G" and leaving demo
+     * mode draws the device's own bar with a shield and a key glyph beside the
+     * clock. Neither is a store frame, so that set was pulled rather than
+     * shipped (owner decision, this session). The phone and the ten inch
+     * images draw one clean group with this command.
+     */
+    private fun prepareTheSystemChrome() {
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        fun shell(command: String) {
+            runCatching { automation.executeShellCommand(command).close() }
+        }
+        shell("settings put global sysui_demo_allowed 1")
+        shell("am broadcast -a com.android.systemui.demo -e command enter")
+        shell("am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941")
+        shell("am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false")
+        shell("am broadcast -a com.android.systemui.demo -e command network -e mobile show -e datatype none -e level 4")
+        shell("am broadcast -a com.android.systemui.demo -e command notifications -e visible false")
+    }
+
+    /**
      * The state the tour photographs: the reader's own translation, the word
      * list that speaks its language, both tafsirs so the ayah card's doors have
      * two to choose between, and the defaults a fresh install starts from.
@@ -415,6 +460,19 @@ class ScreenshotTest {
         store.install("words-en")
         store.install("tafsir-ibn-kathir-en")
         store.install("tafsir-ibn-kathir-bn")
+        // The Saved frame needs something saved: the reader's own work, under
+        // the place it was written on. Three ayahs of one passage, because one
+        // row in a sheet is a list that reads as an empty state, and a reader's
+        // notes are the one surface in the app that holds their own words. The
+        // notes are written before the activity starts and removed when the
+        // tour is done, because the store is shared by every class in the run.
+        SavedStore(context).apply {
+            TOUR_NOTES.forEach { (ayah, note) ->
+                runBlocking { setNote(ayah, note) }
+            }
+            close()
+        }
+        prepareTheSystemChrome()
         val settings = SettingsStore(context)
         runBlocking {
             settings.setUiLanguage("en")
@@ -422,7 +480,7 @@ class ScreenshotTest {
             // because the verse is one a reader who has never seen the app
             // can recognise. The frames are the store, and the store's
             // first image is the app's promise.
-            settings.setAyah(262)
+            settings.setAyah(TOUR_AYAH)
             settings.setTheme(AppTheme.Light)
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn"))
@@ -431,6 +489,18 @@ class ScreenshotTest {
             // a long press now, not a field of pairs under every ayah (owner
             // decision, this session).
             settings.setWordByWord(false)
+            // The reminder and the reciter are state a phone keeps across runs,
+            // and a test that trusted the device would photograph whatever the
+            // last session left: the first ten inch capture in this session
+            // found a reminder armed at 6:31 PM from a run in November on the
+            // same AVD. The tour states its own setup rather than the device's
+            // (owner report, this session).
+            settings.setDailyAyah(false)
+            settings.setRecitation("husary")
+            // The reading's one-time tap hint is not this set's subject, and
+            // a first launch's hint would otherwise ride into whatever frame
+            // the tour reached first.
+            settings.setBarTaught(true)
             // The colors are the 10.3 change; a test that left the switch off
             // would silently strip them from every store frame.
             settings.setTajweed(true)
@@ -446,12 +516,18 @@ class ScreenshotTest {
     /**
      * The eight frames the store shows, in the order a reader meets them.
      *
-     * The set used to be the app's own map: reading, chrome, opening, search,
-     * settings, Browse, card, tafsir. Three of the eight were the same ayah,
-     * and four of the app's most distinctive surfaces were never photographed
-     * at all. The eight follow a reader now, and two of them show something a
-     * feature list cannot: the card the app hands out, and the page that
-     * explains the colors on the Quran's own line (owner decision, this
+     * The set used to be four photographs of the same page: the reading at
+     * 2:255, the same reading with its menu up, the same reading at night, and
+     * the same reading with the recitation's offer standing on it. A shopper
+     * learned what one verse looks like and nothing about the app. The eight
+     * are eight surfaces now, and the first one carries the app's own chrome,
+     * so the frame that has to establish the product actually shows it: the
+     * surah's name, the juz, and the three doors the reading keeps (owner
+     * decision, this session).
+     *
+     * Every frame is a screen capture, the chrome's included. The four that
+     * were root captures had no status bar while the four sheet frames did,
+     * so one listing showed two different phones (owner decision, this
      * session).
      *
      * The order is not taste. The last frame is the pill's offer, which stays
@@ -461,24 +537,14 @@ class ScreenshotTest {
     private fun runTheTour() {
         waitForAReading()
 
-        // 1. The reading at 2:255, with nothing over it.
+        // 1. The reading with its own chrome up: the surah's name, its juz, and
+        // the three doors. This is the app's own face, and it is the frame a
+        // reader who knows nothing about the product meets first.
+        revealChrome()
+        captureScreen("01-reading")
         hideChrome()
-        capture("01-reading")
 
-        // 2. The ayah's own actions, from the number at its head: Play,
-        // Tafsir, Save, Note, Share. The menu is a popup window, so the frame
-        // is the display and not the compose root.
-        openTheAyahActions()
-        captureScreen("02-ayah-actions")
-
-        // 3. The card the app hands out. The sheet opens on the picture of the
-        // ayah, its translation, and the app's own mark.
-        rule.onAllNodesWithText(SHARE).onFirst().performClick()
-        waitForTag("share-sheet", timeout = 30_000)
-        captureScreen("03-share-card")
-        leave(SHARE_SHEET)
-
-        // 4. The tafsir, open on its passage. One frame carries the card and
+        // 2. The tafsir, open on its passage. One frame carries the card and
         // the commentary: the source line names the language and the
         // commentary, and the passage's own reference stands over its prose.
         openTheAyahActions()
@@ -486,10 +552,10 @@ class ScreenshotTest {
         waitForTag("ayah-card", timeout = 30_000)
         rule.onAllNodesWithText(TAFSIR_SOURCE, substring = true).onFirst().performClick()
         waitForTag("tafsir-panel", timeout = 30_000)
-        captureScreen("04-tafsir")
+        captureScreen("02-tafsir")
         leave(AYAH_CARD)
 
-        // 5. Search that reads a reference. The frame is the state a reader
+        // 3. Search that reads a reference. The frame is the state a reader
         // meets: the field, the query, and the results, with the sources
         // folded away as the first keystroke folds them (owner decision,
         // this build). A frame that staged the open source list sold a
@@ -508,20 +574,47 @@ class ScreenshotTest {
         // hardware keyboard shows no IME at all, and a Back there closes the
         // sheet instead, so the keyboard is dismissed by name.
         androidx.test.espresso.Espresso.closeSoftKeyboard()
-        captureScreen("05-search")
+        captureScreen("03-search")
         leave(SEARCH_SHEET)
 
-        // 6. The page that explains the colors on the Quran's own line: seven
-        // families, each with its word and its rules.
+        // 4. Browse's Saved list, with the reader's own note under the ayah it
+        // was written on: the one surface in the app that holds the reader's
+        // own words.
+        revealChrome()
+        rule.onNodeWithContentDescription("Browse the Quran").performClick()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithTag("browse-sheet", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onAllNodesWithText(SAVED_TAB).onFirst().performClick()
+        rule.waitUntil(timeoutMillis = 30_000) {
+            rule.onAllNodesWithText(SAVED_LAST_NOTE, substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        // All three rows have to be on the glass before the frame: the note that
+        // sorts last is the one the wait above watched for, and the two under it
+        // arrive in the same pass.
+        Thread.sleep(600)
+        captureScreen("04-saved")
+        leave(BROWSE_SHEET)
+
+        // 5. The page that explains the colors the first frame is full of:
+        // seven families, each with a word from the reading and its rules. It
+        // stands here rather than the settings hub, which was this frame's
+        // first choice, because the hub's last row carries the version and a
+        // store frame that dates itself is wrong the day the next release
+        // ships. On a phone the About row happens to fall below the fold; on a
+        // seven inch and a ten inch sheet all ten rows fit, so a frame built
+        // on a phone's luck broke on its own tablets in the first capture
+        // (owner report, this session).
         openSettingsHub()
         rule.onNodeWithTag("row-tajweed").performScrollTo().performClick()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText(TAJWEED_FAMILY).fetchSemanticsNodes().isNotEmpty()
         }
-        captureScreen("06-tajweed")
+        captureScreen("05-tajweed")
         leave(SETTINGS_SHEET)
 
-        // 7. The reading at night: the other half of the app, and the frame
+        // 6. The reading at night: the other half of the app, and the frame
         // most likely to show what the light page hides. The flip is the
         // reader's own act, through Settings and Theme: a store write lands on
         // the next launch, and this frame is taken inside this one. The store
@@ -535,7 +628,7 @@ class ScreenshotTest {
             waitForAReading()
             hideChrome()
             Thread.sleep(1_200)
-            capture("07-dark-reading")
+            captureScreen("06-dark-reading")
         } finally {
             // The light page is a promise to the frame after this one and to
             // every class after this one: a run shares one process and one set
@@ -550,13 +643,22 @@ class ScreenshotTest {
             Thread.sleep(800)
         }
 
+        // 7. The card the app hands out: the picture of the ayah, its
+        // translation, and the app's own mark, which is the one thing in this
+        // app that leaves it.
+        openTheAyahActions()
+        rule.onAllNodesWithText(SHARE).onFirst().performClick()
+        waitForTag("share-sheet", timeout = 30_000)
+        captureScreen("07-share-card")
+        leave(SHARE_SHEET)
+
         // 8. The recitation's own offer, last: the compact capsule names the
         // surah, the reciter, and the size before a tap, and it stays on the
         // reading until the reader answers it.
         openTheAyahActions()
         rule.onAllNodesWithText(PLAY).onFirst().performClick()
         waitForTag("listen-offer-bar", timeout = 30_000)
-        capture("08-listen-offer")
+        captureScreen("08-listen-offer")
     }
 
     /**
@@ -693,6 +795,19 @@ class ScreenshotTest {
         const val AYAH_CARD = "Tafsir"
         const val DARK = "Dark"
         const val LIGHT = "Light"
+        const val SAVED_TAB = "Saved"
+        const val BROWSE_SHEET = "Browse"
+
+        /** The note the Saved list sorts last, so its arrival means all three are drawn. */
+        const val SAVED_LAST_NOTE = "Come back to this one"
+
+        /** The ayahs the tour keeps, and the reader's own words on them. */
+        const val TOUR_AYAH = 262
+        val TOUR_NOTES = listOf(
+            262 to "Come back to this one on the hard mornings.",
+            263 to "Read slowly.",
+            264 to "For the weeks I could not see a way out.",
+        )
     }
 }
 

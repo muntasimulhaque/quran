@@ -63,6 +63,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.ReadingReveal
 import io.github.muntasimulhaque.quran.ui.search.SearchArrival
+import io.github.muntasimulhaque.quran.ui.settings.SettingsPage
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
 import io.github.muntasimulhaque.quran.ui.reading.SelectionClearer
@@ -204,6 +205,11 @@ fun ReaderScreen(
     // the sheet is written into the saved state, so the choice is answered
     // where it was made (owner decision, 21).
     var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
+    // The settings page a door outside Settings asked for. The word meanings'
+    // door and the ayah card's tafsir offer name a pack, so they land on the
+    // page that carries it rather than on the hub (owner decision, this
+    // session).
+    var settingsPage by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     // The sheet a result came from, one level deep. A search or Browse result
     // closes its sheet, and Back from the reading reopens it at the same
     // query, tab, and place. The state holder keeps the sheet's own saveable
@@ -281,12 +287,13 @@ fun ReaderScreen(
     var captureWidth by remember { mutableStateOf(ShareCardWidths.first()) }
 
     /** Opens a sheet from the reading and forgets any stale state it held. */
-    fun openSheet(target: ReaderSheet) {
+    fun openSheet(target: ReaderSheet, page: SettingsPage? = null) {
         if (sheet == target) return
         returnTo = null
         menu = null
         selectionClearer.clear()
         sheetStates.removeState(target.name)
+        settingsPage = page
         sheet = target
     }
 
@@ -294,6 +301,7 @@ fun ReaderScreen(
     fun closeSheet() {
         val closing = sheet
         sheet = ReaderSheet.None
+        settingsPage = null
         if (returnTo == null) clearSheet = closing
     }
 
@@ -689,6 +697,20 @@ fun ReaderScreen(
                     reveal = revealForSurah,
                     place = settings.ayah,
                     hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
+                    // The word meanings are the reading's one undiscoverable
+                    // aid: a Settings row and nothing else. The door stands at
+                    // the surah's arrival while the list is not on the device,
+                    // and the tap lands on the page that has the pack (owner
+                    // decision, this session).
+                    wordsInstalled = content.installedPack(
+                        ContentDatabase.wordsPackId(viewModel.readingLanguage),
+                    ),
+                    onAddWords = { openSheet(ReaderSheet.Settings, SettingsPage.Words) },
+                    // The reading's whole navigation is one tap, and nothing on
+                    // a bare page says so: the first opening carries one
+                    // sentence that names the gesture (owner decision, this
+                    // session).
+                    teachTap = !settings.barTaught,
                     contentLanguage = viewModel.readingLanguage,
                     nextSurahName = viewModel.surahs
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
@@ -716,6 +738,10 @@ fun ReaderScreen(
                         chrome = !chrome
                         menu = null
                         reveal = null
+                        // The tap that brings the bar is the gesture the first
+                        // surah's sentence teaches, so the same tap answers it
+                        // (owner decision, this session).
+                        viewModel.markBarTaught()
                         // A tap on the page is how a raised control is put
                         // away: the paused recitation, a failure, the offer.
                         // It never silences a playing recitation, and never
@@ -765,7 +791,9 @@ fun ReaderScreen(
                         )
                         viewModel.markReminderAnswered()
                     },
-                    onAddContent = { openSheet(ReaderSheet.Settings) },
+                    onAddContent = {
+                        openSheet(ReaderSheet.Settings, SettingsPage.Translations)
+                    },
                     onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
                     onJumped = { ayah ->
                         announceView.announceForAccessibility(
@@ -861,10 +889,6 @@ fun ReaderScreen(
                 anchor = request.anchor,
                 isSaved = savedRow?.marked == true,
                 hasNote = !savedRow?.note.isNullOrBlank(),
-                // The Tafsir door is always on the menu. A reader who has no
-                // pack gets the offer card, not a missing action (owner
-                // decision, this session).
-                showTafsir = true,
                 onDismiss = { menu = null },
                 onPlay = {
                     viewModel.playAyah(request.ayah.number)
@@ -961,6 +985,7 @@ fun ReaderScreen(
                     pendingRemoveUndoable = sheet != ReaderSheet.Browse
                 },
                 onRestoreSaved = { row -> viewModel.restoreSaved(row) },
+                settingsPage = settingsPage,
             )
         }
     }
@@ -983,7 +1008,10 @@ fun ReaderScreen(
             onAddContent = {
                 cardAyah = null
                 cardTafsirPack = null
-                openSheet(ReaderSheet.Settings)
+                // The card offered a tafsir pack, so the door lands on the page
+                // that has it rather than on the hub (owner decision, this
+                // session).
+                openSheet(ReaderSheet.Settings, SettingsPage.Tafsirs)
             },
             onDismiss = {
                 cardAyah = null

@@ -8,9 +8,12 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -23,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.Dp
 import io.github.muntasimulhaque.quran.core.AyahList
@@ -58,6 +63,11 @@ internal fun ReadingRows(
     wordAid: Boolean,
     place: Int,
     hasTranslation: Boolean,
+    /** True when the reader's own word list is on the device. */
+    wordsInstalled: Boolean = true,
+    /** True while the one gesture the reading keeps has not been taught. */
+    teachTap: Boolean = false,
+    onAddWords: () -> Unit = {},
     contentLanguage: String,
     nextSurahName: String?,
     /**
@@ -277,6 +287,39 @@ internal fun ReadingRows(
                         action = stringResource(R.string.reading_action_add),
                         onClick = onAddContent,
                         modifier = Modifier.padding(vertical = Space.Tight),
+                    )
+                }
+                // The word meanings and the tafsir were the app's two
+                // undiscoverable features: both live behind a Settings row and
+                // neither is named anywhere in the reading, so a reader met an
+                // app that appeared to be text and a translation. The words'
+                // door stands where the reading arrives, on the one screen a
+                // reader always sees, and leaves for good once the list is on
+                // the device (owner decision, this session).
+                if (!wordsInstalled) {
+                    AddDoor(
+                        text = stringResource(R.string.reading_add_words),
+                        action = stringResource(R.string.reading_action_add),
+                        onClick = onAddWords,
+                        modifier = Modifier.padding(vertical = Space.Tight),
+                    )
+                }
+                // The reading's whole navigation is one tap on the paper, and
+                // nothing on a bare page says so. The sentence stands until
+                // the reader's first tap anywhere, and then never again
+                // (owner decision, this session).
+                if (teachTap) {
+                    Text(
+                        text = stringResource(R.string.reading_tap_hint),
+                        // An instruction, not a label: the meta line's voice,
+                        // centered under the opening it belongs to.
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = Space.Block, bottom = Space.Tight)
+                            .testTag("reading-tap-hint"),
                     )
                 }
             }

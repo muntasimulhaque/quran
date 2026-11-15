@@ -170,14 +170,10 @@ internal fun SurahOpening(
         if (expanded && info != null) {
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
-            // chosen thing on the page, in the same lapis at the same weight
-            // a chosen ayah leaves behind. A press on it answers in the same
-            // lapis rather than the gray an unstyled ripple would flash.
-            val wash = if (expanded) {
-                MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
-            } else {
-                Color.Transparent
-            }
+            // chosen thing on the page, in the same warm paper a chosen ayah
+            // leaves behind. A press on it answers in the accent rather than
+            // the gray an unstyled ripple would flash.
+            val wash = if (expanded) palette.selected else Color.Transparent
             val press = remember { MutableInteractionSource() }
             Box(
                 // The introduction is a document, not one paragraph: it is

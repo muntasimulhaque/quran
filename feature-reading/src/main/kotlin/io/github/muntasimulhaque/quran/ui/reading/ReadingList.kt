@@ -73,6 +73,11 @@ fun ReadingList(
     /** The reader's place: the ayah, which the list shows and never corrects. */
     place: Int,
     hasTranslation: Boolean,
+    /** True when the reader's own word list is on the device. */
+    wordsInstalled: Boolean = true,
+    /** True while the one gesture the reading keeps has not been taught. */
+    teachTap: Boolean = false,
+    onAddWords: () -> Unit = {},
     /** The reader's language: the reading reads it, and so does the opening. */
     contentLanguage: String,
     nextSurahName: String?,
@@ -207,6 +212,9 @@ fun ReadingList(
         wordAid = wordAid,
         place = place,
         hasTranslation = hasTranslation,
+        wordsInstalled = wordsInstalled,
+        teachTap = teachTap,
+        onAddWords = onAddWords,
         contentLanguage = contentLanguage,
         nextSurahName = nextSurahName,
         selectedAyah = selectedAyah,

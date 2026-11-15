@@ -107,6 +107,16 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * when it opens, so a state sentence on the door would be a stop that says
  * nothing.
  *
+ * **The door hugs the verse it names** (owner decision, this session). The
+ * number stood centred in its 48 dp target, which put seven dp of dead air
+ * above it and seven below, so the head sat almost exactly in the middle of the
+ * room between two ayahs and belonged to neither: the gap above it was 38 dp
+ * and the gap to its own first line 28. The target is still 48 dp tall, because
+ * a finger needs one, but its content sits on the target's floor, so the room
+ * inside the box all falls above the number. The head now reads as the verse's
+ * own head, with the verse's 8 dp under its baseline, while the air between two
+ * ayahs stays where it was.
+ *
  * [onOpen] hands the door's own place on the glass to the caller, measured in
  * the window, because the menu hangs from the door and a popup cannot read
  * its anchor back through a test.
@@ -148,7 +158,9 @@ internal fun AyahDoor(
             ) { onOpen(bounds.value) }
             .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
             .semantics { contentDescription = name },
-        contentAlignment = Alignment.CenterStart,
+        // The content sits on the target's floor, so the room the 48 dp target
+        // owns falls above the number and the head hugs the verse it names.
+        contentAlignment = Alignment.BottomStart,
     ) {
         Row(
             modifier = Modifier

@@ -40,12 +40,14 @@ private val AyahMenuMeasure = 216.dp
  * the only action that leaves the app, the least common, and the one a stray
  * tap costs most, so it takes the far end, away from where the thumb rests.
  *
- * Tafsir sits in the second slot when the reader has a tafsir on the device
- * and is absent otherwise: the packs are the setting, and a pack that is not
- * there is a door that does not exist rather than a card with nothing behind
- * it. Play is always first, Save is always before Note, and Share is always
- * last, so the three fixed actions never move and only the deep door comes
- * and goes with the reader's own choice.
+ * Tafsir sits in the second slot for every reader, because the packs are the
+ * setting and the card the row opens is where a pack is chosen: a reader with
+ * no tafsir on the device gets the card's own offer, with the pack, its size,
+ * and one Add, rather than a row that is not there. The row used to be hidden
+ * when no pack was installed, which meant the one feature the reading is built
+ * around did not exist for a reader who had not already found the Settings
+ * page. Play is always first, Save is always before Note, and Share is always
+ * last, so the four fixed actions never move.
  *
  * The two marked actions say their state. The note mark is lit by a note and
  * the bookmark by a Save, never the one by the other, so a lit glyph is not
@@ -78,7 +80,6 @@ internal fun AyahMenu(
     anchor: IntRect,
     isSaved: Boolean,
     hasNote: Boolean,
-    showTafsir: Boolean,
     onDismiss: () -> Unit,
     onPlay: () -> Unit,
     onTafsir: () -> Unit,
@@ -109,16 +110,14 @@ internal fun AyahMenu(
                 onPlay()
             },
         )
-        if (showTafsir) {
-            MenuActionRow(
-                icon = Icon.Tafsir,
-                label = tafsir,
-                onClick = {
-                    onDismiss()
-                    onTafsir()
-                },
-            )
-        }
+        MenuActionRow(
+            icon = Icon.Tafsir,
+            label = tafsir,
+            onClick = {
+                onDismiss()
+                onTafsir()
+            },
+        )
         MenuActionRow(
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
             label = save,

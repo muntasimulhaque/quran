@@ -40,7 +40,7 @@
     <string name="settings_words_lead">Press and hold a word for its meaning and pronunciation</string>
     <!-- The word list and the roots that travel with it: the two sizes the
          one tap fetches, so the reader sees the whole price of the aid. -->
-    <string name="settings_words_size_with_root">%1$s · word roots %2$s</string>
+    <string name="settings_words_size_with_root">%1$s, plus word roots %2$s</string>
     <!-- The pronunciation line under the one switch: only while a transfer
          runs or after one fails, because the voices on the device have their
          own row and a word with no voice says so on its own sheet. -->
@@ -51,7 +51,7 @@
     <string name="settings_pronunciation_label">Downloaded pronunciation (%1$d)</string>
     <string name="settings_pronunciation_remove">Remove the pronunciation of %1$s</string>
     <string name="settings_tajweed_title">Tajweed colors</string>
-    <string name="settings_tajweed_lead">Each color is one family of rules, and the word beside its name is from the reading. The colored letters are the ones the rule touches; every rule the family covers is named under it.</string>
+    <string name="settings_tajweed_lead">Each color is one family of rules, shown on a word from the reading.</string>
 
 
     <string name="settings_downloaded_label">Surahs on this device (%1$d)</string>
@@ -60,6 +60,23 @@
     <string name="settings_downloaded_bundled">Bundled</string>
     <string name="settings_downloaded_remove">Remove %1$s</string>
 
+    <!-- The question before a download the reader waited for is taken away. A
+         file under 20 MB goes on one tap; a surah's recitation, which took
+         minutes and cannot be brought back without another download, is asked
+         about (owner decision, this session). -->
+    <string name="remove_download_sheet_name">Remove download</string>
+    <string name="remove_download_title">Remove %1$s?</string>
+    <string name="remove_download_body">It is %1$s of audio, and removing it cannot be undone. Playing the ayah again downloads it again.</string>
+    <string name="remove_download_keep">Keep</string>
+
+    <!-- Add and Download are two verbs on purpose, and this is the rule they
+         keep (owner decision, this session). A pack is added: it is a lasting
+         choice in a list, the thing is on this device or it is not, and the row
+         that carries it has a Remove at the other end. A sound is downloaded:
+         it is a transfer, with a size before it starts and a percent while it
+         runs, and it belongs to the pill and to the offer. A reader never adds
+         a surah and never downloads a translation. See `playback_download` in
+         feature-playback for the other half. -->
     <string name="pack_action_add">Add</string>
     <string name="pack_action_remove">Remove</string>
     <string name="pack_action_retry">Retry</string>
@@ -119,7 +136,17 @@
     <string name="settings_title_about">About</string>
     <string name="settings_version_short">Version %1$s</string>
     <string name="settings_none_yet">Not added yet</string>
-    <string name="settings_chosen_count">%1$d chosen</string>
+    <!-- A count under a row says what it counts. "2 chosen" was a number with
+         no noun, and the row above it was the only thing that said what had
+         been chosen (owner decision, this session). -->
+    <plurals name="settings_translation_count">
+        <item quantity="one">%1$d translation</item>
+        <item quantity="other">%1$d translations</item>
+    </plurals>
+    <plurals name="settings_tafsir_count">
+        <item quantity="one">%1$d tafsir</item>
+        <item quantity="other">%1$d tafsirs</item>
+    </plurals>
     <string name="settings_size_arabic">Quran text</string>
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>

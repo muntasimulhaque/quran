@@ -33,9 +33,9 @@ import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The size a line of Arabic in a result is drawn at before the reader's own
@@ -88,7 +88,7 @@ internal fun AyahRow(
         val matches = remember(arabicText, terms) {
             Search.matchRanges(arabicText, terms, arabic = true)
         }
-        val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
+        val wash = LocalPagePalette.current.match
         // The rule colors stay on the reading: a result list is a scan
         // surface, and the matched line's wash is not a reading ground. The
         // result line is ink, on purpose (owner decision, the palette

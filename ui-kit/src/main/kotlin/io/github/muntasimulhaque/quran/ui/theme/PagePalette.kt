@@ -22,6 +22,17 @@ import androidx.compose.ui.graphics.Color
  * rule colors are drawn over it, and one drop more puts the closest of them
  * under 4.5:1.
  *
+ * [selected] is the chosen thing's ground, and it is opaque and warm: the
+ * ayah whose menu is open, the introduction the reader opened, the row Browse
+ * is standing on, and the word the word sheet is naming. It is the page's own
+ * family and never a tint of the accent, so the one surface in the app that
+ * says "this one" says it in the paper's voice (owner decision, this
+ * session). See [PaperSelected] for the measurement.
+ *
+ * [match] is its sibling for the thing that was *found* rather than chosen:
+ * the word a search matched, and the text a reader selected in a field. Same
+ * family, same opaque treatment, one step louder. See [PaperMatch].
+ *
  * [introInk] is the softer tone the surah's opened introduction wears: the
  * reading's ink at 0.78, a page that steps back under the wash it stands on.
  * [mastheadInk] is the first paint's display tone, the interface's word at
@@ -40,6 +51,14 @@ data class PagePalette(
      * the ayah-level recitation wash is gone (owner decision, this session).
      */
     val highlight: Color,
+    /** The chosen thing's ground: warm, opaque, and never the accent. */
+    val selected: Color,
+    /**
+     * The found thing's ground: the word a search matched, and the text a
+     * reader selected in a field. Warm, opaque, one step louder than
+     * [selected], and never the accent (owner decision, this session).
+     */
+    val match: Color,
     val tajweed: TajweedColors,
     val introInk: Color,
     val mastheadInk: Color,
