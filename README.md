@@ -4,7 +4,36 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 19.0 (versionCode 192) was submitted for Play review from commit `b23ee1a0`, taken from `build` run 43695368334, the newest green run on `main`, whose gates and signed-bundle jobs both passed, in 3m22s and 4m27s. The signed bundle `quran-19.0-vc192.aab` has SHA-256 `0f7f8dd2251967908b56832e2e165059a835c23214e5ddf8168f818f2314d4a4`, the workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 through 19.0 were signed with. The release gates are the CI unit tests, lint, and `assembleDebug`, all green; the same suite ran here on this machine, green. The instrumented suites are an audit, not a gate: this session ran `ScreenshotTest`, `ScreenshotVariantsTest`, and `WordMeaningTest` on `quran_phone`, five tests, green, and `BanglaCaptureTest` on the same phone, one test, green. The store frames were recaptured here on 19.0 and every one read: the eight phone frames and the eight ten inch frames are committed, and the seven inch set is pulled because its AVD's status bar draws one network group per modem and the image reports three, so every frame of that set read "3G 3G 3G". `play-store/listing.md` records it. Content is 1.8.0: database `content-db-7668312b`; the word packs `pack-words-en-e1fa6684` and `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1` (QUL 2); the morphology source Quranpedia's 2026-11-14 export, with the database rebuilding to its committed SHA-256; the word pronunciation pack is 1.0 (352 MB, tag `word-audio-alafasy`) downloaded one surah at a time and Al-Fatiha's 29 words in the app.
+**Status:** 19.1 (versionCode 193) was submitted for Play review from commit `c84f9cba`, taken from `build` run 43743269182, the newest green run on `main`, whose gates and signed-bundle jobs both passed, in 5m00s and 5m38s. The signed bundle `quran-19.1-vc193.aab` has SHA-256 `e2b4176f54ec002eeb69171780e495d2a311f69e59de3b6d82c48e160cb4a2bd`, the workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 through 19.1 were signed with. The release gates are the CI unit tests, lint, and `assembleDebug`, all green; the same suite ran here on this machine, green. The instrumented suites are an audit, not a gate: this session ran `ScreenshotTest`, `ScreenshotVariantsTest`, and `WordMeaningTest` on `quran_phone`, five tests, green, and `BanglaCaptureTest` on the same phone, one test, green. The full app and data suites were not rerun, and the swatch's press, which the last commit moved, changes no frame and no assertion the capture classes make. The store frames were recaptured here on 19.1 and every one read: the eight phone frames and the eight ten inch frames are committed, and the seven inch set is pulled, because its AVD's status bar draws one network group per modem and the image reports three, so every frame of that set read "3G 3G 3G"; `play-store/listing.md` records it. Content is 1.8.0: database `content-db-7668312b`; the word packs `pack-words-en-e1fa6684` and `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1` (QUL 2); the morphology source Quranpedia's 2026-11-14 export, with the database rebuilding to its committed SHA-256; the word pronunciation pack is 1.0 (352 MB, tag `word-audio-alafasy`) downloaded one surah at a time and Al-Fatiha's 29 words in the app.
+
+**In 19.1.** The verse's number stands on its verse. The head keeps its 48 dp
+target, but its content sits on the target's floor, so the room inside the box
+falls above the number and the head hugs the line it names instead of floating in
+the gap between two verses. One number per verse follows: the printed medallion
+closes a verse only on a page that draws the Quran alone, so a page with a
+translation carries the reference at its head as the one number, and that number
+is the door. The chosen verse and a found word wear the page's own warm tone now
+instead of a tint of the accent, which measured a cold gray over cream for the
+chosen block and a real blue, hue 252, for a search match: the two surfaces that
+say "this one" were the only cold things in a warm app. `PaperSelected` and
+`PaperMatch` hold the lightness of the tints they replace, so every pair measured
+before still holds, and `Wash` keeps only the three fills that really are a tint.
+
+The Tajweed page explains itself in one line, ends a rule's name with a period
+instead of a middot, draws its rules at 13, and puts a family's rules 12 dp under
+their head against 24 dp between families. Word meanings are offered where the
+reading arrives, the menu's Tafsir row lost a parameter that was always true, and
+the first surah a reader opens carries one sentence naming the tap that brings the
+bar, retired by the first tap. The share sheet's Share image is the solid answer,
+a place left more than four weeks ago is named by its date, a count carries its
+noun, a download of 20 MB or more asks before it goes, and the theme swatch's
+press is drawn on the circle rather than on the box around it. The store set is
+eight surfaces rather than four photographs of one verse, captured in one pass
+with the same chrome on every frame.
+
+The Quran text, both translations, both tafsirs, the recitations, the word lists,
+the roots, and the content database are unchanged at 1.8.0. The word pronunciation
+pack is 1.0. Version 19.1 (193).
 
 **In 19.0.** A place on the word sheet's list is a door out of the sheet, and
 the phone's Back now gives the sheet back. The root's count and the dictionary
