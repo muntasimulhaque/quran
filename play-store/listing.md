@@ -105,8 +105,11 @@ for.
 - Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The seven inch set is pulled, and the reason is in the capture record below.
-Play falls back to the phone set on a seven inch tablet.
+The seven inch set is pulled and is the one capture still owed: the next session
+captures all three form factors again and restores `screenshots/tablet7/` at
+1200 x 1920, which is the 600 dp page, taken on the phone image with
+`wm size 1200x1920` and `wm density 320`. Play falls back to the phone set on a
+seven inch tablet until then.
 
 Play's current rule for preview assets is a JPEG or 24-bit PNG, 320 to 3840
 pixels on each side, and a long side no more than twice the short side. Both
@@ -142,13 +145,14 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The sets were captured on this machine on 19.0: the phone set on `quran_phone`
+The sets were captured on this machine for 19.1: the phone set on `quran_phone`
 (1080 x 1920) and the ten inch set on `quran_tablet10` (2560 x 1800), both green,
 every frame read. The seven inch set is pulled. Its AVD's status bar draws one
 network group per modem and the image reports three, so every frame of that set
 read "3G 3G 3G"; leaving demo mode instead brought a shield and a key glyph up
-beside the clock. A store frame is not a test rig's face, so the set comes back
-when that AVD is rebuilt with one modem.
+beside the clock. A store frame is not a test rig's face, so that set is owed
+rather than shipped, and the next session takes it at 1200 x 1920 on the phone
+image, where the bar is one group.
 
 Every frame is a screen capture of the whole display, the reading's included, so
 the status bar, the sheet's own window, and the app agree. The bar is the demo's
