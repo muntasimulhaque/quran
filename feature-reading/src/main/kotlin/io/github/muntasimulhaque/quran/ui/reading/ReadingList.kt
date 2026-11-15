@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -171,8 +172,25 @@ fun ReadingList(
     // The word the reader pressed and held. It is a sheet of its own, at the
     // reading's level rather than inside the ayah, so the page never grows
     // under the finger and the word survives the item being recycled (owner
-    // decision, this session).
-    var word by remember { mutableStateOf<OpenWord?>(null) }
+    // decision, this session). Its page and the row its places mark are part
+    // of the same state, so a sheet can be put back exactly as it was left
+    // (owner decision, this session).
+    var word by remember { mutableStateOf<OpenWordSheet?>(null) }
+    // The word sheet the reader left to take a place: the list they chose
+    // from, on the page and at the place they stood, one Back away. A place
+    // is the app's one arrival by which the reader leaves a sheet without
+    // leaving the reading, and Back from the ayah it landed on used to close
+    // the app (owner decision, this session).
+    var wordReturn by remember { mutableStateOf<OpenWordSheet?>(null) }
+    // Back gives the sheet back before it closes the reading, as it gives back
+    // the results a search result came from. The word sheet is a window of its
+    // own and takes Back there; this is the reading's window, which had no
+    // memory of it. A press on another word spends the return: the sheet Back
+    // holds is the one the reader was in, never the one before it.
+    BackHandler(enabled = word == null && wordReturn != null) {
+        word = wordReturn
+        wordReturn = null
+    }
     if (ayahs.isEmpty()) {
         // The paper is already there; the text is a frame away.
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
@@ -218,13 +236,30 @@ fun ReadingList(
         footnote = footnote,
         onFootnote = { footnote = it },
         word = word,
-        onWord = { word = it },
+        onWord = { next ->
+            word = next
+            // A press is a new question, so the list Back was holding is
+            // spent. A dismissal spends nothing: the place tap that put the
+            // sheet away set the return before it.
+            if (next != null) wordReturn = null
+        },
+        onWordPage = { page -> word = word?.copy(page = page) },
         onHearWord = onHearWord,
         wordVoice = wordVoice,
         wordAudio = wordAudio,
         onWordClosed = onWordClosed,
         surahNameOf = surahNameOf,
-        onOpenPlace = onOpenPlace,
+        onOpenPlace = { ayah, position ->
+            // The reader's choice is the reading's next stop, and the sheet
+            // they chose it from stays one Back away, at the place they chose
+            // and on the page they stood on. The sheet's own voice is put
+            // away with it, exactly as a dismissal puts it away (owner
+            // decision, this session).
+            wordReturn = word?.copy(currentAyah = ayah, currentPosition = position)
+            word = null
+            onWordClosed()
+            onOpenPlace(ayah, position)
+        },
         modifier = modifier,
     )
 }

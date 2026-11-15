@@ -672,7 +672,11 @@ fun ReaderScreen(
                         // The place the reader chose is the reading's next
                         // stop: the word sheet has gone, and the word wears
                         // the same reveal a search arrival gives it (owner
-                        // decision, this session).
+                        // decision, this session). The sheet itself is one
+                        // Back away, and that memory is the reading's own
+                        // (ReadingList), because the word sheet is the
+                        // reading's surface and not one of this screen's
+                        // doors (owner decision, this session).
                         reveal = ReadingReveal(ayah = ayah, words = setOf(position))
                         viewModel.jumpToAyah(ayah)
                         chrome = false

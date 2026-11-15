@@ -205,6 +205,16 @@ import kotlinx.coroutines.withContext
  * phone's Back, return to the word, and an old root pack without the index
  * answers the same rows through the scan it always did.
  *
+ * **The door out of the sheet is one level deep, as a result is** (owner
+ * decision, this session). A place tap puts the sheet away and the reading
+ * lands on that ayah, and the phone's Back then gives the sheet back, on the
+ * page and at the place the reader left it, so a second place is one press
+ * away instead of a walk back through the word. It was not: a place was the
+ * app's one arrival with no way back, so Back from the ayah the reader had
+ * just been sent to closed the app. The page and the reader's row are the
+ * reading's state ([OpenWordSheet]) because the sheet itself is disposed the
+ * moment it is dismissed.
+ *
  * **While the word sounds, the word is washed** (owner decision, an earlier
  * session). One word is a sample, not a session: it is one word file on its
  * own player, so it raises no capsule and leaves no notification behind, and
@@ -249,16 +259,38 @@ internal data class OpenWord(
 private const val FactArabicOfQuran = 20f / 26f
 
 /** The word sheet's two pages: the word, and the places one of its facts owns. */
-private sealed interface WordSheetPage {
+internal sealed interface WordSheetPage {
     data object Word : WordSheetPage
     data class Places(val subject: PlacesSubject) : WordSheetPage
 }
 
 /** The fact whose places the page lists. */
-private sealed interface PlacesSubject {
+internal sealed interface PlacesSubject {
     data class Root(val arabic: String, val latin: String) : PlacesSubject
     data class Lemma(val lemma: String) : PlacesSubject
 }
+
+/**
+ * The word sheet as it stands: the word the reader pressed, the page the
+ * sheet is on, and the row the places mark as the reader's own.
+ *
+ * The page belongs to the reading rather than to the sheet, so the sheet can
+ * be put back exactly as the reader left it. A place on the list is a door
+ * out of the sheet, and the sheet it came through is kept, page and all, so
+ * the phone's Back hands the reader the list they chose from (owner
+ * decision, this session).
+ *
+ * [currentAyah] and [currentPosition] are the row the list opens at and
+ * washes, and they are not always the word's own place: when Back brings the
+ * list back, the reading stands where the reader sent it, so the row they
+ * chose is their place and the word's is one row among thousands.
+ */
+internal data class OpenWordSheet(
+    val word: OpenWord,
+    val page: WordSheetPage,
+    val currentAyah: Int,
+    val currentPosition: Int,
+)
 
 /** What the places read has to say: nothing yet, a failure, or the list. */
 private sealed interface PlacesRead {
@@ -271,15 +303,25 @@ private sealed interface PlacesRead {
 @Composable
 internal fun WordSheet(
     word: OpenWord,
-    surahName: String,
-    /** The surah's own name at a reference, for the places page's groups. */
+    /** The page the sheet stands on: the word, or the places of one fact. */
+    page: WordSheetPage,
+    /** The reader turned to another page of the sheet. */
+    onPage: (WordSheetPage) -> Unit,
+    /** The row the places mark as the reader's own. */
+    currentAyah: Int,
+    currentPosition: Int,
+    /** The surah's own name at a reference, for the head and the groups. */
     surahNameOf: (Int) -> String,
     metrics: ReadingMetrics,
     hafs: FontFamily,
     /** The library the places are read from, on the door's tap. */
     content: ContentDatabase,
     onDismiss: () -> Unit,
-    /** A place the reader chose: the reading jumps there with its word washed. */
+    /**
+     * A place the reader chose: the reading jumps there with its word
+     * washed. The caller puts the sheet away, because the caller is the one
+     * that keeps it for the phone's Back.
+     */
     onOpenPlace: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     /** The word's own voice, which every word offers: the tap is the ask. */
     onHear: () -> Unit = {},
@@ -290,6 +332,10 @@ internal fun WordSheet(
     voiceAudio: WordAudioState? = null,
 ) {
     val sheetState = rememberExpandedSheetState()
+    // The word's own surah, never the one on the glass: a sheet that Back gave
+    // back may stand over a surah the reading has since left, and its head
+    // still names where its word is (owner decision, this session).
+    val surahName = surahNameOf(word.surah)
     val palette = LocalPagePalette.current
     // The word's shaped line, so the wash can sit on the letters rather than
     // on the width the sheet gives it (owner decision, an earlier session).
@@ -349,10 +395,6 @@ internal fun WordSheet(
     // the target, and it follows the reader's type scale (owner decision,
     // this session).
     val headInset = sheetHeadActionInset()
-    // The sheet's page is the word until a count opens the places. It is
-    // remembered against the word, so a new word never opens on the last
-    // word's places (owner decision, this session).
-    var page by remember(word) { mutableStateOf<WordSheetPage>(WordSheetPage.Word) }
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -363,7 +405,7 @@ internal fun WordSheet(
         // whose last act was opening a list must not be thrown out of the
         // word they were reading (owner decision, this session).
         BackHandler(enabled = page is WordSheetPage.Places) {
-            page = WordSheetPage.Word
+            onPage(WordSheetPage.Word)
         }
         when (val shown = page) {
             WordSheetPage.Word -> Column(
@@ -486,8 +528,10 @@ internal fun WordSheet(
                                     ),
                                     tag = "word-sheet-root-door",
                                     onClick = {
-                                        page = WordSheetPage.Places(
-                                            PlacesSubject.Root(root.arabic, root.latin),
+                                        onPage(
+                                            WordSheetPage.Places(
+                                                PlacesSubject.Root(root.arabic, root.latin),
+                                            ),
                                         )
                                     },
                                 )
@@ -565,7 +609,9 @@ internal fun WordSheet(
                                     ),
                                     tag = "word-sheet-lemma-door",
                                     onClick = {
-                                        page = WordSheetPage.Places(PlacesSubject.Lemma(lemma))
+                                        onPage(
+                                            WordSheetPage.Places(PlacesSubject.Lemma(lemma)),
+                                        )
                                     },
                                 )
                             },
@@ -602,21 +648,15 @@ internal fun WordSheet(
             }
             is WordSheetPage.Places -> PlacesPage(
                 subject = shown.subject,
-                currentAyah = word.ayahNumber,
-                currentPosition = word.position,
+                currentAyah = currentAyah,
+                currentPosition = currentPosition,
                 metrics = metrics,
                 hafs = hafs,
                 factSp = factSp,
                 content = content,
                 surahNameOf = surahNameOf,
-                onBack = { page = WordSheetPage.Word },
-                onOpenPlace = { ayah, position ->
-                    // The reader's choice is the reading's next place: the
-                    // sheet goes first, so the word's own voice and the
-                    // sheet's state are put away before the page moves.
-                    onDismiss()
-                    onOpenPlace(ayah, position)
-                },
+                onBack = { onPage(WordSheetPage.Word) },
+                onOpenPlace = onOpenPlace,
             )
         }
     }

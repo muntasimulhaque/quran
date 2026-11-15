@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 18.9 (versionCode 191)
+Version: 19.0 (versionCode 192)
 
 ## Listing
 

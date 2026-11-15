@@ -2,6 +2,9 @@ package io.github.muntasimulhaque.quran
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
@@ -24,6 +27,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExternalResource
@@ -171,6 +175,21 @@ class WordMeaningTest {
      * the reading to 2:31, and write the reader's place. The frame is the
      * page's evidence, not only the semantics tree (owner decision, this
      * session).
+     *
+     * **The sheet comes back as the reader left it** (owner decision, this
+     * session). The tap is a door the reader came through, so the reading's
+     * Back gives the list back, opened at the row they chose and marking it as
+     * their place, because the reading stands there now. The sheet's own
+     * ladder is the one it always was: its back mark steps to the word, and
+     * the reading stays on 2:31, where it was Back from that ayah that used to
+     * close the app. The root's door opens the same page through the same
+     * state, so this leg pins both.
+     *
+     * The press is the activity's own dispatcher, as the reading's Back is: a
+     * platform Back aimed at the sheet the restore brings back does not arrive
+     * in this harness, aimed at a window that has only just risen (owner
+     * report, this session), and the sheet's own page is not this session's
+     * decision to pin.
      */
     @Test
     fun theDictionaryFormsPlacesOpenAndLandOnTheAyah() {
@@ -230,6 +249,57 @@ class WordMeaningTest {
         compose.waitUntil(timeoutMillis = 60_000) {
             runBlocking { SettingsStore(context).settings.first().ayah } == 38
         }
+        // The sheet's window has to be gone before Back is asked for, or the
+        // press belongs to a sheet that is still animating away. The places
+        // page is the sheet's other page, and its tag is the one the sheet
+        // wears while the reader is on the list.
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-places", useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
+        }
+
+        // The reading's Back hands the sheet back, on the page the reader
+        // chose from and at the row they chose, which the list marks as their
+        // place: the reading stands there now, not on the word's own ayah.
+        // With the sheet's window gone, this is the activity's dispatcher: the
+        // same one the reading's window sends its Back to.
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-places", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-place-38-3", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithTag("word-sheet-place-38-3", useUnmergedTree = true)
+            .onFirst()
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    compose.activity.getString(ReadingR.string.reading_word_places_current),
+                ),
+            )
+
+        // The sheet's own ladder is the one it always was: its back mark steps
+        // to the word, the same page change the sheet's Back asks for.
+        compose.onAllNodesWithContentDescription(
+            compose.activity.getString(ReadingR.string.reading_word_places_back),
+            useUnmergedTree = true,
+        ).onFirst().performClick()
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-places", useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("word-sheet-lemma-door", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        assertEquals(
+            "the reading stays where the reader sent it",
+            38,
+            runBlocking { SettingsStore(context).settings.first().ayah },
+        )
     }
 
     /**

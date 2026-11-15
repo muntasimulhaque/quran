@@ -5,3 +5,10 @@
 # as an app asset; its hash is recorded in content/manifest.json, so git must
 # never rewrite its line endings.
 content/audio-edges.txt -text
+
+# The word pronunciation manifest is weighed and hashed by the content gate and
+# recorded in both content/manifest.json and content/catalog.json, so a
+# checkout must hand it over as the pipeline wrote it: a CRLF ending would
+# change its byte count and its checksum without changing one word of it
+# (owner decision, this session).
+content/word-audio/manifest.json -text

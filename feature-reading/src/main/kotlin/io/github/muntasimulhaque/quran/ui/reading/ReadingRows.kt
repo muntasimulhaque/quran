@@ -99,8 +99,10 @@ internal fun ReadingRows(
     footnote: OpenFootnote?,
     onFootnote: (OpenFootnote?) -> Unit,
     /** The word the reader pressed and held, and the sheet that holds it. */
-    word: OpenWord?,
-    onWord: (OpenWord?) -> Unit,
+    word: OpenWordSheet?,
+    onWord: (OpenWordSheet?) -> Unit,
+    /** The reader turned the word sheet to another of its pages. */
+    onWordPage: (WordSheetPage) -> Unit,
     /** The word sheet's speaker: one word of the verse, in the reader's voice. */
     onHearWord: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     /** What the speaker's press has to say, and what its pack weighs. */
@@ -325,7 +327,16 @@ internal fun ReadingRows(
                         )
                     }
                 },
-                onWord = { onWord(it) },
+                onWord = { pressed ->
+                    onWord(
+                        OpenWordSheet(
+                            word = pressed,
+                            page = WordSheetPage.Word,
+                            currentAyah = pressed.ayahNumber,
+                            currentPosition = pressed.position,
+                        ),
+                    )
+                },
             )
         }
         item(key = "end-${surah.number}", contentType = "end") {
@@ -358,8 +369,11 @@ internal fun ReadingRows(
 
     word?.let { open ->
         WordSheet(
-            word = open,
-            surahName = surah.nameSimple,
+            word = open.word,
+            page = open.page,
+            onPage = onWordPage,
+            currentAyah = open.currentAyah,
+            currentPosition = open.currentPosition,
             surahNameOf = surahNameOf,
             metrics = metrics,
             hafs = hafs,
@@ -369,8 +383,9 @@ internal fun ReadingRows(
                 onWord(null)
             },
             onOpenPlace = onOpenPlace,
-            onHear = { onHearWord(open.ayahNumber, open.position) },
-            hearing = open.ayahNumber == hearingAyah && open.position == hearingWord,
+            onHear = { onHearWord(open.word.ayahNumber, open.word.position) },
+            hearing = open.word.ayahNumber == hearingAyah &&
+                open.word.position == hearingWord,
             voice = wordVoice,
             voiceAudio = wordAudio,
         )

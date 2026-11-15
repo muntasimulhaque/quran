@@ -6,6 +6,24 @@ trackers, no accounts, nothing collected, ever.
 
 **Status:** 18.9 (versionCode 191) was submitted for Play review from commit `27a74448`, taken from `build` run 43623737475, the newest green run on `main`, whose gates and signed-bundle jobs both passed, in 5m05s and 6m01s. The signed bundle `quran-18.9-vc191.aab` has SHA-256 `695656a483de1d66c3f85d24a31733e131386edfa44d687e5ea7b441ec2c3ebb`, the workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 through 18.9 were signed with. The release gates are the CI unit tests, lint, and `assembleDebug`, all green. The instrumented suites are an audit, not a gate: this session ran the affected word-sheet classes on `quran_phone`, `WordMeaningTest` (two legs), `WordFactGapTest`, and `WordVoiceTest`, nine tests in the first run and the two word-meaning legs again after the places page opened under its surah's head, all green; the full app and data suites were not rerun. The store's eight phone frames stand; the word sheet and the places page were read on the phone but are not store frames. Content is 1.8.0: database `content-db-7668312b`; the word packs `pack-words-en-e1fa6684` and `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1` (QUL 2); the morphology source Quranpedia's 2026-11-14 export, with the database rebuilding to its committed SHA-256; the word pronunciation pack is 1.0 (352 MB, tag `word-audio-alafasy`) downloaded one surah at a time and Al-Fatiha's 29 words in the app.
 
+**In 19.0.** A place on the word sheet's list is a door out of the sheet, and
+the phone's Back now gives the sheet back. The root's count and the dictionary
+form's count open a list of places, and a tap on one puts the sheet away and
+moves the reading to that ayah; Back from there returns the sheet on the page
+and at the row the reader chose, opened at their place and marking it, because
+the reading stands there now. It was not: a place was the app's one arrival
+with no way back, so Back from the ayah the reader had been sent to closed the
+app, which is what the search results, Browse, and the settings pages already
+did not do. The sheet's head names the word's own surah, never the one on the
+glass, since a sheet that Back gave back may stand over a surah the reading has
+since left. The word pronunciation manifest is marked so a checkout can never
+rewrite its endings: with a CRLF copy its byte count and its checksum both
+moved behind the content gate, which is the one thing that file's two numbers
+must not do. The Quran text, both translations, both tafsirs, the recitations,
+the word lists, the roots, and the content database are unchanged at 1.8.0. The
+word pronunciation pack is 1.0. The store's eight phone frames stand.
+Version 19.0 (192).
+
 **In 18.9.** The word sheet's counts are doors. The root's count and the
 dictionary form's count open a places page inside the same sheet: every place
 grouped by surah, the word as the page writes it, the reader's own place washed
