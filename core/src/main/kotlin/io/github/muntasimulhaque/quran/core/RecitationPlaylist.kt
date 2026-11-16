@@ -3,9 +3,16 @@ package io.github.muntasimulhaque.quran.core
 /**
  * The recitation playlist, described by its own media ids.
  *
- * A media id is "ayah:surah", which is why the player always knows where it
- * is without another query, and why the first ayah of a surah can be found
- * from the ids alone.
+ * A media id is "runningAyah:surah", which is why the player always knows
+ * where it is without another query, and why the first ayah of a surah can be
+ * found from the ids alone.
+ *
+ * The first part is the ayah's running number, 1 to 6236, the content
+ * database's key and the reading's place. It is not the ayah's number inside
+ * its surah: 16:28 is running 1929, and a pill that printed the running
+ * number as the verse's own read 16:1929 (owner report, this session). The
+ * reader's number travels beside the id, in the item's own ayah, so nothing
+ * has to guess which of the two it was given.
  *
  * This is pure arithmetic, kept here because the surah repeat needs it and
  * cannot be left inside the controller where nothing can reach it
@@ -16,14 +23,19 @@ package io.github.muntasimulhaque.quran.core
  */
 object RecitationPlaylist {
 
-    /** The id one ayah of one surah plays under. */
-    fun mediaId(ayahNumber: Int, surah: Int): String = "$ayahNumber:$surah"
+    /** The id one ayah of one surah plays under: its running number and its surah. */
+    fun mediaId(runningAyah: Int, surah: Int): String = "$runningAyah:$surah"
 
     /** The surah an id belongs to, or null when the id is not one of ours. */
     fun surahOf(mediaId: String): Int? = mediaId.substringAfter(':').toIntOrNull()
 
-    /** The ayah an id names, or null when the id is not one of ours. */
-    fun ayahOf(mediaId: String): Int? = mediaId.substringBefore(':').toIntOrNull()
+    /**
+     * The running ayah number an id names, or null when the id is not one of
+     * ours. This is the content database's key and the reading's place, 1 to
+     * 6236, never the ayah's number inside its surah: 2:255 is running 262
+     * (owner report, this session).
+     */
+    fun runningAyahOf(mediaId: String): Int? = mediaId.substringBefore(':').toIntOrNull()
 
     /**
      * The index the surah starts at, or -1 when the playlist holds none of

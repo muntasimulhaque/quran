@@ -18,6 +18,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
+import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
 import io.github.muntasimulhaque.quran.core.RecitationQueue
@@ -62,9 +63,9 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *
  * The playlist is built one surah at a time, from the ayah files that are
  * actually on the device, and the next surah is appended as the reader
- * reaches the end of the current one. A media id is "ayah:surah", so the
- * player always knows where it is without another query, and the shape that
- * id gives the playlist lives in [RecitationPlaylist] where it can be
+ * reaches the end of the current one. A media id is "runningAyah:surah", so
+ * the player always knows where it is without another query, and the shape
+ * that id gives the playlist lives in [RecitationPlaylist] where it can be
  * tested.
  *
  * What happens at the end of the audio is [EndOfAudio], one value, and the
@@ -172,6 +173,19 @@ class PlaybackController(
      */
     private val placeNames = mutableMapOf<Int, String>()
 
+    /**
+     * Each ayah's number inside its surah, indexed by its running number, and
+     * kept as each playlist is built so a player event reads an array and not
+     * the database.
+     *
+     * The running number is the id's own number and the reading's place; it is
+     * not the verse's number inside its surah (16:28 is running 1929). The
+     * pill's key and the panel's spoken place are the only readers, and they
+     * must never take the running number for the reader's (owner report, this
+     * session). A zero means no item was built for that ayah.
+     */
+    private val ayahsInSurah = IntArray(DailyAyah.TOTAL_AYAHS + 1)
+
     fun attach(content: ContentDatabase) {
         this.content = content
         if (edges == null) {
@@ -214,7 +228,7 @@ class PlaybackController(
         if (player.playbackState == Player.STATE_ENDED) return null
         if (stoppedAtAyahEnd && !player.playWhenReady) return null
         val id = player.currentMediaItem?.mediaId ?: return null
-        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return null
+        val ayahNumber = RecitationPlaylist.runningAyahOf(id) ?: return null
         val segments = segmentsByAyah[ayahNumber] ?: return null
         val recitation = recitationId ?: return null
         val edges = edges
@@ -241,7 +255,7 @@ class PlaybackController(
         if (player.playbackState == Player.STATE_ENDED) return null
         if (stoppedAtAyahEnd && !player.playWhenReady) return null
         val id = player.currentMediaItem?.mediaId ?: return null
-        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return null
+        val ayahNumber = RecitationPlaylist.runningAyahOf(id) ?: return null
         val segments = segmentsByAyah[ayahNumber] ?: return null
         val recitation = recitationId ?: return null
         val edges = edges
@@ -1026,6 +1040,12 @@ class PlaybackController(
             val audio = database.recitationAyah(recitation, ayah.number) ?: return@mapNotNull null
             val uri = store.uri(audio.audioPath) ?: return@mapNotNull null
             segmentsForSurah[ayah.number] = audio.segments
+            // The ayah's own number travels beside the item, because the id
+            // carries the running one and the pill must draw this one (owner
+            // report, this session).
+            if (ayah.number in 1..DailyAyah.TOTAL_AYAHS) {
+                ayahsInSurah[ayah.number] = ayah.ayah
+            }
             MediaItem.Builder()
                 .setMediaId(RecitationPlaylist.mediaId(ayah.number, ayah.surah))
                 .setUri(uri)
@@ -1233,7 +1253,7 @@ class PlaybackController(
         if (player.playbackState == Player.STATE_ENDED) return
         if (stoppedAtAyahEnd && !player.playWhenReady) return
         val id = player.currentMediaItem?.mediaId ?: return
-        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return
+        val ayahNumber = RecitationPlaylist.runningAyahOf(id) ?: return
         rememberHeard(
             recitationId,
             ayahNumber,
@@ -1265,8 +1285,9 @@ class PlaybackController(
         // reader asks for the audio back (owner decision).
         if (stoppedAtAyahEnd && !player.playWhenReady) return
         val id = player.currentMediaItem?.mediaId ?: return
-        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return
+        val ayahNumber = RecitationPlaylist.runningAyahOf(id) ?: return
         val surah = RecitationPlaylist.surahOf(id)
+        val place = playingPlace(id, ayahsInSurah.getOrNull(ayahNumber))
         val at = player.currentPosition.coerceAtLeast(0)
         _state.value = _state.value.copy(
             connected = true,
@@ -1274,7 +1295,8 @@ class PlaybackController(
             recitation = recitationId,
             ayahNumber = ayahNumber,
             surah = surah,
-            reference = surah?.let { "$it:$ayahNumber" },
+            ayahInSurah = place?.ayahInSurah,
+            reference = place?.reference,
             placeName = surah?.let { placeNames[it] },
         )
         rememberHeard(recitationId, ayahNumber, at, player.isPlaying)

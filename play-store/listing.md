@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.1 (versionCode 193)
+Version: 19.2 (versionCode 194)
 
 ## Listing
 
@@ -207,6 +207,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.2, 400 characters)
+19.2 fixes the ayah key on the recitation pill. Since 14.2 it showed the Book's running number, so 16:28 read 16:1929 and the listening panel said Ayah 1929. The pill now reads 16:28 and the panel says Ayah 28, the number you know. Every other number the app keeps is unchanged, and so are the text, both translations, both tafsirs, the recitations, and the content. No ads, no trackers, no accounts.
 
 ## Release notes (19.1, 497 characters)
 19.1 puts the number on its verse: at the head of the line, not floating between two verses, and one number per verse, the one you tap. The chosen verse and a found word are the page's warm tone instead of blue. Word meanings are offered where the reading arrives, the first page says once that a tap brings the bar, Saved names a date instead of 104 weeks ago, and a large download asks first. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.

@@ -210,6 +210,7 @@ class PlaybackPillTest {
                         ),
                         reference = reference,
                         placeName = placeName,
+                        ayahInSurah = state.ayahInSurah,
                         pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
                         pendingAudio = pendingAudio,
                         speed = speed,
@@ -267,6 +268,7 @@ class PlaybackPillTest {
                         reciterOptions = listOf(ListenOption("husary", "Husary", 0L)),
                         reference = state.value.reference,
                         placeName = state.value.placeName,
+                        ayahInSurah = state.value.ayahInSurah,
                         pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
                         onToggle = {},
                         onNext = {},
@@ -820,7 +822,7 @@ class PlaybackPillTest {
      */
     @Test
     fun thePlaceIsThePillsAndThePanes() {
-        showPill(state = PlaybackUiState(ayahNumber = 255))
+        showPill(state = PlaybackUiState(ayahNumber = 255, ayahInSurah = 255))
         compose.onNodeWithTag("playback-words").performClick()
         // The capsule under the panel still says the place and the key.
         compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true).assertExists()

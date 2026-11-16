@@ -166,6 +166,7 @@ internal fun BottomStack(
                 reciterOptions = reciterOptions,
                 reference = playback.reference,
                 placeName = playback.placeName,
+                ayahInSurah = playback.ayahInSurah,
                 // The button says Continue; the words name the surah and its
                 // size, so the offer does not say the verb twice (owner
                 // decision). The continuation and the plain offer read the

@@ -15,21 +15,27 @@ import org.junit.Test
 class RecitationPlaylistTest {
 
     private val fatihah = (1..7).map { RecitationPlaylist.mediaId(it, 1) }
-    private val baqarah = (8..286).map { RecitationPlaylist.mediaId(it, 2) }
+
+    // Al-Baqarah's ayahs are the Book's 8th to 293rd: the id carries the
+    // running number, not the ayah's number inside its surah (owner report,
+    // this session).
+    private val baqarah = (8..293).map { RecitationPlaylist.mediaId(it, 2) }
     private val playlist = fatihah + baqarah
 
     @Test
-    fun anIdNamesBothItsAyahAndItsSurah() {
-        val id = RecitationPlaylist.mediaId(255, 2)
-        assertEquals(255, RecitationPlaylist.ayahOf(id))
+    fun theIdCarriesTheRunningNumberAndTheSurah() {
+        // Al-Baqarah's 255th ayah is the Book's 262nd. The verse's own number
+        // travels beside the id, never inside it.
+        val id = RecitationPlaylist.mediaId(262, 2)
+        assertEquals(262, RecitationPlaylist.runningAyahOf(id))
         assertEquals(2, RecitationPlaylist.surahOf(id))
     }
 
     @Test
     fun anIdThatIsNotOursIsReadAsNothing() {
         assertNull(RecitationPlaylist.surahOf("a-file-name.mp3"))
-        assertNull(RecitationPlaylist.ayahOf("a-file-name.mp3"))
-        assertNull(RecitationPlaylist.ayahOf(""))
+        assertNull(RecitationPlaylist.runningAyahOf("a-file-name.mp3"))
+        assertNull(RecitationPlaylist.runningAyahOf(""))
     }
 
     @Test

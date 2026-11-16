@@ -156,6 +156,12 @@ fun PlaybackBar(
     reference: String?,
     /** The surah's name in the reader's language; null while it is not known. */
     placeName: String? = null,
+    /**
+     * The playing ayah's number inside its surah, for the panel's spoken
+     * place. The state's own number is the running one (16:28 is 1929), and a
+     * panel that spoke it said "Ayah 1929" (owner report, this session).
+     */
+    ayahInSurah: Int? = null,
     pendingLabel: String?,
     /**
      * The pending surah's name and size, said while its package downloads
@@ -430,11 +436,11 @@ fun PlaybackBar(
                     val place = placeName?.takeIf { it.isNotBlank() }
                     val fullPlace = when {
                         place == null -> null
-                        state.ayahNumber != null -> localizedDigits(
+                        ayahInSurah != null -> localizedDigits(
                             stringResource(
                                 R.string.playback_now_playing,
                                 place,
-                                state.ayahNumber,
+                                ayahInSurah,
                             ),
                         )
                         else -> "$place ${playbackPlace(reference.orEmpty())}"

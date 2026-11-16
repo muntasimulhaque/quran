@@ -6,6 +6,21 @@ trackers, no accounts, nothing collected, ever.
 
 **Status:** 19.1 (versionCode 193) was submitted for Play review from commit `c84f9cba`, taken from `build` run 43743269182, the newest green run on `main`, whose gates and signed-bundle jobs both passed, in 5m00s and 5m38s. The signed bundle `quran-19.1-vc193.aab` has SHA-256 `e2b4176f54ec002eeb69171780e495d2a311f69e59de3b6d82c48e160cb4a2bd`, the workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 through 19.1 were signed with. The release gates are the CI unit tests, lint, and `assembleDebug`, all green; the same suite ran here on this machine, green. The instrumented suites are an audit, not a gate: this session ran `ScreenshotTest`, `ScreenshotVariantsTest`, and `WordMeaningTest` on `quran_phone`, five tests, green, and `BanglaCaptureTest` on the same phone, one test, green. The full app and data suites were not rerun, and the swatch's press, which the last commit moved, changes no frame and no assertion the capture classes make. The store frames were recaptured here on 19.1 and every one read: the eight phone frames and the eight ten inch frames are committed, and the seven inch set is pulled, because its AVD's status bar draws one network group per modem and the image reports three, so every frame of that set read "3G 3G 3G"; `play-store/listing.md` records it. Content is 1.8.0: database `content-db-7668312b`; the word packs `pack-words-en-e1fa6684` and `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1` (QUL 2); the morphology source Quranpedia's 2026-11-14 export, with the database rebuilding to its committed SHA-256; the word pronunciation pack is 1.0 (352 MB, tag `word-audio-alafasy`) downloaded one surah at a time and Al-Fatiha's 29 words in the app.
 
+**In 19.2.** The recitation pill's key is the verse's own number again. Since
+14.2 it printed the ayah's running number, the Book's count from 1 to 6,236
+that the content database and the reading's place are keyed by: 16:28 read
+16:1929, and the listening panel's spoken place said "Ayah 1929". The
+builder already held the verse's own number beside the running one, so the fix
+is one small table filled when the surah is built and one pure function,
+`PlayingPlace`, where the two numbers meet; it is pinned with 16:28 (running
+1929) and 2:255 (running 262). The running number stays where it belongs: the
+database key, the recitation rows and their word timings, the saved and
+last-read stores, and the reading's position. The Quran text, both translations,
+both tafsirs, the recitations, the word lists, the roots, and the content
+database are unchanged at 1.8.0. The word pronunciation pack is 1.0. The store's
+eight frames stand: the playing pill's key is in none of them. Version 19.2
+(194).
+
 **In 19.1.** The verse's number stands on its verse. The head keeps its 48 dp
 target, but its content sits on the target's floor, so the room inside the box
 falls above the number and the head hugs the line it names instead of floating in

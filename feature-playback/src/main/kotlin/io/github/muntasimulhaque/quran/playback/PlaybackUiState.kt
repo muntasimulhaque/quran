@@ -12,12 +12,26 @@ data class PlaybackUiState(
      */
     val speed: Float = 1f,
     val recitation: String? = null,
+    /**
+     * The playing ayah's running number, 1 to 6236: the content database's
+     * key and the reading's place. It is not the ayah's number inside its
+     * surah (16:28 is running 1929); [ayahInSurah] is that one, and it is the
+     * number a reader knows (owner report, this session).
+     */
     val ayahNumber: Int? = null,
     val surah: Int? = null,
     /**
+     * The playing ayah's number inside its surah, read from the ayah when the
+     * playlist was built. The pill's key and the panel's spoken place are its
+     * only readers; everything that compares ayahs compares [ayahNumber]
+     * (owner report, this session).
+     */
+    val ayahInSurah: Int? = null,
+    /**
      * The playing ayah's key, surah:ayah, for the pill's own line. It is the
-     * app's reference in its data form (2:255), not the notification's
-     * sentence; the pill localizes its digits where it draws them.
+     * app's reference in its data form (2:255), the verse's own number and
+     * never the running one, and the pill localizes its digits where it draws
+     * them.
      */
     val reference: String? = null,
     /**
