@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +48,8 @@ import io.github.muntasimulhaque.quran.ui.kit.ChipKind
 import io.github.muntasimulhaque.quran.ui.kit.ChipStyle
 import io.github.muntasimulhaque.quran.ui.kit.chipMeasure
 import io.github.muntasimulhaque.quran.ui.kit.AppSnackbar
+import io.github.muntasimulhaque.quran.ui.kit.putAwaySentence
+import io.github.muntasimulhaque.quran.ui.kit.rememberSentence
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
@@ -94,7 +95,10 @@ fun BrowseSheet(
     onRestoreSaved: (SavedAyah) -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
-    val snackbar = remember { SnackbarHostState() }
+    // The sheet's own sentence: the reading's host is behind this window,
+    // so this surface owes its own, and the rule that ends it is the
+    // reading's own (owner decision, this session).
+    val sentence = rememberSentence()
     val removedMessage = stringResource(R.string.browse_saved_removed)
     val undo = stringResource(UiKitR.string.action_undo)
     // The list the reader saw before the database answered the removal. The
@@ -108,7 +112,7 @@ fun BrowseSheet(
         previousSaved = saved
         val removed = old.firstOrNull { row -> saved.none { it.ayahNumber == row.ayahNumber } }
             ?: return@LaunchedEffect
-        val result = snackbar.showSnackbar(
+        val result = sentence.host.showSnackbar(
             message = removedMessage,
             actionLabel = undo,
             withDismissAction = false,
@@ -251,7 +255,15 @@ fun BrowseSheet(
         // to the surah list before it leaves the sheet: the same two-level
         // behavior a settings page has, one level down.
         BackHandler(enabled = gridSurah != null) { gridSurah = null }
-        Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                // A touch anywhere but on the sentence puts it away, and the
+                // touch still reaches the row it landed on: the reading
+                // answers its own sentence the same way (owner decision,
+                // this session).
+                .putAwaySentence(sentence),
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -375,7 +387,7 @@ fun BrowseSheet(
             }
         }
         AppSnackbar(
-            hostState = snackbar,
+            sentence = sentence,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = Space.Gutter, vertical = Space.Line),

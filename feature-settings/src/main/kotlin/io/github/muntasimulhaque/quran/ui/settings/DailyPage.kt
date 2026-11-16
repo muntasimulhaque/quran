@@ -74,6 +74,16 @@ fun DailyPage(
     settings: AppSettings,
     notificationsBlocked: Boolean,
     exactGrantWithheld: Boolean,
+    /**
+     * The phone has no screen for the notification settings at all, so the
+     * line that says notifications are off has no door under it. The fact is
+     * a property of the phone and not a moment, so it is state here beside
+     * the switch that needs it, said once and kept (owner decision, this
+     * session).
+     */
+    notificationScreenMissing: Boolean = false,
+    /** The same, for the phone's own screen for the exact alarm. */
+    alarmScreenMissing: Boolean = false,
     onDailyAyah: (Boolean) -> Unit,
     onDailyAyahTime: (Int) -> Unit,
     onOpenNotificationSettings: () -> Unit,
@@ -118,7 +128,13 @@ fun DailyPage(
         // is one place in the phone's settings where that is decided.
         if (notificationsBlocked) {
             Text(
-                text = stringResource(R.string.settings_daily_blocked),
+                text = stringResource(
+                    if (notificationScreenMissing) {
+                        R.string.settings_daily_no_notification_screen
+                    } else {
+                        R.string.settings_daily_blocked
+                    },
+                ),
                 // A sentence about the phone's own settings is prose, not a
                 // caption: it reads at the meta line's neighbours, not a point
                 // under them (owner decision, this session).
@@ -130,11 +146,17 @@ fun DailyPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )
-            Box(Modifier.padding(start = Space.Gutter, top = Space.Line)) {
-                TextButton(
-                    label = stringResource(R.string.settings_daily_blocked_action),
-                    onClick = onOpenNotificationSettings,
-                )
+            // A phone with no such screen has no door to offer, so none is
+            // drawn: the sentence above is the whole of what can be done, and
+            // a word that opens nothing is worse than a sentence (owner
+            // decision, this session).
+            if (!notificationScreenMissing) {
+                Box(Modifier.padding(start = Space.Gutter, top = Space.Line)) {
+                    TextButton(
+                        label = stringResource(R.string.settings_daily_blocked_action),
+                        onClick = onOpenNotificationSettings,
+                    )
+                }
             }
         }
         // The exact time is the other thing the phone can withhold, and it is
@@ -144,16 +166,24 @@ fun DailyPage(
         // and has the one door the phone offers.
         if (settings.dailyAyah && exactGrantWithheld && !notificationsBlocked) {
             Text(
-                text = stringResource(R.string.settings_daily_exact_blocked),
+                text = stringResource(
+                    if (alarmScreenMissing) {
+                        R.string.settings_daily_no_alarm_screen
+                    } else {
+                        R.string.settings_daily_exact_blocked
+                    },
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )
-            Box(Modifier.padding(start = Space.Gutter, top = Space.Line)) {
-                TextButton(
-                    label = stringResource(R.string.settings_daily_exact_action),
-                    onClick = onAskExactAlarm,
-                )
+            if (!alarmScreenMissing) {
+                Box(Modifier.padding(start = Space.Gutter, top = Space.Line)) {
+                    TextButton(
+                        label = stringResource(R.string.settings_daily_exact_action),
+                        onClick = onAskExactAlarm,
+                    )
+                }
             }
         }
         Spacer(Modifier.height(Space.Section))

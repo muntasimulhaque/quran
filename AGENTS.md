@@ -187,6 +187,15 @@ change, never left as a dead letter.
 - **A popup's place on the glass cannot be read by a compose test.** Every node
   in a popup reports coordinates from that window's own corner. Pin the rule
   that places it as arithmetic in a JVM test, and the anchor in the compose test.
+- **A sentence is never merged over.** Material's host marks the paper it draws
+  with a pane title and a dismiss action, and a pane title is one of Compose's
+  unmergeable semantics properties: a merging ancestor laid over `AppSnackbar`
+  (a `clickable`, a `toggleable`, a list item) throws "merge function called on
+  unmergeable property PaneTitle" in the first test that reads the merged tree,
+  so the leg reads as a fault in the app when it is the shape of the test. A
+  test that wants the page's own touch puts the page beside the sentence and
+  counts it with `pointerInput`, the way `SentenceTouchTest` does (found and
+  named from material3 1.5's bytecode, this session).
 - **A gate that reads content by table name is reading a contract, not a
   schema.** Change the build's shape and run every `:tools` gate.
 - **A red leg is a fact to baseline, not a verdict.** `git worktree add` the

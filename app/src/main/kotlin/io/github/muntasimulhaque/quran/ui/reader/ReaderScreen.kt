@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,6 +55,8 @@ import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
 import io.github.muntasimulhaque.quran.ui.kit.AppSnackbar
+import io.github.muntasimulhaque.quran.ui.kit.putAwaySentence
+import io.github.muntasimulhaque.quran.ui.kit.rememberSentence
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
@@ -132,6 +133,10 @@ fun ReaderScreen(
     onReminderPermission: () -> Unit,
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
+    /** Whether the phone has no screen for the notification settings at all. */
+    notificationScreenMissing: () -> Boolean = { false },
+    /** Whether the phone has no screen for the exact alarm at all. */
+    alarmScreenMissing: () -> Boolean = { false },
     onOpenNotificationSettings: () -> Unit,
     onAskExactAlarm: () -> Unit,
     /** The one permission answer the reading still has to say. */
@@ -232,14 +237,17 @@ fun ReaderScreen(
     val locale = LocalConfiguration.current.locales[0]
     val announceView = LocalView.current
     val scope = rememberCoroutineScope()
-    val snackbar = remember { SnackbarHostState() }
+    // The sentence the reading owes the reader, and the one value the two
+    // halves of the rule share: the paper's ground, and the touch that ends
+    // it (owner decision, this session).
+    val sentence = rememberSentence()
     LaunchedEffect(Unit) {
         viewModel.messages.collect { message ->
             val text = resources.getString(message.text)
             if (message.announceOnly) {
                 announceView.announceForAccessibility(text)
             } else {
-                val result = snackbar.showSnackbar(
+                val result = sentence.host.showSnackbar(
                     message = text,
                     actionLabel = message.action?.let { resources.getString(it) },
                     withDismissAction = false,
@@ -258,17 +266,26 @@ fun ReaderScreen(
     // twice; the action opens the phone's own page for the thing it names.
     LaunchedEffect(permissionNotice) {
         val notice = permissionNotice ?: return@LaunchedEffect
-        val result = snackbar.showSnackbar(
+        // A notice may name no door, and then it is only a sentence: the
+        // phone that answered with nothing is told so on the app's own
+        // paper, in the place the missing door was tapped from, and the
+        // reader's next touch puts it away (owner decision, this session).
+        val result = sentence.host.showSnackbar(
             message = resources.getString(notice.text),
-            actionLabel = resources.getString(notice.action),
+            actionLabel = notice.action?.let { resources.getString(it) },
             withDismissAction = false,
-            duration = SnackbarDuration.Long,
+            duration = if (notice.action != null) {
+                SnackbarDuration.Long
+            } else {
+                SnackbarDuration.Short
+            },
         )
         onPermissionNoticeShown()
         if (result == SnackbarResult.ActionPerformed) {
             when (notice.kind) {
                 PermissionNotice.Kind.Notifications -> onOpenNotificationSettings()
                 PermissionNotice.Kind.ExactAlarm -> onAskExactAlarm()
+                null -> Unit
             }
         }
     }
@@ -554,7 +571,7 @@ fun ReaderScreen(
             // tap did nothing. The reader can raise the sheet again.
             sharing = null
             capturing = false
-            scope.launch { snackbar.showSnackbar(shareUnavailable) }
+            scope.launch { sentence.host.showSnackbar(shareUnavailable) }
         }
     }
 
@@ -570,7 +587,7 @@ fun ReaderScreen(
         sharing = null
         capturing = false
         sharePlainText(text)
-        scope.launch { snackbar.showSnackbar(shareCardFailed) }
+        scope.launch { sentence.host.showSnackbar(shareCardFailed) }
     }
 
     /**
@@ -619,7 +636,12 @@ fun ReaderScreen(
                         }
                     }
                 }
-            },
+            }
+            // The sentence answers the reader the way every other raised
+            // thing here does: the first touch puts it away, and the touch
+            // still reaches the page it landed on (owner decision, this
+            // session).
+            .putAwaySentence(sentence),
     ) {
         // The bar is composed before the page it floats over, so a screen
         // reader meets the controls first when the reader brings them back:
@@ -869,7 +891,7 @@ fun ReaderScreen(
         )
 
         AppSnackbar(
-            hostState = snackbar,
+            sentence = sentence,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .zIndex(2f)
@@ -972,6 +994,8 @@ fun ReaderScreen(
                 lastRead = lastRead,
                 notificationsBlocked = notificationsBlocked,
                 exactGrantWithheld = exactGrantWithheld,
+                notificationScreenMissing = notificationScreenMissing,
+                alarmScreenMissing = alarmScreenMissing,
                 onOpenNotificationSettings = onOpenNotificationSettings,
                 onAskExactAlarm = onAskExactAlarm,
                 onReminderPermission = onReminderPermission,

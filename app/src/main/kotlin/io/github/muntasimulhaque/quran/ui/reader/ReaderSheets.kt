@@ -36,6 +36,8 @@ internal fun ReaderSheets(
     lastRead: List<ReadPlace>,
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
+    notificationScreenMissing: () -> Boolean,
+    alarmScreenMissing: () -> Boolean,
     onOpenNotificationSettings: () -> Unit,
     onAskExactAlarm: () -> Unit,
     onReminderPermission: () -> Unit,
@@ -161,6 +163,8 @@ internal fun ReaderSheets(
             // system settings without the app restarting.
             notificationsBlocked = notificationsBlocked,
             exactGrantWithheld = exactGrantWithheld,
+            notificationScreenMissing = notificationScreenMissing,
+            alarmScreenMissing = alarmScreenMissing,
             actions = SettingsActions(
                 onLanguage = { tag ->
                     UiLanguage.of(tag)?.let { language ->

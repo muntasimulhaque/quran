@@ -22,8 +22,13 @@
     <string name="settings_daily_off">The daily ayah is off</string>
     <string name="settings_daily_blocked">Your phone is not showing notifications for this app, so the daily ayah cannot arrive.</string>
     <string name="settings_daily_blocked_action">Notification settings</string>
+    <!-- The same line on a phone with no settings screen at all: the fact is
+         kept and the door is not drawn, so nothing here is a word that opens
+         nothing (owner decision, this session). -->
+    <string name="settings_daily_no_notification_screen">Your phone is not showing notifications for this app, and this phone has no screen to change that, so the daily ayah cannot arrive.</string>
     <string name="settings_daily_exact_blocked">Your phone has alarms and reminders off, so the ayah can arrive late.</string>
     <string name="settings_daily_exact_action">Allow alarms and reminders</string>
+    <string name="settings_daily_no_alarm_screen">Your phone has alarms and reminders off, and this phone has no screen to change that, so the ayah can arrive late.</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
     <string name="settings_daily_picker_hour">Hour</string>
     <string name="settings_daily_picker_minute">Minute</string>

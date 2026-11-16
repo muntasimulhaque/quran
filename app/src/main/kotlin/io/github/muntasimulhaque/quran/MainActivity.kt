@@ -9,7 +9,6 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,6 +42,17 @@ class MainActivity : ComponentActivity() {
      * host can draw it (owner decision, this session).
      */
     private var permissionNotice by mutableStateOf<PermissionNotice?>(null)
+
+    /**
+     * The two screens this phone answered with nothing, kept for the window's
+     * life. Neither is a moment but a property of the phone, so it is said as
+     * state where the switch that needs it is drawn, and once more on the
+     * reading's own paper at the door that was tapped. It used to be a Toast,
+     * which is the one thing on the glass a tap cannot put away, and the app
+     * says nothing in the platform's bubble (owner decision, this session).
+     */
+    private var notificationScreenMissing by mutableStateOf(false)
+    private var alarmScreenMissing by mutableStateOf(false)
 
     /**
      * The reader's language belongs to every window of the app. A dialog, a
@@ -158,6 +168,8 @@ class MainActivity : ComponentActivity() {
                 onPermissionNoticeShown = { permissionNotice = null },
                 notificationsBlocked = { notificationsBlocked.value },
                 exactGrantWithheld = { exactGrantWithheld.value },
+                notificationScreenMissing = { notificationScreenMissing },
+                alarmScreenMissing = { alarmScreenMissing },
                 onOpenNotificationSettings = ::openNotificationSettings,
                 onAskExactAlarm = { askExactAlarmIfNeeded() },
             )
@@ -169,8 +181,10 @@ class MainActivity : ComponentActivity() {
      * who was told the reminder cannot arrive. The channel API arrived with
      * Android 8, and the releases before it have no notification settings to
      * name, so those get the app's page in the system settings, which holds
-     * the same switch. A phone with no settings app at all is told so in one
-     * sentence rather than left tapping a word that did nothing.
+     * the same switch. A phone with no settings app at all is told so where
+     * the door was tapped, and the Daily page keeps the sentence beside the
+     * switch, rather than being left tapping a word that did nothing (owner
+     * decision, this session).
      *
      * A reader who turned off this one reminder in the phone's own settings is
      * sent to that reminder's own page rather than to the app's, because the
@@ -194,7 +208,11 @@ class MainActivity : ComponentActivity() {
         try {
             startActivity(page.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         } catch (notFound: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.notification_settings_unavailable, Toast.LENGTH_LONG).show()
+            // The phone has no such screen. The Daily page keeps the sentence
+            // beside the switch that needs it, and the reading says it once
+            // where a door was tapped from the reading itself.
+            notificationScreenMissing = true
+            permissionNotice = PermissionNotice(text = R.string.notification_settings_unavailable)
         }
     }
 
@@ -221,6 +239,9 @@ class MainActivity : ComponentActivity() {
      *
      * The Daily page says when the phone still withholds the exact time, so
      * the answer is read where the switch is, not announced over the reading.
+     * A phone with no such screen at all keeps the line and loses the door:
+     * the fact is a property of the phone, so it is kept as state and not
+     * said in a bubble (owner decision, this session).
      */
     private fun askExactAlarmIfNeeded() {
         // Without the notification granted, an exact alarm fires into a shade
@@ -231,7 +252,8 @@ class MainActivity : ComponentActivity() {
         try {
             askExactAlarm.launch(request)
         } catch (notFound: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.exact_alarm_settings_unavailable, Toast.LENGTH_LONG).show()
+            alarmScreenMissing = true
+            permissionNotice = PermissionNotice(text = R.string.exact_alarm_settings_unavailable)
         }
     }
 

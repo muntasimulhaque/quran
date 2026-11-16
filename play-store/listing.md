@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.2 (versionCode 194)
+Version: 19.3 (versionCode 195)
 
 ## Listing
 
@@ -207,6 +207,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.3, 458 characters)
+19.3 makes a message leave when you touch anywhere else. Note saved, a removed save with Undo, a failed share, and a permission notice no longer wait out a timer over the page you are reading, and the tap you made still counts. The one sentence you could not put away is gone too: a phone with no settings screen is now said on the Daily ayah page itself. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (19.2, 400 characters)
 19.2 fixes the ayah key on the recitation pill. Since 14.2 it showed the Book's running number, so 16:28 read 16:1929 and the listening panel said Ayah 1929. The pill now reads 16:28 and the panel says Ayah 28, the number you know. Every other number the app keeps is unchanged, and so are the text, both translations, both tafsirs, the recitations, and the content. No ads, no trackers, no accounts.

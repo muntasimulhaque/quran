@@ -96,6 +96,14 @@ fun SettingsSheet(
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
+    /**
+     * Whether this phone has no screen for the notification settings, or for
+     * the exact alarm, at all. The Daily page draws that as a state line with
+     * no door, because a word that opens nothing is worse than a sentence
+     * (owner decision, this session).
+     */
+    notificationScreenMissing: () -> Boolean = { false },
+    alarmScreenMissing: () -> Boolean = { false },
     actions: SettingsActions,
     onDismiss: () -> Unit,
     /**
@@ -204,6 +212,8 @@ fun SettingsSheet(
                         settings = settings,
                         notificationsBlocked = notificationsBlocked(),
                         exactGrantWithheld = exactGrantWithheld(),
+                        notificationScreenMissing = notificationScreenMissing(),
+                        alarmScreenMissing = alarmScreenMissing(),
                         onDailyAyah = actions.onDailyAyah,
                         onDailyAyahTime = actions.onDailyAyahTime,
                         onOpenNotificationSettings = actions.onOpenNotificationSettings,

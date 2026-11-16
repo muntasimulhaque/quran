@@ -65,6 +65,15 @@ fun QuranApp(
     notificationsBlocked: () -> Boolean = { false },
     /** Whether the phone is still withholding the exact alarm. */
     exactGrantWithheld: () -> Boolean = { false },
+    /**
+     * Whether this phone has no notification settings screen at all, read
+     * after a door the phone answered with nothing. The Daily page says it
+     * beside the switch that needs it, because it is a property of the phone
+     * and not a moment (owner decision, this session).
+     */
+    notificationScreenMissing: () -> Boolean = { false },
+    /** The same, for the phone's own exact alarm screen. */
+    alarmScreenMissing: () -> Boolean = { false },
     /** Opens the phone's own page for this app's notifications. */
     onOpenNotificationSettings: () -> Unit = {},
     /** Opens the phone's own screen for the exact alarm. */
@@ -132,6 +141,8 @@ fun QuranApp(
                     onReminderPermission,
                     notificationsBlocked,
                     exactGrantWithheld,
+                    notificationScreenMissing,
+                    alarmScreenMissing,
                     onOpenNotificationSettings,
                     onAskExactAlarm,
                     permissionNotice = permissionNotice,
