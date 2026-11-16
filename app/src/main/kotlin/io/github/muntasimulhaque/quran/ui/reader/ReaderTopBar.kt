@@ -1,14 +1,10 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
@@ -17,108 +13,151 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import kotlin.math.roundToInt
 
 /**
- * The reading's top bar, and the one place its margins live.
+ * The reading's bar, and the one place its margins live.
  *
- * The bar is summoned, never resident: it fades in over the page when the
- * reader asks for it and leaves when the page starts to move, which is the
- * whole of the chrome the reading carries. It lives beside the reading screen
- * so the page file is about the page, and the bar is about the bar.
+ * **The bar is the page's head** (owner decision, this session). It has its
+ * own band at the top, and the reading begins at the band's bottom: no ayah,
+ * no opening, and no translation is ever behind it. As the reader moves
+ * forward, [shown] falls and the band, with the page's own top under it,
+ * rises; when the band is gone, the page scrolls. A backward move spends its
+ * first distance bringing the band back, so the line the reader is returning
+ * to arrives below it, never under it. [ReaderBarState] owns that arithmetic.
+ *
+ * **One row, `Space.Tight` above and below.** The row is 48 dp, the app's
+ * touch floor, and the title's capsule is 48 for the same reason. The four
+ * points of air above and below the row are the seam that keeps the marks off
+ * the status bar and the reading, and the whole of the air the bar spends: the
+ * bar was 8 above and 20 below when it floated over the page, and the 20 was
+ * the old scrim's tail and the page's gutter, not the head's. The 48 row is
+ * the floor; a bar shorter than that would clip the target or the title's
+ * capsule, which is the one thing the app never does to a finger.
+ *
+ * **The sides keep the page head's 8.** A round control is a 48 dp target
+ * holding a 24 dp mark, so the row is inset by the app's one edge
+ * ([Space.Gutter]) less the 12 dp of air inside that target. Browse, Search,
+ * and Settings land on the reading's 20 dp line, and the title's capsule sits
+ * on the same line.
  *
  * The three marks are Browse, Search, and Settings, and the surah and its juz
  * sit between them: the bar holds the places the reader can go and the place
  * they are in. The text size is a setting, so it lives in Settings rather than
  * taking the room the juz needs; the bar is not the page's display panel
- * (owner decision, this session: Aa left the bar, the folio left the page, and
- * the title is whole again on a phone).
- *
- * Its marks stand on the same two lines as the words under them. A round
- * control is a 48 dp target holding a 24 dp mark, so the row is inset by the
- * app's one edge ([Space.Gutter]) less the 12 dp of air inside that target,
- * and Browse, Search, and Settings land exactly on the text they act on. The
- * row used to be the reading column's own width, centered, which left the
- * marks in the margins of a ten inch screen (owner report, this session); the
- * column is the glass now, so the bar is too (owner decision, this session).
+ * (owner decision, an earlier session: Aa left the bar, the folio left the
+ * page, and the title is whole again on a phone).
  */
 
 /** The bar's own margin: the app's edge less the air inside a round target. */
 private val BarInset = Space.Gutter - 12.dp
 
+/**
+ * The bar's band, from the status bar's bottom to the reading's top.
+ *
+ * [shown] is how much of the row's own height stands; 1 is fully standing and
+ * 0 leaves only the status bar's band, which belongs to the phone and is never
+ * the reader's to scroll away. The natural content is measured once and placed
+ * above the band by the part that is away, so the page's top and the bar's
+ * bottom are the same line on every frame.
+ *
+ * [onOwnHeight] is the row and its air without the status bar, in pixels: the
+ * distance a finger spends before the page scrolls. It is measured, not
+ * written down, because the title grows with the phone's type scale.
+ *
+ * A fully away bar leaves the screen reader nothing: the page's own "Show the
+ * bar" action is the way back, and a control the reader cannot see should not
+ * be the next thing they hear (owner decision, this session).
+ */
 @Composable
 internal fun ReaderTopBar(
     title: String,
     detail: String?,
-    visible: Boolean,
-    reducedMotion: Boolean,
+    shown: Float,
     /** What a tap on the title does, said out loud; null when it does nothing. */
     titleAction: String?,
     onTitle: () -> Unit,
     onBrowse: () -> Unit,
     onSearch: () -> Unit,
     onSettings: () -> Unit,
+    onOwnHeight: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { -it / 3 },
-        exit = if (reducedMotion) fadeOut() else fadeOut() + slideOutVertically { -it / 3 },
-        modifier = modifier,
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                // The scrim is solid behind the controls and gives way below
-                // them, so the surah never sits on the fading edge. It used to
-                // stay solid to seventy-two percent of its own height, which
-                // is exactly where the page's own surah name falls: the gold
-                // name was measurably washed every time the bar came up (the
-                // ornament's contrast dropped from 5.0 to 4.4 on paper). The
-                // solid run is now the bar's own height, and the fade is short,
-                // so the page's first line is never under it.
-                .background(
-                    Brush.verticalGradient(
-                        0f to MaterialTheme.colorScheme.background,
-                        0.55f to MaterialTheme.colorScheme.background,
-                        0.82f to MaterialTheme.colorScheme.background.copy(alpha = 0.88f),
-                        1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
-                    ),
-                )
-                .windowInsetsPadding(WindowInsets.statusBars),
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            Row(
+    val status = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val statusPx = with(LocalDensity.current) { status.roundToPx() }
+    val reveal = shown.coerceIn(0f, 1f)
+    val away = reveal <= 0.001f
+    Layout(
+        content = {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = BarInset, end = BarInset, top = Space.Line, bottom = Space.Gutter),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                // The bar is one row: Browse leads, the surah
-                // and its juz sit centered, and Search and
-                // Settings close it.
-                IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = Space.Tight),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    ReadingTitle(
-                        surah = title,
-                        detail = detail,
-                        action = titleAction,
-                        onClick = onTitle,
+                    .background(MaterialTheme.colorScheme.background)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .then(
+                        if (away) {
+                            Modifier.clearAndSetSemantics {}
+                        } else {
+                            Modifier
+                        },
                     )
+                    // The content is measured at its natural height, so the
+                    // band's visible part and the row's own height are the
+                    // same measurement (owner decision, this session).
+                    .onSizeChanged { onOwnHeight((it.height - statusPx).coerceAtLeast(0)) },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = BarInset,
+                            end = BarInset,
+                            top = Space.Tight,
+                            bottom = Space.Tight,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // The bar is one row: Browse leads, the surah
+                    // and its juz sit centered, and Search and
+                    // Settings close it.
+                    IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = Space.Tight),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        ReadingTitle(
+                            surah = title,
+                            detail = detail,
+                            action = titleAction,
+                            onClick = onTitle,
+                        )
+                    }
+                    IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
+                    IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
                 }
-                IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
-                IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
             }
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(if (reveal >= 0.99f) "reading-bar-shown" else "reading-bar"),
+    ) { measurables, constraints ->
+        val content = measurables.first().measure(constraints.copy(minHeight = 0))
+        val own = (content.height - statusPx).coerceAtLeast(0)
+        val visible = statusPx + (own * reveal).roundToInt()
+        layout(constraints.maxWidth, visible) {
+            content.place(x = 0, y = -(own * (1f - reveal)).roundToInt())
         }
     }
 }

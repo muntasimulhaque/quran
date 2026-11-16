@@ -3,12 +3,6 @@
     <string name="reading_page_description">Reading</string>
     <string name="reading_add_translation">Add a translation to read this surah in your language</string>
     <string name="reading_action_add">Add</string>
-    <!-- The one gesture the reading keeps, said once: the bar is asked for and
-         never resident, and a reader who has never seen the app has no way to
-         reach the index, the search, or the settings. The first tap anywhere on
-         the page answers it, and the sentence never returns (owner decision,
-         this session). -->
-    <string name="reading_tap_hint">Tap the page for the index, search, and settings</string>
     <!-- The word meanings are the one aid the reading never mentions, because
          they are a Settings row and nothing else. The door stands where the
          reading arrives, and leaves for good once the list is on the device
@@ -23,7 +17,7 @@
     <string name="reading_next_surah">Next surah</string>
     <string name="reading_end_of_quran">This is the end of the Quran</string>
     <string name="reading_ayah_actions">Ayah actions</string>
-    <string name="reading_paper_actions">Show or hide the bar</string>
+    <string name="reading_paper_actions">Show the bar</string>
     <string name="reading_ayah_reference">Ayah %1$s</string>
     <string name="reading_door">Ayah %1$s, actions</string>
     <string name="reading_door_saved">Saved</string>

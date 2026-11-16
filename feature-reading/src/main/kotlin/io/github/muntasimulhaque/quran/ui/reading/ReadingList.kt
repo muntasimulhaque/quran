@@ -75,8 +75,6 @@ fun ReadingList(
     hasTranslation: Boolean,
     /** True when the reader's own word list is on the device. */
     wordsInstalled: Boolean = true,
-    /** True while the one gesture the reading keeps has not been taught. */
-    teachTap: Boolean = false,
     onAddWords: () -> Unit = {},
     /** The reader's language: the reading reads it, and so does the opening. */
     contentLanguage: String,
@@ -102,6 +100,14 @@ fun ReadingList(
     onAyahMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
+    /**
+     * What a scroll spends on the reading's bar before the page moves, and
+     * what the bar took. The bar's own arithmetic lives in the app beside
+     * the screen; this list is the reader's finger's only way to it.
+     */
+    onBarScroll: (Float) -> Float = { 0f },
+    /** The reader's scroll stopped with the bar between its two ends. */
+    onBarSettled: () -> Unit = {},
     onNextSurah: (Int) -> Unit,
     /** True while the one-time daily reminder offer is still unanswered. */
     reminderOffer: Boolean = false,
@@ -213,7 +219,6 @@ fun ReadingList(
         place = place,
         hasTranslation = hasTranslation,
         wordsInstalled = wordsInstalled,
-        teachTap = teachTap,
         onAddWords = onAddWords,
         contentLanguage = contentLanguage,
         nextSurahName = nextSurahName,
@@ -230,6 +235,8 @@ fun ReadingList(
         onAyahMenu = onAyahMenu,
         onBackgroundTap = onBackgroundTap,
         onScrolled = onScrolled,
+        onBarScroll = onBarScroll,
+        onBarSettled = onBarSettled,
         onNextSurah = onNextSurah,
         reminderOffer = reminderOffer,
         onReminderOn = onReminderOn,

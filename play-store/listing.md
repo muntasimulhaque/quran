@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.3 (versionCode 195)
+Version: 19.4 (versionCode 196)
 
 ## Listing
 
@@ -103,20 +103,21 @@ for.
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
 - Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
+- 7 inch tablet screenshots: `screenshots/tablet7/` (1200 x 1920), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The seven inch set is pulled and is the one capture still owed: the next session
-captures all three form factors again and restores `screenshots/tablet7/` at
-1200 x 1920, which is the 600 dp page, taken on the phone image with
-`wm size 1200x1920` and `wm density 320`. Play falls back to the phone set on a
-seven inch tablet until then.
+All three sets are current: the phone set on `quran_phone`, the seven inch set
+on `quran_tablet7` at 1200 x 1920 and 320 dpi, and the ten inch set on
+`quran_tablet10`. The seven inch set is the 600 dp page, taken with
+`wm size 1200x1920` and `wm density 320`, and its AVD's status bar drew one
+network group at that display, so every frame is clean.
 
 Play's current rule for preview assets is a JPEG or 24-bit PNG, 320 to 3840
-pixels on each side, and a long side no more than twice the short side. Both
-sets stand inside it: the phone set is the 9:16 shape, and the ten inch set is
-2560 x 1800, 1.42:1. The 16:9 and 9:16 shapes are Play's recommendation for
-large-screen placements, not a submission requirement, so the ten inch set keeps
-the shape its real screen gives it.
+pixels on each side, and a long side no more than twice the short side. All
+three sets stand inside it: the phone set is the 9:16 shape, the seven inch set
+is 1200 x 1920, and the ten inch set is 2560 x 1800, 1.42:1. The 16:9 and 9:16
+shapes are Play's recommendation for large-screen placements, not a submission
+requirement, so the ten inch set keeps the shape its real screen gives it.
 
 The icon and the feature graphic are the app's own mark: an open book on its
 rehal, the owner's own reference drawing, redrawn clean for this app as
@@ -145,17 +146,11 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The sets were captured on this machine for 19.1: the phone set on `quran_phone`
-(1080 x 1920) and the ten inch set on `quran_tablet10` (2560 x 1800), both green,
-every frame read. The seven inch set is pulled. Its AVD's status bar draws one
-network group per modem and the image reports three, so every frame of that set
-read "3G 3G 3G"; leaving demo mode instead brought a shield and a key glyph up
-beside the clock. A store frame is not a test rig's face, so that set is owed
-rather than shipped, and the next session takes it at 1200 x 1920 on the phone
-image, where the bar is one group.
-
-Every frame is a screen capture of the whole display, the reading's included, so
-the status bar, the sheet's own window, and the app agree. The bar is the demo's
+The sets are current, captured on this machine in one session: the phone set on
+`quran_phone` (1080 x 1920), the seven inch set on `quran_tablet7` at
+1200 x 1920 and 320 dpi, and the ten inch set on `quran_tablet10`
+(2560 x 1800), all three green, every frame read. Every frame is a screen
+capture of the whole display. The bar is the demo's
 on every leg: 9:41, a full battery, and no notification icons, set before the
 tour starts.
 
@@ -207,6 +202,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.4, 417 characters)
+19.4 makes the top bar the page's head. It stands when you arrive and at the top of a surah, steps away as you read forward, and returns on the first backward scroll or a tap. The reading begins below it, never under it, so no verse is ever behind it. The first-surah sentence is gone with the tap it had to teach. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (19.3, 458 characters)
 19.3 makes a message leave when you touch anywhere else. Note saved, a removed save with Undo, a failed share, and a permission notice no longer wait out a timer over the page you are reading, and the tap you made still counts. The one sentence you could not put away is gone too: a phone with no settings screen is now said on the Daily ayah page itself. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.

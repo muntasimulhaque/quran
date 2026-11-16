@@ -120,8 +120,6 @@ class BanglaCaptureTest {
                 setTafsirPacks(setOf("tafsir-ibn-kathir-bn"))
                 setShowTranslation(true)
                 setWordByWord(false)
-                // The one-time tap hint is not this class's subject.
-                setBarTaught(true)
                 setTajweed(true)
                 setAyah(262)
                 for (role in TypeRole.entries) setTypeSize(role, TextSize.DEFAULT)

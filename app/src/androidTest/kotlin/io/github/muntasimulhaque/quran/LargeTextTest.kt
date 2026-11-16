@@ -72,13 +72,13 @@ class LargeTextTest {
                     ReaderTopBar(
                         title = "Al-Baqarah",
                         detail = "Juz 3",
-                        visible = true,
-                        reducedMotion = true,
+                        shown = 1f,
                         titleAction = "Back to the top of the surah",
                         onTitle = {},
                         onBrowse = {},
                         onSearch = {},
                         onSettings = {},
+                        onOwnHeight = {},
                     )
                 }
             }

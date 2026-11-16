@@ -311,7 +311,8 @@ class ScreenshotTest {
     }
 
     private fun chromeIsUp(): Boolean =
-        rule.onAllNodesWithContentDescription("Settings").fetchSemanticsNodes().isNotEmpty()
+        rule.onAllNodesWithTag("reading-bar-shown", useUnmergedTree = true)
+            .fetchSemanticsNodes().isNotEmpty()
 
     /**
      * A tap on the reading's own quiet margin brings the chrome up.
@@ -326,24 +327,13 @@ class ScreenshotTest {
         readingPage().performTouchInput { click(Offset(4f, height * 0.5f)) }
     }
 
-    /** A tap on the margin brings the chrome up; the states are remembered. */
+    /** A tap on the margin brings the bar up; the states are remembered. */
     private fun revealChrome() {
         repeat(3) {
             if (chromeIsUp()) return
             tapTheReading()
             runCatching {
                 rule.waitUntil(timeoutMillis = 4_000) { chromeIsUp() }
-            }
-        }
-    }
-
-    /** And a tap on the margin puts it away again, for the frames that want the page bare. */
-    private fun hideChrome() {
-        repeat(3) {
-            if (!chromeIsUp()) return
-            tapTheReading()
-            runCatching {
-                rule.waitUntil(timeoutMillis = 4_000) { !chromeIsUp() }
             }
         }
     }
@@ -497,10 +487,6 @@ class ScreenshotTest {
             // (owner report, this session).
             settings.setDailyAyah(false)
             settings.setRecitation("husary")
-            // The reading's one-time tap hint is not this set's subject, and
-            // a first launch's hint would otherwise ride into whatever frame
-            // the tour reached first.
-            settings.setBarTaught(true)
             // The colors are the 10.3 change; a test that left the switch off
             // would silently strip them from every store frame.
             settings.setTajweed(true)
@@ -542,7 +528,6 @@ class ScreenshotTest {
         // reader who knows nothing about the product meets first.
         revealChrome()
         captureScreen("01-reading")
-        hideChrome()
 
         // 2. The tafsir, open on its passage. One frame carries the card and
         // the commentary: the source line names the language and the
@@ -626,7 +611,6 @@ class ScreenshotTest {
         try {
             chooseTheme(DARK)
             waitForAReading()
-            hideChrome()
             Thread.sleep(1_200)
             captureScreen("06-dark-reading")
         } finally {

@@ -100,12 +100,11 @@ change, never left as a dead letter.
 10. **Simple to the bone, fast to the point of invisible, quiet.** No wizard,
     no dialog before the text, no feature that asks a choice before the reading.
     The reminder is offered after the first surah, never before it. The bar
-    carries the place and is asked for, never resident: it leaves when the
-    reader moves the page, and the page is bare. The one exception is the first
-    surah a reader ever opens, which carries one sentence naming the tap that
-    brings the bar: a reader who has never seen the app cannot guess a gesture
-    nothing on the glass mentions, and the first tap answers the sentence and
-    puts it away for good. Cold start
+    carries the place and is the page's head: it stands when the reading
+    arrives, at a surah's head, and on the first backward move; it steps aside
+    as the reader moves forward and returns on the first backward move or a
+    tap, and the reading begins below it, never under it. The old first-surah
+    sentence and its setting are gone; the bar itself is the sign. Cold start
     lands on readable text with no spinner, the reading is a scroll through
     rows already measured, and nothing blocks the main thread. No streaks,
     badges, social, or guilt.
@@ -255,19 +254,22 @@ A release is three steps and no more.
    store note in the hand-over message itself, as bare paragraphs under 500
    characters.
 
-When a visible surface changed and a phone set is wanted, capture the phone
-frames only, with
+When a visible surface changed, capture all three sets, phone, 7 inch, and
+10 inch, with
 
 ```bash
 ./gradlew :app:connectedDebugAndroidTest -Pquran.devPacks=screenshot \
   -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest,io.github.muntasimulhaque.quran.WordMeaningTest
 ```
 
-on `quran_phone`, collect the frames from
+on `quran_phone`, `quran_tablet7`, and `quran_tablet10` in turn. Before each
+leg, uninstall the app and its test APK from that AVD. Collect the frames from
 `app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/<AVD>/`
-before another call replaces them, read the eight, and commit them to
-`play-store/screenshots/phone/`. When no visible surface changed, the
-committed phone set stands.
+before another call replaces them, read the eight of each, and commit them to
+`play-store/screenshots/phone/`, `play-store/screenshots/tablet7/`, and
+`play-store/screenshots/tablet10/`. The 7 inch leg runs at 1200 x 1920 and
+320 dpi (see This machine); the 10 inch at its own 2560 x 1800. When no visible
+surface changed, the three committed sets stand.
 
 When the Bangla interface changed, one separate leg photographs it, on the
 same phone:
@@ -286,8 +288,9 @@ only way to see it.
 **Not in the per-release path, ever again.** The full app instrumented suite
 is an occasional audit or a manual dispatch, never a release requirement. A
 width-sensitive change gets one targeted class on one tablet, not the full
-suite. The store capture is phone frames only; the 7-inch and 10-inch listings
-are optional, and their sets stand as last captured.
+suite. The store capture is all three form factors every time: phone, 7 inch,
+and 10 inch. None is optional, and no set stands from an earlier release when
+a visible surface changed.
 
 A change that genuinely touches runtime behavior may run the affected classes
 on the phone, and the hand-off says so. Otherwise the instrumented work is
@@ -316,9 +319,10 @@ bundle.
   exit. A software renderer is never used here; the CI runners keep their own
   flags. `gh` is authenticated.
 - The 7 inch AVD's display is 800 x 1280 and the store set Play has is
-  1200 x 1920, the same page at 1.5 times the pixels. When that optional set is
-  captured, the leg runs with `adb shell wm size 1200x1920` and `wm density
-  320`, and both are reset after the leg.
+  1200 x 1920, the same page at 1.5 times the pixels. The set is captured every
+  time, and the leg runs with `adb shell wm size 1200x1920` and `wm density
+  320`; both are reset after the leg. The 10 inch AVD is 2560 x 1800 at 320 dpi,
+  and its store set is that same display.
 - `python3` and `python` are the Store alias; the real interpreter is under
   `C:/Users/zn/AppData/Local/hermes/tools/`. Nothing in the build needs it.
 - Two tool calls in one block run in parallel. Never edit a file and read it in

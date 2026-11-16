@@ -5,33 +5,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.selection.DisableSelection
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.Dp
 import io.github.muntasimulhaque.quran.core.AyahList
@@ -65,8 +64,6 @@ internal fun ReadingRows(
     hasTranslation: Boolean,
     /** True when the reader's own word list is on the device. */
     wordsInstalled: Boolean = true,
-    /** True while the one gesture the reading keeps has not been taught. */
-    teachTap: Boolean = false,
     onAddWords: () -> Unit = {},
     contentLanguage: String,
     nextSurahName: String?,
@@ -93,6 +90,14 @@ internal fun ReadingRows(
     onAyahMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
+    /**
+     * What a scroll spends on the reading's bar before the page moves, and
+     * what the bar took. The bar's own arithmetic lives in the app beside
+     * the screen; this list is the reader's finger's only way to it.
+     */
+    onBarScroll: (Float) -> Float = { 0f },
+    /** The reader's scroll stopped with the bar between its two ends. */
+    onBarSettled: () -> Unit = {},
     onNextSurah: (Int) -> Unit,
     /** True while the one-time daily reminder offer is still unanswered. */
     reminderOffer: Boolean = false,
@@ -159,10 +164,37 @@ internal fun ReadingRows(
     // never by a scroll the app started. The flag is cleared on the write, so
     // the jump that follows a drag cannot write a place of its own.
     var dragged by remember(surah.number) { mutableStateOf(false) }
-    // Moving the page means reading, and reading wants the page: the chrome
-    // is told to step aside when the reader's own drag begins. The place
-    // landing on screen is not the reader moving the page, so a scroll the
-    // app started does not hide the first reveal.
+    // The app's own scrolls are not the reader's thumb. A place that arrives,
+    // the opening a surah is opened at, and the reciter's follow must not
+    // spend the bar's distance or carry it away; the reader's drag is the
+    // only scroll the bar answers (owner decision, this session).
+    val programmatic = remember { mutableStateOf(false) }
+    val consumeBar by rememberUpdatedState(onBarScroll)
+    val barSettled by rememberUpdatedState(onBarSettled)
+    val barScroll = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (programmatic.value) return Offset.Zero
+                val consumed = consumeBar(available.y)
+                return Offset(0f, consumed)
+            }
+        }
+    }
+    // The reader's scroll stopped, fling and all: a bar left between its two
+    // ends finishes the nearer one, the way a browser's toolbar does.
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }.collect { scrolling ->
+            if (!scrolling) barSettled()
+        }
+    }
+    // Moving the page means reading, and reading wants the page: the bar's
+    // scroll connection spends the drag's first distance on the bar, and the
+    // menu goes with the page it hangs from. The place landing on screen is
+    // not the reader moving the page, so a scroll the app started does not
+    // spend the bar (owner decision, this session).
     LaunchedEffect(listState, surah.number) {
         listState.interactionSource.interactions.collect { interaction ->
             if (interaction is DragInteraction.Start) {
@@ -198,7 +230,12 @@ internal fun ReadingRows(
     LaunchedEffect(place, surah.number, ayahs) {
         val target = AyahList.moveTarget(ayahs, place, listState.firstVisibleItemIndex)
             ?: return@LaunchedEffect
-        listState.scrollToItem(target)
+        programmatic.value = true
+        try {
+            listState.scrollToItem(target)
+        } finally {
+            programmatic.value = false
+        }
         jumpAyah = place
         rows.firstOrNull { it.ayah.number == place }?.ayah?.let(onJumped)
     }
@@ -217,7 +254,12 @@ internal fun ReadingRows(
     // reader back down to the first ayah the moment the opening appeared.
     LaunchedEffect(listState, ayahs, startAtOpening) {
         if (!startAtOpening || ayahs.isEmpty()) return@LaunchedEffect
-        listState.scrollToItem(0)
+        programmatic.value = true
+        try {
+            listState.scrollToItem(0)
+        } finally {
+            programmatic.value = false
+        }
         onOpeningReached()
     }
 
@@ -230,8 +272,13 @@ internal fun ReadingRows(
         val target = AyahList.indexOf(ayahs, ayahNumber)
         val current = listState.firstVisibleItemIndex
         if (target < current || target > current + 3) {
-            if (reducedMotion) listState.scrollToItem(target)
-            else listState.animateScrollToItem(target)
+            programmatic.value = true
+            try {
+                if (reducedMotion) listState.scrollToItem(target)
+                else listState.animateScrollToItem(target)
+            } finally {
+                programmatic.value = false
+            }
         }
     }
 
@@ -254,6 +301,7 @@ internal fun ReadingRows(
         modifier = modifier
             .fillMaxSize()
             .semantics { contentDescription = pageDescription }
+            .nestedScroll(barScroll)
             .pointerInput(Unit) {
                 // The paper around the text brings the chrome, and so does the
                 // text: the whole page is the page's own tap, and an ayah's
@@ -305,23 +353,9 @@ internal fun ReadingRows(
                     )
                 }
                 // The reading's whole navigation is one tap on the paper, and
-                // nothing on a bare page says so. The sentence stands until
-                // the reader's first tap anywhere, and then never again
-                // (owner decision, this session).
-                if (teachTap) {
-                    Text(
-                        text = stringResource(R.string.reading_tap_hint),
-                        // An instruction, not a label: the meta line's voice,
-                        // centered under the opening it belongs to.
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = Space.Block, bottom = Space.Tight)
-                            .testTag("reading-tap-hint"),
-                    )
-                }
+                // nothing on a bare page says so. The bar is the page's head,
+                // so the sentence that taught the tap retired with the tap
+                // itself (owner decision, this session).
             }
         }
         items(
