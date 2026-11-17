@@ -29,7 +29,7 @@ import java.io.File
  * commits the pack, publishes the state, and hands the surah back so the word
  * can sound when it lands. This class holds that chain with a pack it writes
  * itself: the shipped pack is a network of its own, and the reading never
- * needs one (owner decision, this session).
+ * needs one (owner decision, 18.7).
  *
  * It is also the regression the 18.6 sheet could not answer: the mark was
  * decided from a snapshot taken when the rows were built, so a pack that

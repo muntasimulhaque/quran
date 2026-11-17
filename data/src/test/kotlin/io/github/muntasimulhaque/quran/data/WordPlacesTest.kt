@@ -11,7 +11,7 @@ import org.junit.Test
  * current place's item index is the arithmetic of that drawing. It is pinned
  * here, on the JVM, because a compose test cannot read a scroll position
  * honestly and the reader's own place must open the list without a frame at
- * the top (owner decision, this session).
+ * the top (owner decision, 18.9).
  */
 class WordPlacesTest {
 

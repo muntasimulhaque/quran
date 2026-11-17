@@ -29,8 +29,8 @@ import org.junit.runner.RunWith
  * it. It became the app's compact pill, 8 dp of air at each end and above and
  * below, inside the 48 dp target (owner decision, an earlier session), and it
  * is a drawn pill now rather than only a press shape: the quiet tone at rest
- * and the chosen chip's tone while its menu is open (owner decision, this
- * session). The drawing cannot be photographed here, so this reads the shape's
+ * and the chosen chip's tone while its menu is open (owner decision, 19.5). The
+ * drawing cannot be photographed here, so this reads the shape's
  * bounds, and the tone is the theme's own pair.
  *
  * The flash is also a control on the washed card, so its shape stands on the
@@ -102,7 +102,7 @@ class AyahDoorShapeTest {
             1f,
         )
         assertEquals(
-            "the flash is centred in the target",
+            "the flash is centered in the target",
             (door.bottom - flash.bottom).value,
             (flash.top - door.top).value,
             1f,
@@ -115,7 +115,7 @@ class AyahDoorShapeTest {
         )
         // The flash is a control on the card, so its shape begins where the
         // card's content begins: one wash inset inside the card's own edge,
-        // never touching it (owner decision, this session).
+        // never touching it (owner decision, 17.0).
         assertEquals(
             "the flash keeps the card's air on its leading edge",
             8f,

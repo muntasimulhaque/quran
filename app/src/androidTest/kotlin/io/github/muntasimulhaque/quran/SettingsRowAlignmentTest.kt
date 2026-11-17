@@ -45,7 +45,7 @@ import org.junit.Test
  * line, and the switch of a row with a door comes after that row's chevron
  * (owner report).
  *
- * The chevron's slot is measured, not the mark: a mark is centred in its
+ * The chevron's slot is measured, not the mark: a mark is centered in its
  * slot, so the slot's edges are what a row's alignment is about, and the
  * slot's tag is on the rows that draw a chevron at all.
  *
@@ -153,7 +153,7 @@ class SettingsRowAlignmentTest {
      * a fixed column and the rail was what was left of the row; at a large
      * system font the column ate the rail and the end marks were dropped. The
      * name now opens the block and the rail has the row's whole width under it
-     * (owner decision, this session).
+     * (owner decision, 18.8).
      */
     @Test
     fun theSizeNameStandsOverItsRail() {
@@ -178,7 +178,7 @@ class SettingsRowAlignmentTest {
      * switch owes the finger its target, and it does not owe the row its
      * height. The hub read as two rhythms alternating down the sheet until
      * this, because every switch row stood 48 dp tall inside its padding and
-     * every page row stood its own two lines (owner report, this session).
+     * every page row stood its own two lines (owner report, 9.3).
      * The target itself is unshaken: its outer edge still answers the finger,
      * and the row's door does not take it.
      */
@@ -338,7 +338,7 @@ class SettingsRowAlignmentTest {
      * strip that carries the whole scale: a tap or a drag chooses the nearest
      * stop, and a screen reader adjusts it through its own SetProgress action.
      * The test drives that action, the same road TalkBack takes, and reads the
-     * five stops from the range (owner decision, this session).
+     * five stops from the range (owner decision, 13.9).
      */
     @Test
     fun theTextSizeRailIsOneAdjustableControl() {

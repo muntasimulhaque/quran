@@ -36,7 +36,7 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * device is not counted, so this line never promises a translation the
  * reading cannot draw. The switch above it follows the choice instead: the
  * value says what is here, and the switch says what the reader asked for
- * (owner decision, this session).
+ * (owner decision, 14.8).
  */
 @Composable
 internal fun translationName(settings: AppSettings, packs: List<ContentPack>): String {
@@ -68,7 +68,7 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
  * the switch can be used. It is not the switch's state: that is the reader's
  * own answer, and a chosen pack that is not on the device leaves the switch
  * on and disabled rather than off, so the row never reports a choice the
- * reader did not make (owner decision, this session: the switch used to read
+ * reader did not make (owner decision, 14.8: the switch used to read
  * on only when a translation could be drawn).
  */
 internal fun hasInstalledTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
@@ -79,7 +79,7 @@ internal fun hasInstalledTranslation(settings: AppSettings, packs: List<ContentP
  * switch's state is this and the reader's own answer; its usability is
  * [hasInstalledTranslation]. The two questions are drawn apart on purpose: a
  * chosen pack that is not on the device yet is still the reader's choice, and
- * the switch says so while it waits (owner decision, this session).
+ * the switch says so while it waits (owner decision, 14.8).
  */
 internal fun hasChosenTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
     packs.any { it.id in settings.translationPacks }
@@ -88,7 +88,7 @@ internal fun hasChosenTranslation(settings: AppSettings, packs: List<ContentPack
  * The word list the reading speaks: the one that matches the reader's own
  * language, and no other. There is no fallback to English: a Bangla reader
  * whose list has not landed yet is asked to add the Bangla list, never
- * handed the English one (owner decision, this session). Null when the
+ * handed the English one (owner decision, 6.6). Null when the
  * catalog carries no list for the language, so the row can say nothing
  * rather than promise a list that does not exist.
  */
@@ -101,7 +101,7 @@ internal fun wantedWordsPack(settings: AppSettings, packs: List<ContentPack>): C
  * One pack's own line on a list page: what it costs to have, and nothing else.
  * The language it speaks is the heading the row stands under, so a row that
  * said it again under its own name spent a line repeating the group it is in
- * (owner report, this session).
+ * (owner report, 12.6).
  */
 @Composable
 internal fun packSizeLine(pack: ContentPack): String =
@@ -119,7 +119,7 @@ internal fun packSizeLine(pack: ContentPack): String =
  * a preparing pack says so, and a failure says what the reader can do about
  * it. The page under the words switch reads it under the switch itself, so
  * the reader's tap is answered where the finger is rather than only at the
- * pack row below (owner decision, this session).
+ * pack row below (owner decision, 16.9).
  */
 @Composable
 internal fun packSetupLine(setup: PackSetupState?): String? = when {
@@ -143,14 +143,14 @@ internal fun packSetupLine(setup: PackSetupState?): String? = when {
  * inside each group. When [leadingLanguage] names a group, that group stands
  * first and the rest follow in the alphabetical order of their names: the
  * Translations page puts the language the reader is reading above the other
- * one, the same way the reading itself does (owner decision, this session).
+ * one, the same way the reading itself does (owner decision, 15.3).
  *
  * The grouping is what the list grows into. A heading costs its room once per
  * language, while a language printed under every name costs a line per pack,
  * so two English translations and two Bangla ones would say "English" and
  * "Bangla" twice each and still give the eye nothing to group. The heading is
  * the same one the settings pages use, so it is one style, one rhythm, and one
- * TalkBack jump whichever group a reader is in (owner decision, this session).
+ * TalkBack jump whichever group a reader is in (owner decision, 12.6).
  *
  * The list spent 12.5 with no headings and the language in each row's own line
  * instead, which read as one flat list of names; with more than one pack per

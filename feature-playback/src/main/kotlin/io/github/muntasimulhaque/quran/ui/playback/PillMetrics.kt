@@ -22,7 +22,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * side and no more, while a glass wider than it keeps the capsule on the
  * page's own middle with the page's ground beside it.
  */
-internal val BarGutter = 16.dp
+internal val BarGutter = Space.Block
 
 /**
  * The width the pill stands at in every voice, and the width of the offer bar
@@ -34,7 +34,7 @@ internal val BarGutter = 16.dp
  * 210 for a transfer that widened again as the percent did. A control whose
  * edge moves while a download advances is a shape the reader watches instead
  * of the reading, and the progress line at its foot changed length with it
- * (owner report, this session: the transfer was narrower at its first percent
+ * (owner report, 9.7: the transfer was narrower at its first percent
  * than at its last, and an offer and the transfer that followed it were two
  * widths for one download).
  *
@@ -64,15 +64,15 @@ internal val PillMeasure = 328.dp
  * keeps, and the transport was that cluster when the pill carried three marks.
  * A circle stands [TransportInset] inside its own target, so two circles keep
  * this number between them with no target air at all, and the pill keeps the
- * measure for the day it carries a cluster again (owner decision, this
- * session).
+ * measure for the day it carries a cluster again
+ * (owner decision, 16.2).
  *
  * Every shape in the pill but the transport's circles fills its target: the
  * words' block, the Download, and the X's word answers. The circles do not,
  * because a 48 dp circle cannot stand beside another without touching it, so
  * a circle is [TransportInset] inside its target and two of them keep this
- * number between them with no target air at all (owner decision, this
- * session). Everything else measures this air from its target, and everything
+ * number between them with no target air at all (owner decision, 9.6).
+ * Everything else measures this air from its target, and everything
  * measures this air from its shape.
  */
 internal val PillAir = Space.Line
@@ -115,9 +115,9 @@ internal val PillEndAir = Space.Block + Space.Tight
  * glyph answer draws [TransportShape] inside a [TransportSize] target, so the
  * row gives that inset back and hands the answer [GlyphLead] of target air for
  * [WordsGap] of shape air. A word answer's shape ends at its own edge, so its
- * lead is this number whole (owner decision, this session).
+ * lead is this number whole (owner decision, 9.6).
  */
-internal val WordsGap = 12.dp
+internal val WordsGap = Space.Row
 
 /**
  * One control's own target, which is the app's [GlyphTarget] and what
@@ -136,7 +136,7 @@ internal val TransportSize = GlyphTarget
  * would flash a dot inside the button the finger hit (owner report, an earlier
  * session), and a circle the size of the target cannot stand beside another
  * circle without touching it. 40 dp inside 48 dp is the app's answer to both,
- * and it is Material's own icon button (owner decision, this session).
+ * and it is Material's own icon button (owner decision, 11.5).
  */
 internal val TransportShape = GlyphPress
 
@@ -152,7 +152,7 @@ internal val TransportInset = (TransportSize - TransportShape) / 2
  * to edge. That is the whole of the compression the transport took: the two
  * 8 dp gaps between the targets became 0, the circles kept the 8 they always
  * had, and the words gained those 16 dp of the capsule's width (owner
- * decision, this session). Two
+ * decision, 9.6). Two
  * targets that overlapped would be a 40 dp target wearing a 48 dp name, so
  * edge to edge is the floor.
  */

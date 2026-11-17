@@ -33,11 +33,11 @@ import org.junit.runner.RunWith
  * while the row below it did the work. The switch is the ask now, the "tap
  * that turns the aid on" the rule names: it fetches the one list, stays off
  * while the list is on its way, says the transfer under the finger, and turns
- * on when the list lands (owner decision, this session).
+ * on when the list lands (owner decision, 16.9).
  *
  * The pronunciation is the reciter page's shape: a door that says how many
  * surahs are on the device, and one row per surah with its own Remove (owner
- * decision, this session).
+ * decision, 18.8).
  *
  * The page is composed on its own, so the legs need no device reading and no
  * network: the pack's state is handed in.
@@ -121,8 +121,8 @@ class WordsSwitchTest {
     /**
      * The pronunciation the reader downloaded: a door that says how many
      * surahs, and under it one row per surah with its own Remove. The bundled
-     * Al-Fatiha is not a download, so it is not counted (owner decision, this
-     * session).
+     * Al-Fatiha is not a download, so it is not counted
+     * (owner decision, 18.8).
      */
     @Test
     fun theDownloadedPronunciationSaysWhichSurahsAndCanGo() {

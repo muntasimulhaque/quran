@@ -175,7 +175,7 @@ internal suspend fun loadShareCard(
 internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier) {
     val hafs = rememberHafs()
     // The app's mark, sized for a foot: the launcher's own drawing, in the
-    // theme's ink on the card's own paper (owner decision, this session: at
+    // theme's ink on the card's own paper (owner decision, 10.0: at
     // a foot's size one ink reads where the thin ornament gold did not).
     val mark = painterResource(R.drawable.ic_share_mark)
     val paper = lightColorScheme(
@@ -206,7 +206,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
             // axis with no straight edge, and before that four alignments met
             // with the labels alternating too (owner report); this is the
             // card as the reading draws it, a verse on its own edge and its
-            // meaning at the page's (owner decision, this session).
+            // meaning at the page's (owner decision, 12.5).
             card.surahArabic?.takeIf { it.isNotBlank() }?.let { arabicName ->
                 Text(
                     text = arabicName,
@@ -256,7 +256,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     // The meaning sits close under the verse it renders, one
                     // row's gap, while the header above the verse keeps a
                     // block's: the gaps say what belongs with what (owner
-                    // decision, this session).
+                    // decision, 12.5).
                     modifier = Modifier.padding(top = Space.Row),
                     sizeSp = LocalReadingVoice.current.style.fontSize.value,
                     lineSp = LocalReadingVoice.current.style.lineHeight.value,

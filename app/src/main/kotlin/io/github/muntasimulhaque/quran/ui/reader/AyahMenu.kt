@@ -15,8 +15,8 @@ import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
  * because its longest row is one word and the shared width left more than
  * half the popup empty. The 216 dp holds the five rows on the one leading
  * rail, keeps the menu from covering more of the page than it needs to, and
- * lets a label that outgrows it wrap rather than be clipped (owner decision,
- * this session).
+ * lets a label that outgrows it wrap rather than be clipped
+ * (owner decision, 13.6).
  */
 private val AyahMenuMeasure = 216.dp
 
@@ -28,9 +28,9 @@ private val AyahMenuMeasure = 216.dp
  * the first row never opens looking chosen, the same row rhythm, and the
  * same rule that an answer puts the panel away. Only the width is its own,
  * because five one-word rows do not need the panel's 288 dp (owner decision,
- * this session). The only thing this menu adds to the app's vocabulary is a
+ * 13.6). The only thing this menu adds to the app's vocabulary is a
  * row that acts instead of one that chooses, and even that shares the choice
- * row's rail to the dp (owner decision, this session).
+ * row's rail to the dp (owner decision, 13.6).
  *
  * The order is the reader's intent, not the control's kind (owner decision,
  * forty-sixth session). The two reasons to open an ayah's actions lead: hear
@@ -56,14 +56,14 @@ private val AyahMenuMeasure = 216.dp
  * The Save row says the keep in its own word while the ayah is kept: the page
  * used to carry a bookmark beside the ayah's number, so the row could name
  * only the act; the page has stopped drawing the save, and the word is where
- * the state is read now (owner decision, this session). Its state is therefore
+ * the state is read now (owner decision, 17.7). Its state is therefore
  * the word and not a second sentence, because "Saved, on" says the same thing
  * twice to the reader who hears it. The Note row keeps the sentence, because
  * its word names the act alone. The tap on either still does the thing, and
  * the Snackbar's Removed and Undo are what answer a removed keep.
  *
- * **Every tap closes the menu and then does its work** (owner decision, this
- * session: the pill's own rule, one panel asks one question and the tap
+ * **Every tap closes the menu and then does its work** (owner decision, 13.3:
+ * the pill's own rule, one panel asks one question and the tap
  * answers it). The reader is returned to the reading rather than to a panel
  * they have to dismiss, and a Save on a kept ayah with a note still asks its
  * question on the page, where the note is the subject.
@@ -90,7 +90,7 @@ internal fun AyahMenu(
     val play = stringResource(R.string.action_play)
     val tafsir = stringResource(R.string.action_tafsir)
     // The kept ayah's row says the keep in its own word, because the reading
-    // no longer draws it (owner decision, this session).
+    // no longer draws it (owner decision, 17.7).
     val save = stringResource(if (isSaved) R.string.action_saved else R.string.action_save)
     val note = stringResource(R.string.action_note)
     val share = stringResource(R.string.action_share)

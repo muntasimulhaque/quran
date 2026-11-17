@@ -32,25 +32,25 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * the platform's shape: its ranges can span several text blocks, and Compose
  * marks the selection internals that would be needed to draw them internal.
  * Replacing it would mean replacing the platform's copy selection, not
- * recoloring it (owner decision, this session).
+ * recoloring it (owner decision, 14.3).
  *
  * The wash is [PagePalette.match], the loudest of the quiet grounds, the same
  * tone a search match wears. It is not the platform's 40 percent tint: a reader
  * selects words to read them again or copy them, and the words must stay
  * readable through their own selection.
  *
- * **The ground is paper and the grips are the accent** (owner decision, this
- * session, and not an inconsistency to be fixed later). A selection is two
+ * **The ground is paper and the grips are the accent** (owner decision, 19.1,
+ * and not an inconsistency to be fixed later). A selection is two
  * things at once: a ground the words are read through, and two handles the
  * reader drags, with the caret marking where the next letter goes. The ground
  * belongs to the paper, for the reason above. The handles and the caret belong
  * to the accent, because blue is this app's mark for the one thing that answers
  * a finger: every button, chevron, and tappable word is blue, so a reader has
- * already learned it before they meet a handle. A sand-coloured grip beside
- * sand-coloured words reads as a smudge rather than as something to hold.
+ * already learned it before they meet a handle. A sand-colored grip beside
+ * sand-colored words reads as a smudge rather than as something to hold.
  *
  * So the three parts are drawn by two owners on purpose. [RoundedSelectionColors]
- * colours the handles and turns the platform's own background off, so the wash
+ * colors the handles and turns the platform's own background off, so the wash
  * behind the words is the only block drawn; the caret is asked for at each
  * field that has one, with `cursorBrush` on the accent (the search field and the
  * note). Neither is measured against the other: a handle is a control and is

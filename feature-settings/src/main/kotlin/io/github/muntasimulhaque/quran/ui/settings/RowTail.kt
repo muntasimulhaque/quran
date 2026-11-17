@@ -98,7 +98,7 @@ fun HeadToggle(
  * The whole row is the door, so the row is one stop to a screen reader and the
  * mark takes no name. A row that also carried a switch used to read as a pair
  * of marks; the hub carries no switch now, so a row's last mark is either the
- * chevron or the switch, never both (owner decision, this session).
+ * chevron or the switch, never both (owner decision, 15.2).
  *
  * The slot is 48 dp wide and a width and not a height: a square tail is taller
  * than the line of text beside it, and a Row takes the height of its tallest
@@ -115,7 +115,7 @@ internal fun RowTail(chevron: Boolean) {
     Box(
         modifier = Modifier
             .width(48.dp)
-            // The slot, not the mark: a mark is centred in its slot, so the
+            // The slot, not the mark: a mark is centered in its slot, so the
             // slot's edges are what a row's alignment is about. The tag is on
             // a row that draws a chevron only, so a count of them is a count
             // of the rows that have a door (owner report).

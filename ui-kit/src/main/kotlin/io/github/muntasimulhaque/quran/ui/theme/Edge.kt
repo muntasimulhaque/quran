@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
  * and it owes the eye the same 3:1 non-text contrast WCAG asks of every
  * control boundary (owner decision, the consistency audit).
  *
- * The tone is the theme's own ink at [Control]. It is not another grey: the
+ * The tone is the theme's own ink at [Control]. It is not another gray: the
  * ink already turns over with the ground, and half of it measures 3.03:1 on
  * the paper page, 3.06:1 on a sheet, 4.30:1 on the night page, and 4.15:1 on
  * a night sheet. A palette edit that sinks any of those pairs fails

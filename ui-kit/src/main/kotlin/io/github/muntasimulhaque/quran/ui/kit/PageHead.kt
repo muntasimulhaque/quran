@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /** The line a page head's back mark starts on: the sheet's words less the
@@ -18,7 +17,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * drawing, so half of the difference is the drawing's own air and the head
  * takes only the other half: the chevron lands on the page's line and the
  * target reaches [Space.Gutter] less 12 dp out, which is nearer the glass than
- * any word may stand (owner decision, this session: the head's drawing stands
+ * any word may stand (owner decision, 17.6: the head's drawing stands
  * on the sheet's line, as the top bar's marks stand on the reading's). */
 private val HeadStart = Space.Gutter - 12.dp
 

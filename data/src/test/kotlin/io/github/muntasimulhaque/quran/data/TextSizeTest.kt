@@ -21,7 +21,7 @@ class TextSizeTest {
     @Test
     fun theStepsAreEvenlySpaced() {
         // 0.1 between every pair, so the step down from the shipped default is
-        // the same size as every other step (owner decision, this session).
+        // the same size as every other step (owner decision, 8.1).
         val gaps = TextSize.STEPS.zipWithNext { a, b -> b - a }
         for (gap in gaps) assertEquals(0.1f, gap, 0.0001f)
     }
@@ -50,8 +50,8 @@ class TextSizeTest {
     fun aRetiredSmallStepKeepsItsPlace() {
         // The old 0.75 and 0.85 are gone. 0.75 lands on 0.8, the smallest
         // step now, and 0.85, which sits exactly between 0.8 and 0.9, lands
-        // on 0.9: the place it held, not the step below it (owner decision,
-        // this session).
+        // on 0.9: the place it held, not the step below it
+        // (owner decision, 8.1).
         assertEquals(0.8f, TextSize.step(0.75f))
         assertEquals(0.9f, TextSize.step(0.85f))
     }
@@ -75,7 +75,7 @@ class TextSizeTest {
     fun theTafsirIsSetAtTheTranslationSize() {
         // One reading voice: the Ibn Kathir prose stands at the size the
         // translation stands at, both at 16 sp with the same 1.5 line
-        // (owner decision, this session).
+        // (owner decision, 5.8).
         assertEquals(TextSize.sp(TypeRole.Translation, 1f), TextSize.sp(TypeRole.Tafsir, 1f))
         assertEquals(TextSize.lineSp(TypeRole.Translation, 1f), TextSize.lineSp(TypeRole.Tafsir, 1f))
     }
@@ -90,8 +90,8 @@ class TextSizeTest {
 
     @Test
     fun theShippedDefaultIsOneEvenStepSmaller() {
-        // The default is 1, the middle of the five (owner decision, this
-        // session). The Arabic stands at 26 sp, 1.625 times the 16 sp prose:
+        // The default is 1, the middle of the five (owner decision, 14.0).
+        // The Arabic stands at 26 sp, 1.625 times the 16 sp prose:
         // the owner's eye asked for the Quran above the prose, and the reader
         // can still go down to 20.8.
         assertEquals(26f, TextSize.sp(TypeRole.Arabic, 1f))
@@ -106,7 +106,7 @@ class TextSizeTest {
         // translation and the tafsir, and the prose stands at the reading
         // voice's own size. The word meaning sheet reads the Quran's word at
         // 26 and its gloss at the translation's 16, so no separate size for
-        // the aid is carried (owner decision, this session).
+        // the aid is carried (owner decision, 16.2).
         assertEquals(26f, TextSize.sp(TypeRole.Arabic, 1f))
         assertEquals(24f, TextSize.inlineArabic(1f), 0.001f)
         assertEquals(24f, TextSize.medallionSp(1f), 0.001f)

@@ -105,7 +105,7 @@ class PlaybackNotificationTest {
             // The notification is rebuilt as the player's commands settle.
             // Waiting for the play mark alone read a list that still had only
             // previous and play, so the next mark was asserted before the
-            // player had offered it (owner report, this session).
+            // player had offered it (owner report, 17.9).
             val posted = awaitNotification(manager, context) { actions ->
                 val icons = actions.map { it.getIcon().resId }
                 PlaybackR.drawable.ic_transport_previous in icons &&

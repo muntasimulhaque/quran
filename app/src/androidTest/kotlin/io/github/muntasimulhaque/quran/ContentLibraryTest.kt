@@ -31,15 +31,15 @@ import org.junit.runner.RunWith
  * The split gave the library its own file, and this is the file's own test:
  * the open, install, and remove paths the reader's taps walk are exercised
  * here directly, without the reading screen around them. The build carries
- * every pack, so the install path works with no network (owner decision,
- * this session).
+ * every pack, so the install path works with no network
+ * (owner decision, 6.6).
  *
  * The second and third legs pin the two rules a pack's arrival follows after
  * the 14.6 report: a pack the queue fetched is installed and **not** chosen,
  * because the queue is the reader's past ask and not this moment's; and a
  * queue entry for a pack that is already here is done, so it cannot come
- * back the next time an update detaches the pack (owner report, this
- * session).
+ * back the next time an update detaches the pack
+ * (owner report, 14.8).
  */
 @RunWith(AndroidJUnit4::class)
 class ContentLibraryTest {

@@ -16,7 +16,7 @@ import org.junit.Test
  * chose: the old Paper as Light and Night as Dark. The removed "sepia" and
  * "black" pages land on the ground that replaced them. A reader who updated
  * must never find their page moved for a reason they cannot see (owner
- * decision, this session).
+ * decision, 6.0).
  *
  * This pins the read the launch mirror and the settings store share, so a
  * migration that drops a reader's choice fails here rather than in the shade.

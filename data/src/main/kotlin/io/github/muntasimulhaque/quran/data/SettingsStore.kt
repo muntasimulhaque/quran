@@ -36,7 +36,7 @@ private val Context.settingsStore: DataStore<Preferences> by preferencesDataStor
  * is a rounding error on a page of text).
  *
  * System is the third value rather than a switch beside the two (owner
- * decision, this session): one choice the whole industry already knows, in
+ * decision, 6.0): one choice the whole industry already knows, in
  * place of a swatch and a toggle whose interaction a reader had to work out,
  * and it deletes the state where a Night choice sat under a light system day.
  */
@@ -60,7 +60,7 @@ fun AppTheme.isDark(): Boolean = this == AppTheme.Dark
  * System follows the phone's own dark mode: a dark system is Dark and a
  * light one is Light. Light and Dark are the reader's own and never move,
  * which is the whole of the difference from the switch this replaced (owner
- * decision, this session).
+ * decision, 6.0).
  */
 fun AppTheme.resolved(systemDark: Boolean): AppTheme = when (this) {
     AppTheme.System -> if (systemDark) AppTheme.Dark else AppTheme.Light
@@ -87,14 +87,14 @@ data class AppSettings(
      * nothing to expire and nothing to correct. A reader who stops inside a
      * long ayah comes back to the top of that ayah, and everything else the
      * app keeps already speaks in ayahs: the Juz label, the history, the
-     * arrivals, the reminders, the links (owner decision, this session).
+     * arrivals, the reminders, the links (owner decision, 13.1).
      */
     val ayah: Int = 1,
     /**
      * The page the app opens on. System until the reader chooses a ground,
      * so a new install follows the phone's own day and night, the way every
      * other app on the phone does; Light and Dark are the reader's own
-     * answers once they have made one (owner decision, this session).
+     * answers once they have made one (owner decision, 13.5).
      */
     val theme: AppTheme = AppTheme.System,
     /**
@@ -139,7 +139,7 @@ data class AppSettings(
      * The tafsir has no such switch. It is drawn only where the reader asks
      * for it, from the ayah pill's own Tafsir mark, so the packs are its one
      * setting, the way the reciter's voice is the recitation's (owner
-     * decision, this session).
+     * decision, 12.5).
      */
     val showTranslation: Boolean = true,
     val wordByWord: Boolean = false,
@@ -147,15 +147,15 @@ data class AppSettings(
     /**
      * Whether the reading draws the QPC tajweed colors. Off on a fresh
      * install, so the first page is the Quran in one ink; the reader turns
-     * the print's colors on when they want them (owner decision, this
-     * session).
+     * the print's colors on when they want them
+     * (owner decision, 15.5).
      */
     val tajweed: Boolean = false,
     /**
      * The daily reminder: one ayah, once a day, at the reader's own time.
      * Off on a fresh install, and offered after the first surah. A reminder
      * is a small commitment, so the reader makes it rather than inheriting
-     * it (owner decision, this session).
+     * it (owner decision, 15.5).
      */
     val dailyAyah: Boolean = false,
     /**
@@ -163,7 +163,7 @@ data class AppSettings(
      * install, so the offer stands at the end of the first surah the reader
      * finishes; the offer's answer writes it true. An existing install
      * keeps the true it has always had, so an update never asks again
-     * (owner decision, this session).
+     * (owner decision, 15.5).
      */
     val reminderAnswered: Boolean = true,
     /**
@@ -196,7 +196,7 @@ data class AppSettings(
      * The line the prose takes per em: the script's own, never a borrowed
      * one. The sizes are the same in both scripts; only the line differs,
      * because Bengali stacks its vowel marks above and below the letters and
-     * needs its own box (owner decision, this session).
+     * needs its own box (owner decision, 13.7).
      */
     private val proseLine: Float
         get() = if (UiLanguage.of(uiLanguage) == UiLanguage.Bangla) {
@@ -240,7 +240,7 @@ data class ReadingMetrics(
      * row that depends on it: the surah's audio is on the device under one
      * voice and not another, so a voice the reader changed has to read the
      * rows again or the mark outlives the audio it was drawn for (owner
-     * decision, this session).
+     * decision, 17.7).
      */
     val recitation: String,
     /** The packs the reading draws, which shape every row it loads. */
@@ -266,7 +266,7 @@ data class ReadingMetrics(
  * English but at its 1.722 line, while the Arabic does not move, because the
  * Quran's text is data and not a locale. The word meaning sheet draws its
  * word at the Arabic size and its gloss at the translation size, so a second
- * size role for the aid is not carried (owner decision, this session).
+ * size role for the aid is not carried (owner decision, 16.2).
  */
 fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     showTranslation = showTranslation,
@@ -307,7 +307,7 @@ class SettingsStore(private val context: Context) {
      * The reader's choices, read once the retired tafsir switch has been
      * carried. The migration runs before the first emission, not in a launch
      * of its own, so no reader of this flow can meet the state the switch
-     * left behind (owner decision, this session).
+     * left behind (owner decision, 12.5).
      */
     val settings: Flow<AppSettings> = context.settingsStore.data
         .onStart {
@@ -347,7 +347,7 @@ class SettingsStore(private val context: Context) {
      * Writes the reader's place. It is one number, the ayah, because a place
      * that carried a pixel depth had to be corrected whenever the page changed
      * shape, and the correction landed on the reader as a jump
-     * (owner decision, this session).
+     * (owner decision, 13.1).
      */
     suspend fun setAyah(ayah: Int) {
         context.settingsStore.edit { it[AYAH] = ayah.coerceIn(1, 6236) }
@@ -394,8 +394,8 @@ class SettingsStore(private val context: Context) {
      * language, the language's own translation on, the reminder off and
      * unanswered, and the place at Al-Fatiha. The language screen is gone,
      * so this is the first decision the app makes on the reader's behalf,
-     * and it makes only the ones the phone already answered (owner decision,
-     * this session).
+     * and it makes only the ones the phone already answered
+     * (owner decision, 15.5).
      */
     suspend fun bootstrapLanguage(
         language: UiLanguage,
@@ -494,7 +494,7 @@ class SettingsStore(private val context: Context) {
      * and simply unchosen. The key is written true in the same edit, so no
      * later read meets the old answer again: this build cannot write it
      * false, so a false value only ever means an install from before (owner
-     * decision, this session).
+     * decision, 12.5).
      */
     private suspend fun carryRetiredTafsirSwitch() {
         context.settingsStore.edit { preferences ->
@@ -506,8 +506,8 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
-     * The word aid's own size is gone with its role (owner decision, this
-     * session): the word meaning sheet draws the Quran's word at the Arabic
+     * The word aid's own size is gone with its role (owner decision, 16.2):
+     * the word meaning sheet draws the Quran's word at the Arabic
      * size and its gloss at the translation size. The stored key is removed
      * once rather than left in the reader's file forever, the same way the
      * tafsir switch above is carried and closed.
@@ -545,7 +545,7 @@ class SettingsStore(private val context: Context) {
      * The queue after a language choice, written in one edit: the language the
      * reader left takes its packs with it and the new language asks for its
      * own. A pack the reader added by hand is not a language's default and is
-     * left exactly where it was (owner decision, this session).
+     * left exactly where it was (owner decision, 14.8).
      */
     suspend fun setPendingForLanguage(previous: UiLanguage?, next: UiLanguage) {
         context.settingsStore.edit {
@@ -590,7 +590,7 @@ class SettingsStore(private val context: Context) {
         val auto = preferences[AUTO_NIGHT] == true
         return when (preferences[THEME]) {
             // A fresh install has no page of its own yet, so it follows the
-            // phone until the reader picks one (owner decision, this session).
+            // phone until the reader picks one (owner decision, 13.5).
             null -> AppTheme.System
             "system" -> AppTheme.System
             "light", "paper", "sepia" -> if (auto) AppTheme.System else AppTheme.Light
@@ -667,7 +667,7 @@ class SettingsStore(private val context: Context) {
         /**
          * The automatic switch the third theme value replaced. Written by no
          * build since System became a value; read only to carry an install
-         * that had it on across to System (owner decision, this session).
+         * that had it on across to System (owner decision, 6.0).
          */
         val AUTO_NIGHT = booleanPreferencesKey("auto_night")
         val UI_LANGUAGE = stringPreferencesKey("ui_language")
@@ -676,8 +676,8 @@ class SettingsStore(private val context: Context) {
         val TRANSLATION_SIZE = floatPreferencesKey("translation_size")
         val TAFSIR_SIZE = floatPreferencesKey("tafsir_size")
         /**
-         * The word aid's own size, removed with its role (owner decision, this
-         * session). Written by no build since the sheet took the Arabic and
+         * The word aid's own size, removed with its role (owner decision,
+         * 16.2). Written by no build since the sheet took the Arabic and
          * translation sizes; read only to be removed at that one migration.
          */
         val LEGACY_WORDS_SIZE = floatPreferencesKey("words_size")
@@ -705,7 +705,7 @@ class SettingsStore(private val context: Context) {
          * The tafsir's master switch, which the packs replaced. Written by
          * no build since the switch was removed; read only to carry an
          * install that had it off across to no tafsir chosen, and written
-         * true at that one migration (owner decision, this session).
+         * true at that one migration (owner decision, 12.5).
          */
         val LEGACY_SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")

@@ -98,7 +98,7 @@ class JuzLabelScrollTest {
 
     /**
      * A tap on the reading's own quiet margin brings the bar up. The exact
-     * centre is not a safe place to tap: an ayah can sit under the finger
+     * center is not a safe place to tap: an ayah can sit under the finger
      * there. The margin is the page's quiet edge, where no control lives.
      */
     private fun revealTheBar(readingPage: String) {

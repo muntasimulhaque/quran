@@ -31,7 +31,7 @@ import io.github.muntasimulhaque.quran.data.resolved
  *   floating thing reads as floating without needing a hard border.
  *
  * The floating control wears [PaperFloating] on the day ground and
- * [NightFloating] on the night ground (owner decision, this session). A
+ * [NightFloating] on the night ground (owner decision, 17.5). A
  * floating panel is the highest paper on its ground, not a shade of the page:
  * the day wears the sheet's white (100.0 over the page's 98.0 and the block's
  * 92.9), and the night wears one step above its sheet (#322E2A at 19.2 over
@@ -64,7 +64,7 @@ import io.github.muntasimulhaque.quran.data.resolved
  * recitation. A failure here is a sentence, the pill's line or the toast,
  * never a hue, so a Material control that asks for an error tone paints the
  * ink it already reads in, and a stock red can never reach the glass (owner
- * decision, this session).
+ * decision, 13.5).
  */
 internal val LightScheme = lightColorScheme(
     primary = Lapis,
@@ -175,7 +175,7 @@ val LocalPagePalette = staticCompositionLocalOf { LightPage }
  * works in Noto Sans Bengali, and the switch is made here so no surface picks
  * a face of its own. The reading voice carries the language's own locale as
  * well, so the hyphenation dictionary and the script's local forms follow the
- * content and never the phone (owner decision, this session).
+ * content and never the phone (owner decision, 13.2).
  *
  * The ground may be handed as any of the three values, System among them:
  * System is resolved here against the phone's own day and night, so a caller
@@ -191,7 +191,7 @@ fun QuranTheme(
 ) {
     // System becomes the phone's own ground; Light and Dark are already one,
     // so `shown` is only ever Light or Dark and the `else` below is the light
-    // ground (owner decision, this session).
+    // ground (owner decision, 6.0).
     val shown = theme.resolved(isSystemInDarkTheme())
     val colors = when (shown) {
         AppTheme.Dark -> DarkScheme

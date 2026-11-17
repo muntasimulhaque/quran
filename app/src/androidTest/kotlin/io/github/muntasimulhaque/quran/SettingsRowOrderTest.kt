@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
  *
  * Three of the four are switches and the last is a list, since the tafsir is
  * opened from the ayah pill rather than drawn behind a switch (owner
- * decision, this session); the row's own position is what this measures.
+ * decision, 12.5); the row's own position is what this measures.
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsRowOrderTest {

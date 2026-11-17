@@ -16,7 +16,7 @@ import android.content.Context
  * `reciter ayah firstMs lastMs durationMs`. The duration is kept for the
  * build's gate and ignored here. A file with no line, or a line the audio
  * cannot explain, has no edge and reads exactly as it did before (owner
- * decision, this session).
+ * decision, 16.3).
  */
 internal class AudioEdges private constructor(
     private val recitations: Map<String, LongArray>,

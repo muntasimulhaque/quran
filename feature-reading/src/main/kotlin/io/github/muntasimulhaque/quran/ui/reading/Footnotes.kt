@@ -56,8 +56,8 @@ internal data class OpenFootnote(
  * The sheet names itself where every sheet does: [SheetHead]'s 20 at
  * SemiBold, then the place it annotates in the same 13 meta line the word
  * meaning sheet wears. The title is the sheet's name and the place is its
- * reference; the note is the subject under both (owner decision, this
- * session).
+ * reference; the note is the subject under both
+ * (owner decision, 16.1).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +85,7 @@ internal fun FootnoteSheet(
                 // A note is prose on the app's one page: its words stop at
                 // Space.Gutter, the line the ayah it explains stands on, and
                 // a reader who changes the size gets more lines and never a
-                // narrower column (owner decision, this session).
+                // narrower column (owner decision, 12.3).
                 .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot)
                 .testTag("footnote-sheet"),
         ) {

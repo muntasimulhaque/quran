@@ -122,7 +122,7 @@ val FloatingShadow = Color(0x1A000000)
 // hangs from one. It is the highest paper on its ground, never a shade of the
 // page. The day wears the sheet's own white; the night wears one step above
 // its sheet, because the chosen ayah outranks the sheet on a dark page (owner
-// decision, this session).
+// decision, 17.5).
 //
 // **The day's floating paper is the sheet's white.** The page stands at
 // L* 98.0, the sheet at 100.0, and the block a menu is always raised over at
@@ -149,7 +149,7 @@ val FloatingShadow = Color(0x1A000000)
 // block. The shadow is invisible at night, so the fill is the only edge there;
 // that is why the night's step is the larger one. The tone before it,
 // [NightControl] at #2E2B28, stood dE76 4.4 from the block; the one-step lift
-// is the owner's word this session, and the switch's track keeps
+// is the owner's word 17.5, and the switch's track keeps
 // [NightControl] because a track is a groove on the sheet, not a bar over the
 // page.
 //
@@ -175,7 +175,7 @@ val NightOnPrimary = Color(0xFF08243D)
  * a neutral gray at chroma 0.9 against a page whose own chroma is 2.6, so the
  * block read as a different app's selection sitting on this app's paper. A
  * chosen thing on a warm page is a warmer sheet of the same paper, not a tint
- * of the control color (owner decision, this session).
+ * of the control color (owner decision, 19.1).
  *
  * The tones are chosen at the *same lightness* as the composites they replace,
  * 92.9 on the day page and 15.6 on the night, so every pair already measured
@@ -194,7 +194,7 @@ val NightSelected = Color(0xFF2D261C)
  * selected in a field. One opaque tone per ground, the paper's own family.
  *
  * It is the same decision as [PaperSelected], one step louder (owner decision,
- * this session). The match used to be the accent at `Wash.Match` of 16
+ * 19.1). The match used to be the accent at `Wash.Match` of 16
  * percent, which over the day sheet is #DBE3EA, lightness 89.8, chroma 4.5 at
  * hue 252: a real blue, and after the chosen block was warmed it was the only
  * cool ground left in the app. The chosen tone had been nearly neutral, which

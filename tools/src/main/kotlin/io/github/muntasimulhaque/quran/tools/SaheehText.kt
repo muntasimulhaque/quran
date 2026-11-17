@@ -15,7 +15,7 @@ import kotlinx.serialization.json.jsonPrimitive
  * by ayah, so it cannot carry a title note: Al-Fatihah opens on note 2, and
  * many surah starts leave one number unused. The reading numbers each
  * surah's notes from one instead, and starts the next surah again at one
- * (owner decision, this session). A surah is the unit the reader moves
+ * (owner decision, 14.6). A surah is the unit the reader moves
  * through, the number climbs through it the way a printed book's notes do,
  * and the marker stays short: Al-Baqarah's 105 notes reach three digits, and
  * every other surah stays at two. The publisher's book-wide numbers cannot
@@ -33,8 +33,8 @@ import kotlinx.serialization.json.jsonPrimitive
  * 1997 and 2023 printed editions and the Arabic (فَإِن تَوَلَّوْا, third
  * person) read "if they turn away". [saheehCorrections] carries that one
  * correction with its source and reason, and the build fails if the source
- * no longer holds the sentence the correction expects (owner decision, this
- * session).
+ * no longer holds the sentence the correction expects
+ * (owner decision, 14.5).
  */
 internal data class SaheehLocal(
     val text: String,

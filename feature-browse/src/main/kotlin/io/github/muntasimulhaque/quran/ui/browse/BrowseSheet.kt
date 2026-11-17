@@ -97,15 +97,15 @@ fun BrowseSheet(
     val sheetState = rememberExpandedSheetState()
     // The sheet's own sentence: the reading's host is behind this window,
     // so this surface owes its own, and the rule that ends it is the
-    // reading's own (owner decision, this session).
+    // reading's own (owner decision, 19.3).
     val sentence = rememberSentence()
     val removedMessage = stringResource(R.string.browse_saved_removed)
     val undo = stringResource(UiKitR.string.action_undo)
     // The list the reader saw before the database answered the removal. The
     // sheet owns the Undo because the reading's Snackbar is behind this
     // window; a row that leaves the list while the sheet is up is one the
-    // reader can bring back without leaving it (owner decision, this
-    // session).
+    // reader can bring back without leaving it
+    // (owner decision, 14.7).
     var previousSaved by remember { mutableStateOf(saved) }
     LaunchedEffect(saved) {
         val old = previousSaved
@@ -151,7 +151,7 @@ fun BrowseSheet(
     // find An-Nas in the middle when the sheet comes back, not Al-Kahf where
     // their thumb left the glass. The sheet used to restore the list's own
     // place instead, which was the same answer whenever nothing had moved and
-    // the wrong one the moment the reading had (owner decision, this session).
+    // the wrong one the moment the reading had (owner decision, 12.2).
     //
     // The two flags are plain `remember`, so they last no longer than one
     // raising: inside a raising the reader's own scroll and their tab
@@ -260,8 +260,8 @@ fun BrowseSheet(
                 .fillMaxSize()
                 // A touch anywhere but on the sentence puts it away, and the
                 // touch still reaches the row it landed on: the reading
-                // answers its own sentence the same way (owner decision,
-                // this session).
+                // answers its own sentence the same way
+                // (owner decision, 19.3).
                 .putAwaySentence(sentence),
         ) {
         Column(

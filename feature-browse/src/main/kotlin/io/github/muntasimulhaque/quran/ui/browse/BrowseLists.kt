@@ -198,7 +198,7 @@ private fun PlaceRow(
     // 16, and 18 dp steps in one row; the row then went to one 8 dp gap for
     // every line, which unified the row and left the name's label further from
     // its name than the same pair sits one tab away in Surahs (owner report,
-    // this session). The eye reads the name and the ayah as one block, and the
+    // 12.6). The eye reads the name and the ayah as one block, and the
     // moment or the note as the row's own line about it.
     Column(
         modifier = Modifier
@@ -249,8 +249,8 @@ private fun PlaceRow(
             // reading's face at the reader's own translation size, so a reader
             // who enlarged the reading does not meet their own words small
             // again, and the preview is held at the reading's default so a
-            // note can never outgrow the row's own name (owner report, this
-            // session: see [notePreviewSp]). The clamp is the same two lines on
+            // note can never outgrow the row's own name (owner report, 18.5: see
+            // [notePreviewSp]). The clamp is the same two lines on
             // every row, so one long note cannot change the list's rhythm.
             Text(
                 text = note,
@@ -279,7 +279,7 @@ private fun PlaceRow(
  * own plural, so a count of one reads as one.
  *
  * The count gives way to a date once it stops meaning anything (owner
- * decision, this session). The week was the last unit and it had no ceiling, so
+ * decision, 19.1). The week was the last unit and it had no ceiling, so
  * a place left two years ago read "104 weeks ago": a number the reader has to
  * divide by fifty-two before it means a season. Four weeks is the last week a
  * reader can still count, and after it the date is shorter and truer, in the

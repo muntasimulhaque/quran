@@ -17,8 +17,8 @@ class RecitationPlaylistTest {
     private val fatihah = (1..7).map { RecitationPlaylist.mediaId(it, 1) }
 
     // Al-Baqarah's ayahs are the Book's 8th to 293rd: the id carries the
-    // running number, not the ayah's number inside its surah (owner report,
-    // this session).
+    // running number, not the ayah's number inside its surah
+    // (owner report, 19.2).
     private val baqarah = (8..293).map { RecitationPlaylist.mediaId(it, 2) }
     private val playlist = fatihah + baqarah
 

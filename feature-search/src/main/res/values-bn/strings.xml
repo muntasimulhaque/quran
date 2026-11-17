@@ -18,7 +18,7 @@
     <string name="search_label_surah">সূরা</string>
     <string name="search_surah_meta">%1$s · %2$d আয়াত</string>
     <string name="search_word_meaning_label">শব্দের অর্থ</string>
-    <string name="search_note_label">টীকা</string>
+    <string name="search_note_label">নোট</string>
     <string name="search_tafsir_range">%1$s · %2$s %3$s</string>
     <string name="search_revelation_makki">মাক্কী</string>
     <string name="search_revelation_madani">মাদানী</string>
@@ -30,7 +30,7 @@
     <string name="search_filter_translations">অনুবাদ</string>
     <string name="search_filter_words">শব্দের অর্থ</string>
     <string name="search_filter_tafsirs">তাফসীর</string>
-    <string name="search_filter_notes">টীকা</string>
+    <string name="search_filter_notes">নোট</string>
     <string name="search_filter_all">সবকিছু</string>
     <string name="search_filter_all_but">%1$s ছাড়া সবকিছু</string>
     <string name="search_filter_all_on">সবকিছু চালু করুন</string>

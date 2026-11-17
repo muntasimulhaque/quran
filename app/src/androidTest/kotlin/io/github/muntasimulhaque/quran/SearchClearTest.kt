@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
  * its own: it appears only while there is a query, empties the field, and
  * leaves the reader focused and ready for the next word. The sheet closes by
  * its handle, the scrim, or Back, like every other sheet, so the field owes no
- * second shape (owner decision, this session).
+ * second shape (owner decision, 15.0).
  */
 @RunWith(AndroidJUnit4::class)
 class SearchClearTest {
@@ -113,7 +113,7 @@ class SearchClearTest {
      * The sheet ends with a query in the field the way every other sheet ends:
      * the keyboard goes first on Back, then the sheet. The field's clear mark
      * is the only mark inside it, so a reader is never asked which of two X's
-     * ends what (owner decision, this session).
+     * ends what (owner decision, 15.0).
      */
     @Test
     fun backEndsTheSearchWithAQueryInTheField() {

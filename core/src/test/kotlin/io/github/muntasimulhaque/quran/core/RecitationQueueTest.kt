@@ -11,7 +11,7 @@ import org.junit.Test
  * returns. A start that recorded its surah after that call was measured from
  * the old surah, so the first advance appended the next surah twice, or, when
  * the start was on a surah's last ayah, appended nothing and offered a
- * package already on the device (owner report, this session).
+ * package already on the device (owner report, 9.9).
  */
 class RecitationQueueTest {
 

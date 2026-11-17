@@ -54,8 +54,8 @@ import kotlin.coroutines.coroutineContext
  * the few readers of installed content the listening flow needs. Everything
  * that a pack's arrival or removal means for the reader's choices is told
  * back through [onInstalled] and [onRemoved], so this class never has to
- * know what a translation switch or a reciter choice is (owner decision,
- * this session).
+ * know what a translation switch or a reciter choice is
+ * (owner decision, 6.6).
  *
  * A reader's settings are read once, at the first open, and handed to the
  * host with the opening: the store is not read twice for one launch.
@@ -73,7 +73,7 @@ class ContentLibrary(
      * choices by the language choice itself, so the queue that fetches them
      * selects nothing. The host decides what to turn on, because that is the
      * reader's choice and not a file fact; a pack the queue fetched is
-     * installed, never chosen (owner decision, this session).
+     * installed, never chosen (owner decision, 14.8).
      */
     private val onInstalled: (ContentPack, Boolean) -> Unit,
     /** The first open, with the reader's settings and the Book's index. */
@@ -143,7 +143,7 @@ class ContentLibrary(
     /**
      * The coroutine carrying the pack that is on its way, so the reader's
      * Cancel can end the transfer itself and not only its line (owner
-     * decision, this session). Every install runs in a launched child of the
+     * decision, 9.3). Every install runs in a launched child of the
      * library's or the reader's scope, never in the scope itself, so
      * cancelling it stops one install and nothing else.
      */
@@ -156,7 +156,7 @@ class ContentLibrary(
      * The one gate on opening and reopening the library. A language choice
      * can land while the first open is still reading, and both runs replace
      * the same [database] and [surahs] state; one at a time, so the last
-     * writer is always the newest truth (owner decision, this session).
+     * writer is always the newest truth (owner decision, 8.2).
      */
     private val openMutex = Mutex()
 
@@ -232,7 +232,7 @@ class ContentLibrary(
             // asked for. A reader whose aid was on before this build asked
             // before the root existed, so the root joins the queue and
             // arrives quietly on an unmetered connection, after the first
-            // page (owner report, this session).
+            // page (owner report, 17.8).
             if (repaired.wordByWord) {
                 val words = catalogNow.get(ContentDatabase.wordsPackId(repaired.readingLanguage))
                 val root = catalogNow.get(ContentDatabase.WORD_ROOT_PACK)
@@ -260,7 +260,7 @@ class ContentLibrary(
         // The names the reader reads are the names their language says:
         // the Book's index is read with the language set, so Browse, the
         // reading, search, the reminder, and the share card all draw the
-        // same name (owner decision, this session).
+        // same name (owner decision, 8.2).
         fresh.useLanguage(stored.readingLanguage)
         // The reader's index of the Book, read on a worker: 114 surahs
         // and the thirty juz boundaries, and the launch frame is not
@@ -292,7 +292,7 @@ class ContentLibrary(
         // first page is ready. A pack that is damaged on the device is not
         // hunted in the background: the next open leaves it out of the
         // library, its row reads Add, and one tap repairs it (owner
-        // decision, this session: the daily re-hash of every installed pack
+        // decision, 13.0: the daily re-hash of every installed pack
         // was the app's only periodic background work, and it bought a
         // repair the reader could already make in one tap).
         scope.launch {
@@ -343,7 +343,7 @@ class ContentLibrary(
      * phone's own language when the app carries it, English otherwise. The
      * language's translation is selected and the reminder is off and still
      * unanswered, so the first page is the Quran and the reminder is offered
-     * later, after the reader has read (owner decision, this session).
+     * later, after the reader has read (owner decision, 15.5).
      */
     private suspend fun bootstrapLanguage(stored: AppSettings): AppSettings {
         if (stored.uiLanguage != null) return stored
@@ -361,7 +361,7 @@ class ContentLibrary(
      * The packs this build carries are placed on the device once, before the
      * catalog is marked. A shipped translation is then a translation the
      * reader already has, with no download and no network (owner decision,
-     * this session). The core pack has its own copy path and is skipped.
+     * 15.5). The core pack has its own copy path and is skipped.
      */
     private fun installShipped(catalog: PackCatalog) {
         val verifier = PackVerifier(application)
@@ -415,7 +415,7 @@ class ContentLibrary(
         database = fresh
         // The language may have changed since the last open; the names are
         // read again so a reader who just chose Bangla reads Bangla names
-        // without a restart (owner decision, this session).
+        // without a restart (owner decision, 8.2).
         fresh.useLanguage(settings().readingLanguage)
         surahs = withContext(Dispatchers.IO) { fresh.surahs() }
         packs = fresh.packs()
@@ -431,8 +431,8 @@ class ContentLibrary(
      * Brings a pack onto the device, or turns it on when it is already here.
      * [select] is the reader's ask: their tap on Add, or the word list's own
      * switch. A pack the queue fetches passes false, so it arrives installed
-     * and off and can never change the page by itself (owner decision, this
-     * session).
+     * and off and can never change the page by itself
+     * (owner decision, 14.8).
      */
     fun install(id: String, select: Boolean) {
         scope.launch {
@@ -511,7 +511,7 @@ class ContentLibrary(
         // so the search index that warms behind the reopen knows about it.
         // [select] travels with the arrival: a pack the queue fetched is
         // installed, not chosen, and the host leaves the switches alone
-        // (owner decision, this session).
+        // (owner decision, 14.8).
         onInstalled(
             catalog.get(pack.id)?.copy(installed = true) ?: pack.copy(installed = true),
             select,
@@ -528,7 +528,7 @@ class ContentLibrary(
      * told, and a root the app brings on its own waits for Wi-Fi; the
      * translation, which is small, arrives on any connection. A pack the
      * build itself carries is placed without a network, so no connection
-     * can hold it back (owner decision, this session).
+     * can hold it back (owner decision, 17.8).
      */
     suspend fun drainPending() {
         drainPendingPacks()
@@ -541,8 +541,8 @@ class ContentLibrary(
             // A pack that is already attached was asked for once and has
             // arrived, whichever door brought it. Its queue entry is done;
             // leaving it behind is what let a former language's pack come
-            // back the next time an update detached it (owner report, this
-            // session).
+            // back the next time an update detached it
+            // (owner report, 14.8).
             settingsStore.removePendingPacks(
                 settingsStore.pendingPacks().filter { id ->
                     database?.installedPack(id) == true
@@ -557,8 +557,8 @@ class ContentLibrary(
                 } ?: break
                 if (!installNow(next)) break
                 // The queue is the reader's past ask, not this moment's: its
-                // arrivals are installed and left alone (owner decision, this
-                // session).
+                // arrivals are installed and left alone
+                // (owner decision, 14.8).
                 finishInstall(catalog.get(next) ?: break, select = false)
                 settingsStore.removePendingPacks(setOf(next))
             }
@@ -571,7 +571,7 @@ class ContentLibrary(
      * The reader's Cancel on a pack's line. It ends the transfer where it is,
      * not only the line above it: the job goes first, so a chunk that lands
      * while the line is being cleared finds it gone and leaves the line alone
-     * (owner decision, this session).
+     * (owner decision, 9.3).
      */
     fun cancelPackSetup() {
         packJob?.cancel()
@@ -658,7 +658,7 @@ class ContentLibrary(
      * answers false, so a missing pack is still an offer even when some files
      * linger. The bundled Al-Fatiha files are found by
      * [RecitationStore.hasAllAudio], the same place [RecitationStore.uri]
-     * finds them when the reader presses Play (owner decision, this session).
+     * finds them when the reader presses Play (owner decision, 15.8).
      */
     suspend fun hasSurahAudio(recitation: String, surah: Int): Boolean = withContext(Dispatchers.IO) {
         val db = database ?: return@withContext false

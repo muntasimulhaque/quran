@@ -3,7 +3,7 @@ package io.github.muntasimulhaque.quran.data
 /**
  * Whether a search row draws its word meaning.
  *
- * The meaning was drawn as its own labelled block under every row that had
+ * The meaning was drawn as its own labeled block under every row that had
  * one, and a reader who searched a word that also appears in the translation
  * saw the same fact twice: the translation already carried the highlight, and
  * the block repeated it (owner report). The block is now drawn only

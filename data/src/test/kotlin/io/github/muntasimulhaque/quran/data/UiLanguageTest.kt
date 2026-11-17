@@ -166,7 +166,7 @@ class UiLanguageTest {
         // A language's packs are asked for once. When the reader moves on,
         // the packs the old language asked for leave the queue with it, so
         // an update that detaches one cannot fetch it and turn it on behind
-        // the reader's back (owner report, this session).
+        // the reader's back (owner report, 14.8).
         val after = pendingAfterLanguage(
             previous = UiLanguage.English,
             next = UiLanguage.Bangla,
@@ -205,7 +205,7 @@ class UiLanguageTest {
     fun theReadersLanguageLeadsTheTranslationColumns() {
         // The catalog sorts by pack name, so Al-Bayan came before Saheeh and
         // the Font size sample, which draws the first line, previewed Bangla
-        // under an English interface (owner report, this session).
+        // under an English interface (owner report, 15.3).
         val catalog = listOf(
             pack("translation-al-bayan-bn", "bn"),
             pack("translation-saheeh-en", "en"),

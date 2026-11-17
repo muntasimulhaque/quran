@@ -37,7 +37,7 @@ import org.junit.runner.RunWith
  * enough to read the next language as a caption to the passage. The passage
  * now leaves one more `Space.Row` before the next door, so the card's block
  * break separates the end of a source from the head of the next (owner
- * decision, this session). The gap is measured between the last line's box
+ * decision, 15.1). The gap is measured between the last line's box
  * and the next language's box, not between the row's invisible padding.
  */
 @RunWith(AndroidJUnit4::class)

@@ -42,7 +42,7 @@ import java.io.File
  * the theme is built from, in both scripts, at the three steps a reader is
  * most likely to choose, and writes one frame per script to the build's
  * screenshot directory, so a type change is seen the way a layout change is
- * (owner decision, this session).
+ * (owner decision, 13.3).
  *
  * It is not a store frame: the tour's eight are the listing's own, and this
  * class is not in the capture workflow's list. Run it on a device with the

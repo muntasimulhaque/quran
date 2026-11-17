@@ -65,7 +65,7 @@ private val ChosenStop = 5.dp
  * The five cell row before this was also five 48 dp targets, which is why it
  * needed 250 dp of width and a line of its own above it; the rail is one
  * target that fits in the row beside its name, and the size settings come
- * down by a line each (owner decision, this session). The rule that every
+ * down by a line each (owner decision, 13.9). The rule that every
  * choice is reachable by a finger still holds: the rail is one finger-sized
  * strip, and the stops are placed inside it.
  *
@@ -86,7 +86,7 @@ private val ChosenStop = 5.dp
  *
  * The rail itself carries the `scale-rail` tag. The rail is what the reader
  * reads as one measure, so a test measures the node the eye sees, not the row
- * around the label and the two marks (owner decision, this session: the four
+ * around the label and the two marks (owner decision, 14.1: the four
  * size rails are one length).
  */
 @Composable

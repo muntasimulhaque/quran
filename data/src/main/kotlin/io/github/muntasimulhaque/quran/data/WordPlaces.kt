@@ -6,13 +6,13 @@ package io.github.muntasimulhaque.quran.data
  *
  * The count the word sheet names and this list are one number. The root's
  * count is the pack's own rows, not the source's field, so a reader who opens
- * the places sees exactly the words the line promised (owner decision, this
- * session). [ayahNumber] is the Book's running number, which the reading
+ * the places sees exactly the words the line promised (owner decision,
+ * 18.9). [ayahNumber] is the Book's running number, which the reading
  * jumps by; [surah] and [ayah] are the reference the list labels.
  *
  * Only the drawn word travels: the gloss belongs to the word sheet the reader
  * left, and a list of thousands of meanings is a word-by-word reading of the
- * Book rather than a place list (owner decision, this session).
+ * Book rather than a place list (owner decision, 18.9).
  */
 data class WordPlace(
     val ayahNumber: Int,
@@ -32,7 +32,7 @@ data class WordPlace(
  * A root's places run through the whole Book, and a flat list of two thousand
  * rows says nothing about where the reader is. The page groups them by surah,
  * the map the Book already has, and every group opens with the surah's name
- * (owner decision, this session).
+ * (owner decision, 18.9).
  */
 data class WordPlaceGroup(
     val surah: Int,
@@ -44,8 +44,8 @@ data class WordPlaceGroup(
  *
  * The grouping is pure so the page's scroll arithmetic can be pinned without
  * a database: the list is ordered by the running ayah number, and a surah's
- * ayahs are contiguous there, so each surah is one run (owner decision, this
- * session).
+ * ayahs are contiguous there, so each surah is one run
+ * (owner decision, 18.9).
  */
 fun wordPlaceGroups(places: List<WordPlace>): List<WordPlaceGroup> =
     places.groupBy { it.surah }.map { (surah, group) -> WordPlaceGroup(surah, group) }
@@ -58,7 +58,7 @@ fun wordPlaceGroups(places: List<WordPlace>): List<WordPlaceGroup> =
  * the room every earlier group takes plus its own head. This is the row the
  * reader's place wears the selected wash on; the list opens at
  * [wordPlaceOpenIndex], its surah's head, so the row is named by the group it
- * stands in (owner decision, this session).
+ * stands in (owner decision, 18.9).
  */
 fun wordPlaceItemIndex(
     groups: List<WordPlaceGroup>,
@@ -83,8 +83,8 @@ fun wordPlaceItemIndex(
  * The current row alone at the top would leave its surah's name scrolled off,
  * a row with no group above it. The head names the group the reader is in,
  * and the current row stands one item under it; the reader's place is still
- * the list's first row after its own surah's head (owner decision, this
- * session).
+ * the list's first row after its own surah's head
+ * (owner decision, 18.9).
  */
 fun wordPlaceOpenIndex(
     groups: List<WordPlaceGroup>,

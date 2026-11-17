@@ -15,16 +15,16 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The head of a sheet: the name it draws, and the one action it owns at the
  * trailing edge of that name.
  *
- * **The head has one line, and it is the name's own** (owner decision, this
- * session). A mark beside the name owes a finger 48 dp, a name owes it
+ * **The head has one line, and it is the name's own** (owner decision,
+ * 18.1). A mark beside the name owes a finger 48 dp, a name owes it
  * nothing, and the line a sheet's place stands under owes the same air on
  * every sheet. So the head is measured by its name, and the action's target
  * paints and answers above and below that line instead of making the head
  * taller. A `Row` could not say this: its height is its tallest child's, which
  * is how the word meaning sheet's speaker made a 48 dp head under a 26 dp
  * title and pushed the place to 15 dp while the footnote's stood at 4, and how
- * the note sheet's Clear and Save did the same to its head (owner report, this
- * session).
+ * the note sheet's Clear and Save did the same to its head
+ * (owner report, 18.1).
  *
  * The action is a lambda rather than a component, because a sheet may own one
  * mark or two words: the word meaning sheet's speaker is one round control and
@@ -89,7 +89,7 @@ fun SheetHead(
  * The number follows the reader's type scale: 11 dp at the default 26 dp
  * line, 4.5 dp at 39, and zero once the name's line reaches the target. The
  * head itself is never measured at the target's height; the air is above the
- * name, not under it (owner decision, this session).
+ * name, not under it (owner decision, 18.2).
  */
 fun sheetHeadInsetFor(titleLine: Dp): Dp =
     ((GlyphTarget - titleLine) / 2f).coerceAtLeast(0.dp)

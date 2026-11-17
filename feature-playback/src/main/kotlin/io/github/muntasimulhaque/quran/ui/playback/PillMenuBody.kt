@@ -27,7 +27,7 @@ internal fun ColumnScope.PillMenuBody(
             selected = selected,
             // Every answer puts the panel away: one
             // question was asked, and the tap answered it
-            // (owner decision, this session). The voice
+            // (owner decision, 10.0). The voice
             // list has always closed on its choice, and
             // the pace and the end of the audio follow it
             // now, so the reader is back on the reading

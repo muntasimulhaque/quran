@@ -21,7 +21,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The row wears the same words as every other row in the sheet: its name, and
  * under it the value, in [RowName]. The value used to stand at the right of
  * the name in a column of its own, measured so that the name kept its room
- *, which made this row the one place in the sheet where a grey
+ *, which made this row the one place in the sheet where a gray
  * value sat beside its name while the rows with a switch printed it underneath
  * (owner decision). It is under the name here for the same reason it
  * is there, and the row's padding is the switch row's padding, so the sheet

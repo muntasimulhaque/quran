@@ -15,7 +15,7 @@ data class Surah(
      * The name in Bangla script, the way a Bangla reader says it. The content
      * carries one for every surah; the reading replaces [nameSimple] with it
      * when the reader's language is Bangla, and search matches it in any
-     * language (owner decision, this session).
+     * language (owner decision, 8.2).
      */
     val nameBangla: String = "",
 )
@@ -266,7 +266,7 @@ data class ContentPack(
      * reader's interface is Bangla and the catalog carries them. Empty when
      * it does not, and the About page then reads the English pair, so a pack
      * added later is never credited in a language nobody wrote for it (owner
-     * decision, this session).
+     * decision, 8.8).
      */
     val creditBn: String = "",
     val licenseBn: String = "",
@@ -310,7 +310,7 @@ data class ReadingRow(
     /**
      * Each drawn word's grammar and lemma, in the verse's order; null where
      * the held word list has no grammar row, so a sheet from an older pack is
-     * the word, its meaning, and its root (owner decision, this session).
+     * the word, its meaning, and its root (owner decision, 18.0).
      */
     val grammar: List<WordGrammar?> = emptyList(),
 )
@@ -319,6 +319,6 @@ data class ReadingRow(
  * A word's triliteral root: the letters as the page writes them, the same
  * letters read out, and how many words in the Quran carry them, so a reader
  * who does not read Arabic script still meets the root the sheet is
- * describing (owner decision, this session).
+ * describing (owner decision, 18.0).
  */
 data class WordRoot(val arabic: String, val latin: String, val wordsCount: Int = 0)

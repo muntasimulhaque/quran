@@ -45,7 +45,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * quiet pill, in the app's one action color, the one turn that says it opens,
  * and the reader's note inside the pill when the verse carries one.
  *
- * **The save is not drawn here** (owner decision, this session). A saved ayah
+ * **The save is not drawn here** (owner decision, 17.7). A saved ayah
  * used to wear the app's filled bookmark in this row. The mark answered no
  * touch, and it was the third place for one fact: the Saved sheet lists the
  * ayah, and the ayah menu's own Save row says the keep where the tap that
@@ -55,7 +55,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * A save's content is the ayah the reader is looking at, so the page marks
  * what the page cannot show and says nothing about what it already does.
  *
- * **The verse is not a button** (owner decision, this session). A tap on the
+ * **The verse is not a button** (owner decision, 16.7). A tap on the
  * Quran is the page's own tap: it brings or puts away the bar, and it never
  * chooses a verse. In 16.6 a tap on the verse raised its actions in the head
  * row, and because the page is almost all verse, the tap that was meant to
@@ -63,9 +63,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * number is the one thing on the reading that opens an ayah's actions, and
  * the menu it opens is the app's one popup: the popup is a window of its own,
  * so a tap outside it can only put it away, never fall through to another
- * verse (owner decision, this session).
+ * verse (owner decision, 16.7).
  *
- * **The door says it opens** (owner decision, this session). The number wore
+ * **The door says it opens** (owner decision, 16.8). The number wore
  * the action color and nothing else, and a number in the accent is a caption
  * rather than a signifier: the head read as the verse's citation, so nothing
  * told the reader that it answers a tap. Every other door in the app ends in
@@ -75,7 +75,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * pair, so a reader who has met the pill reads the door at once, and a reader
  * who has not is the case the pill below is for.
  *
- * **The door wears the app's quiet pill** (owner decision, this session). It
+ * **The door wears the app's quiet pill** (owner decision, 19.5). It
  * had no capsule, on the argument that a shape around every number would turn
  * the page into a list of buttons and that the turn and the action color
  * already said a number answers a tap. They did not. A number in the accent
@@ -103,7 +103,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * the page and the card gap is untouched.
  *
  * **The press is the app's pill, and it stands on the card's own line**
- * (owner decision, this session). The flash used to be the row's own bounds:
+ * (owner decision, 17.0). The flash used to be the row's own bounds:
  * no air on the leading end, so the digits touched it, 4 dp above and below,
  * and the reader's marks stood inside it, which made one door three shapes. It
  * is the compact measure the pill's own doors wear now, 8 dp of air at each end
@@ -116,7 +116,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * out to the card's own edge, so that the digits landed on the line the
  * translation keeps, and the two rounded shapes met along that edge: two blues
  * with one silhouette, which is the one thing a control over the reading must
- * not do (owner report, this session). Now the flash keeps the card's air on
+ * not do (owner report, 17.0). Now the flash keeps the card's air on
  * every side, and the digits are a shape's content, inset inside it, the way
  * the word on every pill in the app is. The card's content line is the line
  * the flash's shape holds; the digits lead it by that shape's own inset.
@@ -128,8 +128,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * when it opens, so a state sentence on the door would be a stop that says
  * nothing.
  *
- * **The door hugs the verse it names** (owner decision, this session). The
- * number stood centred in its 48 dp target, which put seven dp of dead air
+ * **The door hugs the verse it names** (owner decision, 19.1). The
+ * number stood centered in its 48 dp target, which put seven dp of dead air
  * above it and seven below, so the head sat almost exactly in the middle of the
  * room between two ayahs and belonged to neither: the gap above it was 38 dp
  * and the gap to its own first line 28. The target is still 48 dp tall, because
@@ -160,7 +160,7 @@ internal fun AyahDoor(
     // (owner decision, the consistency audit).
     val ink = MaterialTheme.colorScheme.primary
     // The pill's two grounds: the quiet tone it rests in, and the chosen
-    // chip's own tone while its menu is open (owner decision, this session).
+    // chip's own tone while its menu is open (owner decision, 19.5).
     val ground = if (open) {
         ink.copy(alpha = Wash.Control)
     } else {
@@ -213,7 +213,7 @@ internal fun AyahDoor(
                 modifier = Modifier
                     // The gap the pill's own door keeps between its word and
                     // its turn, so the number and the mark read as one thing
-                    // (owner decision, this session).
+                    // (owner decision, 16.8).
                     .padding(start = Space.Tight)
                     // The turn is a drawing, not a control, so it carries no
                     // name of its own; the tag is how a test sees that the

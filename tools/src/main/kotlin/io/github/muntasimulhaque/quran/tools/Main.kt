@@ -129,7 +129,7 @@ private const val MAX_FILE_BYTES = 256L * 1024 * 1024
  * largest source plus the rest of the pipeline's work, so it is four
  * gigabytes. It was 512 MB, which stopped `verify` at the recitation package
  * and left every source after it unextracted, including the metadata and the
- * timings the content build reads (owner report, this session).
+ * timings the content build reads (owner report, 18.9).
  */
 private const val MAX_TOTAL_BYTES = 4L * 1024 * 1024 * 1024
 

@@ -65,7 +65,7 @@ class BrowseNumbersTest {
         // Tabular figures give the column one width per digit, so a
         // three-digit number is as wide as the three-digit label the column
         // was measured on and cannot be the one that overflows (owner
-        // decision, this session: the table's figures do the work the wider
+        // decision, 13.2: the table's figures do the work the wider
         // column used to).
         assertEquals(
             "every three-digit number must take the column's own width",

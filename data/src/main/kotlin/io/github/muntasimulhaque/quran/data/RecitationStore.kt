@@ -40,7 +40,7 @@ class RecitationStore(private val context: Context) {
      * all of it is there, and otherwise reads each asset folder's name list
      * once, so a surah the app does not carry costs no exception per ayah.
      * Both `file://` and `asset:///` are covered, the two places [uri] reads
-     * (owner decision, this session).
+     * (owner decision, 15.8).
      */
     fun hasAllAudio(paths: List<String>): Boolean {
         if (paths.isEmpty()) return false
@@ -71,7 +71,7 @@ class RecitationStore(private val context: Context) {
         // reader's language, and a Bangla default wrote the prefix in Bangla
         // digits (০০১), which matched none of the ASCII names the packages
         // hold. A reader who downloaded a surah in one language then met a
-        // download offer for it in the other (owner report, this session).
+        // download offer for it in the other (owner report, 8.3).
         val prefix = String.format(Locale.ROOT, "%03d", surah)
         val files = directory.listFiles { file ->
             file.isFile && file.name.startsWith(prefix) && file.name.endsWith(AYAH_SUFFIX)

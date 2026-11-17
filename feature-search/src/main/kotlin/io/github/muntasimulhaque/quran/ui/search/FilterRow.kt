@@ -63,7 +63,7 @@ private data class OfferedSource(
  * A source the reader does not have is not offered, rather than offered and
  * empty.
  *
- * **A chosen chip is a tint, not a button** (owner decision, this session).
+ * **A chosen chip is a tint, not a button** (owner decision, 15.0).
  * Seven sources start on, and seven solid pills over the results read as
  * seven pressed buttons: the accent became the page's background instead of
  * the one chosen thing. A chosen chip now wears the ayah door's own open
@@ -87,7 +87,7 @@ private data class OfferedSource(
  * The words of the door stand on the page's own gutter, the line the chips
  * and every other block keep; the press shape hangs 12 dp to their left so
  * the ripple has its room without moving the words off the rail (owner
- * decision, this session).
+ * decision, 15.0).
  */
 @Composable
 internal fun FilterRow(
@@ -111,7 +111,7 @@ internal fun FilterRow(
     // and empty. The word meanings are their own source: the chip follows the
     // word list being on the device, never the translations being on, because
     // a reader may read a translation and keep the meanings off, or keep the
-    // meanings on with no translation at all (owner decision, this session).
+    // meanings on with no translation at all (owner decision, 6.6).
     val offered = buildList {
         add(
             OfferedSource(
@@ -169,7 +169,7 @@ internal fun FilterRow(
     val state = when {
         off.isEmpty() -> stringResource(R.string.search_filter_all)
         // One source off is named, so the closed door can explain a query
-        // that found nothing because of it (owner decision, this session).
+        // that found nothing because of it (owner decision, 15.0).
         off.size == 1 -> stringResource(R.string.search_filter_all_but, off[0].label)
         else -> stringResource(R.string.search_filter_some, chosen, offered.size)
     }
@@ -177,16 +177,16 @@ internal fun FilterRow(
     // A search with no place to look is not a search: the door opens itself
     // when the last source is turned off, and again when a query begins,
     // because the query folds the list shut. The status line's sentence then
-    // always points at a list the reader can see and touch (owner decision,
-    // this session).
+    // always points at a list the reader can see and touch
+    // (owner decision, 15.0).
     LaunchedEffect(none, hasQuery) {
         if (none) open = true
     }
     // The door is a choice of place, not a place to type: opening it puts the
     // keyboard away so the chips and the results have the sheet's room. That
     // is what keeps the seven chips reachable at the largest text size, where
-    // they can be taller than the sheet with the keyboard up (owner decision,
-    // this session).
+    // they can be taller than the sheet with the keyboard up
+    // (owner decision, 15.0).
     val focusManager = LocalFocusManager.current
     LaunchedEffect(open) {
         if (open) focusManager.clearFocus()
@@ -212,7 +212,7 @@ internal fun FilterRow(
                 text = stringResource(R.string.search_filter),
                 // The door names its state the way a settings row names its
                 // own value: the row name's 15 over the meta 13, told apart
-                // by weight and tone (owner decision, this session: 14 and
+                // by weight and tone (owner decision, 15.0: 14 and
                 // 13 were too near to read as a pair).
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -228,7 +228,7 @@ internal fun FilterRow(
             visible = open,
             // A reader who asked the phone to reduce motion gets the list
             // without the height change; the information arrives, the page
-            // does not move (owner decision, this session).
+            // does not move (owner decision, 13.8).
             enter = if (reducedMotion.value) fadeIn() else expandVertically() + fadeIn(),
             exit = if (reducedMotion.value) fadeOut() else shrinkVertically() + fadeOut(),
         ) {
@@ -247,7 +247,7 @@ internal fun FilterRow(
                     // gives the flow the gap the target's air does not
                     // already leave, so two rows of capsules stand Space.Row
                     // apart, or the target air where that is more (owner
-                    // decision, this session).
+                    // decision, 15.1).
                     verticalArrangement = Arrangement.spacedBy(chip.rowGap),
                 ) {
                     offered.forEach { source ->
@@ -263,7 +263,7 @@ internal fun FilterRow(
                 // Seven ways to narrow and no way back to everything is a
                 // trap: the reset stands under the chips, in the quiet shape,
                 // only while there is something to turn back on (owner
-                // decision, this session).
+                // decision, 15.0).
                 if (off.isNotEmpty()) {
                     TextButton(
                         label = stringResource(R.string.search_filter_all_on),

@@ -13,7 +13,7 @@ import org.junit.Test
  * stands, because the verse is data and its size is the reader's own step.
  * The word meaning sheet draws the Quran's word at the Arabic size and its
  * gloss at the translation size, so the metrics no longer carry a size of
- * their own for the aid (owner decision, this session).
+ * their own for the aid (owner decision, 16.2).
  */
 class ReadingMetricsTest {
 

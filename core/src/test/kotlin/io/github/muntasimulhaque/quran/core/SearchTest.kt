@@ -104,7 +104,7 @@ class SearchTest {
      * A Bengali vowel sign is a combining mark, not a letter, and the index
      * keeps it inside its token. The query must meet it there: splitting on
      * the mark turned "প্রতিফল" into the phrase "পরত ফল", which could never
-     * match the single token the index holds (owner report, this session). A
+     * match the single token the index holds (owner report, 8.5). A
      * mark at a word's end must survive the edge trim too, or "কি" would be
      * cut to one letter and refused by [Search.MIN_TERM_LENGTH].
      */

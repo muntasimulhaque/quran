@@ -21,7 +21,7 @@ import kotlinx.serialization.json.longOrNull
  *
  * The correction is made once, here, so every reader of the content gets the
  * same word order and the app's player stays a plain read of the data (owner
- * decision, this session). The ayah's number, which the export keeps as the
+ * decision, 9.8). The ayah's number, which the export keeps as the
  * last word past the drawn words, is folded onto the last drawn word so the
  * verse keeps its mark through the closing silence.
  */

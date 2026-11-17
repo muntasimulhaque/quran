@@ -156,7 +156,7 @@ object DailyAyahScheduler {
             // reader's own minute. The day behind is cleared too: a timezone
             // change can leave an armed alarm whose slot is no longer today
             // or tomorrow on the reader's own clock, and a reminder that was
-            // turned off must not speak (owner decision, this session).
+            // turned off must not speak (owner decision, 6.5).
             val today = localDay(now)
             alarm.cancel(pendingIntent(context, today - 1))
             alarm.cancel(pendingIntent(context, today))
@@ -359,7 +359,7 @@ object DailyAyahScheduler {
                             // the shape in the notification color, so a ground
                             // and an outline would both be thrown away, and at
                             // the status bar's size the outline drawing's lines
-                            // would turn to dust (owner decision, this session).
+                            // would turn to dust (owner decision, 5.2).
                             // The mark lives in ui-kit so the recitation's own
                             // notification wears it too.
                             .setSmallIcon(UiKitR.drawable.ic_daily)
@@ -425,7 +425,7 @@ object DailyAyahScheduler {
  * reader's own digits. The reminder is built on the Application's context,
  * which wears the phone's language rather than the reader's, so a context is
  * derived for this one string: the chosen language's word and the chosen
- * language's digits both come from it (owner decision, this session).
+ * language's digits both come from it (owner decision, 8.3).
  */
 internal fun notificationTitle(
     context: Context,

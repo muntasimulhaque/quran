@@ -12,7 +12,7 @@ package io.github.muntasimulhaque.quran.ui.theme
  * audio and type audit session).
  *
  * The scale has no step for a *ground*, and that is a decision, not an
- * omission (owner decision, this session). The chosen thing and the found
+ * omission (owner decision, 19.1). The chosen thing and the found
  * thing used to wear the accent at 8 and 16 percent, which over the warm page
  * measured a neutral gray and then a real blue: the two surfaces in the app
  * that say "this one" were the only cold things on it. They are
@@ -34,22 +34,22 @@ package io.github.muntasimulhaque.quran.ui.theme
  * search result's own line keeps [Match] for its text.
  *
  * A control's fill has three levels, and the app keeps them apart (owner
- * decision, this session): the accent at [Control] is a chosen state inside a
+ * decision, 15.0): the accent at [Control] is a chosen state inside a
  * set of controls (a search source turned on), carried by the accent's own
  * ink; the accent at [Button] is the reader's own action (Save, Add,
  * Download, Share image); and the ink at [Door] is a quiet action or an
  * unselected chip (Cancel, Remove, Share text). The reading's ayah door is the
  * one control that takes no fill: its head already stands on the block's own
  * wash while its menu is open, and its turn is what says so (owner decision,
- * this session). The solid level is the one place the reader is at (the tab
+ * 16.8). The solid level is the one place the reader is at (the tab
  * you are on, the ayah number you are at) and the one prominent answer on a
  * surface that asks a single question (Save, Turn it on, Download); it never
  * shares that surface with a selected tab, so the two meanings cannot be read
  * at once. A search source is a chosen control and not a place: seven of them
  * stood as seven solid pills over the results, which read as seven pressed
  * buttons, so the chosen chip wears the door's own tint and ink and the
- * solid level stays for the one place and the one answer (owner decision,
- * this session).
+ * solid level stays for the one place and the one answer
+ * (owner decision, 15.0).
  */
 object Wash {
 

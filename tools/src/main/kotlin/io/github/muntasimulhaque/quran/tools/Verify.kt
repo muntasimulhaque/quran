@@ -450,7 +450,7 @@ class Verify(private val root: File) {
             // The counter check needs the QPC script, which is one of the
             // large manual exports. A machine without it still gets the
             // file-name and coverage checks; the missing dataset is already
-            // reported by the manifest pass (owner decision, this session).
+            // reported by the manifest pass (owner decision, 14.5).
             val hasCounts = counts.any { it > 0 }
             if (!hasCounts) {
                 println("verify: $id: the QPC script is not extracted; ayah counters skipped")
@@ -566,7 +566,7 @@ class Verify(private val root: File) {
      * The reviewed Bangla names: one per surah, none blank, and no name for a
      * number the Book does not have. The build reads this file word for word,
      * so a hole here is a hole the reader would meet in Bangla (owner
-     * decision, this session).
+     * decision, 8.2).
      */
     private fun checkSurahNamesBn(id: String, dir: File) {
         val element = Json.parseToJsonElement(jsonFile(dir).readText())

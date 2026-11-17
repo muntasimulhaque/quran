@@ -46,7 +46,7 @@ import org.junit.runner.RunWith
  * whether the reader is sighted or using a screen reader. The whole verse is
  * not a button: a tap on the Quran is the page's own tap, and the menu the
  * number opens is the app's one popup, so a tap outside it puts it away
- * instead of choosing another ayah (owner decision, this session: 16.6's
+ * instead of choosing another ayah (owner decision, 16.8: 16.6's
  * whole-verse tap was half a solution, because the page has almost no room
  * left for a tap that means something else).
  *
@@ -81,8 +81,8 @@ class AyahActionsTest {
                     // translation column, so the first ayah's head is on
                     // screen. The tests share one install, and inheriting a
                     // taller reading from the test before this one pushed the
-                    // head off the fold and the wait timed out (owner report,
-                    // this session).
+                    // head off the fold and the wait timed out
+                    // (owner report, 13.3).
                     setTranslationPacks(emptySet())
                     setTafsirPacks(emptySet())
                     setShowTranslation(true)
@@ -142,8 +142,8 @@ class AyahActionsTest {
         )
         // The page draws no bookmark, so the row that keeps an ayah says the
         // keep in its own word: an ayah a note brought into Saved is not an
-        // ayah the reader saved, and the row still says Save (owner decision,
-        // this session).
+        // ayah the reader saved, and the row still says Save
+        // (owner decision, 17.7).
         assertEquals(
             "a note never presses Save",
             1,
@@ -190,7 +190,7 @@ class AyahActionsTest {
         waitForReading()
         // The head is one line of type and one turn: the number, then the
         // app's chevron 4 dp after it in the same ink, the pair the pill's
-        // own doors draw (owner decision, this session).
+        // own doors draw (owner decision, 16.8).
         assertEquals(
             "a door says it opens once",
             1,
@@ -219,7 +219,7 @@ class AyahActionsTest {
 
         // A tap on the page puts the menu away, and it cannot land on another
         // verse: the popup is a window of its own, and a tap outside it only
-        // dismisses it (owner decision, this session).
+        // dismisses it (owner decision, 16.7).
         val page = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.onAllNodesWithContentDescription(page).onFirst().tapThePaper()
         waitForMenuClosed()

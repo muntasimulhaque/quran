@@ -8,7 +8,7 @@ import org.junit.Test
 /**
  * The pill's key, pinned with the numbers that made it wrong: 16:28 is the
  * Book's 1929th ayah, and 2:255 is its 262nd. The key is the verse's own
- * number, never the running one (owner report, this session).
+ * number, never the running one (owner report, 19.2).
  */
 class PlayingPlaceTest {
 

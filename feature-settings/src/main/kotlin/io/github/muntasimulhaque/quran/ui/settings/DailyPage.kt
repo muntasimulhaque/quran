@@ -28,7 +28,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The daily ayah's own page: the switch, the moment it arrives, and the
  * things that can stop it arriving. The switch is here as well as on the hub
  * row, because the page that owns the feature should be able to turn it on
- * (owner decision, this session).
+ * (owner decision, 9.1).
  *
  * The hour used to be a strip of hour chips that unfolded under the switch in
  * the hub, and a reader reported two things about it: it filled the hub with
@@ -42,7 +42,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * subject, an hour tape and a minute tape, and the phone's own 24 or 12 hour
  * reading with its AM/PM pair. The tapes reach every minute of the day, which
  * a row of hours could not, and the page is drawn in the app's hand rather
- * than borrowing the platform's clock (owner decision, this session).
+ * than borrowing the platform's clock (owner decision, 13.9).
  *
  * The phone's permission to notify is asked for from the two moments that
  * prove the reader wants the daily ayah, which the shell wires up: turning it
@@ -78,8 +78,8 @@ fun DailyPage(
      * The phone has no screen for the notification settings at all, so the
      * line that says notifications are off has no door under it. The fact is
      * a property of the phone and not a moment, so it is state here beside
-     * the switch that needs it, said once and kept (owner decision, this
-     * session).
+     * the switch that needs it, said once and kept
+     * (owner decision, 19.3).
      */
     notificationScreenMissing: Boolean = false,
     /** The same, for the phone's own screen for the exact alarm. */
@@ -101,8 +101,8 @@ fun DailyPage(
         // to set the time and found the reminder off should not have to go
         // back a page to turn it on. The page that owns the feature owns the
         // switch that turns it on, and the hub's own switch is the reader's
-        // hand on the same value from the list (owner decision, this
-        // session). The line under it says only that the reminder is off,
+        // hand on the same value from the list (owner decision, 11.9). The
+        // line under it says only that the reminder is off,
         // because the moment is the row below it. The row stays live while it
         // is off, so a reader who came to move the time is not asked to turn
         // the daily ayah on first, and a time that is set is a time that is
@@ -137,7 +137,7 @@ fun DailyPage(
                 ),
                 // A sentence about the phone's own settings is prose, not a
                 // caption: it reads at the meta line's neighbours, not a point
-                // under them (owner decision, this session).
+                // under them (owner decision, 13.3).
                 style = MaterialTheme.typography.bodyMedium,
                 // The same ink as the exact-time line below: both are state
                 // lines of the same shape, and the one the page calls the
@@ -149,7 +149,7 @@ fun DailyPage(
             // A phone with no such screen has no door to offer, so none is
             // drawn: the sentence above is the whole of what can be done, and
             // a word that opens nothing is worse than a sentence (owner
-            // decision, this session).
+            // decision, 19.3).
             if (!notificationScreenMissing) {
                 Box(Modifier.padding(start = Space.Gutter, top = Space.Line)) {
                     TextButton(

@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextOverflow
  * The value is under the name and never beside it, and that is the answer to a
  * question the hub used to ask twice (owner decision). A row with no
  * switch printed its value in a column at the right ("Paper", "Husary",
- * "Arabic 25, translation 14"), and a row with a switch printed the same grey
+ * "Arabic 25, translation 14"), and a row with a switch printed the same gray
  * line under its name ("Saheeh International", "Ibn Kathir"), so one list
  * read as two grammars and the eye had to change its reading half way down
  * (owner report, the forty-fourth session).
@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
  *   one line; a value beside them would have to be
  *   measured into what is left, and on a 360 dp phone that was 125 dp for two
  *   values that are both longer than it;
- * - some of the sheet's grey lines are sentences, not values ("Add English
+ * - some of the sheet's gray lines are sentences, not values ("Add English
  *   words, 4.2 MB", "The whole surah begins again at its first ayah"), and a
  *   sentence in a right-hand column is worse than a sentence under a name;
  * - the sheet's other rows already say it this way: a pack row is a name over
@@ -56,8 +56,8 @@ internal fun RowName(
             text = title,
             // A row's name: the interface's own voice at Medium, one weight
             // above the value under it and the same size as the body, so a
-            // list reads as names with facts under them (owner decision, this
-            // session).
+            // list reads as names with facts under them
+            // (owner decision, 13.3).
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 2,
@@ -70,7 +70,7 @@ internal fun RowName(
                 text = value,
                 // A row's own value is the caption, 13 at Regular: the settings
                 // hub is measured by this line, and a value is not a source
-                // line and not a sentence (owner decision, this session).
+                // line and not a sentence (owner decision, 13.3).
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,

@@ -19,7 +19,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  *
  * A row that answered a tap with a rectangle drawn from edge to edge touched
  * the boundary it stood on, the same report the pill's own menus drew (owner
- * report, this session). The row's press is a card inset by this much, so the
+ * report, 7.4). The row's press is a card inset by this much, so the
  * highlight never reaches the sheet's left or right edge.
  */
 val SheetRowGutter = 8.dp
@@ -33,7 +33,7 @@ private val SheetRowGap = 2.dp
  * The click owns the whole row, the way every other control in the app does,
  * and the press is drawn on a rounded card inside it, inset from the sheet's
  * own edge by [SheetRowGutter], so the highlight never reaches the boundary
- * (owner report, this session: the plain clickable drew a rectangle from edge
+ * (owner report, 7.4: the plain clickable drew a rectangle from edge
  * to edge). The row's own content padding is applied by the caller, after
  * this, so the words and marks stay where they were and only the shape the
  * press paints moves.
@@ -46,7 +46,7 @@ private val SheetRowGap = 2.dp
  * A row that answers a tap is a button unless it says otherwise. The role
  * used to be the caller's to remember, so some rows announced themselves as
  * buttons and some as bare clickable text; a door should sound like a door
- * wherever it stands (owner decision, this session).
+ * wherever it stands (owner decision, 13.8).
  */
 @Composable
 fun Modifier.sheetRow(

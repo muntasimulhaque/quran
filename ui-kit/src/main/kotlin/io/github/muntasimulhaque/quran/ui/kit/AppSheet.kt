@@ -46,7 +46,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * modal surface has to name itself before its first row, or a screen reader
  * enters a page with no title; the caller hands the name it already has in
  * the reader's language, and a sheet with a visible title hands the same one
- * (owner decision, this session).
+ * (owner decision, 13.8).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

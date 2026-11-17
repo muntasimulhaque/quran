@@ -40,7 +40,7 @@ import java.io.File
  * head is sticky: on a short window the scroll can stop with the head at the
  * last line of the glass, and the rules under it are then one item past the
  * composed window. That is what made this test red on a shorter window while
- * the page itself was whole (owner report, this session). The head's own
+ * the page itself was whole (owner report, 17.6). The head's own
  * title is matched exactly, because a family and its single rule can share a
  * name (Ghunnah) while the rule's paragraph carries its sentence after it.
  *

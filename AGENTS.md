@@ -124,9 +124,20 @@ change, never left as a dead letter.
 - **No em dashes**, anywhere. `NoEmDashTest` scans the repo and fails the build.
 - **US English**, everywhere: color, gray, center, license, behavior.
 - **User-facing strings** live in the `strings.xml` of the module that draws
-  them, nowhere in Kotlin. **Colors** live in the theme, nowhere else.
+  them, nowhere in Kotlin. **Colors** live in the theme, nowhere else. A
+  sentence two modules need is written in each of them, and `CopyParityTest`
+  holds the copies to one Bangla: the same English word read two ways in one
+  language is the drift that gate exists for.
 - **Small pieces, plain names.** Split early, and a name that says the idea beats
   a name that says the screen.
+- **A test's name is a sentence.** In a JVM suite it is spaced, in backticks,
+  where the sentence needs a comma or a possessive, and an identifier where it
+  does not. A device test's name is always an identifier: the Android runtime
+  cannot hold a space in a method name, and `DeviceTestNamesTest` fails the
+  build over one.
+- **A settled decision is dated by its version**, not by the session that made
+  it: `owner decision, 19.6` is a thing a later reader can find in `git log`,
+  and "this session" names nothing once the session has ended.
 - **Small edits** are `node -e` replacements, and a CRLF file needs `\r?\n` in the
   pattern or the replace silently no-ops. Grep afterwards to confirm.
 
@@ -135,17 +146,18 @@ change, never left as a dead letter.
 | Path | What is there |
 | --- | --- |
 | `core/` | pure JVM Kotlin, no `android.*`: references, search normalization, rich text, models |
-| `data/` | read-only content access, the saved-ayah and last-read databases, preferences |
-| `app/` | the shell: activity, view model, the screen that composes the features |
+| `data/` | read-only content access, the downloads that fetch a pack from the project's Releases, the saved-ayah and last-read databases, preferences |
+| `app/` | the shell: activity, view model, the screen that composes the features, the daily ayah's scheduler and notification |
 | `feature-reading/` | the reading surface |
 | `feature-search/` | the search sheet |
 | `feature-browse/` | Surahs, Juz, Last Read, Saved |
 | `feature-playback/` | the pill, the listening menu, the player |
 | `feature-settings/` | the settings hub and its pages |
-| `ui-kit/` | the theme and palettes, the hand-drawn icons, the shared rows and shapes, the small formatters |
+| `ui-kit/` | the theme and palettes, the hand-drawn icons, the shared rows and shapes (the text button, the icon button, the confirm sheet), the rich text and tajweed views, the small formatters |
 | `content-assets/` | the faces the app ships |
 | `tools/` | the offline pipeline (`--args="help"` lists it), with `word-audio` cutting the pronunciation pack; `tools/icons/forge.py` draws every icon and the feature graphic |
-| `content/` | `quran.db`, `packs/`, `bundled/`, `word-audio/`, `manifest.json`, `recitation-manifest.json`, `catalog.json`, `build-report.json`, `surah-names-bn.json`, `audio-sources.json`, `audit-report.md`; `raw/` is local and gitignored |
+| `content/` | `quran.db`, `packs/`, `bundled/`, `word-audio/`, `manifest.json`, `recitation-manifest.json`, `catalog.json`, `build-report.json`, `surah-names-bn.json`, `audio-sources.json`, `audio-edges.txt`, `audit-report.md`; `raw/` is local and gitignored |
+| `licenses/` | the SIL Open Font License the six open faces ship under, wired into the app's assets |
 | `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `docs/` | the Pages site and the privacy policy Play links to |
@@ -228,7 +240,7 @@ change, never left as a dead letter.
 ## Verify
 
 ```bash
-./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-browse:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ./gradlew :data:connectedDebugAndroidTest   # an instrumented audit, never a release gate
 ./gradlew :app:connectedDebugAndroidTest    # an instrumented audit, never a release gate
 ./gradlew :tools:run --args="help"          # the content pipeline, every step

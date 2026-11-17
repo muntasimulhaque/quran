@@ -61,7 +61,7 @@ class Build(private val root: File) {
      * this build does not know is a failure, so the sheet can never draw a
      * blank where a part of speech should be. Only the parts the sheet shows
      * are carried; the export's other qualifiers describe the word's place
-     * in its sentence and are left out (owner decision, this session).
+     * in its sentence and are left out (owner decision, 18.0).
      */
     private data class GrammarRow(
         val ayahNumber: Int,
@@ -118,12 +118,12 @@ class Build(private val root: File) {
         }
         // The word's own detail: its root, keyed by the source's word
         // number, the same key the word lists use, so the merge of the four
-        // QPC pairs needs no second rule (owner decision, this session).
+        // QPC pairs needs no second rule (owner decision, 17.7).
         val roots = readRoots()
         // The word's grammar and its lemma, keyed by the reading's own word
         // number: the corpus divides the Book exactly as the page does, so
         // the join needs no mapping and a division that drifts is a failure
-        // (owner decision, this session).
+        // (owner decision, 18.0).
         val grammar = readGrammar(ayahNumbers, words)
         val surahs = readSurahs()
         val navigation = readNavigation(ayahNumbers)
@@ -283,7 +283,7 @@ class Build(private val root: File) {
      * The publisher's translation as the publisher exports it. The database
      * keeps the book-wide note numbers and the 3:32 sentence; the Saheeh pack
      * is the reader's shape, and [Packs] applies the reader's numbering and
-     * the one correction there (owner decision, this session).
+     * the one correction there (owner decision, 14.5).
      */
     private fun readTranslation(): Map<Int, Translation> {
         val out = HashMap<Int, Translation>(7000)
@@ -383,7 +383,7 @@ class Build(private val root: File) {
      * Buckwalter, which is a keyboard not a spelling (`Ebd`, `Alh`). The gap
      * is closed here and the Buckwalter is read as the letters it stands for,
      * so the sheet shows `ع ب د` and `ʿ-b-d` and not the export's own
-     * shorthand (owner decision, this session).
+     * shorthand (owner decision, 17.7).
      */
     private fun readRoots(): Map<String, Root> {
         if (sourceDb("word-root") == null) {
@@ -418,14 +418,14 @@ class Build(private val root: File) {
      * silently says the wrong thing. The lemma's two counts are counted here,
      * over the whole Book, because a dictionary form is only worth naming
      * with how many words carry it and how many shapes they take (owner
-     * decision, this session).
+     * decision, 18.0).
      *
      * The 2026-11-14 export leaves nine rows at 70:1 and 78:30 in the
      * corpus's raw tags, with a code where a verb's pattern stands. The tags
      * are read as the parts they name and [GrammarErrata] restores the fuller
      * labels the same words carried in the export the database was built
      * from, so the source can move without the sheet losing a participle, a
-     * particle, or a pattern (owner decision, this session).
+     * particle, or a pattern (owner decision, 18.9).
      */
     private fun readGrammar(
         ayahNumbers: Map<String, Int>,
@@ -463,7 +463,7 @@ class Build(private val root: File) {
         val rows = ArrayList<GrammarRow>(77_429)
         // The lemma table is ordered by the letters themselves, so the ids
         // the rows carry are the same on every run and a rebuild writes the
-        // same bytes (owner decision, this session).
+        // same bytes (owner decision, 18.0).
         val sortedLemmas = lemmaWords.keys.sorted()
         val lemmaIds = HashMap<String, Int>(sortedLemmas.size * 2)
         sortedLemmas.forEachIndexed { index, text -> lemmaIds[text] = index }
@@ -488,7 +488,7 @@ class Build(private val root: File) {
                 // and a code where the pattern stands. The map reads the tag's
                 // broad part; the erratum restores the finer label, the gender,
                 // and the pattern the same words carried before (owner
-                // decision, this session).
+                // decision, 18.9).
                 val erratum = GrammarErrata["$surah:$number:${index + 1}"]
                 val label = stem["pos"]?.jsonPrimitive?.contentOrNull.orEmpty()
                 val partOfSpeech = erratum?.partOfSpeech ?: GrammarLabels.partOfSpeech[label]
@@ -526,7 +526,7 @@ class Build(private val root: File) {
                     // The pattern is a verb's own shape. A participle or a
                     // verbal noun has one too, but the sheet's word for it is
                     // "pattern" and a reader of grammar reads it as a verb's
-                    // (owner decision, this session).
+                    // (owner decision, 18.0).
                     pattern = if (erratum != null) {
                         erratum.pattern
                     } else if (partOfSpeech in VERB_PARTS) {
@@ -638,7 +638,7 @@ class Build(private val root: File) {
         // The Bangla names are a dataset of their own, compiled and reviewed
         // for this app. Every surah must carry one: the Bangla interface
         // reads its names from here and never falls back to the Latin line
-        // (owner decision, this session).
+        // (owner decision, 8.2).
         val bangla = Json.parseToJsonElement(
             sourceDir("surah-names-bn").firstWithExtension(".json")!!.readText(),
         ).jsonObject
@@ -769,7 +769,7 @@ class Build(private val root: File) {
             // own small tables, keyed the way the word lists are, and they
             // travel in their own packs: a reader who wants the meanings is
             // not made to carry the morphology, and the Bangla line is not
-            // downloaded on an English page (owner decision, this session).
+            // downloaded on an English page (owner decision, 17.7).
             statement.execute(
                 "CREATE TABLE word_root (ayah_number INTEGER NOT NULL, position INTEGER NOT NULL, " +
                     "arabic TEXT NOT NULL, latin TEXT NOT NULL, words_count INTEGER NOT NULL, " +
@@ -778,7 +778,7 @@ class Build(private val root: File) {
             // The word's grammar and its dictionary form, keyed the way the
             // root is, and carried inside the word list the reader turns on:
             // the sheet's study lines arrive with the meanings that make the
-            // sheet open at all (owner decision, this session).
+            // sheet open at all (owner decision, 18.0).
             statement.execute(
                 "CREATE TABLE grammar_lemma (id INTEGER PRIMARY KEY, text TEXT NOT NULL, " +
                     "words_count INTEGER NOT NULL, forms_count INTEGER NOT NULL)",
@@ -1030,7 +1030,7 @@ class Build(private val root: File) {
         // The word's grammar and its lemma, one row per drawn word. Written
         // beside the root so the sheet's lines come from one place, and
         // ordered by the reading's own numbers so the bytes are the same on
-        // every run (owner decision, this session).
+        // every run (owner decision, 18.0).
         connection.prepareStatement(
             "INSERT INTO grammar_lemma(id, text, words_count, forms_count) VALUES(?,?,?,?)",
         ).use { statement ->

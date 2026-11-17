@@ -40,7 +40,7 @@ class ContentDatabase private constructor(
      * a surah answers in that language from then on. The reading, Browse, the
      * search results, the ayah card, the daily reminder, and the share card
      * all draw one name without each surface choosing a column (owner
-     * decision, this session).
+     * decision, 8.2).
      */
     @Volatile
     private var displayLanguage: String = "en"
@@ -198,7 +198,7 @@ class ContentDatabase private constructor(
      * introduction is the one deliberate exception to the one-language rule:
      * there is no Bangla introduction yet, and a Bangla reader is owed the
      * introduction in the one language it exists in rather than a door that
-     * opens nothing (owner decision, this session). The translation, the
+     * opens nothing (owner decision, 6.6). The translation, the
      * tafsir, and the word meanings keep the strict rule and never fall back.
      */
     fun surahInfo(surah: Int, language: String = "en"): String? {
@@ -240,7 +240,7 @@ class ContentDatabase private constructor(
      * literal in the reading's own source, and it was one mark away from the
      * audited text: the reader met a basmalah the audit never verified. The
      * one text is read here and drawn everywhere, so no Quran text lives in
-     * Kotlin (owner decision, this session).
+     * Kotlin (owner decision, 6.6).
      */
     fun basmalah(): Ayah? = basmalahAyah
 
@@ -374,8 +374,8 @@ class ContentDatabase private constructor(
      *
      * A held word list from before the grammar table answers with nothing
      * rather than an exception, and the sheet draws the word, its meaning, and
-     * its root as it did, until the pack refreshes (owner decision, this
-     * session).
+     * its root as it did, until the pack refreshes
+     * (owner decision, 18.0).
      */
     fun wordGrammar(
         ayahNumbers: List<Int>,
@@ -417,12 +417,12 @@ class ContentDatabase private constructor(
      * as the page writes it there. The pack's own index over the root makes
      * the read one lookup; a root pack from before the index answers with the
      * same rows through a scan, so an old install is slower and never empty
-     * (owner decision, this session).
+     * (owner decision, 18.9).
      *
      * The list's length is the count the word sheet promised: the pack's
      * `words_count` is written from these rows, not from the source's own
-     * field, which disagreed for fourteen roots (owner decision, this
-     * session).
+     * field, which disagreed for fourteen roots
+     * (owner decision, 18.9).
      */
     fun wordRootPlaces(arabic: String): List<WordPlace> {
         if (arabic.isBlank()) return emptyList()
@@ -448,7 +448,7 @@ class ContentDatabase private constructor(
      * page needs no id of its own. A held list from before the grammar table
      * answers with nothing rather than an exception, exactly as the sheet's
      * lemma line does, and the door is only drawn when that line is (owner
-     * decision, this session).
+     * decision, 18.9).
      */
     fun wordLemmaPlaces(lemma: String, language: String = "en"): List<WordPlace> {
         if (lemma.isBlank()) return emptyList()
@@ -519,7 +519,7 @@ class ContentDatabase private constructor(
      * The installed word list that speaks a language, and nothing else. There
      * is no fallback: a Bangla reader never meets English meanings under the
      * Arabic because the Bangla list has not landed yet, exactly as search
-     * never falls back (owner decision, this session). A language with no
+     * never falls back (owner decision, 6.6). A language with no
      * list installed answers null, and the reading draws the words without
      * meanings rather than the wrong language's meanings.
      */
@@ -581,7 +581,7 @@ class ContentDatabase private constructor(
         try {
             // A pack that carries its own index does not need the in-memory
             // copy, and loading it would spend the memory the index just
-            // saved (owner decision, this session).
+            // saved (owner decision, 6.5).
             val withoutIndex = tafsirPacks.filterNot { hasTable(it, "tafsir_passage_fts") }.toSet()
             if (withoutIndex.isNotEmpty()) {
                 synchronized(tafsirIndex) { tafsirIndex.ensure(withoutIndex) }
@@ -862,7 +862,7 @@ class ContentDatabase private constructor(
             // tap, so the stored sentence's bracketed numbers go and the
             // highlight is measured on the words that remain. Before this,
             // a result for an ayah with a note printed "Allāh,[2]" at the
-            // reader (owner report, this session).
+            // reader (owner report, 14.5).
             val readable = RichText.plain(translation.text)
             row.translation = TranslationHit(
                 pack = pack,

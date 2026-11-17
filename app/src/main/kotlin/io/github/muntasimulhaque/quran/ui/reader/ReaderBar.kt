@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
  * it. The reading's first scroll is spent moving the bar, and only after the
  * bar is away does the page scroll; a backward scroll spends its first part
  * bringing the bar back, and the line the reader is returning to arrives below
- * it (owner decision, this session: the Chromium and Material app bar's own
+ * it (owner decision, 19.4: the Chromium and Material app bar's own
  * rule, because a reading app must never put the text under glass).
  *
  * [shown] is 1 with the bar fully standing and 0 with only the status band
@@ -102,7 +102,7 @@ internal class ReaderBarState {
  * The 0.5 split is the browser's own: a bar past its middle finishes opening
  * and a bar short of it finishes closing. It is a fact of the glass and not of
  * a screen, so it lives here beside the state and is measured without one
- * (owner decision, this session).
+ * (owner decision, 19.4).
  */
 internal object ReaderBar {
 

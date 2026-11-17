@@ -27,12 +27,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * The voices lead, because the block that opens the panel leads with the
  * reciter's name; the pace and the answers follow, in the order the listening
- * menu has always kept. One panel rather than two menus (owner decision, this
- * session: the block is one door, and the three questions are one subject).
+ * menu has always kept. One panel rather than two menus (owner decision, 9.5:
+ * the block is one door, and the three questions are one subject).
  * The panel is only opened by a recitation that exists: an offer, a failure,
  * and an unavailable answer show the voice list alone, because the pace and
  * the end are answers to a recitation, and theirs has not begun (owner
- * decision, this session).
+ * decision, 9.5).
  *
  * It may stand taller than the two menus did apart, so the popup caps it to
  * the window's safe band and what does not fit scrolls, with the edge fade
@@ -42,7 +42,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * and what that voice would still need for the surah at hand, so a reciter is
  * chosen with its price in view.
  *
- * **Every answer puts the panel away** (owner decision, this session). The
+ * **Every answer puts the panel away** (owner decision, 9.7). The
  * voice list has always closed on its choice, and the pace and the ending
  * follow it. One panel asked one question, and the tap answered it, so the
  * reader is back on the reading rather than in a panel they have to dismiss.
@@ -50,7 +50,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * that the ending has no read-back on the pill, which by a settled rule does
  * not write the ending down; the row's own mark was on screen when the tap
  * landed.
- * **The place is the pill's, not the panel's** (owner decision, this session).
+ * **The place is the pill's, not the panel's** (owner decision, 16.9).
  * The panel used to head itself with the whole place in the same words and
  * type the capsule under it already wears, ten dp apart: the sentence was
  * said twice, and the popup was the one panel in the app that drew a title
@@ -59,7 +59,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * question. The voices lead, because the block that opens the panel leads
  * with the reciter's name; the pace and the answers follow, in the order the
  * listening menu has always kept. One panel rather than two menus (owner
- * decision, this session: the block is one door, and the three questions are
+ * decision, 16.9: the block is one door, and the three questions are
  * one subject).
  */
 @Composable
@@ -87,8 +87,8 @@ internal fun ColumnScope.ListeningPanel(
  * It wears the app's one head over a list, [SectionHead], so the panel's
  * sections read as groups of choices rather than as rows of their own: a label
  * at the size of the rows under it made the merged panel twelve lines of one
- * voice, with no hierarchy to lean the air between them on (owner report, this
- * session). It is a heading to a screen reader as well, so a reader who cannot
+ * voice, with no hierarchy to lean the air between them on (owner report, 9.6).
+ * It is a heading to a screen reader as well, so a reader who cannot
  * see the panel can jump from the voices to the pace to the ending.
  *
  * The air is this popup's own, not the settings sheet's: the panel keeps the
@@ -118,10 +118,10 @@ private fun MenuLabel(text: String) {
  * rather than a foreign sheet laid over it.
  *
  * The pace keeps the app's own step row: the label is a bare line at the
- * menu's left inset and the five paces stand centred under it, as the text
+ * menu's left inset and the five paces stand centered under it, as the text
  * sizes do on their own page (owner decision, forty-seventh session). The
  * row itself is [ScaleRow], the app's one step row, so one control is learned
- * once (owner decision, this session: the menu had carried a second copy and
+ * once (owner decision, 7.1: the menu had carried a second copy and
  * the two had drifted).
  *
  * The answers are one value and one list (owner decision, 4.5): the five
@@ -147,12 +147,12 @@ internal fun ColumnScope.ListeningMenu(
     MenuLabel(stringResource(R.string.playback_speed_label))
     // One row, five paces, the chosen one filled: the app's own step row, the
     // same the text sizes wear, so one control is learned once. It stands
-    // centred on the menu rather than against its left edge, where it left
+    // centered on the menu rather than against its left edge, where it left
     // 10 dp of ground on one side and 28 on the other and read as a row that
     // had slipped (owner decision, forty-seventh session). The row itself
     // came from the settings page's old copy and the two had drifted, one
     // filling its whole cell and this one hugging its text (owner decision,
-    // this session: one ScaleRow, one shape).
+    // 16.0: one ScaleRow, one shape).
     ScaleRow(
         label = stringResource(R.string.playback_speed_label),
         steps = SpeedSteps,

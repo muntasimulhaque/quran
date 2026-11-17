@@ -100,7 +100,7 @@ fun SettingsSheet(
      * Whether this phone has no screen for the notification settings, or for
      * the exact alarm, at all. The Daily page draws that as a state line with
      * no door, because a word that opens nothing is worse than a sentence
-     * (owner decision, this session).
+     * (owner decision, 19.3).
      */
     notificationScreenMissing: () -> Boolean = { false },
     alarmScreenMissing: () -> Boolean = { false },
@@ -111,7 +111,7 @@ fun SettingsSheet(
      * a page. A door that names a missing pack (the reading's word meanings
      * door, the ayah card's tafsir offer) lands on the page that has it, rather
      * than on a hub the reader has to navigate after being told to come here
-     * (owner decision, this session).
+     * (owner decision, 19.1).
      */
     initialPage: SettingsPage? = null,
 ) {

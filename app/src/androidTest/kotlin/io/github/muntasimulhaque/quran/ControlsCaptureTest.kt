@@ -107,7 +107,7 @@ class ControlsCaptureTest {
     }
 
     /**
-     * The words page after this session: the feature's name on the switch,
+     * The words page after 18.8: the feature's name on the switch,
      * the gesture as its lead, the one list as a file row, and the
      * pronunciation behind the reciter page's door with a row per surah.
      */

@@ -15,7 +15,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.data.PackStore
-import io.github.muntasimulhaque.quran.data.SearchHistory
+import io.github.muntasimulhaque.quran.data.SearchHistoryStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import kotlinx.coroutines.runBlocking
@@ -35,11 +35,11 @@ import org.junit.runner.RunWith
  * a result is opened and not when a key is typed, which the pure tests in
  * `data` pin; this test pins that the sheet draws the list, that a chip puts
  * its query back in the field, and that a chip's own X takes that word from
- * the phone while the others stay (owner decision, this session).
+ * the phone while the others stay (owner decision, 15.1).
  *
  * The X is the only removal: a chip goes on its own, with its X at the
  * trailing end of the capsule, so a reader who wants to forget a word does
- * not have to discover a long press (owner decision, this session).
+ * not have to discover a long press (owner decision, 15.1).
  */
 @RunWith(AndroidJUnit4::class)
 class RecentSearchesTest {
@@ -65,7 +65,7 @@ class RecentSearchesTest {
                 setWordByWord(false)
             }
         }
-        SearchHistory(context).apply {
+        SearchHistoryStore(context).apply {
             clear()
             record("mercy")
         }
@@ -74,7 +74,7 @@ class RecentSearchesTest {
 
     @After
     fun cleanUp() {
-        SearchHistory(context).clear()
+        SearchHistoryStore(context).clear()
     }
 
     private fun openSearch(): ActivityScenario<MainActivity> {
@@ -104,7 +104,7 @@ class RecentSearchesTest {
 
     @Test
     fun theVisibleXRemovesOnlyThatQuery() {
-        SearchHistory(context).record("absolute")
+        SearchHistoryStore(context).record("absolute")
         openSearch()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
@@ -116,18 +116,18 @@ class RecentSearchesTest {
         }
         assertTrue("the chip's own word is gone", rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isEmpty())
         assertTrue("the other word stays", rule.onAllNodesWithText("absolute").fetchSemanticsNodes().isNotEmpty())
-        assertTrue("the phone keeps only the other word", SearchHistory(context).read() == listOf("absolute"))
+        assertTrue("the phone keeps only the other word", SearchHistoryStore(context).read() == listOf("absolute"))
     }
 
     /**
      * The chip is the word's own width, not the sheet's. Two short queries
      * stand on one line because each capsule ends at its own X; a chip that
      * filled the row put every query on a line of its own, and the list read
-     * as a column of bars (owner report, this session).
+     * as a column of bars (owner report, 14.8).
      */
     @Test
     fun aChipTakesItsWordAndNotTheRow() {
-        SearchHistory(context).record("absolute")
+        SearchHistoryStore(context).record("absolute")
         openSearch()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
@@ -144,7 +144,7 @@ class RecentSearchesTest {
     }
 
     /**
-     * The X stands beside the word it removes (owner report, this session).
+     * The X stands beside the word it removes (owner report, 18.4).
      *
      * The chip's word half used to keep 8 dp of its own after the last
      * letter, on top of the 15 the 18 dp mark leaves inside its 48 dp
@@ -156,7 +156,7 @@ class RecentSearchesTest {
      */
     @Test
     fun theXStandsBesideItsWord() {
-        SearchHistory(context).record("mercy")
+        SearchHistoryStore(context).record("mercy")
         openSearch()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
@@ -186,7 +186,7 @@ class RecentSearchesTest {
      * the block used to add a Section on top of that, so the caption stood
      * about twice as far from the door as the door is from the field. The
      * caption now opens at Space.Line, one row break under the door (owner
-     * decision, this session).
+     * decision, 15.1).
      */
     @Test
     fun theCaptionStandsWithItsChips() {

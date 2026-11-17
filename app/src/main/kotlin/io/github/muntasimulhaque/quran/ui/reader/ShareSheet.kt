@@ -61,8 +61,8 @@ import kotlin.math.roundToInt
  * name, in a type size no other sheet uses: the surface named the ayah a
  * third time and said nothing about what it was for (owner report). The two
  * doors say what it is for, and a screen reader is told the surface's name
- * through the pane title without a line being drawn (owner decision, this
- * session).
+ * through the pane title without a line being drawn
+ * (owner decision, 12.5).
  *
  * **The preview is the whole card, at the width the card chose, scaled to the
  * sheet** (owner report, an earlier session). The old preview kept the card
@@ -138,7 +138,7 @@ internal fun AyahShareSheet(
                     // stand on. Weighted buttons made the gap a side effect of the
                     // stretch, wide on the phone and wider on a ten inch screen,
                     // and 12 dp read as one crowded pair under two wide pills
-                    // (owner report, this session).
+                    // (owner report, 12.6).
                     horizontalArrangement = Arrangement.spacedBy(Space.Action, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -157,7 +157,7 @@ internal fun AyahShareSheet(
                         // button tone, a 10 percent accent tint, which reads in
                         // this app as "a door among doors" and sat beside a
                         // quiet pill as one of two equal choices while the copy
-                        // called it the default (owner decision, this session).
+                        // called it the default (owner decision, 19.1).
                         prominent = true,
                     )
                 }

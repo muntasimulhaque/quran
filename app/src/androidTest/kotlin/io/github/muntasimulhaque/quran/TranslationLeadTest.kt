@@ -31,8 +31,8 @@ import org.junit.runner.RunWith
  * The catalog sorts translations by pack name, so Al-Bayan stands before
  * Saheeh. Before this rule the sample drew Al-Bayan under an English
  * interface and the reading drew it first: one Bangla column with no name on
- * the sample, and the Bangla line at the head of the reading (owner report,
- * this session).
+ * the sample, and the Bangla line at the head of the reading
+ * (owner report, 15.3).
  */
 @RunWith(AndroidJUnit4::class)
 class TranslationLeadTest {

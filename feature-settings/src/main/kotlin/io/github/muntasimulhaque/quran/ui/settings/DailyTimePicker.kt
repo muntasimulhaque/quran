@@ -99,7 +99,8 @@ import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
-import io.github.muntasimulhaque.quran.ui.reader.IconButton
+import io.github.muntasimulhaque.quran.ui.kit.IconButton
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
@@ -112,8 +113,8 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** One number's cell on a tape: the finger's 48 dp at every step. */
-private val TapeCell = 48.dp
+/** One number's cell on a tape: the finger's floor at every step. */
+private val TapeCell = ControlMetrics.Target
 
 /** The room the hour's and the minute's names take, so their tapes start on one line. */
 private val TapeLabel = 64.dp
@@ -130,7 +131,7 @@ private val TimeSlotAir = 4.dp
  * keyboard mark, Cancel and Set are on the glass at every text size and
  * every keyboard height (owner decision, this version).
  */
-private val FooterRoom = 48.dp + Space.Block + 20.dp
+private val FooterRoom = ControlMetrics.Target + Space.Block + Space.Gutter
 
 /**
  * The moment the daily ayah arrives, chosen on the app's own time page.
@@ -141,8 +142,8 @@ private val FooterRoom = 48.dp + Space.Block + 20.dp
  * the app's grammar instead. The question is a small page's name at 16; the
  * moment is the subject, set in the interface's tabular digits; and each part
  * of it is a tape the reader scrolls, with the chosen number in the accent
- * under a thin tick and its neighbours quiet on either side (owner decision,
- * this session).
+ * under a thin tick and its neighbours quiet on either side
+ * (owner decision, 13.9).
  *
  * The tapes keep every minute of the day, which is what the clock bought and
  * what a row of hour chips could not. The hour tape speaks the phone's own
@@ -153,7 +154,7 @@ private val FooterRoom = 48.dp + Space.Block + 20.dp
  * a sighted reader can drag the tape or tap the number they want and the tape
  * carries it to the middle.
  *
- * **The title stands on the dialog's one axis** (owner report, this session).
+ * **The title stands on the dialog's one axis** (owner report, 14.1).
  * The time is centered and the page is a floating sheet of its own, so a
  * left-aligned question over a centered subject read as a layout accident.
  * It is still the small page's 16, not the 20 of a full sheet: the time is the
@@ -169,7 +170,7 @@ private val FooterRoom = 48.dp + Space.Block + 20.dp
  * period already chosen; an out-of-range entry is clamped rather than
  * rejected, so the reader always leaves with a time.
  *
- * **The tape and the field are one value** (owner report, this session).
+ * **The tape and the field are one value** (owner report, 14.4).
  * A tape that moves while its part is being typed writes the draft, so the
  * big digits follow the tape and the next commit cannot put the old value
  * back. The tape's one programmatic scroll waits for the drag or fling to
@@ -225,7 +226,7 @@ internal fun DailyTimeDialog(
     // The keyboard is hidden only after an editor was actually open. Hiding it
     // on the dialog's first frame sent an IME transaction with no field on
     // screen, and the next Back landed while the window was still settling
-    // (found by the accessibility run, this session).
+    // (found by the accessibility run, 14.1).
     var hadEditing by remember { mutableStateOf(false) }
     var hourField by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -289,7 +290,7 @@ internal fun DailyTimeDialog(
      * The tape is a door to the same value the field edits, so a tape that
      * moves while its part is being typed has to write the draft too. Without
      * this the big digits kept the old draft and the next commit wrote it
-     * back over the tape's choice (owner report, this session).
+     * back over the tape's choice (owner report, 14.4).
      */
     fun selectHour(value: Int) {
         hour = if (twentyFour) value else (value % 12) + if (evening) 12 else 0
@@ -353,15 +354,15 @@ internal fun DailyTimeDialog(
             val room = maxHeight
             Column(
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(Space.Gutter)
                     .widthIn(max = 360.dp)
                     .fillMaxWidth()
                     .floatingLift(Radii.Popup)
                     .clip(Radii.Popup)
                     // A panel, like the sheets and the menus it stands among,
                     // so it wears their paper and not the tone of a control
-                    // that floats over the reading (owner decision, this
-                    // session: the day's exact time is a page the reader sets,
+                    // that floats over the reading (owner decision, 17.0: the
+                    // day's exact time is a page the reader sets,
                     // not a pill over the page).
                     .background(MaterialTheme.colorScheme.surface)
                     .semantics { paneTitle = title }
@@ -374,7 +375,7 @@ internal fun DailyTimeDialog(
                         // every keyboard height.
                         .heightIn(max = (room - 40.dp - FooterRoom).coerceAtLeast(1.dp))
                         .verticalScroll(rememberScrollState())
-                        .padding(start = 20.dp, end = 20.dp, top = 20.dp),
+                        .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Gutter),
                 ) {
                     Text(
                         text = title,
@@ -507,7 +508,7 @@ internal fun DailyTimeDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, top = Space.Block, bottom = 20.dp),
+                        .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Block, bottom = Space.Gutter),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -712,7 +713,7 @@ private fun TimeTape(
                 // own drag already reports the value it centers. Wait for the
                 // finger and the fling to finish before the one programmatic
                 // scroll, so the effect never fights the drag it came from
-                // (owner report, this session).
+                // (owner report, 14.4).
                 if (state.isScrollInProgress) {
                     snapshotFlow { state.isScrollInProgress }.first { !it }
                 }

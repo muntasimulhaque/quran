@@ -69,7 +69,7 @@ fun QuranApp(
      * Whether this phone has no notification settings screen at all, read
      * after a door the phone answered with nothing. The Daily page says it
      * beside the switch that needs it, because it is a property of the phone
-     * and not a moment (owner decision, this session).
+     * and not a moment (owner decision, 19.3).
      */
     notificationScreenMissing: () -> Boolean = { false },
     /** The same, for the phone's own exact alarm screen. */
@@ -178,7 +178,7 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
                 ),
                 // A state that names itself is a page's title, so it wears the
                 // sheet-title voice and a screen reader can land on it (owner
-                // decision, this session).
+                // decision, 13.3).
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.semantics { heading() },
@@ -225,8 +225,8 @@ private fun FirstPaint() {
             if (slow) {
                 Text(
                     text = stringResource(R.string.first_paint_preparing),
-                    // A status sentence, not a label (owner decision, this
-                    // session).
+                    // A status sentence, not a label
+                    // (owner decision, 13.3).
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Space.Gutter),

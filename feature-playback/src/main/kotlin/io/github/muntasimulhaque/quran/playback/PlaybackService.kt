@@ -34,7 +34,7 @@ import java.util.Locale
  * A word's own voice is not here at all: one word is its own file on the
  * reader's own sample player, which no session and no notification carry, so
  * nothing at this level ever watches a position or stops a verse at a
- * millisecond (owner decision, this session).
+ * millisecond (owner decision, 18.0).
  */
 class PlaybackService : MediaSessionService() {
 
@@ -52,7 +52,7 @@ class PlaybackService : MediaSessionService() {
      * player that stays in the shade forever is a small cost the reader never
      * asked for. Thirty minutes is the length of a reading session, but still
      * short enough that a paused player is not a permanent shade entry (owner
-     * decision, this session: five minutes took the controls away while the
+     * decision, 14.7: five minutes took the controls away while the
      * reader was still on the page).
      */
     private val pauseTimeout = Runnable {
@@ -61,8 +61,8 @@ class PlaybackService : MediaSessionService() {
             // Releasing the session first is what lets the app's controller
             // let go. A stopSelf alone leaves the service alive while that
             // controller is bound, and a notification that never leaves is
-            // the thing this timeout exists to put away (owner decision, this
-            // session).
+            // the thing this timeout exists to put away
+            // (owner decision, 10.2).
             session?.release()
             session = null
             player.release()
@@ -77,7 +77,7 @@ class PlaybackService : MediaSessionService() {
      * and those strings resolve against the context the service carries; it
      * carries the reader's own locale, the same way the activity does, so a
      * Bangla reading gets a Bangla notification even on a phone whose system
-     * language is English (owner decision, this session).
+     * language is English (owner decision, 8.8).
      */
     override fun attachBaseContext(newBase: Context) {
         val tag = LanguagePreference(newBase).tag()
@@ -116,7 +116,7 @@ class PlaybackService : MediaSessionService() {
             // the player asks for no lock of its own. The lock it would
             // otherwise take is the one that keeps the processor awake while
             // the DSP is playing, which is the whole of what audio offload is
-            // for (owner decision, this session).
+            // for (owner decision, 10.2).
             .setWakeMode(C.WAKE_MODE_NONE)
             .build()
         // The recitation is speech, and the phone has a decoder for it. Offload
@@ -125,7 +125,7 @@ class PlaybackService : MediaSessionService() {
         // instead of decoding every frame itself. Gapless and the reader's own
         // pace stay required: a device or a speed that cannot honor them keeps
         // the software path, and the reading sounds exactly as it did (owner
-        // decision, this session).
+        // decision, 10.2).
         player.trackSelectionParameters = player.trackSelectionParameters
             .buildUpon()
             .setAudioOffloadPreferences(
@@ -234,8 +234,8 @@ class PlaybackService : MediaSessionService() {
         /**
          * How long a paused recitation keeps its notification and its service.
          * Thirty minutes covers a reading session and still puts a forgotten
-         * player away; the task can be swiped sooner (owner decision, this
-         * session).
+         * player away; the task can be swiped sooner
+         * (owner decision, 14.7).
          */
         const val PAUSE_TIMEOUT_MS = 30 * 60 * 1000L
     }

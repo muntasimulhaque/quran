@@ -51,7 +51,7 @@ import kotlinx.coroutines.launch
  * same state as the hub row that opened it. The page that owns the list owns
  * the switch that shows it, and a reader who came here from the row, or from
  * a reader's own path, can turn the reading on without going back for it
- * (owner decision, this session). The switch that used to live on the hub row
+ * (owner decision, 11.9). The switch that used to live on the hub row
  * and nowhere else is still there; this is one value read in two places, not
  * a second setting.
  */
@@ -101,7 +101,7 @@ fun TranslationsPage(
  * when the reader asks for one, from the ayah pill's own Tafsir mark, so
  * there is no passage being drawn that a switch could hide; a tafsir is on
  * the reading exactly while a pack is chosen, the same way a reciter is the
- * reader's voice exactly while it is chosen (owner decision, this session).
+ * reader's voice exactly while it is chosen (owner decision, 12.5).
  */
 @Composable
 fun TafsirsPage(
@@ -141,7 +141,7 @@ fun TafsirsPage(
  * second list would only invite a reader to read the Quran in a language they
  * did not ask for.
  *
- * **The switch is the ask** (owner decision, this session). A fresh install
+ * **The switch is the ask** (owner decision, 16.9). A fresh install
  * carries no word list, and the switch used to stand disabled until the pack
  * was added, a dead control under the name of the feature while two other
  * rows did the same thing. It is the "tap that turns the aid on" the rule
@@ -155,15 +155,15 @@ fun TafsirsPage(
  * cannot choose which translation to fetch; here there is exactly one list.
  *
  * **The switch carries the feature's name, and the gesture is a lead** (owner
- * decision, this session). The row used to be titled with the instruction
+ * decision, 18.8). The row used to be titled with the instruction
  * "Press and hold a word for its meaning and pronunciation", a sentence in the
  * size and weight every other row's name wears, wrapped beside its switch. The
  * name is the one the hub already uses, and the instruction, which is the only
  * door to the word sheet, stands under it as the page's lead, the way the
  * Tajweed page opens with its own.
  *
- * **The one list is a file row, not a choice row** (owner decision, this
- * session). There is nothing to choose between: the switch is the choice, and
+ * **The one list is a file row, not a choice row** (owner decision, 18.8).
+ * There is nothing to choose between: the switch is the choice, and
  * the row is the file that choice needs. It carried a radio, the reciter's
  * one-answer mark, with `selected` set to the file's presence, so the same row
  * drew an empty check ring and installed on a fresh page, then a filled radio
@@ -172,8 +172,8 @@ fun TafsirsPage(
  * here, Remove when it is. The whole row is the add while the file is absent,
  * and the pill at the trailing end names the act.
  *
- * **The pronunciation is a door over its own surahs** (owner decision, this
- * session). It was one row, "Downloaded voices (12)" and a total size, with
+ * **The pronunciation is a door over its own surahs** (owner decision,
+ * 18.8). It was one row, "Downloaded voices (12)" and a total size, with
  * one Remove for all of them: a count the reader could not act on, a word that
  * belongs to the reciter, and a leading column the choice rows use with no
  * mark in it. The page now uses the reciter page's own shape: a disclosure
@@ -201,13 +201,13 @@ fun WordsPage(
         // The root travels with the list, so the row says what the tap will
         // fetch and not only what the list's own file weighs. The line names
         // the root while it is still to come, and goes back to the list's
-        // size once it is on the device (owner decision, this session).
+        // size once it is on the device (owner decision, 17.7).
         val root = packs.firstOrNull { it.id == ContentDatabase.WORD_ROOT_PACK }
         val rootToCome = root != null && !root.installed
         // The voices the reader has downloaded, read again when a pack
         // lands or leaves, and never on a progress tick: a folder holds up to
         // six thousand files and the list changes only when one arrives
-        // (owner decision, this session).
+        // (owner decision, 18.7).
         var voices by remember { mutableStateOf<List<DownloadedSurah>>(emptyList()) }
         LaunchedEffect(wordAudio.surah, wordAudio.installed) { voices = wordVoices() }
         val scope = rememberCoroutineScope()
@@ -241,7 +241,7 @@ fun WordsPage(
         }
         // The gesture that opens a word's own sheet is a page lead, not the
         // switch's name: the name is the feature, and this is how the feature
-        // is used (owner decision, this session).
+        // is used (owner decision, 18.8).
         Text(
             text = stringResource(R.string.settings_words_lead),
             style = MaterialTheme.typography.bodyMedium,
@@ -383,8 +383,8 @@ private fun WordListRow(
         }
         if (busy) {
             // The same 2 dp line the pill and the pack row carry, so a download
-            // has one shape wherever it is shown (owner decision, this
-            // session).
+            // has one shape wherever it is shown
+            // (owner decision, 18.8).
             DownloadLine(
                 progress = setup?.progress ?: 0f,
                 modifier = Modifier
@@ -405,11 +405,11 @@ private fun WordListRow(
  * The pronunciation on the device, behind the reciter page's own door: a
  * count, the chevron that says it opens, and one row per surah with its own
  * Remove. The door is the list's count, not a total size, because a number a
- * reader cannot act on says nothing (owner decision, this session).
+ * reader cannot act on says nothing (owner decision, 18.8).
  *
  * A surah's voices are asked about before they go when they are worth asking
- * about, by the same 20 MB rule a recitation keeps (owner decision, this
- * session).
+ * about, by the same 20 MB rule a recitation keeps
+ * (owner decision, 19.1).
  */
 @Composable
 private fun PronunciationDownloads(

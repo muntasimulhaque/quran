@@ -138,7 +138,7 @@ internal fun ReadingRows(
     // which the reader felt as a jump at the end of every drag (owner report:
     // the landscape reading stepped from ayah to ayah). An ayah cannot go
     // stale, so there is nothing to correct and nothing to move
-    // (owner decision, this session).
+    // (owner decision, 13.1).
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, place),
     )
@@ -146,7 +146,7 @@ internal fun ReadingRows(
     // should hear. The focus request moves the reading's own focus to the
     // target ayah, and the callback announces its reference; the list can
     // only focus an item it has composed, so the request waits one frame
-    // after the scroll (owner decision, this session).
+    // after the scroll (owner decision, 14.7).
     val jumpFocus = remember { FocusRequester() }
     var jumpAyah by remember { mutableStateOf<Int?>(null) }
 
@@ -167,7 +167,7 @@ internal fun ReadingRows(
     // The app's own scrolls are not the reader's thumb. A place that arrives,
     // the opening a surah is opened at, and the reciter's follow must not
     // spend the bar's distance or carry it away; the reader's drag is the
-    // only scroll the bar answers (owner decision, this session).
+    // only scroll the bar answers (owner decision, 19.4).
     val programmatic = remember { mutableStateOf(false) }
     val consumeBar by rememberUpdatedState(onBarScroll)
     val barSettled by rememberUpdatedState(onBarSettled)
@@ -194,7 +194,7 @@ internal fun ReadingRows(
     // scroll connection spends the drag's first distance on the bar, and the
     // menu goes with the page it hangs from. The place landing on screen is
     // not the reader moving the page, so a scroll the app started does not
-    // spend the bar (owner decision, this session).
+    // spend the bar (owner decision, 19.4).
     LaunchedEffect(listState, surah.number) {
         listState.interactionSource.interactions.collect { interaction ->
             if (interaction is DragInteraction.Start) {
@@ -294,7 +294,7 @@ internal fun ReadingRows(
     // characters. A reader who turns the text down gets more lines and not a
     // narrower column, and a reader on a wide screen gets the page the seven
     // inch tablet already reads instead of a line as long as the glass
-    // (owner decision, this session).
+    // (owner decision, 12.7).
     val side = rememberPageMargin() - Space.WashInset
     LazyColumn(
         state = listState,
@@ -343,7 +343,7 @@ internal fun ReadingRows(
                 // app that appeared to be text and a translation. The words'
                 // door stands where the reading arrives, on the one screen a
                 // reader always sees, and leaves for good once the list is on
-                // the device (owner decision, this session).
+                // the device (owner decision, 19.1).
                 if (!wordsInstalled) {
                     AddDoor(
                         text = stringResource(R.string.reading_add_words),
@@ -355,7 +355,7 @@ internal fun ReadingRows(
                 // The reading's whole navigation is one tap on the paper, and
                 // nothing on a bare page says so. The bar is the page's head,
                 // so the sentence that taught the tap retired with the tap
-                // itself (owner decision, this session).
+                // itself (owner decision, 19.4).
             }
         }
         items(
@@ -364,8 +364,8 @@ internal fun ReadingRows(
             // One slot type for every ayah, so a block that scrolls out
             // is the block the next one reuses; the opening and the
             // closing line are their own kinds and never borrow an
-            // ayah's measured composition (owner decision, this
-            // session).
+            // ayah's measured composition
+            // (owner decision, 10.0).
             contentType = { "ayah" },
         ) { index ->
             val row = rows[index]
@@ -379,7 +379,7 @@ internal fun ReadingRows(
                 // The word is read here, inside this item, and only for the
                 // ayah being recited: a tick that moves the wash invalidates
                 // this one item and leaves the page around it alone (owner
-                // decision, this session). Every other block keeps a stable
+                // decision, 13.0). Every other block keeps a stable
                 // null, so a word change never rebuilds its AnnotatedString.
                 playingWord = if (playingAyah == row.ayah.number) playedWord.value else null,
                 reveal = reveal?.takeIf { it.ayah == row.ayah.number },

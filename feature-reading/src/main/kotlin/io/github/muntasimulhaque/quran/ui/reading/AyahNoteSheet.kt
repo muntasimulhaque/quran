@@ -133,7 +133,7 @@ private fun NoteEditor(
     // The head's Clear and Save are a 48 dp target on a 26 dp name line.
     // The scroll's top edge owes the target the same room the word sheet's
     // speaker gets, so the two action heads start on the same line (owner
-    // decision, this session).
+    // decision, 18.2).
     val headInset = sheetHeadActionInset()
     Column(
         modifier = Modifier
@@ -146,8 +146,8 @@ private fun NoteEditor(
             // edits what is already written. The two at the right wear the
             // app's button shape, so the name and the buttons are never
             // mistaken for the same kind of word, and they hang from the
-            // head's line rather than making it taller (owner decision, this
-            // session).
+            // head's line rather than making it taller
+            // (owner decision, 18.1).
             SheetHead(
                 text = stringResource(
                     if (initial.isNullOrBlank()) R.string.card_note_take else R.string.card_note_edit,
@@ -169,9 +169,9 @@ private fun NoteEditor(
                             ),
                             onClick = { onSave(draft.text.trim().takeIf { it.isNotEmpty() }) },
                             // Save and Clear are two standalone actions, so they stand
-                            // the action gap apart (owner decision, this session). Save
+                            // the action gap apart (owner decision, 13.5). Save
                             // is the one act the sheet exists for, so it is the app's
-                            // one prominent shape (owner decision, this session). It is
+                            // one prominent shape (owner decision, 16.4). It is
                             // disabled while the write is in flight, and while an empty
                             // draft has nothing to write and no note to clear.
                             modifier = Modifier.padding(start = Space.Action),
@@ -198,7 +198,7 @@ private fun NoteEditor(
                 // The reader writes their note in the reading's own voice at the
                 // size they read at, not at a fixed point: it is one voice, the
                 // reader's own, and it follows the choice they made for the
-                // translation (owner decision, this session: the fixed 16 sp is
+                // translation (owner decision, 10.0: the fixed 16 sp is
                 // out, the reading voice is in).
                 textStyle = LocalReadingVoice.current.prose(
                     settings.translationSp,
@@ -216,7 +216,7 @@ private fun NoteEditor(
                     // The field keeps its name whether or not it holds words:
                     // a screen reader hears "Write a note for this ayah" and
                     // then the text, where it used to hear only the text once
-                    // the reader had typed (owner decision, this session).
+                    // the reader had typed (owner decision, 15.0).
                     .semantics { contentDescription = hint },
                 decorationBox = { inner ->
                     Box {

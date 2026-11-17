@@ -7,7 +7,7 @@ import io.github.muntasimulhaque.quran.playback.PlaybackUiState
  * What the reading's page answers when it is tapped, and what the phone's own
  * Back answers, at the foot of the reading.
  *
- * The pill's close is gone (owner decision, this session), so a raised
+ * The pill's close is gone (owner decision, 9.4), so a raised
  * control is put away the way every other raised control in this app is put
  * away: a tap on the page, or Back. That makes the table below the pill's
  * whole dismissal rule, which is why it is a pure function beside the screen
@@ -32,7 +32,7 @@ import io.github.muntasimulhaque.quran.playback.PlaybackUiState
  * raises no capsule of its own, and it ends itself. A recitation that waited
  * for the word is still the reader's, so a tap on the page while a word sounds
  * puts nothing away: the word finishes its clip and the recitation is given
- * back where it stood (owner decision, this session).
+ * back where it stood (owner decision, 18.0).
  */
 internal enum class RaisedAnswer {
 
@@ -66,8 +66,8 @@ internal fun raisedAnswer(
         RaisedAnswer.Nothing
     }
     // A sample is a word's own voice, not a session: nothing at the foot
-    // answers it, and it ends with its own clip (owner decision, this
-    // session).
+    // answers it, and it ends with its own clip
+    // (owner decision, 18.0).
     state.sample != null -> RaisedAnswer.Nothing
     state.error -> RaisedAnswer.StopRecitation
     state.downloadFailed -> RaisedAnswer.CancelDownload

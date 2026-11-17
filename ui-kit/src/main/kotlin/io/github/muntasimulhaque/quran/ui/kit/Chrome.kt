@@ -1,4 +1,4 @@
-package io.github.muntasimulhaque.quran.ui.reader
+package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
@@ -50,7 +50,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The target is the smallest the guidelines allow, never the size of the icon,
  * and the press is the app's own round control: the circle inside the target,
  * not the target itself, so a mark that stands beside another mark keeps its
- * air (owner decision, this session). [GlyphButton] is the whole of the
+ * air (owner decision, 9.6). [GlyphButton] is the whole of the
  * geometry, which the top bar's marks and the playback pill's transport read
  * as one rule.
  */
@@ -88,7 +88,7 @@ private val TitlePad = 14.dp
  * name: the name of the surah is what the reader looks for, and a tight bar
  * must shorten the label, never the name.
  *
- * **The two sit on one baseline** (owner decision, this session). They used
+ * **The two sit on one baseline** (owner decision, 13.9). They used
  * to be centered by their line boxes, and the name's box is 20.8 while the
  * label's is 19, so the 13 sp label landed at the name's x-height and read as
  * a subscript on the surah's name. The label's first baseline is placed on
@@ -98,9 +98,9 @@ private val TitlePad = 14.dp
  * When [onClick] is given the title answers a tap, which is the way back to
  * the top of a long surah without a scroll. It then wears the app's one
  * control shape, a capsule, and its own target hugs the words it names
- * rather than filling the bar's centre: the shape the eye reads and the
+ * rather than filling the bar's center: the shape the eye reads and the
  * node a finger gets are the same size, so a reader who taps the title sees
- * the boundary of what they tapped (owner decision, this session). The
+ * the boundary of what they tapped (owner decision, 6.8). The
  * words keep a [TitlePad] gap from the capsule's edge, the same gap the
  * app's text button keeps between its label and its shape, so the capsule
  * never touches the type it names; the gap is measured into the shape, so
@@ -187,12 +187,12 @@ fun ReadingTitle(
             ?.takeIf { name.width + gap + it.width + 2 * padX <= constraints.maxWidth }
         // The name and its part are one unit, and the unit is the shape: the
         // box reports what the words measure plus the gap around them rather
-        // than the bar's whole centre, so the capsule the reader sees on a
+        // than the bar's whole center, so the capsule the reader sees on a
         // tap is exactly the control they tapped. The unit is a control when
         // it answers a tap, and a control owes the finger 48 dp: the type is
         // shorter and narrower than that, so the box is grown to the floor
         // and the lines are centered in it (owner report, the accessibility
-        // test). The row that holds the title centres the unit, so the name
+        // test). The row that holds the title centers the unit, so the name
         // stays where the eye expects it whether it is wide or narrow.
         val contentWidth = name.width + (label?.let { gap + it.width } ?: 0)
         val shapeWidth = contentWidth + 2 * padX

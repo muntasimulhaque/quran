@@ -15,13 +15,13 @@ import io.github.muntasimulhaque.quran.feature.reading.R
  *
  * The codes come from the corpus through the word pack, and the words are
  * the app's own: they are the settled names of Arabic grammar in English
- * and in Bangla, not a translation of scripture (owner decision, this
- * session).
+ * and in Bangla, not a translation of scripture
+ * (owner decision, 18.0).
  *
  * The parts are separated by the app's middot, the mark it puts between two
  * facts in one line ("Al-Kahf · 18:10", "Downloading 43% · 5.8 MB"). A comma
  * joins clauses, so "Noun, nominative" read as one long description; the
- * middot reads as three facts (owner decision, this session). A middot never
+ * middot reads as three facts (owner decision, 19.1). A middot never
  * joins a name to a sentence, and never a verb to a size: this page's parts are
  * all facts.
  */

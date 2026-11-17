@@ -98,14 +98,14 @@ internal fun ReaderSheets(
             notes = saved,
             // The reference result names its surah the way Browse and the
             // reading do, so `18:10` is never a number the reader has to
-            // place from memory (owner decision, this session).
+            // place from memory (owner decision, 15.5).
             surahName = { number ->
                 viewModel.surahs.firstOrNull { it.number == number }?.nameSimple
             },
             // Search reads the language the reader chose and no other: a
             // Bangla reader searches Bangla translations and tafsirs even
-            // when an English column was added by hand (owner decision, this
-            // session).
+            // when an English column was added by hand
+            // (owner decision, 10.0).
             translationPacks = remember(viewModel.searchTranslationPacks) {
                 viewModel.searchTranslationPacks.map { it.id }
             },
@@ -183,7 +183,7 @@ internal fun ReaderSheets(
                     viewModel.setTypeSize(role, step)
                     // The translation's step is the tafsir's step: two
                     // controls govern the prose the reading draws (owner
-                    // decision, this session). The word meaning sheet reads
+                    // decision, 16.2). The word meaning sheet reads
                     // the Quran's word at the Arabic size and its gloss at
                     // the translation size, so there is no aid size to set.
                     if (role == io.github.muntasimulhaque.quran.data.TypeRole.Translation) {

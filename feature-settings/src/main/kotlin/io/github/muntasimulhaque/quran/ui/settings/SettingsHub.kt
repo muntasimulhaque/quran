@@ -67,7 +67,7 @@ private fun themeSummary(settings: AppSettings): String = settings.theme.name()
  * same room above and below it, so the list has no gap that reads as a
  * section break.
  *
- * **The hub carries no leading icons** (owner decision, this session). The
+ * **The hub carries no leading icons** (owner decision, 18.2). The
  * value under each name is the row's sign: Aa is the text size, System is
  * the ground, English is the language, the pack names are the reading,
  * Minshawi is the voice, 8:00 is the reminder. A 20 dp leading mark would
@@ -111,7 +111,7 @@ fun SettingsHub(
         // it, then the translation, then the tafsir behind the ayah card. Each
         // row is a place and the state it stands in, and the page it opens is
         // where the reader changes it: the hub is an index, and an index carries
-        // no second way to act (owner decision, this session).
+        // no second way to act (owner decision, 15.2).
         PageRow(
             title = stringResource(R.string.settings_tajweed_title),
             summary = onOff(settings.tajweed),
@@ -131,8 +131,8 @@ fun SettingsHub(
         // when the reader asks for one, from the pill's own Tafsir mark, so
         // there is no page of tafsir being drawn that a switch could hide:
         // the packs are the setting, the same way the reciter's voice is the
-        // setting and no switch turns a reciter on (owner decision, this
-        // session).
+        // setting and no switch turns a reciter on
+        // (owner decision, 12.5).
         PageRow(
             title = stringResource(R.string.settings_title_tafsirs),
             summary = tafsirSummary(settings, packs),
@@ -179,8 +179,8 @@ private fun FontSizeSample(settings: AppSettings) {
 
 /**
  * The reader's reciter, in the reader's own language: the hub row used to
- * draw the catalog's English name beside a Bangla interface (owner decision,
- * this session).
+ * draw the catalog's English name beside a Bangla interface
+ * (owner decision, 8.3).
  */
 @Composable
 private fun reciterName(settings: AppSettings, recitations: List<Recitation>): String {
@@ -198,7 +198,7 @@ private fun reciterName(settings: AppSettings, recitations: List<Recitation>): S
  *
  * While the phone withholds notifications or the exact alarm, the row does not
  * promise the time at all: the daily ayah cannot arrive, or can arrive late,
- * and saying which is the honest line (owner decision, this session).
+ * and saying which is the honest line (owner decision, 9.1).
  */
 @Composable
 private fun dailySubtitle(
@@ -225,7 +225,7 @@ private fun onOff(on: Boolean): String = stringResource(
  * What the word meanings row says: whether the reading draws the meanings,
  * and, while the list is on its way or has failed, what the download is
  * doing. The size and the Add live on the page, so the index row keeps one
- * short line (owner decision, this session).
+ * short line (owner decision, 15.2).
  *
  * The value follows the switch's old rule: it reads On only when the aid is
  * on and the list it needs is on the device, so an On in the list always
@@ -247,7 +247,7 @@ private fun wordsSummary(
  * What the translation row says: the pack the reading draws with, or Off.
  * The pack's name is the useful half when the translation is on, and a
  * chosen pack that is not on the device reads as the reader's file and not
- * as a missing setting (owner decision, this session).
+ * as a missing setting (owner decision, 15.2).
  */
 @Composable
 private fun translationSummary(settings: AppSettings, packs: List<ContentPack>): String =

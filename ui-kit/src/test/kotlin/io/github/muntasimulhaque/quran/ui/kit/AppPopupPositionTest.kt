@@ -20,7 +20,7 @@ import org.junit.Test
  * control it hangs from is pinned in the compose suite, which can see that.
  *
  * The two together are the promise. The pill's anchor stands on the capsule's
- * middle, and its menu is centred on that anchor and rises above it with
+ * middle, and its menu is centered on that anchor and rises above it with
  * [PopupGap] of ground between: the capsule floats at the foot of the page, so
  * below it is no room at all. The reading's ayah door stands at the head of an
  * ayah, hangs its menu from its own leading edge, and opens downward, the way
@@ -56,7 +56,7 @@ class AppPopupPositionTest {
             side = PopupSide.Above,
         )
         assertEquals(
-            "the popup's own left edge is the anchor's left edge, so both stand on one centre",
+            "the popup's own left edge is the anchor's left edge, so both stand on one center",
             anchor.left,
             at.x,
         )
@@ -200,7 +200,7 @@ class AppPopupPositionTest {
     fun aDoorMenuThatCannotFitEitherSideStandsBesideTheDoor() {
         // A door in the middle of a landscape phone: the menu is taller than
         // either side's ground. It stands beside the door on the side with the
-        // room, centred on the door, and every row stays on the glass, so the
+        // room, centered on the door, and every row stays on the glass, so the
         // number the reader tapped is never covered (owner decision, this
         // session).
         val anchor = IntRect(left = 84, top = 440, right = 260, bottom = 546)
@@ -259,7 +259,7 @@ class AppPopupPositionTest {
 
     @Test
     fun aCapsuleMenuThatCannotFitEitherSideTakesTheSafeBand() {
-        // The pill is a centred thing, and its menu keeps that middle: a
+        // The pill is a centered thing, and its menu keeps that middle: a
         // capsule has no leading edge to stand beside, so it takes the band.
         val anchor = IntRect(left = 300, top = 440, right = 780, bottom = 500)
         val content = IntSize(480, 480)

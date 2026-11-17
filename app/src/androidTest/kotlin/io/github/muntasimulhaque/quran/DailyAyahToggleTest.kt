@@ -197,7 +197,7 @@ class DailyAyahToggleTest {
      * One value in two places: the page turns the reminder on, and the index
      * row says the moment it will arrive. A reader who taps the row lands on
      * the switch they came for, and turning it on there is what the row says
-     * when they go back (owner decision, this session).
+     * when they go back (owner decision, 15.2).
      */
     @Test
     fun thePageSwitchIsTheSameReminder() {

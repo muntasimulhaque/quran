@@ -69,7 +69,7 @@ private data class TafsirView(
      * The passage already parsed into its blocks. The parse is the one heavy
      * step in showing a tafsir, and it is pure work: doing it here, on the
      * read's own worker, leaves the frame that unfolds the panel with only
-     * the layout to do (owner report, this session).
+     * the layout to do (owner report, 6.7).
      */
     val blocks: List<TextBlock>,
 )
@@ -87,13 +87,13 @@ private data class TafsirLoad(
  * The ayah and its translation and meanings are already on the page, so the
  * card does not repeat them: it opens only the tafsirs. The note is not here
  * at all: it belongs to the ayah's own menu, at the number at its head, one
- * tap away rather than a scroll to the foot of a card (owner decision, this
- * session).
+ * tap away rather than a scroll to the foot of a card
+ * (owner decision, 13.3).
  *
  * The sheet opens on the commentary, not on a name for it. The reader came
  * from the ayah's own Tafsir mark, so the drawn `Tafsir` head and its
  * `Ayah 2:255` line said what the reader already knew and what the passage's
- * own title says below (owner decision, this session). What is drawn first is
+ * own title says below (owner decision, 13.9). What is drawn first is
  * the pack itself: one pack is a two-line head, and more than one is a door,
  * both naming the language before the pack. The language is the label's 12 in
  * the secondary ink, the pack's name is the row name's 15, and the passage's
@@ -101,9 +101,9 @@ private data class TafsirLoad(
  * line reads the same whether or not there is a choice to make. The reference
  * belongs to the passage and stands with it, because two packs can cover
  * different ayahs of one surah, so a reference at the head of the sheet would
- * be a promise only one pack keeps (owner decision, this session).
+ * be a promise only one pack keeps (owner decision, 14.1).
  *
- * **The language leads** (owner decision, this session). The settings pages
+ * **The language leads** (owner decision, 14.1). The settings pages
  * already group packs under a language head and then name them, and the card
  * said "Ibn Kathir · English" in one line, so the same pack was read in two
  * orders on two surfaces. The card now says "English" over "Ibn Kathir",
@@ -124,7 +124,7 @@ fun AyahCard(
      * The tafsir this build offers in the reader's language, when the reader
      * does not have it. The card is the moment of intent, so the offer stands
      * here with its language, name, and size rather than sending the reader
-     * to Settings (owner decision, this session).
+     * to Settings (owner decision, 15.5).
      */
     tafsirOffer: ContentPack? = null,
     onInstallTafsir: (String) -> Unit = {},
@@ -136,7 +136,7 @@ fun AyahCard(
     val sheetState = rememberExpandedSheetState()
     // The card's selectable passage registers here, and any touch on the card
     // clears it, so the platform menu goes when the reader touches anywhere
-    // outside it (owner decision, this session).
+    // outside it (owner decision, 13.7).
     val selectionClearer = remember { SelectionClearer() }
     // The pack a search hit named, when there is one: the hit already chose
     // the commentary, so its door stands open and its passage under it. With
@@ -147,7 +147,7 @@ fun AyahCard(
     // door. The reader's own language follows it: a pack added by hand in
     // another language is the exception and never the first door, so with two
     // Ibn Kathirs the one in the language the reader is reading leads (owner
-    // decision, this session). The fallback is the shell's own, the same
+    // decision, 12.4). The fallback is the shell's own, the same
     // answer it gives before the first choice.
     val readerLanguage = settings.readingLanguage
     val orderedPacks = remember(tafsirPacks, initialTafsirPack, readerLanguage) {
@@ -169,7 +169,7 @@ fun AyahCard(
     // tapped: the read is one indexed query of a millisecond or two, and
     // paying for it here puts the text in hand before the sheet has finished
     // moving, so the panel opens on prose instead of on "Opening…" (owner
-    // report, this session: the wait was the tap-to-read, not the query).
+    // report, 6.7: the wait was the tap-to-read, not the query).
     val load by produceState<TafsirLoad>(
         initialValue = TafsirLoad(),
         content,
@@ -211,8 +211,8 @@ fun AyahCard(
     // The card is the app's one page, which is the glass, and the tafsir
     // inside it stands on the app's one margin like every other line of prose:
     // a ten inch screen reads a longer line and the reader who changes the
-    // tafsir size gets more lines, never a narrower column (owner decision,
-    // this session).
+    // tafsir size gets more lines, never a narrower column
+    // (owner decision, 12.3).
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -249,13 +249,13 @@ fun AyahCard(
             // named the pack, so there is nothing here to hide behind a
             // switch. The packs are the choice, and the mark that opens
             // this card exists exactly while one of them is on the device
-            // (owner decision, this session).
+            // (owner decision, 12.5).
             // The card opens on the pack. The reader came from the ayah's
             // Tafsir mark, so a drawn `Tafsir` head and an `Ayah 2:255` line
             // repeated what they already knew and what the passage's title
             // says below; the source line is the first thing the card has to
-            // say, and the passage's own title follows it (owner decision,
-            // this session).
+            // say, and the passage's own title follows it
+            // (owner decision, 13.8).
             if (tafsirPacks.isEmpty()) {
                 TafsirOffer(
                     pack = tafsirOffer,
@@ -270,11 +270,11 @@ fun AyahCard(
                     // the pill, or arrived from a search hit that already
                     // named the pack, so its language and its name stand as
                     // one head and its passage stands under them with no door
-                    // to fold (owner decision, this session). The language is
+                    // to fold (owner decision, 14.1). The language is
                     // the settings pages' group label at 12 in the secondary
                     // ink; the name keeps the row name's 15, so one source
                     // line does not change size with the number of packs on
-                    // the device (owner decision, this session).
+                    // the device (owner decision, 14.1).
                     val packName = contentPackName(single.id, single.name)
                     PackNames(
                         language = languageName(single.language),
@@ -302,7 +302,7 @@ fun AyahCard(
                     // of the next row. The passage's foot used to be 0, and
                     // the next door's own head made the end of a source closer
                     // to the next one than two doors are to each other (owner
-                    // decision, this session).
+                    // decision, 15.1).
                     var passageOpen = false
                     orderedPacks.forEach { pack ->
                         if (passageOpen) {
@@ -401,8 +401,8 @@ private fun DoorRow(
  *
  * A reader who chose a tafsir and a reader who has only one see the same
  * block. [opening] is null where the name above already said whose passage is
- * on its way, so the wait never repeats the name (owner decision, this
- * session).
+ * on its way, so the wait never repeats the name
+ * (owner decision, 12.4).
  */
 @Composable
 private fun PassageArea(
@@ -439,8 +439,8 @@ private fun PassageArea(
  *
  * The reference is the passage's, read from the pack that returned it, so two
  * tafsirs of one ayah can name the same span or different ones without the
- * sheet ever promising what only one of them keeps (owner decision, this
- * session). It is the passage's title: [TypeLadder.articleTitleSp], which is
+ * sheet ever promising what only one of them keeps (owner decision, 13.3). It
+ * is the passage's title: [TypeLadder.articleTitleSp], which is
  * 17 at the default 16 body and moves from 13.8 to 19.5 across the reader's
  * steps, capped at 19.5, so it stands above the document's own heads at every
  * step without becoming a page title on a phone. Its line is the script's
@@ -482,7 +482,7 @@ private fun TafsirPanel(
         // A commentary is the reader's to keep a sentence of: the passage is
         // selectable, so a long press copies from it with the platform's own
         // menu instead of sending the reader through Share for a picture
-        // (owner decision, this session). The heading above it stays outside
+        // (owner decision, 13.5). The heading above it stays outside
         // the selection: a reference is the card's, not the commentary's. The
         // passage registers with the card's clearer, so a touch anywhere on
         // the card puts the menu away.
@@ -504,7 +504,7 @@ private fun TafsirPanel(
  * it. The language, the pack's name, and its size are the whole of the
  * question; Add is the one act, and Not now closes the card. A language with
  * no offered pack falls back to the Settings door, so the card is never a
- * sheet with nothing in it (owner decision, this session).
+ * sheet with nothing in it (owner decision, 15.5).
  */
 @Composable
 private fun TafsirOffer(

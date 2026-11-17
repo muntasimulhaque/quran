@@ -266,7 +266,7 @@ class LastReadStore internal constructor(
             // carry across: the app has not shipped, and the old rows cannot
             // be rebuilt into the readings they never recorded. The table is
             // made new, so the first reading after the update is the first
-            // row in it (owner decision, this session).
+            // row in it (owner decision, 7.8).
             db.execSQL("DROP TABLE IF EXISTS $TABLE")
             onCreate(db)
         }

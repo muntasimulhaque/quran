@@ -13,13 +13,13 @@ import androidx.compose.ui.unit.dp
  * is a block inside the page, the tile is a card that stands on a page, the
  * sheet is a page over the reading, and the popup is the one surface that
  * hangs from another control. A title that answers a tap is a control, so it
- * wears the pill and never a shape of its own (owner decision, this session).
+ * wears the pill and never a shape of its own (owner decision, 13.8).
  *
  * The sheet's top corners are 28 dp, Material's large surface, and only its
  * top corners are round: it rises from the foot of the glass. The 18 dp shape
  * was called a sheet but was used for a card on a page, so the name moved to
  * [Tile] and the sheet's real shape is now the one the app draws (owner
- * decision, this session).
+ * decision, 13.8).
  */
 object Radii {
 

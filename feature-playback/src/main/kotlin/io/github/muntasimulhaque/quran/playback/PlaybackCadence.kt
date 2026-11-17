@@ -8,7 +8,7 @@ package io.github.muntasimulhaque.quran.playback
  * of lag, not precision, and it grew when the reader sped the reciter up. The
  * checkpoint is the only timer left. It writes the heard place for the
  * resume, and it is worth its cost only while the reading is hidden. A paused
- * player needs neither (owner decision, this session).
+ * player needs neither (owner decision, 16.3).
  */
 internal data class PlaybackCadence(
     /** Whether the ten-second place checkpoint should run. */

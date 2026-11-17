@@ -16,7 +16,7 @@ enum class TypeRole { Arabic, Translation, Tafsir }
  * the text was designed for.
  *
  * The steps are evenly spaced, 0.8 through 1.2 with 0.1 between them, and the
- * default is 1, the middle step (owner decision, this session). The ladder
+ * default is 1, the middle step (owner decision, 8.1). The ladder
  * before this was 0.75, 0.85, 1, 1.1, 1.2, whose gap under the default was
  * 0.15 while every other gap was 0.1: the one step down from the shipped
  * default read heavier than the rest, and an even ladder also makes "one step
@@ -40,11 +40,11 @@ enum class TypeRole { Arabic, Translation, Tafsir }
  * and the 2.0 line is the Quran Foundation's own for the QPC Hafs face. It is
  * more contrast than the field (Quran for Android 1.4, Quran.com 1.28); the
  * reader can still go down to 20.8 at the smallest step and up to 31.2 at the
- * largest (owner decision, this session).
+ * largest (owner decision, 14.0).
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of
  * headings. The smallest is 0.8, the compact choice, at 12.8 sp of
- * translation and 12 sp of meaning (owner decision, this session). The
+ * translation and 12 sp of meaning (owner decision, 14.0). The
  * earlier session pinned 0.75 against the larger base as the readability
  * floor; the two sit within a hair of each other at the default, and the
  * floor stands.
@@ -68,8 +68,8 @@ object TextSize {
      * The line a Bangla paragraph of reading takes per em of text: 31 over
      * 18. Noto Serif Bengali's own box is 1.594 of the em and the script
      * stacks vowel marks above and below the line, so a 1.6 line borrowed from
-     * Literata would be a hair under the face's own ink (owner decision, this
-     * session: the Bangla reading takes its own line at last).
+     * Literata would be a hair under the face's own ink (owner decision, 13.2:
+     * the Bangla reading takes its own line at last).
      */
     const val BENGALI_PROSE_RATIO = 31f / 18f
 
@@ -86,7 +86,7 @@ object TextSize {
      * scales keeps its meaning: 1.6 becomes 1.2, the largest step now, not
      * whatever index it was. A tie goes to the larger step, so the retired
      * 0.85 lands on 0.9, the place it held under the new ladder, and never on
-     * 0.8 (owner decision, this session).
+     * 0.8 (owner decision, 8.1).
      */
     fun step(value: Float): Float {
         var nearest = DEFAULT
@@ -132,7 +132,7 @@ object TextSize {
      * default, 24/26 of the reader's own Quran size, so it follows the
      * Arabic through the five steps. Its ink is about 0.89 of the em, so the
      * digits inside it are drawn at nearly the verse's own size instead of
-     * at a bracket's (owner decision, this session).
+     * at a bracket's (owner decision, 14.0).
      */
     fun medallionSp(step: Float): Float = medallionAt(sp(TypeRole.Arabic, step))
 
@@ -145,7 +145,7 @@ object TextSize {
         // The tafsir is the longest prose the app draws, read in the same
         // sitting as the translation it opens from, so it stands at the
         // translation's own size and not a point under it (owner decision,
-        // this session; the two sizes read as one voice now).
+        // 5.8; the two sizes read as one voice now).
         TypeRole.Tafsir -> 16f
     }
 
@@ -154,14 +154,14 @@ object TextSize {
      * The ratio is public because the search results draw the Quran's own
      * line outside the reading's sizes and must breathe at the reading's own
      * ratio, one rule on both surfaces rather than two copies that can drift
-     * (owner decision, this session).
+     * (owner decision, 7.8).
      */
     fun lineRatio(role: TypeRole): Float = when (role) {
         // 2.0, the Quran Foundation's own leading for the QPC Hafs face in its
         // font guide. At 31.2 the app carried 1.9, measured against the marks;
         // with the base at 26 the official 2.0 gives the marks their room and
-        // matches the field the app was compared with (owner decision, this
-        // session).
+        // matches the field the app was compared with
+        // (owner decision, 13.3).
         TypeRole.Arabic -> 2f
         else -> LATIN_PROSE_RATIO
     }
@@ -173,7 +173,7 @@ object TextSize {
      * The one stand for Arabic beside prose, in the translation and the
      * tafsir alike: 24 of the Quran's own 26, a step under the verse and
      * still the Quran's text at this stand without reaching the verse (owner
-     * decision, this session).
+     * decision, 14.0).
      */
     private const val INLINE_ARABIC_RATIO = 24f / ARABIC_BASE
 

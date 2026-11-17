@@ -40,7 +40,7 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * and then it plays.
  *
  * **The offer is one row, 64 dp, the pill's own shape** (owner decision,
- * this session). It used to be a two-row capsule of 96: a 48 dp line over a
+ * 17.2). It used to be a two-row capsule of 96: a 48 dp line over a
  * 48 dp pair of answers, because the line and the two buttons could not share
  * the capsule's 328. The one-row form already existed beside it: the pill's
  * own pending-download voice asks the same question in one 64 dp row. The
@@ -52,9 +52,9 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * an ellipsis takes. 8 dp, the finger's 48 dp, and 8 dp are the height the
  * playing pill already stands at.
  *
- * **The block is the door, and the price is in view** (owner decision, this
- * session). The block opens the same reciter list the playing pill carries,
- * hung from the capsule's centre: the chosen voice's mark, and what each
+ * **The block is the door, and the price is in view** (owner decision,
+ * 17.2). The block opens the same reciter list the playing pill carries,
+ * hung from the capsule's center: the chosen voice's mark, and what each
  * voice would still need for this surah, so the choice is made with its price
  * in view. A chosen voice is the app's reciter, and the offer is asked again
  * with that voice's name and size, so the size beside the name changes with
@@ -62,7 +62,7 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * with no published voice to offer keeps the block as a notice, because a
  * door with nothing behind it is a door that lies.
  *
- * **An offer has no X and no Not now** (owner decision, this session). A page
+ * **An offer has no X and no Not now** (owner decision, 17.2). A page
  * tap and Back put it away; the answer is Download or Retry, and the way out
  * is the page. The offer used to carry Not now as the visible "no"; the
  * one-row form cannot hold a third answer at the pill's 328 without cutting
@@ -114,7 +114,7 @@ internal fun ListenOfferBar(
         modifier = modifier
             // The caller's gutters come first, then the pill's one measure:
             // the offer is the same width as the playing pill and takes it
-            // before its shape is drawn (owner decision, this session).
+            // before its shape is drawn (owner decision, 16.1).
             .widthIn(max = PillMeasure)
             .fillMaxWidth()
             .floatingLift(Radii.Pill)
@@ -124,7 +124,7 @@ internal fun ListenOfferBar(
         // The bar stands at the pill's one measure, and its content stands on
         // its own middle whatever measure it is given. The measure is taken
         // before the shape so a narrower glass narrows the capsule and never
-        // its words alone (owner decision, this session).
+        // its words alone (owner decision, 9.7).
         contentAlignment = Alignment.Center,
     ) {
         if (progress == null) {
@@ -132,7 +132,7 @@ internal fun ListenOfferBar(
             // leading end and the one answer at the trailing one. The block
             // is the playing pill's lockup, and the size stands with the
             // voice it prices, so the surah and the size are both whole
-            // (owner report, this session).
+            // (owner report, 18.4).
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -240,7 +240,7 @@ internal fun ListenOfferBar(
                 )
             }
         }
-        // The chooser hangs from the capsule's own centre, exactly as it does
+        // The chooser hangs from the capsule's own center, exactly as it does
         // on the playing pill: one list opens the same way in both of its
         // homes. It is composed only while it is asked for, and only while
         // there is still an ask to change; a transfer has no voice to choose.

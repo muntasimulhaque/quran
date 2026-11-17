@@ -10,7 +10,7 @@ package io.github.muntasimulhaque.quran.core
  * The first part is the ayah's running number, 1 to 6236, the content
  * database's key and the reading's place. It is not the ayah's number inside
  * its surah: 16:28 is running 1929, and a pill that printed the running
- * number as the verse's own read 16:1929 (owner report, this session). The
+ * number as the verse's own read 16:1929 (owner report, 19.2). The
  * reader's number travels beside the id, in the item's own ayah, so nothing
  * has to guess which of the two it was given.
  *
@@ -33,7 +33,7 @@ object RecitationPlaylist {
      * The running ayah number an id names, or null when the id is not one of
      * ours. This is the content database's key and the reading's place, 1 to
      * 6236, never the ayah's number inside its surah: 2:255 is running 262
-     * (owner report, this session).
+     * (owner report, 19.2).
      */
     fun runningAyahOf(mediaId: String): Int? = mediaId.substringBefore(':').toIntOrNull()
 
@@ -61,8 +61,8 @@ object RecitationPlaylist {
      * then does is the reader's own answer, [EndOfAudio.surahEnding], read at
      * the crossing: the playlist holds the next surah whatever the answer, so
      * a deliberate Next and Previous still carry the reader out of the surah,
-     * and the answer decides whether the audio follows it (owner decision, this
-     * session).
+     * and the answer decides whether the audio follows it
+     * (owner decision, 11.9).
      */
     fun endedSurah(
         playing: Int?,

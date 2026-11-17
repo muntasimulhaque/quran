@@ -42,7 +42,7 @@ import org.junit.runner.RunWith
  * These are not visual rules. A pane with no name, a tab that says "radio
  * button", or a field that says nothing is invisible in a screenshot and
  * obvious to a reader with TalkBack, so they get their own gate rather than a
- * sentence in a comment (owner decision, this session).
+ * sentence in a comment (owner decision, 13.8).
  */
 @RunWith(AndroidJUnit4::class)
 class SemanticsTest {
@@ -102,7 +102,7 @@ class SemanticsTest {
             .assert(hasContentDescription(searchHint))
         // A field keeps its name after the reader types: a name that vanished
         // with the first letter left a text field with no name at all (owner
-        // decision, this session).
+        // decision, 15.0).
         compose.onNode(hasSetTextAction()).performTextInput("mercy")
         compose.onNode(hasSetTextAction())
             .assert(hasContentDescription(searchHint))

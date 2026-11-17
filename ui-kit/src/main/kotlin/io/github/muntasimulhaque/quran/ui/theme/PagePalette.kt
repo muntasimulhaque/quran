@@ -26,8 +26,8 @@ import androidx.compose.ui.graphics.Color
  * ayah whose menu is open, the introduction the reader opened, the row Browse
  * is standing on, and the word the word sheet is naming. It is the page's own
  * family and never a tint of the accent, so the one surface in the app that
- * says "this one" says it in the paper's voice (owner decision, this
- * session). See [PaperSelected] for the measurement.
+ * says "this one" says it in the paper's voice (owner decision,
+ * 19.1). See [PaperSelected] for the measurement.
  *
  * [match] is its sibling for the thing that was *found* rather than chosen:
  * the word a search matched, and the text a reader selected in a field. Same
@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.Color
  * [mastheadInk] is the first paint's display tone, the interface's word at
  * 0.9, because a 48 sp line does not need the reading's full ink. Both live
  * here so the theme owns them and the contrast test can measure them, rather
- * than each call site mixing its own alpha (owner decision, this session).
+ * than each call site mixing its own alpha (owner decision, 14.0).
  */
 data class PagePalette(
     val ink: Color,
@@ -48,7 +48,7 @@ data class PagePalette(
      * the word a search arrived on. It is a wash and not a recolored word, so
      * the letters keep their own ink and their tajweed colors. Its alpha is
      * the strongest tint the seven rule colors can be read on, which is why
-     * the ayah-level recitation wash is gone (owner decision, this session).
+     * the ayah-level recitation wash is gone (owner decision, 15.9).
      */
     val highlight: Color,
     /** The chosen thing's ground: warm, opaque, and never the accent. */
@@ -56,7 +56,7 @@ data class PagePalette(
     /**
      * The found thing's ground: the word a search matched, and the text a
      * reader selected in a field. Warm, opaque, one step louder than
-     * [selected], and never the accent (owner decision, this session).
+     * [selected], and never the accent (owner decision, 19.1).
      */
     val match: Color,
     val tajweed: TajweedColors,

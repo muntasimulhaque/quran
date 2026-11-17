@@ -40,8 +40,8 @@ import java.io.File
  * two lines, a button's word to one, and the reading's title to one with no
  * wrapping. A frame is the only evidence that they are fine, and the store set
  * is English, so this class exists to produce that evidence and nothing else.
- * It is dispatch-only and never part of a release (owner decision, this
- * session).
+ * It is dispatch-only and never part of a release
+ * (owner decision, 19.1).
  *
  * The phone is handed back as it was found, in a `finally`: every instrumented
  * class in a run shares one process and one set of settings, and a language
@@ -64,7 +64,7 @@ class BanglaCaptureTest {
      * context looks for "Reading" on a screen that says "পাঠ" and waits thirty
      * seconds for a page that is already there, which is how this class failed
      * its first run. The configuration is made once here, in the one place a
-     * name is read (owner report, this session).
+     * name is read (owner report, 19.1).
      */
     private val bangla by lazy {
         val configuration = android.content.res.Configuration(context.resources.configuration)
@@ -159,8 +159,8 @@ class BanglaCaptureTest {
     /**
      * A tap on the paper, in the quiet margin the reading keeps for it.
      *
-     * The page's centre is not a safe tap: a translation's footnote marker sits
-     * in the flow of the text, so a centre tap opens the footnote instead of the
+     * The page's center is not a safe tap: a translation's footnote marker sits
+     * in the flow of the text, so a center tap opens the footnote instead of the
      * chrome. Four pixels in from the page's leading edge is the margin no ayah
      * or control reaches.
      */

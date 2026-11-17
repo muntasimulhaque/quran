@@ -18,7 +18,7 @@ import java.util.LinkedHashMap
  * at once (the reading list, the ayah card's share, and the size sample), and
  * it is the place where a pack arriving and a query in flight meet. Keeping
  * it whole here means the view model's own file is about the reader's choices
- * and the row cache's file is about the rows (owner decision, this session).
+ * and the row cache's file is about the rows (owner decision, 6.6).
  *
  * Everything it answers is shaped by three things the caller owns: the open
  * library, the translation packs the reader has on, and the reader's own
@@ -109,7 +109,7 @@ internal class ReadingRowsCache(
                 val roots = open.wordRoots(numbers)
                 // The study lines are read only when the aid that opens the
                 // sheet is on: a word meaning the reader turned off is not a
-                // query the reading pays for (owner decision, this session).
+                // query the reading pays for (owner decision, 18.0).
                 val grammar = if (wordByWord) {
                     open.wordGrammar(numbers, language())
                 } else {

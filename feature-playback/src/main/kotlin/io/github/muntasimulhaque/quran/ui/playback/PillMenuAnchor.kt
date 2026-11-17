@@ -21,14 +21,14 @@ import io.github.muntasimulhaque.quran.ui.kit.PopupMeasure
 /**
  * The anchor hairline: a menu is placed from the bounds of the box it hangs
  * on, and a box with no height has no bounds to read, so a zero-height anchor
- * stands every popup at the window edge instead of the capsule centre. One dp
+ * stands every popup at the window edge instead of the capsule center. One dp
  * is the thinnest box that has a place on the page, and it draws nothing.
  */
 private val AnchorLine = 1.dp
 
 /**
  * The anchor the pill's own popup hangs from, on both of the bars it wears:
- * the capsule's own width, with the popup's measure centred on it and its top
+ * the capsule's own width, with the popup's measure centered on it and its top
  * edge as the line they drop from.
  *
  * The anchor and the popup are one measure on purpose, and the anchor is read
@@ -36,7 +36,7 @@ private val AnchorLine = 1.dp
  * not from whatever the library would take from a box it cannot see the
  * bounds of (owner report). It draws nothing and takes one hairline of room,
  * because a box with no height has no bounds to read: a zero-height anchor
- * stands every popup at the window's own edge instead of the capsule's centre.
+ * stands every popup at the window's own edge instead of the capsule's center.
  * The playing capsule and the offer bar both stand it, so the menu opens from
  * the same place wherever it is asked.
  */

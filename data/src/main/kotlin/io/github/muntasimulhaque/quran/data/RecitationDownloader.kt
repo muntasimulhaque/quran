@@ -25,7 +25,7 @@ import java.util.zip.ZipInputStream
  * The read loop below is blocking, and a blocking read is not a suspension
  * point: cancelling the caller's job did not end it, the loop ran to its end,
  * verified its hash, and unpacked the surah the reader had just dropped
- * (owner report, this session). The job's own state is therefore read with
+ * (owner report, 9.3). The job's own state is therefore read with
  * every chunk, and the cancellation is passed on instead of being turned into
  * a failure result. The loop has no suspension point, so this is the only
  * place that can end it.

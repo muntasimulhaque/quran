@@ -61,7 +61,7 @@ class DailyAyahTest {
         // The title says the ayah's own number in its surah, never the
         // running number the reading navigates with: the two differ from
         // Al-Baqarah on, and the reminder once printed the second as if it
-        // were the first (owner report, this session).
+        // were the first (owner report, 8.3).
         val database = openLibrary()
         try {
             val stored = database.ayah(today.ayah)
@@ -86,7 +86,7 @@ class DailyAyahTest {
         // The running number and the ayah's own number differ from the second
         // surah on, and the reminder must say the second: the title once
         // printed the running number's last digits as if they were the ayah's
-        // (owner report, this session). One format in both languages, the
+        // (owner report, 8.3). One format in both languages, the
         // language's own word and the language's own digits.
         val content = DailyAyahContent(
             ayah = 5037,
@@ -140,8 +140,8 @@ class DailyAyahTest {
 
         // The other way: the catalog sorts by pack name, so Al-Bayan is the
         // first pack it lists. Under English the reminder must still lead
-        // with Saheeh, not with the catalog's first line (owner report, this
-        // session).
+        // with Saheeh, not with the catalog's first line
+        // (owner report, 15.3).
         SettingsStore(context).setUiLanguage("en")
         assertTheReminderReads("translation-saheeh-en")
     }

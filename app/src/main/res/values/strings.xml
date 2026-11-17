@@ -20,7 +20,7 @@
     <string name="share_preview">Ayah card preview</string>
 
     <string name="share_sheet_announcement">Share ayah</string>
-    <string name="share_unavailable">No app on this device can receive a share</string>
+    <string name="share_unavailable">No app on this device can receive a share.</string>
     <!-- Said when the card could not be drawn or written: the words still go,
          and the reader is told why the picture did not. -->
     <string name="share_card_failed">The picture could not be made, so the words were shared instead.</string>

@@ -23,7 +23,7 @@ import org.junit.Test
  * Quran is 26 on a 2.0 line, the aid's word 22, the inline Arabic and the
  * medallion 24, and the gloss 15. The Book's face is the reason the reading
  * takes 16 where the interface takes 15; the sizes are one ladder, and the
- * Bangla ladder reads the same constants (owner decision, this session).
+ * Bangla ladder reads the same constants (owner decision, 14.0).
  */
 class TypographyTest {
 
@@ -106,7 +106,7 @@ class TypographyTest {
         // The card's article title at 17, one point over the body's 16, and
         // both heads at the body's own size, one Semibold and one Medium. The
         // hierarchy is the title's point and the heads' weight, not a ladder
-        // of big lines (owner decision, this session).
+        // of big lines (owner decision, 13.9).
         assertEquals(17f, TypeLadder.articleTitleSp(16f), 0.001f)
         assertEquals(16f, TypeLadder.headingSp(16f), 0.001f)
         assertEquals(16f, TypeLadder.subheadingSp(16f), 0.001f)
@@ -144,7 +144,7 @@ class TypographyTest {
     fun theReadingBodyIsAProseSizeOnAProseLine() {
         // 16 sp on a 1.5 line: the Book's body, in the Book's face. The line
         // stays the book's 1.5, and 16 is the point at which Literata's 0.507
-        // x-height matches Inter's 15 (owner decision, this session).
+        // x-height matches Inter's 15 (owner decision, 14.0).
         assertEquals(16f, TextSize.sp(TypeRole.Translation, TextSize.DEFAULT), 0.001f)
         assertEquals(1.5f, TextSize.LATIN_PROSE_RATIO, 0.001f)
         for (step in TextSize.STEPS) {
@@ -203,7 +203,7 @@ class TypographyTest {
     fun theQuranVoiceKeepsTheAgreedStaircase() {
         // The Quran is the page's anchor at 26; the prose is 16; the inline
         // Arabic and the medallion are 24, a step under the verse. The verse
-        // to prose ratio is 1.625 (owner decision, this session). The word
+        // to prose ratio is 1.625 (owner decision, 16.2). The word
         // meaning sheet draws the Quran's word at 26 and its gloss at 16, so
         // there is no separate aid size to pin.
         assertEquals(26f, TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT), 0.001f)
@@ -232,7 +232,7 @@ class TypographyTest {
      * A note's preview is the reader's own size, held at the reading's
      * default: a row's name is 15 and stays its largest line, where the top
      * step's 19.2 would turn the row's title into a caption under the
-     * reader's own words (owner report, this session).
+     * reader's own words (owner report, 18.5).
      */
     @Test
     fun aNotesPreviewNeverOutgrowsTheRowThatHoldsIt() {

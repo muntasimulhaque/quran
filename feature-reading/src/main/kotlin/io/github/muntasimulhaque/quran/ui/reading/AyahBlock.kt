@@ -115,7 +115,7 @@ internal fun AyahBlock(
     // The gesture's two callbacks are read through their latest value: a
     // pointerInput's lambda is not restarted by a recomposition, and a long
     // press that began before the page rebuilt must still open the current
-    // sheet (owner decision, this session).
+    // sheet (owner decision, 15.9).
     val currentWord by rememberUpdatedState(onWord)
     val currentVerseTap by rememberUpdatedState(onBackgroundTap)
     val ayahActions = stringResource(R.string.reading_ayah_actions)
@@ -129,8 +129,8 @@ internal fun AyahBlock(
     // decision, an earlier session). Every verse closes this way now, on the
     // page that carries a translation as well as on the one that draws the
     // Quran alone: the same verse ended two ways depending on a setting, and
-    // the difference was the print's own roundel (owner decision, this
-    // session). On the page that draws the Quran alone the medallion is also
+    // the difference was the print's own roundel (owner decision, 19.5). On
+    // the page that draws the Quran alone the medallion is also
     // the verse's only number and its door, and the reference line at the
     // head is not drawn, so the screen holds the Quran and nothing else.
     val arabicOnly = !metrics.showTranslation && !showWordAid
@@ -138,22 +138,22 @@ internal fun AyahBlock(
     // reader's own marks ride the verse's first line in a rail at its leading
     // edge instead of standing in a head above it: the mark adds no height,
     // and the block is the same height whether or not it carries one (owner
-    // decision, this session). The rail is the Arabic line's own box at the
-    // system's scale, the measure the mark is centred on.
+    // decision, 16.9). The rail is the Arabic line's own box at the
+    // system's scale, the measure the mark is centered on.
     val firstLine = with(LocalDensity.current) {
         (metrics.arabicLineSp * fontScale).dp
     }
     // The reader's digits, and a spoken name for them: the reference is a
     // number the reader reads, so it follows the interface's digits, and a
-    // screen reader hears it named rather than as a bare key (owner decision,
-    // this session).
+    // screen reader hears it named rather than as a bare key
+    // (owner decision, 9.1).
     val reference = localizedDigits(row.ayah.verseKey)
     val referenceLabel = stringResource(R.string.reading_ayah_reference, reference)
     val revealWords = reveal?.words.orEmpty()
     // A search that matched a word's meaning marks the word it matched, by
     // its text. The reading used to draw the whole aid to show this; the
     // page now carries the same mark as an Arabic hit, on the one word that
-    // answered (owner decision, this session).
+    // answered (owner decision, 15.9).
     val revealMeanings = reveal?.meanings.orEmpty()
     // The one spoken shape of the whole ayah. The reference and the Arabic
     // used to carry their own descriptions inside a merged clickable block,
@@ -194,7 +194,7 @@ internal fun AyahBlock(
             // 24 of the ayah's 26: the medallion's own ink is about 0.89 em
             // tall, so this lands it on the line the way the printed page
             // does and keeps the digits inside it legible (owner decision,
-            // this session). It replaces the 0.72 the Amiri rosette wore,
+            // 14.0). It replaces the 0.72 the Amiri rosette wore,
             // whose oval openwork read as a bracket and whose digits were
             // tiny.
             fontSize = TextSize.medallionAt(metrics.arabicSp).sp,
@@ -205,11 +205,11 @@ internal fun AyahBlock(
     // The reciter's word is marked on the word, not on the whole ayah: the
     // ayah-level recitation wash was removed when the word wash came back,
     // because the two tints together put the seven rule colors under their
-    // contrast floor (owner decision, this session).
+    // contrast floor (owner decision, 15.9).
     //
     // The wash is the page's own warm tone and not a tint of the accent, so
     // the one surface that says "this verse is the one you are acting on"
-    // says it in the paper's voice (owner decision, this session).
+    // says it in the paper's voice (owner decision, 19.1).
     val wash = if (isSelected) palette.selected else Color.Transparent
     // The padding belongs to the paper, so the gaps between ayahs still
     // answer a tap with the reading chrome. The block is set apart by the
@@ -231,8 +231,8 @@ internal fun AyahBlock(
     // each side stands between two verses: 8 dp from text to text, so the
     // glass holds more of the surah and the face's own medallion is the
     // separator, not a blank line. The line still ends ragged at the margin,
-    // so the reader loses a blank line and nothing else (owner decision, this
-    // session: the verse gap was the room a Browse row keeps, and the Quran
+    // so the reader loses a blank line and nothing else (owner decision, 13.7:
+    // the verse gap was the room a Browse row keeps, and the Quran
     // was borrowing a list's rhythm).
     //
     // The surah's own opening above the first verse keeps its 14 dp foot, so
@@ -244,7 +244,7 @@ internal fun AyahBlock(
             // The door is a 48 dp row, and it stands inside the head the
             // block already kept: the card's own room above and below it is
             // untouched, so two blocks that carry more than the Arabic still
-            // stand 24 dp apart (owner decision, this session).
+            // stand 24 dp apart (owner decision, 13.3).
             .padding(vertical = if (arabicOnly) 0.dp else Space.Row),
     ) {
         val press = remember { MutableInteractionSource() }
@@ -278,12 +278,12 @@ internal fun AyahBlock(
                 // or puts away the bar, and it never chooses a verse. The
                 // ayah's own door is its number, at the head of the block, so
                 // the tap carries no ripple over the Quran's own letters (owner
-                // decision, this session: 16.6's whole-verse tap made the
+                // decision, 16.7: 16.6's whole-verse tap made the
                 // page's own tap impossible, because almost the whole page is
                 // verse). The word's own long press is the one hold the
                 // reading keeps: it is the word meanings aid, turned on by its
                 // own Settings row, and it opens the word's sheet rather than
-                // the ayah's actions (owner decision, this session).
+                // the ayah's actions (owner decision, 16.7).
                 .clickable(
                     interactionSource = press,
                     indication = null,
@@ -301,7 +301,7 @@ internal fun AyahBlock(
                     // it is on the door. The save is spoken too, though the
                     // page draws nothing for it: a reader who cannot see the
                     // menu's lit row still learns, while reading, that this
-                    // ayah is one of their own (owner decision, this session).
+                    // ayah is one of their own (owner decision, 17.7).
                     if (saved || noted) {
                         stateDescription = buildList {
                             if (saved) add(savedState)
@@ -347,8 +347,8 @@ internal fun AyahBlock(
             // The roundel's own span is a key as well as the words: the
             // reader's size change and a change of ground both reach the
             // line only through it, and a remembered line that missed it
-            // kept the old size and the old gold (owner report, this
-            // session).
+            // kept the old size and the old gold
+            // (owner report, 6.6). 
             val recitedWord = playingWord.takeIf { playing }
             // The code is read by the painter, not by the layout: the line's
             // letters are the same whether the switch is on or off, so the
@@ -380,7 +380,7 @@ internal fun AyahBlock(
                     // and the roundel only closes the verse the way the
                     // printed page closes it. On the page that draws the
                     // Quran alone it is the number and the door both (owner
-                    // decision, this session).
+                    // decision, 19.5).
                     ornamentStyle,
                     revealWords,
                     revealMeanings,
@@ -427,7 +427,7 @@ internal fun AyahBlock(
                         // around it. The medallion is a few dp of ink, so its
                         // target is grown around the ink to the 48 dp every
                         // control owes a finger; the ink and the page do not move
-                        // (owner decision, this session).
+                        // (owner decision, 16.7).
                         .then(
                             if (arabicOnly) {
                                 Modifier.pointerInput(arabicLine.ornamentRange) {
@@ -457,7 +457,7 @@ internal fun AyahBlock(
                                         // The tap is still the page's: a word is
                                         // asked for by holding it, so the reading
                                         // keeps its one tap everywhere (owner
-                                        // decision, this session).
+                                        // decision, 15.9).
                                         onTap = { currentVerseTap() },
                                         onLongPress = { position ->
                                             val layout = textLayout
@@ -506,8 +506,8 @@ internal fun AyahBlock(
                             // both a place on the Quran's own line, and the seven
                             // rule colors have to stay readable on it. The
                             // selected ayah is a ground of its own, so the word
-                            // wash is not laid over it (owner decision, this
-                            // session).
+                            // wash is not laid over it
+                            // (owner decision, 15.9).
                             if (!isSelected) {
                                 arabicLine.matchRanges.forEach { range ->
                                     drawWordWash(layout, range, palette.highlight)
@@ -535,8 +535,8 @@ internal fun AyahBlock(
                     // The name is read when more than one translation is drawn,
                     // and whenever the column is not in the reader's own
                     // language: a line of another language never stands
-                    // unannounced under the ayah (owner decision, this
-                    // session).
+                    // unannounced under the ayah
+                    // (owner decision, 15.3).
                     if (
                         translationIsNamed(
                             row.translations.size,
@@ -562,7 +562,7 @@ internal fun AyahBlock(
                     // only as a picture of the page. The Quran above it stays
                     // outside the selection, because the page's own touch
                     // belongs to the verse and the verse is not a paragraph
-                    // (owner decision, this session). The line registers its
+                    // (owner decision, 13.7). The line registers its
                     // state with the surface's clearer, so the reader's next
                     // touch anywhere puts the platform menu away.
                     val selection = remember(line) { SelectionState() }
@@ -603,12 +603,12 @@ internal fun AyahBlock(
  * [Space.Tight] on each side of the wash. The mark rides the verse's first
  * line in a rail the width of the mark and its gap, reserved on every verse
  * so a note never rewraps the Arabic, and the block keeps the verse's own
- * height whether or not it carries a note (owner decision, this session).
+ * height whether or not it carries a note (owner decision, 17.7).
  *
  * The rail is reserved on every verse, so it must never widen: it held two
  * marks while the saved ayah wore a bookmark, and it holds the note's one now
  * that the save is said where the tap that made it lives (owner decision,
- * this session). The note stands centred on the first line's own box, so it
+ * 17.7). The note stands centered on the first line's own box, so it
  * reads as a note in the page's margin and never as part of the Quran.
  */
 @Composable
@@ -670,7 +670,7 @@ private data class ArabicLine(
  * carries a translation the medallion is only the verse's close, and the
  * reference and its door stand at the head; on the page that draws the Quran
  * alone it is the number and the door both, so nothing is drawn above the
- * verse (owner decision, this session).
+ * verse (owner decision, 19.5).
  */
 private fun arabic(
     row: ReadingRow,
@@ -756,7 +756,7 @@ private fun ornamentBox(layout: TextLayoutResult, range: IntRange): Rect {
  * The medallion's touch target: its ink, grown until the shorter side is 48 dp.
  * The growth is even on both sides, so the target stays centered on the mark
  * the reader sees; a tap that lands on the paper beside the medallion is the
- * door, not a miss (owner decision, this session).
+ * door, not a miss (owner decision, 13.8).
  */
 private fun PointerInputScope.ornamentTarget(
     layout: TextLayoutResult,

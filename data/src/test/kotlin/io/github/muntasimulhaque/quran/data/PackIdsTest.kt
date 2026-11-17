@@ -22,7 +22,7 @@ class PackIdsTest {
     fun theEnglishWordListIsItsOwnPack() {
         // The word list is never another language's: the id carries the
         // language and the app never answers English for Bangla (owner
-        // decision, this session). The introductions live in the word list
+        // decision, 6.6). The introductions live in the word list
         // of the reader's own language, so a Bangla reader with no Bangla
         // introduction is shown none rather than an English one.
         assertEquals(ContentDatabase.WORDS_PACK, ContentDatabase.wordsPackId("en"))

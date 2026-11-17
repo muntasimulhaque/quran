@@ -119,7 +119,7 @@ class ScreenshotTest {
      * The status bar comes with the display, and so does the clock: on a page
      * scrolled into a surah it can stand over the first line, which the
      * reading does by decision (see the head's padding in the reading screen).
-     * The frame is kept as the phone shows it (owner decision, this session).
+     * The frame is kept as the phone shows it (owner decision, 15.2).
      *
      * A sheet's semantics exist before its window has drawn and its opening
      * animation has settled, so the frame is kept only when two captures in a
@@ -317,7 +317,7 @@ class ScreenshotTest {
     /**
      * A tap on the reading's own quiet margin brings the chrome up.
      *
-     * The page's exact centre is not a safe place to tap: a control can sit
+     * The page's exact center is not a safe place to tap: a control can sit
      * under the finger there, and a selected translation line is not the
      * paper either. The margin is the reading's quiet edge, where no control
      * lives, which is the same rule the rest of the suite already follows
@@ -398,15 +398,15 @@ class ScreenshotTest {
      * The demo mode is SystemUI's own broadcast, and some builds drop it. Every
      * command is therefore best effort: a phone that ignores them keeps its own
      * clock, and the frames still settle, which is the difference between a
-     * listing that reads as two phones and one that does not (owner decision,
-     * this session).
+     * listing that reads as two phones and one that does not
+     * (owner decision, 19.1).
      *
      * The network is drawn by the demo broadcast as one group per modem, and
      * every AVD here reports one modem except the seven inch image, which
      * reports three: on that image the demo bar is "3G 3G 3G" and leaving demo
      * mode draws the device's own bar with a shield and a key glyph beside the
      * clock. Neither is a store frame, so that set was pulled rather than
-     * shipped (owner decision, this session). The phone and the ten inch
+     * shipped (owner decision, 19.1). The phone and the ten inch
      * images draw one clean group with this command.
      */
     private fun prepareTheSystemChrome() {
@@ -477,14 +477,14 @@ class ScreenshotTest {
             settings.setShowTranslation(true)
             // The first frame is the reading at its default: the word aid is
             // a long press now, not a field of pairs under every ayah (owner
-            // decision, this session).
+            // decision, 15.5).
             settings.setWordByWord(false)
             // The reminder and the reciter are state a phone keeps across runs,
             // and a test that trusted the device would photograph whatever the
-            // last session left: the first ten inch capture in this session
+            // last session left: the first ten inch capture in 19.1
             // found a reminder armed at 6:31 PM from a run in November on the
             // same AVD. The tour states its own setup rather than the device's
-            // (owner report, this session).
+            // (owner report, 19.1).
             settings.setDailyAyah(false)
             settings.setRecitation("husary")
             // The colors are the 10.3 change; a test that left the switch off
@@ -509,12 +509,12 @@ class ScreenshotTest {
      * are eight surfaces now, and the first one carries the app's own chrome,
      * so the frame that has to establish the product actually shows it: the
      * surah's name, the juz, and the three doors the reading keeps (owner
-     * decision, this session).
+     * decision, 19.1).
      *
      * Every frame is a screen capture, the chrome's included. The four that
      * were root captures had no status bar while the four sheet frames did,
-     * so one listing showed two different phones (owner decision, this
-     * session).
+     * so one listing showed two different phones
+     * (owner decision, 15.2).
      *
      * The order is not taste. The last frame is the pill's offer, which stays
      * on the reading until the reader answers it: it carries one answer and no
@@ -590,7 +590,7 @@ class ScreenshotTest {
         // ships. On a phone the About row happens to fall below the fold; on a
         // seven inch and a ten inch sheet all ten rows fit, so a frame built
         // on a phone's luck broke on its own tablets in the first capture
-        // (owner report, this session).
+        // (owner report, 19.1).
         openSettingsHub()
         rule.onNodeWithTag("row-tajweed").performScrollTo().performClick()
         rule.waitUntil(timeoutMillis = 15_000) {

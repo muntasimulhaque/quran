@@ -30,8 +30,8 @@ import java.io.File
  * one of the app's six readings: a scheme of its own, and five text sizes, all
  * of them drawn on the page and none of them ever photographed. A defect that
  * only the dark scheme shows, or only the largest step shows, had no frame to
- * appear in, so it could not be found by looking (owner decision, this
- * session).
+ * appear in, so it could not be found by looking
+ * (owner decision, 12.7).
  *
  * These frames are evidence and not the listing, so they are named apart from
  * the store's numbered eight and the workflow keeps them out of
@@ -84,7 +84,7 @@ class ScreenshotVariantsTest {
             // business to leave behind: SheetStillnessTest measured the
             // footnote sheet at 1.2 and its drag moved 11 dp against a 20 dp
             // floor, which was this class's leftover and not that sheet's
-            // behavior (owner report, this session).
+            // behavior (owner report, 12.8).
             runBlocking {
                 val settings = SettingsStore(context)
                 settings.setTheme(AppTheme.Light)

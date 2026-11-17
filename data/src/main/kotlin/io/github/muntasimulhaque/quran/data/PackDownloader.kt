@@ -35,7 +35,7 @@ import java.security.MessageDigest
  * blocking read is not a suspension point, so the job's own state is read
  * with every chunk; otherwise the pack was still fetched after the reader
  * closed its line, and the next progress chunk put the line back (owner
- * report, this session). The part on disk is kept: a pack that resumes is
+ * report, 9.3). The part on disk is kept: a pack that resumes is
  * data the reader does not pay for twice.
  */
 class PackDownloader(private val context: Context) {

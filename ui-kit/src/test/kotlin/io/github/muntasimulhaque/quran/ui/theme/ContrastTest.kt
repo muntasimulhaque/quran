@@ -46,12 +46,12 @@ class ContrastTest {
         assertReadable(PaperOnPrimary, Lapis)
         // The four container roles a Material component may ask for, so a
         // stock surface can never fall back to the baseline purple (owner
-        // decision, this session).
+        // decision, 13.8).
         assertReadable(LightScheme.onSecondaryContainer, LightScheme.secondaryContainer)
         assertReadable(LightScheme.onTertiaryContainer, LightScheme.tertiaryContainer)
         // The error roles are the quiet voice, so a Material control that
-        // asks for one can never paint a stock red (owner decision, this
-        // session).
+        // asks for one can never paint a stock red
+        // (owner decision, 13.5).
         assertReadable(LightScheme.onError, LightScheme.error)
         assertReadable(LightScheme.onErrorContainer, LightScheme.errorContainer)
         assertReadable(PaperTajweed.silent, PaperBackground)
@@ -66,7 +66,7 @@ class ContrastTest {
         // as on the plain page. The word mark is a wash and not a recolored
         // word: the letters keep their own ink and rule colors, so every one
         // of them is measured on the full mark, which is the strongest ground
-        // the palette allows (owner decision, this session).
+        // the palette allows (owner decision, 15.9).
         assertTajweedOn(PaperTajweed, PaperSurface)
         assertTajweedOnWash(PaperTajweed, PaperBackground, PaperSelected, 1f)
         assertTajweedOnWash(
@@ -81,21 +81,21 @@ class ContrastTest {
         )
         // The found word's ground: the result line is ink, not a family, for
         // the reason the class notes, and the ground is the page's own warm
-        // tone rather than a tint of the accent (owner decision, this session).
+        // tone rather than a tint of the accent (owner decision, 19.1).
         assertReadable(PaperInk, PaperMatch)
         assertReadable(LightPage.ink, PaperMatch)
         // Browse's current row wears the selected wash under its quiet words,
-        // so the muted voice is measured on that ground too (owner decision,
-        // this session).
+        // so the muted voice is measured on that ground too
+        // (owner decision, 13.5).
         assertReadable(PaperMuted, PaperSelected)
         // The quiet ground every button, off chip, and typed field stands on:
         // the muted voice is measured on the ink wash itself, not only on the
-        // scheme's named slots (owner decision, this session).
+        // scheme's named slots (owner decision, 15.0).
         assertReadable(PaperMuted, blend(PaperInk, PaperSurface, Wash.Door))
         // A chosen search source wears the ayah door's open state: the
         // accent's ink on the accent's own tint, where the full-strength fill
-        // read as a pressed button times seven (owner decision, this
-        // session).
+        // read as a pressed button times seven
+        // (owner decision, 15.0).
         assertReadable(Lapis, blend(Lapis, PaperSurface, Wash.Control))
         // The two text tones outside the scheme, measured the way they are drawn:
         // the opened surah introduction at 0.78 of the reading ink, and the
@@ -224,7 +224,7 @@ class ContrastTest {
         assertReadable(DarkScheme.onSecondaryContainer, DarkScheme.secondaryContainer)
         assertReadable(DarkScheme.onTertiaryContainer, DarkScheme.tertiaryContainer)
         // The error roles are the quiet voice on this ground too (owner
-        // decision, this session).
+        // decision, 13.5).
         assertReadable(DarkScheme.onError, DarkScheme.error)
         assertReadable(DarkScheme.onErrorContainer, DarkScheme.errorContainer)
         assertReadable(NightTajweed.silent, NightBackground)
@@ -246,10 +246,10 @@ class ContrastTest {
         assertReadable(NightInk, NightMatch)
         assertReadable(NightText, NightMatch)
         // The night sheet's current row, on the same selected wash (owner
-        // decision, this session).
+        // decision, 13.5).
         assertReadable(NightMuted, NightSelected)
         // The quiet ground and the chosen search source, as on the day sheet
-        // (owner decision, this session).
+        // (owner decision, 15.0).
         assertReadable(NightMuted, blend(NightText, NightSurface, Wash.Door))
         assertReadable(LapisLight, blend(LapisLight, NightSurface, Wash.Control))
         // The same two tones on the night page.
@@ -318,7 +318,7 @@ class ContrastTest {
      * shadow is invisible at night, so the fill is the only edge there, and
      * that is why the night's step is the larger one. All of this is pinned
      * here, so a palette edit fails on the machine and not on a reader's eyes
-     * (owner decision, this session).
+     * (owner decision, 17.5).
      */
     private fun assertFloatingGrounds(scheme: ColorScheme, selected: Color, day: Boolean) {
         val floating = scheme.surfaceContainerHigh
@@ -331,7 +331,7 @@ class ContrastTest {
         assertHigher("the floating paper on the chosen block", floating, block)
         if (day) {
             // The day's floating paper is the sheet's own paper (owner
-            // decision, this session). The day can be white because it is the
+            // decision, 17.5). The day can be white because it is the
             // top of the scale; the night sheet cannot, because its block
             // stands above it.
             assertTrue(

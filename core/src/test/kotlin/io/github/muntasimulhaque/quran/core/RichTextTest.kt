@@ -22,7 +22,7 @@ class RichTextTest {
     fun `a sub-heading keeps its own level`() {
         // A surah's introduction keeps a chapter and a topic apart with h2 and
         // h3. Folding the two into one kind drew a topic as loudly as the
-        // chapter it belongs to (owner decision, this session).
+        // chapter it belongs to (owner decision, 13.3).
         val blocks = RichText.parseHtml("<h2>The Opening</h2><h3>Topics</h3><p>Prose.</p>")
         assertEquals(
             listOf(TextBlockKind.HEADING, TextBlockKind.SUBHEADING, TextBlockKind.PARAGRAPH),

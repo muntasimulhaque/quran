@@ -1,29 +1,14 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
-import io.github.muntasimulhaque.quran.ui.kit.AppSheet
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
+import io.github.muntasimulhaque.quran.ui.kit.ConfirmSheet
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -33,11 +18,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * the note is the reader's own writing, and removing the save removes it too,
  * so the reader is asked rather than having their words taken by one tap. The
  * note itself is drawn in the sheet, so the reader sees what is at stake
- * before they answer. Keep is the one prominent shape, because the safe
- * answer is the one the sheet leads with; Remove keeps the quiet shape every
- * removing word wears (owner decision, the consistency audit).
+ * before they answer. The question's own shape is [ConfirmSheet]'s; this is
+ * the reader's words on it.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemoveSavedSheet(
     note: String?,
@@ -47,33 +30,20 @@ fun RemoveSavedSheet(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberExpandedSheetState()
-    AppSheet(
-        onDismiss = onDismiss,
-        sheetState = sheetState,
+    val hasNote = !note.isNullOrBlank()
+    ConfirmSheet(
         name = stringResource(R.string.remove_saved_sheet_name),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                // The gate rides with the scroll, so an upward flick on the
-                // question never bounces the sheet on its top anchor.
-                .sheetVerticalScroll(rememberScrollState())
-                .padding(horizontal = Space.Gutter, vertical = Space.Row)
-                .padding(bottom = Space.SheetFoot),
-        ) {
-            Text(
-                text = stringResource(R.string.remove_saved_title),
-                // The sheet's own name, in the app's one title voice (owner
-                // decision, this session).
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.semantics { heading() },
-            )
-            if (!note.isNullOrBlank()) {
+        title = stringResource(R.string.remove_saved_title),
+        body = stringResource(R.string.remove_saved_body),
+        confirm = stringResource(R.string.remove_saved_action),
+        keep = stringResource(R.string.remove_saved_keep),
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+        tag = "remove-saved",
+        atStake = if (hasNote) {
+            {
                 Text(
-                    text = note,
+                    text = note.orEmpty(),
                     style = LocalReadingVoice.current.prose(noteSp, noteLineSp),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
@@ -81,34 +51,8 @@ fun RemoveSavedSheet(
                     modifier = Modifier.padding(top = Space.Line),
                 )
             }
-            Text(
-                text = stringResource(R.string.remove_saved_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Space.Line),
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Space.Block),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextButton(
-                    label = stringResource(R.string.remove_saved_action),
-                    onClick = onConfirm,
-                    modifier = Modifier.testTag("remove-saved-confirm"),
-                    quiet = true,
-                )
-                TextButton(
-                    label = stringResource(R.string.remove_saved_keep),
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .padding(start = Space.Action)
-                        .testTag("remove-saved-keep"),
-                    prominent = true,
-                )
-            }
-        }
-    }
+        } else {
+            null
+        },
+    )
 }

@@ -8,13 +8,13 @@ package io.github.muntasimulhaque.quran.core
  * database, and the app turns the code into the reader's own language. A
  * code is written here once, in the module both sides can read, so a label
  * the build writes and a string the app looks up can never drift apart
- * (owner decision, this session).
+ * (owner decision, 18.0).
  *
  * The corpus labels 41 parts of speech, four cases, nine gender and number
  * forms, and the passive voice; the rest of its qualifiers describe the
  * word's role in the sentence and are not shown. The verb's pattern is not a
  * code: it is the Arabic pattern itself, which is what a reader of Arabic
- * grammar already reads (owner decision, this session).
+ * grammar already reads (owner decision, 18.0).
  */
 enum class PartOfSpeech(val code: String) {
     NOUN("noun"),
@@ -108,7 +108,7 @@ enum class WordForm(val code: String) {
  * the sheet then draws the grammar line without a lemma line. [pattern] is
  * the verb's Arabic pattern, or null for a word that is not a verb. All of it
  * comes from the word pack that opens the sheet, so an older pack on the
- * phone simply has no grammar to draw (owner decision, this session).
+ * phone simply has no grammar to draw (owner decision, 18.0).
  */
 data class WordGrammar(
     val lemma: String?,

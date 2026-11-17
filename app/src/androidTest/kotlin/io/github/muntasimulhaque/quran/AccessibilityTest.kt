@@ -47,7 +47,7 @@ import org.junit.runner.RunWith
  * from the screen's own root on every interaction this test makes, so a
  * control that loses its spoken name, a target that shrinks under a finger,
  * or a contrast pair that falls under the floor fails here instead of
- * reaching a reader (owner decision, this session).
+ * reaching a reader (owner decision, 6.6).
  *
  * The framework is a test-only dependency and never ships; the shipped app
  * keeps the same set of dependencies it had before.
@@ -85,8 +85,8 @@ class AccessibilityTest {
          * a test that follows this one and looks for a line at the foot of
          * the first ayah can find it pushed below the fold. The choices this
          * test made are put back the way a fresh install holds them, so no
-         * test after it inherits a reading it did not ask for (owner report,
-         * this session).
+         * test after it inherits a reading it did not ask for
+         * (owner report, 6.6).
          */
         override fun after() {
             runBlocking {
@@ -115,7 +115,7 @@ class AccessibilityTest {
             // node is let go here; a named control that is too small, a
             // contrast pair that is too close, or a missing label still
             // fails, because every other check and every named element is
-            // still measured (owner decision, this session).
+            // still measured (owner decision, 6.6).
             .setSuppressingResultMatcher(
                 org.hamcrest.Matchers.allOf(
                     com.google.android.apps.common.testing.accessibility.framework
@@ -196,7 +196,7 @@ class AccessibilityTest {
         // The dialog is gone and the page behind it is the surface a Back
         // belongs to. The global Back below goes to whatever window is on
         // top, so a dialog that is still animating away cannot make the press
-        // fail before the app sees it (owner report, this session).
+        // fail before the app sees it (owner report, 15.0).
         compose.waitForIdle()
         back()
         waitForTag("settings-hub")
@@ -211,7 +211,7 @@ class AccessibilityTest {
         // The field is where typing would begin, so the test does not type;
         // it does open the source door, because the chips inside it are
         // controls a reader turns off and every one has to be a named,
-        // full-size target (owner decision, this session: the chip's fill had
+        // full-size target (owner decision, 7.1: the chip's fill had
         // grown to the whole target and was put back to the app's chip
         // height).
         revealChrome()
@@ -228,7 +228,7 @@ class AccessibilityTest {
         compose.onNodeWithText("Quran text").assertWidthIsAtLeast(48.dp)
         // The door put the keyboard away, so the field takes the focus back
         // for the audit's query and gives the IME back before the sheet's
-        // own Back (owner decision, this session).
+        // own Back (owner decision, 15.0).
         compose.onNode(hasSetTextAction()).requestFocus()
         compose.onNode(hasSetTextAction()).performTextInput("mercy")
         compose.waitUntil(30_000) {
@@ -284,7 +284,7 @@ class AccessibilityTest {
      * focus, and a dialog that is still animating away leaves the activity's
      * root without it: the press fails before the app ever sees a Back. The
      * harness's global action goes to whatever window is on top, which is what
-     * the reader's own Back does (owner report, this session).
+     * the reader's own Back does (owner report, 15.0).
      */
     private fun back() {
         InstrumentationRegistry.getInstrumentation().uiAutomation

@@ -86,7 +86,7 @@ fun ThemeRow(
                         // other selectable in the app turns it off for the same
                         // reason and draws the ripple on the shape the reader
                         // sees; this row was the one that still let it through
-                        // (owner report, this session).
+                        // (owner report, 19.1).
                         indication = null,
                         role = Role.RadioButton,
                     ) {
@@ -99,8 +99,8 @@ fun ThemeRow(
                     text = theme.name(),
                     // A swatch's name is a label, not a row's value: it wears
                     // the label's Medium at 12, where the value under a row
-                    // wears the caption's Regular (owner decision, this
-                    // session).
+                    // wears the caption's Regular
+                    // (owner decision, 13.3).
                     style = MaterialTheme.typography.labelMedium,
                     color = if (theme == selected) {
                         MaterialTheme.colorScheme.primary
@@ -119,7 +119,7 @@ fun ThemeRow(
  * the ayah's own letter standing on it; System is the two halves of the
  * phone's own day and night, split down the middle, the mark the whole
  * industry uses for "follow the system" and the one thing a single filled
- * circle cannot say (owner decision, this session).
+ * circle cannot say (owner decision, 6.0).
  *
  * The chosen swatch wears its halo outside the fill, with a gap: a ring on
  * the fill's own edge read as a border and ate the page's color where the eye
@@ -129,7 +129,7 @@ fun ThemeRow(
  * on a dark sheet both keep their circle (owner report; measured again in
  * the consistency audit).
  *
- * **The press is the circle** (owner report, this session). Material's own
+ * **The press is the circle** (owner report, 19.1). Material's own
  * indication draws on the selectable's box, which here is the swatch, its name
  * under it, and the invisible 48 dp target around both: a tall rounded
  * rectangle that belongs to nothing the reader can see, flashing where no
@@ -196,8 +196,8 @@ private fun ThemeSwatch(
             if (theme != AppTheme.System) {
                 // The letter is drawn in the Quran's display hand, never in
                 // the phone's default Arabic face: a swatch that names the
-                // page must wear the page's own letter (owner decision, this
-                // session).
+                // page must wear the page's own letter
+                // (owner decision, 13.2).
                 Text(
                     text = "\u0627",
                     style = amiriDisplay(TypeLadder.SWATCH_SP),
@@ -223,7 +223,7 @@ fun AppTheme.name(): String = stringResource(
  * chosen stop filled. The sample above the rows is the reader's own ayah, so a
  * change is judged on the page it is about to change.
  *
- * **The name stands over its rail** (owner decision, this session). It used to
+ * **The name stands over its rail** (owner decision, 18.8). It used to
  * keep a fixed 120 dp column beside the rail, and the two end marks a fixed
  * slot each: at 200 percent on a phone the column took half the row, the name
  * ellipsized, and on a narrow glass the marks were dropped to keep the rail

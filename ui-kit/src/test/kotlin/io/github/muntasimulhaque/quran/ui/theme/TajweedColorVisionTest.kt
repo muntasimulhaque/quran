@@ -22,8 +22,8 @@ import kotlin.math.sqrt
  * deuteranopia, and tritanopia, followed by the same OKLab distance the
  * normal palette test uses. The floor is 0.02, a tenth of the normal floor:
  * it is not a promise that every reader sees seven distinct hues, but it is a
- * real, measurable separation where the old palette had none (owner decision,
- * this session).
+ * real, measurable separation where the old palette had none
+ * (owner decision, 13.8).
  */
 class TajweedColorVisionTest {
 

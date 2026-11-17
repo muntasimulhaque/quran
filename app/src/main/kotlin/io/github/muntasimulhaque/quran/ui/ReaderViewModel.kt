@@ -64,7 +64,7 @@ import java.util.Locale
  * One sentence the reading owes the reader. A save or a removal changes a
  * mark or a row, so it is announced to a screen reader and not drawn again;
  * a note, a failure, or an unavailable share has no visible mark of its own,
- * so it is a Snackbar (owner decision, this session).
+ * so it is a Snackbar (owner decision, 13.8).
  */
 data class ReaderMessage(
     val text: Int,
@@ -100,7 +100,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * A save, a note, and a removal each change a mark or a list, but a
      * screen reader needs the sentence, and a sighted reader who looked away
      * needs the Snackbar; a failure that used to be a Toast is a Snackbar too
-     * (owner decision, this session).
+     * (owner decision, 13.8).
      */
     private val _messages = MutableSharedFlow<ReaderMessage>(extraBufferCapacity = 8)
     val messages: SharedFlow<ReaderMessage> = _messages.asSharedFlow()
@@ -109,8 +109,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The reader's library, in its own file: the open content database, the
      * packs on the device, and the downloads that put them there. The reader's
      * choices are the view model's, and the library tells it when a pack
-     * arrives or leaves through the callbacks below (owner decision, this
-     * session).
+     * arrives or leaves through the callbacks below
+     * (owner decision, 6.6). 
      */
     private val library = ContentLibrary(
         application = application,
@@ -183,7 +183,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The word the reciter is on at this moment, and the wait to the next
      * moment it can change. The reading sleeps to that wait instead of
      * polling, so the wash is on time at any pace and the page is idle
-     * between words (owner decision, this session).
+     * between words (owner decision, 16.3).
      */
     fun playedWordNow(): Int? = playback.heardWordNow()
 
@@ -192,7 +192,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Tells the player whether the reading that draws the wash is on the
      * glass. The shell knows when the window is visible; the player owns the
-     * tick and its checkpoint (owner decision, this session).
+     * tick and its checkpoint (owner decision, 10.2).
      */
     fun setWordTracking(visible: Boolean) = playback.setWordTracking(visible)
 
@@ -208,7 +208,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The order is the reader's language and not the catalog's: the catalog
      * sorts by pack name, so Al-Bayan stood above Saheeh under an English
      * interface and the sample, which draws the first line, previewed Bangla
-     * (owner report, this session).
+     * (owner report, 15.3).
      */
     val enabledTranslationPacks: List<ContentPack>
         get() = translationPacks
@@ -224,7 +224,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * meanings, and the surah introductions all follow it, and nothing falls
      * back to another language: a Bangla reader is never handed an English
      * column, an English meaning, or an English introduction because the
-     * Bangla content has not arrived yet (owner decision, this session). An
+     * Bangla content has not arrived yet (owner decision, 6.6). An
      * install that has not been seeded yet answers English, which is the
      * fallback; a fresh open writes the phone's language before the reading
      * is shown.
@@ -237,7 +237,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * the language they chose. A reader who reads in Bangla searches Bangla
      * only, even when they added an English column by hand, because one search
      * field over two languages answers in two voices and the reader asked for
-     * one (owner decision, this session).
+     * one (owner decision, 6.5).
      */
     val searchTranslationPacks: List<ContentPack>
         get() = enabledTranslationPacks.forLanguage(readingLanguage)
@@ -249,8 +249,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The packs are the whole of the choice: a tafsir is drawn only where the
      * reader asks for it, from the ayah pill's Tafsir mark, so search has no
      * master switch to follow and reads exactly what the pill would open. The
-     * filter row's Tafsir chip follows the same list (owner decision, this
-     * session).
+     * filter row's Tafsir chip follows the same list
+     * (owner decision, 12.5).
      */
     val searchTafsirPacks: List<ContentPack>
         get() = enabledTafsirPacks.forLanguage(readingLanguage)
@@ -394,7 +394,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         playback.attach(database)
         // The surah names may have changed with the interface language, so
         // the by-number index is rebuilt from the fresh list on its next
-        // read (owner decision, this session).
+        // read (owner decision, 8.2).
         surahIndexByNumber = null
         clearRowCache()
         wordAudio.onSurah(surahOf(settings.ayah)?.number ?: 1)
@@ -402,12 +402,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     /**
      * Adding a pack is also choosing it, but only when the reader asked for
-     * it in this act (owner decision, this session). [select] is that ask: a
+     * it in this act (owner decision, 14.8). [select] is that ask: a
      * tap on Add, or the word list's own switch. A pack the queue fetched
      * because a former language asked for it, or because a chosen pack's file
      * went missing, is installed and left alone: an arrival is not a choice,
-     * so a download can never change the page by itself (owner report, this
-     * session).
+     * so a download can never change the page by itself
+     * (owner report, 14.8).
      */
     private fun onPackInstalled(pack: ContentPack, select: Boolean) {
         if (!select) return
@@ -454,8 +454,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (fallbackReciter != null) {
             settings = settings.copy(recitation = fallbackReciter)
             // The voice the page was measured under is gone, so the rows are
-            // read again under the one that replaced it (owner decision,
-            // this session).
+            // read again under the one that replaced it
+            // (owner decision, 17.7).
             clearRowCache()
             viewModelScope.launch { settingsStore.setRecitation(fallbackReciter) }
         }
@@ -504,7 +504,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * reading is the place.
      *
      * The place used to carry a pixel depth inside the ayah; [AppSettings.ayah]
-     * records why it does not any more (owner decision, this session). A settle
+     * records why it does not any more (owner decision, 13.1). A settle
      * that lands on the ayah already written is not a second write, so a still
      * thumb costs the store nothing.
      */
@@ -792,7 +792,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 settingsStore.setWordByWord(false)
                 // A root still to come was the aid's other half, so it
                 // leaves the queue with the aid. Bytes already here stay
-                // (owner report, this session).
+                // (owner report, 17.8).
                 settingsStore.removePendingPacks(setOf(ContentDatabase.WORD_ROOT_PACK))
             }
             return
@@ -809,8 +809,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // gloss, and a reader who asked for the words asked for what the
         // words are. It is asked for before the list's own check, because a
         // list downloaded before this build has no root beside it and the
-        // switch is the one door that fetches the pair (owner report, this
-        // session).
+        // switch is the one door that fetches the pair
+        // (owner report, 17.8).
         library.installIfMissing(ContentDatabase.WORD_ROOT_PACK, select = false)
         if (library.isInstalled(wanted)) {
             settings = settings.copy(wordByWord = true)
@@ -825,8 +825,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * The word list the reading speaks: the reader's own language's list, and
      * nothing else. There is no fallback to English, exactly as there is none
-     * for the translation, the tafsir, or search (owner decision, this
-     * session). The id is answered even when the catalog does not carry the
+     * for the translation, the tafsir, or search (owner decision, 6.6). The
+     * id is answered even when the catalog does not carry the
      * list, so a caller can tell "not here yet" from "not offered".
      */
     fun wantedWordsPack(): String = ContentDatabase.wordsPackId(readingLanguage)
@@ -841,13 +841,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The language is changed from Settings only; a fresh install is seeded
      * from the phone before the first page, with no screen. A change moves
      * the content and leaves the reader's place exactly where it was (owner
-     * decision, this session).
+     * decision, 15.5).
      *
      * The language's reading is fetched without another question: the
      * language's translation and tafsir become the queue, and the queue brings
      * them one at a time, the tafsir on an unmetered connection. The language
      * the reader left takes its packs with it, so a former language's download
-     * can never come back (owner decision, this session). The word list is not
+     * can never come back (owner decision, 14.8). The word list is not
      * fetched here: it is off by default, and the toggle is its own ask when
      * the reader wants it.
      */
@@ -867,12 +867,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             )
             // The surah names are content, and the content now answers in the
             // new language: the library is read again so the names change
-            // with the words around them (owner decision, this session).
+            // with the words around them (owner decision, 8.2).
             library.refresh()
             // The queue is the language's, not the install's: the language
             // the reader left takes its packs with it, so a former language's
             // translation can never come back when an update detaches it
-            // (owner decision, this session).
+            // (owner decision, 14.8).
             settingsStore.setPendingForLanguage(previous, language)
             library.drainPending()
         }
@@ -928,7 +928,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (!setRecitation(id)) return
         // The audio a surah has is the audio one voice has: a new reciter
         // reads the rows again, so a word sheet's speaker is never drawn for
-        // a voice that has nothing to play (owner decision, this session).
+        // a voice that has nothing to play (owner decision, 17.7).
         clearRowCache()
         playback.state.value.ayahNumber?.let { playAyah(it) }
     }
@@ -1043,7 +1043,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The result is handed back to the sheet when it asks. A failed write no
      * longer closes the editor and leaves a Toast behind: the sheet keeps the
      * words and says what went wrong, and only a successful write takes the
-     * sheet away (owner decision, this session).
+     * sheet away (owner decision, 13.8).
      */
     fun setNote(ayahNumber: Int, note: String?, onResult: ((Boolean) -> Unit)? = null) {
         viewModelScope.launch {
@@ -1133,7 +1133,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * full, with the reciter already chosen and the offer naming that voice.
      * Nothing is fetched until the reader says so. A surah whose audio is
      * already in the app's assets, whole, is not missing anything (owner
-     * decision, this session).
+     * decision, 16.1).
      */
     private suspend fun missingForListen(recitation: String, ayah: Ayah): Long? {
         val timingsId = ContentDatabase.reciterPack(recitation)
@@ -1163,7 +1163,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // not borrowed from the playing pill: the offer may be about a
             // surah the player has never seen, and the reader who is about
             // to spend a megabyte chooses with its price in view (owner
-            // decision, this session).
+            // decision, 16.2).
             options = listenOptions(ayah.surah),
         )
 
@@ -1263,7 +1263,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * only when nothing is playing yet: [listenTarget] is a snapshot and the
      * audio moves on by itself, so a voice chosen three ayahs in was heard
      * from the ayah the reader started on, and a surah the audio had carried
-     * on into was left entirely (owner report, this session).
+     * on into was left entirely (owner report, 17.7).
      */
     fun choosePillReciter(reciter: String) {
         val target = reciterTarget(playback.state.value.ayahNumber, listenTarget)
@@ -1292,7 +1292,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      *
      * The file, the pack, and the manifest are disk work, so the three
      * answers are read on a worker and the sheet answers on the next frame
-     * (owner decision, this session).
+     * (owner decision, 18.7).
      */
     fun hearWord(ayahNumber: Int, position: Int) {
         viewModelScope.launch {
@@ -1302,7 +1302,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 // The pack is asked first, and the word only when the pack is
                 // here: a pack that has just finished is one the word's file
                 // is checked against, and a pack that is still on its way is
-                // one listing rather than two (owner decision, this session).
+                // one listing rather than two (owner decision, 18.7).
                 val installed = wordAudio.isInstalled(ayah.surah)
                 WordAsk(
                     surah = ayah.surah,
@@ -1343,7 +1343,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The surah's voices arrived. A tap that was waiting for them sounds now,
      * and only while the sheet is still on that word: a reader who closed the
      * sheet is not handed a voice they are no longer looking at (owner
-     * decision, this session).
+     * decision, 18.7).
      */
     private fun onWordAudioInstalled(surah: Int) {
         val waiting = pendingWord ?: return

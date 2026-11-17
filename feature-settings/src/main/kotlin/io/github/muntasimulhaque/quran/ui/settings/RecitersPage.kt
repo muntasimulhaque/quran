@@ -65,7 +65,7 @@ fun RecitersPage(
         packs.filter { it.type == PackType.Recitation }
             // The list is read by the name each row draws, so it is ordered
             // by the reader's own alphabet and not the catalog's English one
-            // (owner decision, this session).
+            // (owner decision, 8.8).
             .map { pack ->
                 pack to reciterShortName(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX), pack.name)
             }
@@ -118,12 +118,12 @@ fun RecitersPage(
  * The door is drawn from the first frame, before the count lands, at the
  * height the page will keep: the files are counted on a worker, and a door
  * that appeared when the count arrived would grow the sheet under the reader
- * and shift every row above it (owner decision, this session). While the
+ * and shift every row above it (owner decision, 7.8). While the
  * count is on its way the label carries no number, so the count appears in
  * place as a text change that moves nothing.
  *
  * **The last downloaded surah takes the reciter's pack with it** (owner
- * decision, this session). The pack is the timings and audio paths of the
+ * decision, 16.1). The pack is the timings and audio paths of the
  * voice, so with no audio on the device it is a held file with nothing to
  * hold: the row's own Remove is the whole act, and the separate Remove
  * <reciter> button that used to stand at the foot of the list is gone. The
@@ -142,7 +142,7 @@ private fun ReciterDownloads(
     var open by remember(recitation) { mutableStateOf(false) }
     var downloaded by remember(recitation) { mutableStateOf<List<DownloadedSurah>?>(null) }
     // The file the reader asked to remove and whose size is worth a question.
-    // Null when nothing is being asked (owner decision, this session).
+    // Null when nothing is being asked (owner decision, 19.1).
     var pending by remember(recitation) { mutableStateOf<DownloadedSurah?>(null) }
     LaunchedEffect(recitation) {
         downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
@@ -178,7 +178,7 @@ private fun ReciterDownloads(
         // Every Remove action wears the app's own button, and the button
         // already carries its 48 dp target, so the rows need no extra height
         // of their own: the names sit close together and the block reads as
-        // one list (owner decision, this session: a 40 dp provider wrapped
+        // one list (owner decision, 13.8: a 40 dp provider wrapped
         // these rows and never applied, because the button holds its own
         // floor and reads no provider).
         rows.forEach { row ->
@@ -190,7 +190,7 @@ private fun ReciterDownloads(
                     // took minutes to arrive and cannot be given back without
                     // another download, so it is asked about; a few megabytes
                     // are fetched again in seconds and the reader meant it
-                    // (owner decision, this session).
+                    // (owner decision, 19.1).
                     if (row.bytes >= AskBeforeRemoving) {
                         pending = row
                     } else {
@@ -223,8 +223,8 @@ private fun ReciterDownloads(
  * The door to one reciter's downloaded surahs. The arrow beside it turns to
  * say whether the list is open, so the door says what it opens rather than
  * what a tap will do. The count is null while the files are being counted,
- * and the label then says the one thing it can honestly say (owner decision,
- * this session).
+ * and the label then says the one thing it can honestly say
+ * (owner decision, 7.8).
  */
 @Composable
 private fun ReciterDownloadsDoor(open: Boolean, count: Int?, onClick: () -> Unit) {

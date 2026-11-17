@@ -15,8 +15,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * glass and the line runs to the far edge. A window wider than a page is a
  * page on a desk: the words keep [Space.Measure] and the glass keeps what is
  * left as margin. Nothing in the app decides a width by counting characters,
- * and nothing reads the window's width outside this file (owner decision,
- * this session).
+ * and nothing reads the window's width outside this file
+ * (owner decision, 12.7).
  *
  * The page and the sheet are the same page. A sheet is the page plus its own
  * two gutters, so its edges land on the reading's lines behind it, and the
@@ -24,7 +24,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * page it holds and never a wider one, which is why the sheet's own width is
  * [sheetWidth] and not the window: the ten inch screen used to hand its
  * sheets 1280 dp of row, and a settings row's switch stood most of a screen
- * away from the words that name it (owner report, this session).
+ * away from the words that name it (owner report, 12.7).
  */
 
 /**

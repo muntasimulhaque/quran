@@ -9,7 +9,7 @@ package io.github.muntasimulhaque.quran.playback
  * to 2:5, and then picks another voice was dropped back at 2:1, which reads as
  * "the reciter starts from the first ayah of the surah"; and after the audio
  * had carried on into the next surah, the same choice took them out of that
- * surah entirely (owner report, this session).
+ * surah entirely (owner report, 17.7).
  *
  * [playing] is the ayah the player is on now, published on every item
  * transition, so it is the one control the pill has. The request is still

@@ -34,7 +34,7 @@ import java.util.zip.ZipOutputStream
  * seven Al-Fatiha ayahs of both reciters into `content/bundled/audio`, taken
  * byte for byte from the published surah 1 packages and checked against the
  * source pins. The app's own assets then answer the first Play with no
- * network (owner decision, this session).
+ * network (owner decision, 15.8).
  */
 class Audio(private val root: File) {
 
@@ -146,7 +146,7 @@ class Audio(private val root: File) {
      * it is opened, and each member is verified against its pin in
      * `audio-sources.json` before it is written, so the bundle is the same
      * recording the reader would download and a changed source cannot slip in
-     * (owner decision, this session).
+     * (owner decision, 15.8).
      */
     fun bundle(): Int {
         val database = File(root, "content/quran.db")

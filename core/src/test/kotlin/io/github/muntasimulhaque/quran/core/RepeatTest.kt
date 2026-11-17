@@ -87,7 +87,7 @@ class RepeatTest {
      * Continue to the next ayah rests. That is the whole of the owner's
      * report: the answer says what happens when an *ayah* ends, and the surah
      * is over when its last ayah ends, so the reading stops there and the
-     * next surah is the next answer's business (owner report, this session).
+     * next surah is the next answer's business (owner report, 11.9).
      */
     @Test
     fun theSurahsEndIsReadByTheAnswersOwnRule() {

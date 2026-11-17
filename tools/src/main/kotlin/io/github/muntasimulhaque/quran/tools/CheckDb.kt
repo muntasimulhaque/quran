@@ -30,7 +30,7 @@ class CheckDb(private val root: File) {
         Expectation("surah_info", 114),
         // Every drawn word has one grammar row, and no row is for a word the
         // page does not draw: the sheet's three study lines and the reading's
-        // words are one set (owner decision, this session).
+        // words are one set (owner decision, 18.0).
         Expectation("word_grammar", 77_429),
         Expectation("grammar_lemma", 4_763),
     )

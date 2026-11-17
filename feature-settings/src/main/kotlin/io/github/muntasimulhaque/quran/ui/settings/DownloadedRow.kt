@@ -32,7 +32,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * both places. The name starts on the line the block belongs to: the reciter's
  * choice row's name, or the words page's own gutter. The Remove ends on the
  * choice row's trailing rail, the same rail a pack's Remove and Add use, so the
- * sheet's file actions stand on one line (owner decision, this session).
+ * sheet's file actions stand on one line (owner decision, 18.8).
  *
  * A list of identical Remove buttons needs each one to say what it removes, so
  * the caller passes [removeAction] with the surah's name in it. A bundled
@@ -45,7 +45,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * in a right-hand column, the last row in the sheet that still answered a name
  * with a value beside it (owner decision, the theme and consistency session). A
  * size is the row's value, so it wears the caption, not a source line (owner
- * decision, this session).
+ * decision, 18.8).
  */
 @Composable
 internal fun DownloadedSurahRow(

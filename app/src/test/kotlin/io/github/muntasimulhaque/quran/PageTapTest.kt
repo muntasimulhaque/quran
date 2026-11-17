@@ -12,7 +12,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The pill wears no close any more (owner decision, this session), so a tap on
+ * The pill wears no close any more (owner decision, 9.4), so a tap on
  * the page and the phone's own Back carry the whole of its dismissal rule.
  * The rule is arithmetic over the playback state, and the state is the only
  * thing it reads, so it is pinned here where a change fails the build instead

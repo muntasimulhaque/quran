@@ -85,7 +85,7 @@ class ListeningMarkCaptureTest {
                     setRecitation("husary")
                     // The frame is the day ground, not the emulator's own
                     // setting: a capture that follows the machine is a frame
-                    // of the machine (owner decision, this session).
+                    // of the machine (owner decision, 17.2).
                     setTheme(AppTheme.Light)
                 }
                 PackStore(context).apply {

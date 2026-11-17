@@ -135,7 +135,7 @@ class LastReadStoreTest {
     /**
      * The list used to be one row per ayah, and the app has not shipped, so
      * the old table is made new on the upgrade rather than carried across
-     * (owner decision, this session). The upgrade must still open cleanly:
+     * (owner decision, 7.8). The upgrade must still open cleanly:
      * a reader who had the old rows meets an empty history, not a crash.
      */
     @Test

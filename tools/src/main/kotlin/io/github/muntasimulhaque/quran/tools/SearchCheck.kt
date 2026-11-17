@@ -310,7 +310,7 @@ class SearchCheck(private val root: File) {
      * `Search.matchExpression`, the same two calls the app makes, and the
      * pack's index must find the ayah that holds it. This is the gate that
      * would have caught the Bengali term that split on its vowel sign into a
-     * phrase no token could match (owner report, this session).
+     * phrase no token could match (owner report, 8.5).
      */
     private fun auditPackIndex() {
         val packs = File(root, "content/packs")

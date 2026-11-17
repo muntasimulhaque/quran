@@ -42,7 +42,7 @@ import org.junit.runner.RunWith
  * so this holds on every form factor without knowing which one it runs on:
  * the ten inch screen's own run proves the page held at 600 dp and the glass
  * became margin, and the phone's proves a narrow glass still runs edge to edge
- * (owner decision, this session).
+ * (owner decision, 12.7).
  */
 @RunWith(AndroidJUnit4::class)
 class ReadingMarginTest {

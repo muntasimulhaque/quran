@@ -125,7 +125,7 @@ class PackStore(private val context: Context) {
      * core pack can never wear an old copy's proof, and the file's name
      * carries the first eight characters of that hash on top. A file whose
      * length or moment moved is hashed again, and one that fails is copied
-     * from the assets over it (owner decision, this session: the launch was
+     * from the assets over it (owner decision, 13.0: the launch was
      * paying for a hash of the Quran's database every time).
      */
     private fun isCoreCopy(target: File, expectation: ContentPack): Boolean {
@@ -182,7 +182,7 @@ class PackStore(private val context: Context) {
      * Whether this build carries the pack in its own assets, so placing it
      * needs no network. A development build carries every pack; a release
      * carries the shipped ones. The asset is the same door [install] opens
-     * first (owner decision, this session).
+     * first (owner decision, 17.8).
      */
     fun hasAsset(id: String): Boolean =
         SafePaths.validId(id) && context.assets.list("packs")?.contains("$id.db") == true

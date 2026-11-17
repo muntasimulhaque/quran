@@ -35,7 +35,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * a paused recitation, the ayah menu, and the sheets all answer a touch, and
  * the sentence was the one that did not. A reader who touched the page to
  * reach an ayah still wore "Note saved" over the foot of it until the timer
- * ran out (owner report, this session). [putAwaySentence] is that rule, and
+ * ran out (owner report, 19.3). [putAwaySentence] is that rule, and
  * the sentence's own paper is the one ground it spares: a touch there
  * belongs to the sentence, and the pill's answer must not be taken by the
  * dismissal. Material's timer is the backstop, never the only way out.
@@ -49,14 +49,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * the paper it draws with a pane title, a polite live region while it shows,
  * and a dismiss action whose label the platform speaks in the reader's own
  * language. Two answers to one question would be one too many, so the app
- * adds none (owner decision, this session).
+ * adds none (owner decision, 19.3).
  *
  * **A sentence is never merged over.** The host merges its own descendants,
  * and the pane title it puts on the paper is one of Compose's unmergeable
  * properties, so a merging ancestor over this composable (a clickable, a
  * toggleable, a list item) throws on the semantics tree before it ever
  * throws on the glass. The sentence is a sibling of the page and never a
- * child of something that merges (owner decision, this session).
+ * child of something that merges (owner decision, 19.3).
  */
 @Composable
 fun AppSnackbar(
@@ -76,7 +76,7 @@ fun AppSnackbar(
             // night paper, above the page it interrupts. The Material
             // Snackbar carries its own elevation, so the sentence keeps an
             // edge even on a sheet, where its fill is the sheet's own (owner
-            // decision, this session).
+            // decision, 17.0).
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
             action = data.visuals.actionLabel?.let { label ->
@@ -135,8 +135,8 @@ fun rememberSentence(): Sentence = remember { Sentence() }
  *
  * A reader must never pay twice for touching the page, so this only
  * watches. It takes the initial pass, which sees the touch before the child
- * that owns the gesture, and it consumes nothing (owner decision, this
- * session). The offer, the paused recitation, and the search reveal already
+ * that owns the gesture, and it consumes nothing (owner decision, 19.3). The
+ * offer, the paused recitation, and the search reveal already
  * answer a page touch that way; the sentence is the same shape of thing.
  *
  * It belongs on the root of the surface's own window, and never as a layer

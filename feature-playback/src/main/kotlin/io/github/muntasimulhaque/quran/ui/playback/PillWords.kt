@@ -51,8 +51,8 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * The transfer keeps the old two-line block because it is a one-row capsule
  * with the X at its end, not the offer's two centered rows. The block is not
  * a door: while a package is on its way, the only control is the X, and a
- * chevron over words that answer nothing is a door that lies (owner decision,
- * this session).
+ * chevron over words that answer nothing is a door that lies
+ * (owner decision, 16.1).
  */
 @Composable
 internal fun TransferWordsBlock(
@@ -90,7 +90,7 @@ internal fun TransferWordsBlock(
  * key, a two-line lockup that shares one row with the transport.
  *
  * **The words are stacked, because one line cannot hold them** (owner
- * decision, this session). The capsule is 328 dp, and one line of words has
+ * decision, 17.0). The capsule is 328 dp, and one line of words has
  * 236 dp beside the answer's one mark. The four facts on one line measure 231
  * dp in English at the default type, but 247 in Bangla, where the place's own
  * name is longest, and 257 in English at the top step: one line cuts the
@@ -103,14 +103,14 @@ internal fun TransferWordsBlock(
  * 1x, because 1x is the pace the app starts at.
  *
  * **The place and the key never give way; the voice does** (owner decision,
- * this session). The pill's type follows the system scale only up to the
+ * 16.2). The pill's type follows the system scale only up to the
  * app's largest step, 1.2, and stops there. Each line is its own row, so the
  * place and the key keep their ends, the pace keeps the voice's line, and the
  * voice is the only part an ellipsis can take. The reading and the listening
  * panel still take the reader's own scale; the pill is a control with a fixed
  * measure.
  *
- * **The block is the transfer's own lockup** (owner decision, this session).
+ * **The block is the transfer's own lockup** (owner decision, 17.0).
  * The transfer's words are a name over a state at a 2 dp inset, and this is
  * the same block with the place under the voice, in the same capsule: the
  * offer, the transfer, and the recitation are one shape in three states. The
@@ -118,7 +118,7 @@ internal fun TransferWordsBlock(
  * the block stands inside a 48 dp target that the finger gets whole.
  *
  * **The two facts on the voice's line stand apart by the app's middot**
- * (owner decision, this session). The size is not a quiet value of the
+ * (owner decision, 18.5). The size is not a quiet value of the
  * voice, which is what the pace is: it is the second fact of the request,
  * the way "Makki · 44 ayahs" and the Continue pill's own "Al-Baqarah ·
  * 8.9 MB" already read. The mark is drawn between two texts rather than
@@ -126,14 +126,14 @@ internal fun TransferWordsBlock(
  * size still never does, and it says nothing to a screen reader.
  *
  * **The turn stands at the block's foot, not beside the size** (owner
- * report, this session). The block is the door in both of its homes, and
+ * report, 18.5). The block is the door in both of its homes, and
  * its mark closes the block: the playing pill wears it at the foot of the
  * place's line, and moving it beside the size would give one block two
  * places for one mark. Beside a number it also reads as a picker for that
  * number, and the offer's list is a choice of voice, not a size editor.
  *
  * **The offer borrows the block, and its size is the voice's** (owner
- * report, this session). The surah stands on the place line with no key, the
+ * report, 18.4). The surah stands on the place line with no key, the
  * size stands beside the reciter as the voice's own value, and the whole
  * block is the door to the offer's voice list, so the offer, the transfer,
  * and the recitation are one two-line lockup and the offer is the playing
@@ -145,7 +145,7 @@ internal fun TransferWordsBlock(
  * size is never cut, the voice is, and a change of price stands beside the
  * name that explains it.
  *
- * **The door says its state** (owner decision, this session). The chevron is
+ * **The door says its state** (owner decision, 16.5). The chevron is
  * [AppChevron]'s [ChevronRole.Expand], so it points down while the listening
  * panel is closed and up while it is open, and the block speaks the app's
  * Expanded or Collapsed. The panel's own name is spoken when it opens; this is
@@ -186,7 +186,7 @@ internal fun PlayingWordsBlock(
     // scale only up to the app's largest text step. Past it the line would
     // cut the place, and a cut place is worse than a control that holds its
     // measure; the reading and the listening panel still take the reader's
-    // own scale (owner decision, this session).
+    // own scale (owner decision, 16.2).
     val density = LocalDensity.current
     val capped = Density(density.density, min(density.fontScale, TextSize.STEPS.last()))
     Column(
@@ -221,7 +221,7 @@ internal fun PlayingWordsBlock(
             // The transfer's own inset: 2 dp holds a lockup whose two lines
             // keep their own leading, so the block is 42 dp inside the 48 dp
             // target and the air the reader sees is the line boxes' own
-            // (owner decision, this session).
+            // (owner decision, 17.0).
             .padding(horizontal = Space.Tight, vertical = 2.dp),
         verticalArrangement = Arrangement.Center,
     ) {
@@ -234,7 +234,7 @@ internal fun PlayingWordsBlock(
                     text = reciter,
                     // The voice leads: the accent's 13, and the one part of
                     // the block that gives way when a long name meets the top
-                    // step (owner decision, this session).
+                    // step (owner decision, 17.0).
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
@@ -246,7 +246,7 @@ internal fun PlayingWordsBlock(
                         text = speedText(speed),
                         // The pace is the pill's read-back after the panel
                         // closes: the quiet value beside the voice, not a
-                        // second title (owner decision, this session).
+                        // second title (owner decision, 17.0).
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -272,8 +272,8 @@ internal fun PlayingWordsBlock(
                         text = price,
                         // The offer's size is the voice's own value, drawn
                         // after the name and its dot, so the voice gives way
-                        // and the size never does (owner report, this
-                        // session).
+                        // and the size never does
+                        // (owner report, 18.5).
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -310,7 +310,7 @@ internal fun PlayingWordsBlock(
                         text = reference,
                         // The ayah key closes the place: 13 at Regular, the
                         // precise reference beside the surah's own name, and it
-                        // never gives way (owner decision, this session).
+                        // never gives way (owner decision, 17.0).
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
@@ -348,7 +348,7 @@ private const val VoiceSizeDot = "·"
  * The reciter's name is the door to the chosen voice, and the sentence is a
  * notice: the pace and the end belong to a recitation, and these voices have
  * none, so the sentence does not open the listening panel (owner decision,
- * this session: the offer showed only the reciter chooser before there was
+ * 9.5: the offer showed only the reciter chooser before there was
  * anything to hear, and a failure and an unavailable answer are the same
  * moment). A state whose name cannot be chosen, which is a package on its way,
  * draws the name as a notice too and no chevron.
@@ -356,7 +356,7 @@ private const val VoiceSizeDot = "·"
  * One line rather than the block, because the sentence and the name are one
  * thought wide: a failure beside the name is shorter than the name above it,
  * and a taller capsule for a sentence would be the 120 dp row again (owner
- * decision, this session: the block while playing, this line elsewhere).
+ * decision, 9.5: the block while playing, this line elsewhere).
  *
  * The name's flash is the door's whole 48 dp target, so the thin strip of type
  * and its chevron are not the whole of what a finger has to hit, and the
@@ -365,8 +365,8 @@ private const val VoiceSizeDot = "·"
  * before the name is.
  *
  * The name's chevron is the door's own state: it turns up while the voice list
- * is open, and the name speaks Expanded or Collapsed (owner decision, this
- * session).
+ * is open, and the name speaks Expanded or Collapsed
+ * (owner decision, 16.5).
  */
 @Composable
 internal fun PlaybackWordsLine(
@@ -434,7 +434,7 @@ internal fun PlaybackWordsLine(
  * Null where the voice cannot be chosen now, which is while a package is on
  * its way: the chevron is gone rather than a door that does nothing.
  *
- * **The door says its state** (owner decision, this session): the chevron is
+ * **The door says its state** (owner decision, 16.5): the chevron is
  * [AppChevron]'s [ChevronRole.Expand] and turns up while the list is open, and
  * the name speaks Expanded or Collapsed. The list itself speaks when it opens;
  * the door is where the closed state is read.
@@ -511,7 +511,7 @@ private fun ReciterDoor(
  * What the pill says under the reciter's name while an ayah plays: the place,
  * in the reader's own digits.
  *
- * The pace does not stand here any more (owner decision, this session). It was
+ * The pace does not stand here any more (owner decision, 9.6). It was
  * appended after the app's middot, which made it the first thing the line's
  * ellipsis cut: at the longest names the place alone is wider than the line,
  * so a pace trailing it was never read at all, and at the shorter ones it would

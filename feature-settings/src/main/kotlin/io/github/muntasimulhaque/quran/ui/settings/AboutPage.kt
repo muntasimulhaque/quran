@@ -41,7 +41,7 @@ private const val SEPARATOR = " · "
  * says that and stops. The page used to carry a "what each face is for" line
  * under every credit and a group of two label-over-value rows at its head;
  * both are the kind of writing that makes a license page into a brochure
- * (owner report, this session).
+ * (owner report, 12.6).
  *
  * The shape is the sheet's own, one step quieter than its rows: a name in the
  * reading size, and under it one line that says what the thing is, its maker
@@ -60,7 +60,7 @@ private const val SEPARATOR = " · "
  *
  * Corrections and rights requests travel to the maker's own inbox, and the
  * page ends with one door to it: a letter the reader's mail app composes,
- * never analytics and never an account (owner decision, this session). The
+ * never analytics and never an account (owner decision, 16.1). The
  * project repository remains the fallback for a phone with no mail app, so a
  * tap is never dead.
  *
@@ -79,7 +79,7 @@ fun AboutPage(
         // The app's own two facts, on the page's first line. A reader who
         // opens About wants the version and the terms, and the two of them in
         // one sentence are shorter than the two rows that said "Version" and
-        // "License" above their own values (owner report, this session).
+        // "License" above their own values (owner report, 12.6).
         Text(
             text = stringResource(R.string.about_version_license, localizedDigits(version)),
             style = MaterialTheme.typography.bodySmall,
@@ -106,8 +106,8 @@ fun AboutPage(
         // The word pronunciation pack is named from the first page even
         // before it is downloaded, because the app carries Al-Fatiha's 29
         // words in its own assets: the voice is already on the device, and
-        // the reader who hears it is owed whose it is (owner decision, this
-        // session).
+        // the reader who hears it is owed whose it is
+        // (owner decision, 18.6).
         packs.filter {
             (it.shipped || it.installed || it.type == PackType.WordAudio) &&
                 it.type != PackType.Recitation
@@ -184,8 +184,8 @@ fun AboutPage(
         // letter to the maker: a correction, a rights request, or a plain
         // sentence about the app belongs in an inbox, not behind a GitHub
         // account. The project repository is still the fallback when the phone
-        // has no mail app at all, so the tap is never dead (owner decision,
-        // this session).
+        // has no mail app at all, so the tap is never dead
+        // (owner decision, 16.1).
         val context = LocalContext.current
         val feedback = stringResource(R.string.about_feedback)
         val feedbackEmail = stringResource(R.string.about_feedback_email)
@@ -253,7 +253,7 @@ private fun packLine(english: String, bangla: String): String {
  * tafsir". The language alone was the whole of the clue while every pack of
  * one language was a single kind, and with two translations and two tafsirs in
  * the catalog a title that said "· English" left the reader to guess which was
- * which (owner report, this session). The Quran text is named by its language
+ * which (owner report, 12.6). The Quran text is named by its language
  * and nothing else, because there is only one of it and its name already says
  * what it is.
  */
@@ -285,7 +285,7 @@ private fun Face(title: String, madeBy: String, usedFor: String) {
  * and the sheet behind it read as one hand; the line under it is the size
  * every row's value wears. It wore the small page's 16, which made a credit
  * head stand as tall as an empty state's name over a line two points under it
- * (owner report, this session). Nothing is uppercase, nothing is a badge, and
+ * (owner report, 13.9). Nothing is uppercase, nothing is a badge, and
  * no credit is a door: the page is facts and credits, and a reader reads it
  * once.
  */

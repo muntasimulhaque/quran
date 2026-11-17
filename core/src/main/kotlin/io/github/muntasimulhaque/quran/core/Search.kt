@@ -207,7 +207,7 @@ object Search {
         // letters the reader can see, and an excerpt can be a page of prose:
         // the folded shape of a code point is remembered for the length of the
         // call, so the normalizer runs once per distinct character instead of
-        // once per character (owner report, this session).
+        // once per character (owner report, 6.5).
         val latinFolds = if (arabic) null else HashMap<Int, String>()
         while (index < text.length) {
             val codePoint = text.codePointAt(index)
@@ -393,7 +393,7 @@ object Search {
      * normalized shape [normalizeForIndex] gives a query into the indexed
      * column, so the two sides meet. The expression is built here, beside
      * [parse], so the app's matching and the index's matching cannot drift
-     * (owner decision, this session).
+     * (owner decision, 6.5).
      */
     /**
      * The query terms plus the spellings an older index may hold for a hamza
@@ -450,7 +450,7 @@ object Search {
      * code point, a combining mark included, inside its token, and the app must
      * meet it there. Splitting on marks turned a Bengali term into the phrase
      * of its letter fragments, which could never match the single token the
-     * index holds (owner report, this session).
+     * index holds (owner report, 8.5).
      */
     private val SEPARATORS = Regex("[\\x00-\\x7F&&[^A-Za-z0-9]]+")
 }

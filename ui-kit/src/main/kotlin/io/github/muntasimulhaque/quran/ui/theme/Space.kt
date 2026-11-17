@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
  * allowed to be, and how far a wash reaches past its words.
  *
  * **The air above a head is more than the air under it, and the air under it is
- * more than the air inside the block** (owner decision, this session). The
+ * more than the air inside the block** (owner decision, 19.1). The
  * reading's block is a head, the verse, and the meaning under it; when the
  * three gaps fall within a few dp of each other the page stops grouping them,
  * and an ayah's number reads as a caption between two paragraphs rather than
@@ -50,7 +50,7 @@ object Space {
      * now and Turn on, and the download band's Close and Retry. It was 12 dp,
      * and the time page's pair drew 20 (the platform lays its own action row 8
      * dp apart and the app added the 12 on top), which is the one the owner's
-     * eye approved (owner decision, this session). The shapes are 36 dp tall
+     * eye approved (owner decision, 18.8). The shapes are 36 dp tall
      * at the default type, so 20 dp between them reads as two answers; 12 read
      * as one crowded pair, and a pair that changes width with a platform
      * constant is not a decision at all. The order of the pair is the button's
@@ -96,7 +96,7 @@ object Space {
      * line moved into the range it is read in. The width of a page did not
      * move with it: [Measure] still holds a wide glass to 600 dp, so the ten
      * inch screen reads the line it read before and only a sheet's own edge
-     * moved out (owner decision, this session: 28 to 20).
+     * moved out (owner decision, 17.6: 28 to 20).
      *
      * A shape that answers a touch may reach outside the line (a row's press
      * card, the wash of a chosen ayah), and a card holds its own words inside
@@ -125,7 +125,7 @@ object Space {
      * reader turned the text down is the shape of that mistake (owner
      * decision: the character measure stays gone). At 600 dp the five text
      * sizes change how many words a line holds and never how wide the page is,
-     * which is what a printed page does (owner decision, this session).
+     * which is what a printed page does (owner decision, 12.7).
      */
     val Measure = 600.dp
 

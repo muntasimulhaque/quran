@@ -19,7 +19,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * target, the target's air is gone, and the flow adds the 12 dp itself. The
  * fixed 36 dp box used to clip the line at the largest text size, and the
  * flow's fixed gap then had nothing left to keep two rows apart (owner
- * decision, this session).
+ * decision, 15.1).
  *
  * The press circle is the default capsule's 36 dp, or the capsule itself when
  * the reader's text is smaller than the default. A mark stays 18 dp: it is a

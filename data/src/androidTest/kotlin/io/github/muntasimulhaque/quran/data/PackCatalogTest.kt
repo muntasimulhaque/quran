@@ -83,8 +83,8 @@ class PackCatalogTest {
      * A pack's Bangla credit and license, when the catalog carries them, are
      * read beside the English pair: the About page shows them in a Bangla
      * interface, and an older catalog with no Bangla line leaves them empty so
-     * the page falls back to English rather than to nothing (owner decision,
-     * this session).
+     * the page falls back to English rather than to nothing
+     * (owner decision, 8.8).
      */
     @Test
     fun aPacksBanglaCreditAndLicenseAreRead() {

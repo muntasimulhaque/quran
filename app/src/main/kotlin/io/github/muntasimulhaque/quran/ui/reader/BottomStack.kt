@@ -39,12 +39,12 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * Everything that sits at the foot of the page: the pack on its way in and
  * the playback pill, stacked in one place. Nothing is here otherwise, so an
  * idle page runs to its own foot: the surah and the juz are the bar's, and
- * the bar is asked for (owner decision, this session).
+ * the bar is asked for (owner decision, 16.0).
  *
  * The ayah's own actions are not here any more: they are the app's one popup,
  * hung from the number at the ayah's head, so the foot belongs to the player
- * alone and a save no longer competes with a recitation (owner decision, this
- * session).
+ * alone and a save no longer competes with a recitation
+ * (owner decision, 13.3).
  *
  * It lives beside the reading screen rather than inside it because the
  * screen's own file is about the page: what the reader is reading, which
@@ -66,18 +66,18 @@ internal fun BottomStack(
      * itself is [raisedAnswer], beside the screen.
      */
     showPlayback: Boolean,
-    /** Reports the stack's measured height so the reading can keep its foot clear. */
-    onHeight: (Int) -> Unit = {},
     onReciter: (String) -> Unit,
     reciterId: String,
     reciterName: String,
     reciterOptions: List<ListenOption>,
     modifier: Modifier = Modifier,
+    /** Reports the stack's measured height so the reading can keep its foot clear. */
+    onHeight: (Int) -> Unit = {},
 ) {
     // A page with nothing raised pays for no foot at all: the stack is not
     // composed until the reader asks for a recitation or a pack, so its
     // measured height is zero and the reading keeps only its own foot
-    // (owner decision, this session).
+    // (owner decision, 16.0).
     if (!showPlayback && viewModel.packSetup == null) return
     Column(
         modifier = modifier
@@ -138,7 +138,7 @@ internal fun BottomStack(
                     // The way out leads and the act trails, the app's one order
                     // for a pair, so a download that failed reads Close then
                     // Retry. The two standalone actions stand the action gap
-                    // apart (owner decision, this session).
+                    // apart (owner decision, 18.8).
                     quiet = true,
                 )
                 if (setup.failed) {
@@ -188,8 +188,8 @@ internal fun BottomStack(
                 },
                 // The recitation's own stop has no shape on the glass: it is
                 // the action TalkBack offers on Play or pause, and the page
-                // and Back put a non-playing pill away (owner decision, this
-                // session). The transfer keeps the app's one X, because a
+                // and Back put a non-playing pill away (owner decision, 9.4).
+                // The transfer keeps the app's one X, because a
                 // stray tap must never throw a package away.
                 onStop = { viewModel.stopPlayback() },
                 onCancelDownload = { viewModel.cancelDownload() },
@@ -207,7 +207,7 @@ internal fun BottomStack(
  * How anything playing or pending shows at the foot of the page.
  *
  * A word's own voice is a sample, not a session: it raises no capsule, so a
- * sample is never anything (owner decision, this session).
+ * sample is never anything (owner decision, 17.9).
  */
 internal fun PlaybackUiState.isAnything(): Boolean =
     sample == null && (

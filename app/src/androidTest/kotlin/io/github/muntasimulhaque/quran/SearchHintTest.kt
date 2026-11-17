@@ -36,7 +36,7 @@ import org.junit.runner.RunWith
  * works, an Arabic word works without its marks, and a reference is a query)
  * were nowhere on it. The note says them in two sentences and leaves the
  * moment the field holds a word, because it teaches and does not stand beside
- * an answer (owner decision, this session).
+ * an answer (owner decision, 12.9).
  *
  * Only the title and the second sentence are asserted: the first sentence
  * follows the packs on the device, and a test that pinned one of its two forms
@@ -121,8 +121,8 @@ class SearchHintTest {
      * The sheet reopens with the query the reader typed. It must not put the
      * cursor back in the field, because the keyboard would cover the results
      * the reader pressed Back to see. The field is focused only when it is
-     * empty, which is the moment the reader came to type (owner decision,
-     * this session).
+     * empty, which is the moment the reader came to type
+     * (owner decision, 13.8).
      */
     @Test
     fun returningToTheResultsDoesNotRaiseTheKeyboard() {
@@ -151,7 +151,7 @@ class SearchHintTest {
      * The door is a choice of place, not a place to type: the sheet gives the
      * chips its room, which is what keeps seven chips reachable at the largest
      * text size, where they can be taller than the sheet with the keyboard up
-     * (owner decision, this session).
+     * (owner decision, 15.0).
      */
     @Test
     fun openingTheSourceDoorPutsTheKeyboardAway() {

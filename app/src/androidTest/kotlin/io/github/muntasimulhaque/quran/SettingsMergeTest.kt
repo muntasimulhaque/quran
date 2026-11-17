@@ -43,7 +43,7 @@ import org.junit.runner.RunWith
  *
  * The page the row opens carries the same switch at its top, so the reader who
  * tapped the words to flip it finds the switch they meant, and the two are one
- * value read in two places (owner decision, this session).
+ * value read in two places (owner decision, 11.9).
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsMergeTest {
@@ -75,7 +75,7 @@ class SettingsMergeTest {
      * The hub used to carry a switch and a chevron side by side, with the
      * chevron holding a spoken name of its own. The row is one door now: it
      * says the setting and where it stands, and a tap anywhere on it lands on
-     * the list (owner decision, this session).
+     * the list (owner decision, 15.2).
      */
     @Test
     fun theTranslationRowIsTheDoor() {
@@ -114,7 +114,7 @@ class SettingsMergeTest {
      * The row is an index line and the switch is the page's, so the two cannot
      * disagree by construction: the row's value is computed from the same
      * setting the switch writes. Turning the reading off here is what the row
-     * says when the reader goes back (owner decision, this session).
+     * says when the reader goes back (owner decision, 15.2).
      */
     @Test
     fun thePageSwitchIsWhatTheRowReadsBack() {

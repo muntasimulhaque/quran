@@ -22,7 +22,7 @@ import java.io.File
  * earlier session).
  *
  * Two of the four are the shade's alone now: the pill became one row with one
- * mark (owner decision, this session), and its skips are the actions that mark
+ * mark (owner decision, 17.0), and its skips are the actions that mark
  * offers to a screen reader. The drawings are still the app's, and this test
  * still holds them to it.
  */

@@ -58,6 +58,17 @@ import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * The air the surah's arrival keeps at its own two ends: more above the
+ * Arabic name than under the place, so the frame reads as the head of the
+ * page and the verses below it keep the lesser gap. [SurahEnd] holds the
+ * arithmetic between this frame, the reading's foot, and the turn of a page.
+ */
+private val OpeningTop = 40.dp
+
+/** The lesser end of the same frame, under the place. */
+private val OpeningBottom = 14.dp
+
 @Composable
 internal fun SurahOpening(
     surah: Surah,
@@ -75,7 +86,7 @@ internal fun SurahOpening(
     // whose content carries no introduction of its own is shown the English
     // one, because the introduction is the one place the app prefers a
     // language the reader may not read over saying nothing at all (owner
-    // decision, this session). The translation, the tafsir, and the word
+    // decision, 6.6). The translation, the tafsir, and the word
     // meanings keep the strict one-language rule.
     val info by produceState<List<TextBlock>?>(initialValue = null, surah.number, content, language) {
         value = withContext(Dispatchers.IO) {
@@ -102,7 +113,7 @@ internal fun SurahOpening(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("surah-opening")
-            .padding(top = 40.dp, bottom = 14.dp),
+            .padding(top = OpeningTop, bottom = OpeningBottom),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // The opening of a surah is the one arrival in the reading: the
@@ -110,7 +121,7 @@ internal fun SurahOpening(
         // type, so every surah opens the same way. The two names are one
         // header, so the Latin name stands a row's gap under the Arabic; the
         // gold rule that used to divide them was ornament, and it made the
-        // arrival read as two separate lines (owner decision, this session).
+        // arrival read as two separate lines (owner decision, 14.3).
         Text(
             text = surah.nameArabic,
             style = amiriDisplay(TypeLadder.OPENING_ARABIC_SP, ornament),
@@ -121,7 +132,7 @@ internal fun SurahOpening(
             color = MaterialTheme.colorScheme.onBackground,
             // The surah's own name is this page's title, so a reader who
             // cannot see it can jump to it instead of hearing the opening
-            // read as one run (owner decision, this session).
+            // read as one run (owner decision, 13.3).
             modifier = Modifier
                 .padding(top = Space.Row)
                 .semantics { heading() },
@@ -164,7 +175,7 @@ internal fun SurahOpening(
         // the door is the whole of what stands under the basmalah, so the
         // surah's own first ayah keeps the page. The about is prose the
         // reader asked for, not a preview to scroll past (owner decision,
-        // this session: the three-line teaser of 6.6, a side effect of the
+        // 6.7: the three-line teaser of 6.6, a side effect of the
         // introduction loading as the surah opens so the door knows whether
         // it has anything behind it, is removed).
         if (expanded && info != null) {
@@ -182,7 +193,7 @@ internal fun SurahOpening(
                 // of running into the sentence under them. The old shape
                 // flattened every block to plain prose and lost the source's
                 // structure on the page that explains the surah (owner
-                // decision, this session).
+                // decision, 13.3).
                 modifier = Modifier
                     .padding(top = Space.Block)
                     .clip(Radii.Card)
@@ -201,7 +212,7 @@ internal fun SurahOpening(
                     // reads at the reading's own voice and size, not at a
                     // caption's: it is the longest text beside the tafsir on
                     // this page, so it takes the same room the translation
-                    // takes (owner decision, this session).
+                    // takes (owner decision, 13.3).
                     sizeSp = metrics.translationSp,
                     lineSp = metrics.translationLineSp,
                     arabicSp = metrics.arabicInlineSp,
@@ -231,7 +242,7 @@ internal fun SurahOpening(
  * The one-time reminder offer, at the end of the first surah the reader
  * finishes. It is not a gate: the reading is already the gift, and the ask
  * comes after it. Turn on asks the phone for what it needs; Not now writes
- * the reader's no and never asks again (owner decision, this session).
+ * the reader's no and never asks again (owner decision, 15.5).
  */
 @Composable
 internal fun ReadingReminderOffer(
@@ -286,8 +297,15 @@ internal fun ReadingReminderOffer(
  * given above it (64 dp of page padding and 40 dp of the opening itself).
  * The turn of a page then reads as a shorter breath than the arrival, which
  * is the order the reader meets them in, never as a card left on the edge of
- * the glass (owner decision, this session).
+ * the glass (owner decision, 12.2).
  */
+/** The turn of a page: the lesser breath, argued against the arrival in
+ * [SurahEnd]'s own KDoc. */
+private val EndTop = 30.dp
+
+/** The air under the next-surah card, which [SurahEnd]'s KDoc counts. */
+private val EndBottom = 20.dp
+
 @Composable
 internal fun SurahEnd(
     surah: Surah,
@@ -299,7 +317,7 @@ internal fun SurahEnd(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 30.dp, bottom = 20.dp),
+            .padding(top = EndTop, bottom = EndBottom),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
@@ -345,7 +363,7 @@ internal fun SurahEnd(
                         text = stringResource(R.string.reading_next_surah),
                         // A label over the next surah's name, so it wears the
                         // meta line rather than a group head: the card itself
-                        // is the door (owner decision, this session).
+                        // is the door (owner decision, 13.3).
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -366,8 +384,8 @@ internal fun SurahEnd(
                 text = stringResource(R.string.reading_end_of_quran),
                 style = MaterialTheme.typography.titleMedium,
                 // The end of the Book is a statement, not an action: the
-                // accent belongs to what answers a tap (owner decision, this
-                // session).
+                // accent belongs to what answers a tap
+                // (owner decision, 13.3).
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = 10.dp),
             )

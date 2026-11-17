@@ -24,7 +24,7 @@ import androidx.compose.ui.semantics.semantics
  * 20 at SemiBold in the interface face: Apple's Title 3 and the header of a
  * utility sheet, not a display line and not a second article title. It is
  * the app's own name, so it wears the app's voice; the page inside the sheet
- * is the Book and wears the Book's face (owner decision, this session: the
+ * is the Book and wears the Book's face (owner decision, 13.4: the
  * title was Literata 18, and the Book's names now stay on the page).
  *
  * It is a heading to a screen reader. TalkBack has navigated by heading since

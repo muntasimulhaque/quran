@@ -14,7 +14,7 @@ package io.github.muntasimulhaque.quran.tools
  * The Saheeh cross-check is not listed: it is a build-time audit copy of the
  * same translation, never a byte of the pack. Listing it here put its QUL
  * line on the pack's About page, which claimed a distribution route the pack
- * does not use (owner decision, this session).
+ * does not use (owner decision, 14.5).
  */
 object PackSources {
 
@@ -39,7 +39,7 @@ object PackSources {
         "words-en" to listOf("word-by-word-english", "surah-info-en", "word-morphology"),
         "words-bn" to listOf("word-by-word-bengali", "word-morphology"),
         // The root is one language-neutral table and travels beside the
-        // word list the reader has (owner decision, this session).
+        // word list the reader has (owner decision, 17.7).
         "word-root" to listOf("word-root"),
         "reciter-minshawi" to listOf("recitation-minshawi"),
         "reciter-husary" to listOf("recitation-husary"),
@@ -58,8 +58,8 @@ object PackSources {
      * The licenses of a pack's datasets, each once, in the order they are
      * listed. With [bangla], each dataset's own Bangla line is read when the
      * manifest carries one, and its English line when it does not, so a pack
-     * can never lose a license by not being translated (owner decision, this
-     * session).
+     * can never lose a license by not being translated
+     * (owner decision, 8.8). 
      */
     fun licenses(manifest: Manifest, packId: String, bangla: Boolean = false): List<String> =
         datasets(packId).mapNotNull { id ->

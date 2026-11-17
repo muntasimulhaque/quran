@@ -12,7 +12,7 @@ import org.junit.Test
  * The two grounds are not on the scale: the chosen thing wears
  * [PaperSelected] and the found thing wears [PaperMatch], both opaque and both
  * in the paper's own family, because a tint of the accent over warm paper
- * measured a cold gray and then a cold blue (owner decision, this session).
+ * measured a cold gray and then a cold blue (owner decision, 19.1).
  */
 class WashTest {
 

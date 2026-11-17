@@ -28,7 +28,7 @@ import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
  * their axis. Nothing else is drawn: no
  * icon, no card, no picture, no button. A note that also offers something is a
  * page selling a feature to a reader who came to read, and the two surfaces
- * that want this note want it quiet (owner decision, this session).
+ * that want this note want it quiet (owner decision, 12.9).
  *
  * The words belong to the page that shows them, because an empty Saved list
  * and an empty search ask different things of a reader; only the voice is
@@ -69,7 +69,7 @@ fun EmptyNote(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             // The sentence is centered with the name over it (owner decision,
-            // this session). A centered name over a left-aligned block read as
+            // 15.0). A centered name over a left-aligned block read as
             // two blocks that disagreed about their axis, and the paragraph's
             // own ragged right is what a centered paragraph keeps.
             textAlign = TextAlign.Center,

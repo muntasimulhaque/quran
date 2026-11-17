@@ -28,8 +28,8 @@ import org.junit.runner.RunWith
  * handle a theme change itself. It did not: the interface language is applied
  * in `attachBaseContext` through a context derived with
  * `createConfigurationContext`, a snapshot taken when the window is built, and
- * nothing recomposed the page when the phone's own colours turned over
- * underneath it. So the phone in its day colours and the app on the night page
+ * nothing recomposed the page when the phone's own colors turned over
+ * underneath it. So the phone in its day colors and the app on the night page
  * it was opened on, at ten in the morning, with the switch on (owner report,
  * 37th session).
  *

@@ -24,7 +24,7 @@ import java.sql.Connection
  * ships the core pack, the two translations, and the two reciter timing
  * packs; the recitation audio itself is downloaded per surah on the reader's
  * word, except Al-Fatiha, whose fourteen ayahs the app carries as assets
- * (owner decision, this session).
+ * (owner decision, 15.8).
  *
  * The pack files are derived from the audited database, so there is exactly
  * one place where content is assembled and one set of gates that guard it.
@@ -66,11 +66,11 @@ class Packs(private val root: File) {
             credit = "QPC Hafs, word by word, with tajweed; audited against the QUL QPC text",
             creditBn = "QPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u09a4\u09be\u099c\u09ac\u09c0\u09a6\u09b8\u09b9; QUL-\u098f\u09b0 QPC \u09b2\u09c7\u0996\u09be\u09b0 \u09b8\u09be\u09a5\u09c7 \u09af\u09be\u099a\u09be\u0987\u0995\u09c3\u09a4",
             // The QPC switch replaced the core's content; the version moves
-            // so a held core is replaced rather than kept (owner decision, this
-            // session). Version 3 carries the four word merges and the works-
+            // so a held core is replaced rather than kept (owner decision,
+            // 10.4). Version 3 carries the four word merges and the works-
             // with-the-word-list positions. Version 4 drops the print's page
             // signs from the search index, so the first word under the rub el
-            // hizb is found by a reader typing it (owner report, this session).
+            // hizb is found by a reader typing it (owner report, 10.7).
             // Version 5 carries the surah introductions, so every reader has
             // them without a word list.
             version = "5",
@@ -154,8 +154,8 @@ class Packs(private val root: File) {
             // meaning: the sheet's study lines arrive with the word list the
             // reader already turned on. Version 3 carries the lemma index the
             // places page reads, so a dictionary form's places are one lookup
-            // rather than a pass over the whole list (owner decision, this
-            // session).
+            // rather than a pass over the whole list
+            // (owner decision, 18.9).
             version = "QUL 3",
             shipped = false,
             ayahs = 6236,
@@ -170,14 +170,14 @@ class Packs(private val root: File) {
             // Version 2 carries every word's grammar and lemma, beside its
             // meaning: the sheet's study lines arrive with the word list the
             // reader already turned on. Version 3 carries the lemma index the
-            // places page reads (owner decision, this session).
+            // places page reads (owner decision, 18.9).
             version = "QUL 3",
             shipped = false,
             ayahs = 6236,
         ),
         // The root is one small table for the whole Book and no language of
         // its own: the letters are Arabic and the Latin beside them is the
-        // letters' names (owner decision, this session).
+        // letters' names (owner decision, 17.7).
         Pack(
             id = "word-root",
             type = "word-root",
@@ -189,7 +189,7 @@ class Packs(private val root: File) {
             // count the sheet names is the list the door opens, and adds the
             // root index the places page reads. The source's own count
             // disagreed for fourteen roots; the pack's rows are the app's
-            // truth (owner decision, this session).
+            // truth (owner decision, 18.9).
             version = "QUL 2",
             shipped = false,
             ayahs = 6236,
@@ -311,7 +311,7 @@ class Packs(private val root: File) {
      * first note belongs to the surah title, which an ayah-keyed file cannot
      * carry. The pack numbers each surah's notes from one and starts the
      * next surah again at one, the rule the Bangla pack follows and the one
-     * the reader's page was asked for (owner decision, this session). The
+     * the reader's page was asked for (owner decision, 14.6). The
      * same pass corrects the export's one printed slip at 3:32, and drops
      * 7:143's marker whose body the export lost. [SaheehText] holds both
      * rules and their reasons.
@@ -392,7 +392,7 @@ class Packs(private val root: File) {
      * The Bangla pack is the reader's shape too. The database numbers each
      * ayah's notes from one, because the QUL row marks them with stars; the
      * pack lets the number climb through the surah and starts the next surah
-     * at one, the same rule as Saheeh (owner decision, this session). The
+     * at one, the same rule as Saheeh (owner decision, 14.6). The
      * note bodies and the sentence's markers move together, and the search
      * index keeps its words.
      */
@@ -531,7 +531,7 @@ class Packs(private val root: File) {
                         // this index the read is a whole scan of the pack,
                         // which is what made a warm tafsir search slow even
                         // after the search itself became an index read (owner
-                        // report, this session).
+                        // report, 6.5).
                         statement.execute("CREATE INDEX tafsir_passage_source ON tafsir_passage(source_id)")
                         createFts(statement, "tafsir_passage_fts", "text_search", "tafsir_passage")
                     }
@@ -545,7 +545,7 @@ class Packs(private val root: File) {
                         // The word's grammar and lemma travel with the list
                         // that opens the sheet, so the reader who turns word
                         // meanings on gets the study lines in the same
-                        // download (owner decision, this session).
+                        // download (owner decision, 18.0).
                         statement.execute(
                             "CREATE TABLE grammar_lemma AS SELECT id, text, words_count, forms_count " +
                                 "FROM src.grammar_lemma",
@@ -557,7 +557,7 @@ class Packs(private val root: File) {
                         // The places page reads one dictionary form's words
                         // across the Book; the index makes that read one
                         // lookup. A pack built before it answers the same
-                        // rows through a scan (owner decision, this session).
+                        // rows through a scan (owner decision, 18.9).
                         statement.execute(
                             "CREATE INDEX word_grammar_lemma ON word_grammar(lemma_id)",
                         )
@@ -584,7 +584,7 @@ class Packs(private val root: File) {
                         // field: the number the sheet names and the places
                         // the door opens are one number. The source's field
                         // disagreed for fourteen roots, and the rows are what
-                        // the reader sees (owner decision, this session).
+                        // the reader sees (owner decision, 18.9).
                         statement.execute(
                             "CREATE TABLE word_root AS SELECT r.ayah_number, r.position, r.arabic, " +
                                 "r.latin, c.words_count FROM src.word_root r " +
@@ -605,8 +605,8 @@ class Packs(private val root: File) {
      * The full text index over one pack's searchable column, so a search
      * reads an index instead of scanning every row of the pack. The tafsir
      * alone is tens of megabytes of prose, and scanning it on every settled
-     * keystroke was the one search a reader could feel (owner decision, this
-     * session).
+     * keystroke was the one search a reader could feel
+     * (owner decision, 6.5). 
      *
      * The table is external content: the tokens are indexed, the text stays in
      * the content table, and a query reads the passages it matched rather

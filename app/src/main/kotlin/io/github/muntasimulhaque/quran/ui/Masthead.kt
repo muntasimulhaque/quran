@@ -37,7 +37,7 @@ fun Masthead(modifier: Modifier = Modifier) {
             // The first line a reader meets, under the 48 sp masthead: a 13
             // sp caption under a display line read as a footnote to the
             // title. 15 at Medium with a little tracking is a subtitle
-            // (owner decision, this session).
+            // (owner decision, 13.3).
             style = MaterialTheme.typography.titleSmall.copy(letterSpacing = 0.2.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Line),

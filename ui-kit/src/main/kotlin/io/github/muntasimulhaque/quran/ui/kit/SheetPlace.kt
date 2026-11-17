@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
  * value in the app wears. The footnote and the word meaning are the same kind
  * of surface, so they read the place the same way, on the page's own left
  * edge: a title never has to share a line with the reference it opens (owner
- * decision, this session).
+ * decision, 16.2).
  *
  * The alignment belongs to the sheet, and every sheet keeps the page's left
  * edge: a footnote is prose and the word card is one entry, and both name

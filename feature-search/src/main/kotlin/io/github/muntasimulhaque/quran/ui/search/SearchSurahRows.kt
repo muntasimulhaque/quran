@@ -29,6 +29,15 @@ import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.bookRowName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
+/**
+ * The two rows a search answers with when the query is a place rather than a
+ * word: the surah a reference or a name matched, and one reference from the
+ * lookup that names its own ayah.
+ *
+ * Both stand on the sheet's own row, [sheetRow], so a search result and a
+ * settings row answer a finger at the same air and the same press, and both
+ * draw the Book's letter where they show the Quran's words.
+ */
 @Composable
 internal fun ReferenceRow(
     ayah: Ayah,

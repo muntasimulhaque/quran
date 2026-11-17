@@ -32,7 +32,7 @@ enum class ChevronRole { Expand, Back, Next }
  * to stand at the call sites are gone, so a new row cannot invent a fifth
  * direction. The pill's doors kept their own raw chevrons past that sweep
  * because the pill's mark is the compact 14 dp and this composable could only
- * draw the row's 18 (owner decision, this session: the turn, and the state
+ * draw the row's 18 (owner decision, 16.5: the turn, and the state
  * said out loud).
  */
 @Composable

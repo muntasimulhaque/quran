@@ -22,7 +22,7 @@ import io.github.muntasimulhaque.quran.core.WordForm
  * which the committed database was built from. They are a source erratum, not
  * a hand edit of the data: the build reads the new export, and where the
  * export's inline translation is missing, it reads the values the corpus
- * itself gave the same words before (owner decision, this session). The
+ * itself gave the same words before (owner decision, 18.9). The
  * database the app ships is expected to rebuild to the same SHA-256 as the
  * committed one; a difference is a change in the source's data rather than in
  * the shape of this table, and it stops the content build for an audit.

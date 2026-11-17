@@ -18,7 +18,7 @@ data class ListenOption(
  * and they are offered as one: one name, one size, one download, one progress
  * bar. The reciter is changeable right here, because the reader who is about
  * to spend a megabyte should be able to spend it on the reciter they actually
- * want to hear (owner decision, this session).
+ * want to hear (owner decision, 16.2).
  */
 data class ListenOffer(
     val reciter: String,

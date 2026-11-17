@@ -98,7 +98,7 @@ class SurahAyahsTest {
         // The list row's name is the row's 15; the grid header is a page's
         // 16, one point over it. The header must lead the row, and it must
         // not go back to the extra size it once drew: one point, not a step
-        // (owner decision, this session).
+        // (owner decision, 13.9).
         assertTrue(
             "the header's name must lead the list row's name: list ${fromList.height}, header ${fromHeader.height}",
             fromHeader.height.value > fromList.height.value,

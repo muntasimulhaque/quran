@@ -12,7 +12,7 @@ import java.util.Locale
  * a search, and a list of them is a list of nothing. Five at most, newest
  * first, and one spelling per query, because the same word typed in two cases
  * is one word. The reader can forget a word in the sheet, and the app never
- * sends the list anywhere (owner decision, this session).
+ * sends the list anywhere (owner decision, 15.1).
  *
  * The arithmetic lives in [RecentQueries] rather than here, so a machine with
  * no screen pins the cap, the dedupe, and the round trip; this class is only
@@ -20,7 +20,7 @@ import java.util.Locale
  * the app's backup is off, so it leaves with the app when the reader removes
  * it and never arrives from anywhere else.
  */
-class SearchHistory(context: Context) {
+class SearchHistoryStore(context: Context) {
 
     private val preferences =
         context.applicationContext.getSharedPreferences("search-history", Context.MODE_PRIVATE)
@@ -89,8 +89,8 @@ object RecentQueries {
     /**
      * The list without [query]. The chip hands back the spelling the list
      * holds, so the match is exact; the fold is there for the stored list,
-     * where one query is kept once whatever its capitals (owner decision,
-     * this session).
+     * where one query is kept once whatever its capitals
+     * (owner decision, 13.9).
      */
     fun remove(existing: List<String>, query: String): List<String> {
         val folded = query.trim().replace(Spaces, " ").lowercase(Locale.ROOT)

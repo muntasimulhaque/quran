@@ -21,14 +21,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 /**
  * The results' own line, and the two states that need more than a line.
  *
- * **A failed search offers its own retry** (owner decision, this session).
+ * **A failed search offers its own retry** (owner decision, 15.0).
  * The line used to end in "Try again." with nothing to tap: the only way to
  * run the query again was to close the sheet or to edit a query the reader
  * had already written. A quiet Retry sits under the sentence now, so the
  * instruction and the control are the same act.
  *
  * **A search with no matches teaches the forms it accepts** (owner decision,
- * this session). "No matches." left most of the sheet blank at exactly the
+ * 15.0). "No matches." left most of the sheet blank at exactly the
  * moment the reader needed to know that a shorter word or a reference is a
  * query. The hint under the count is the empty sheet's teaching, at the one
  * moment it is an answer rather than a lesson beside the field.
@@ -60,14 +60,14 @@ internal fun StatusLine(
         // A new query starts before its results exist; the previous results
         // are never shown under it. The line says the search is running
         // instead of naming a count that belongs to another question (owner
-        // decision, this session).
+        // decision, 13.8).
         !current -> stringResource(R.string.search_status_searching)
         searching && results.hits.isEmpty() -> stringResource(R.string.search_status_searching)
         total == 0 -> stringResource(R.string.search_status_no_matches)
         // A capped list has no honest count: the number the pass collected is
         // not the number that exists, and a reader who acts on it is acting
         // on a floor. The line says what the reader is looking at instead of
-        // how much there is (owner decision, this session).
+        // how much there is (owner decision, 10.0).
         results.capped -> stringResource(R.string.search_status_capped, LIMIT)
         else -> pluralStringResource(R.plurals.search_matches, total, total)
     } ?: return
@@ -89,14 +89,14 @@ internal fun StatusLine(
         Text(
             text = message,
             // A status line is a caption, not prose: the meta line's 13 reads it
-            // under the field without competing with the results (owner decision,
-            // this session).
+            // under the field without competing with the results
+            // (owner decision, 13.3).
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             // A result count, a settled search, or a failure arrives while the
             // reader's focus is still in the field. The line announces itself
             // once each time it changes, and a failure interrupts because the
-            // reader has to act on it (owner decision, this session).
+            // reader has to act on it (owner decision, 13.8).
             modifier = Modifier.semantics {
                 liveRegion = if (failed) LiveRegionMode.Assertive else LiveRegionMode.Polite
             },
@@ -106,7 +106,7 @@ internal fun StatusLine(
                 text = localizedDigits(stringResource(R.string.search_status_no_match_hint)),
                 // The hint is the one line on the results' page that teaches,
                 // so it takes the body's 15 where the count above it is a
-                // caption (owner decision, this session).
+                // caption (owner decision, 15.0).
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier

@@ -69,7 +69,7 @@ class WordMeaningTest {
             store.install("words-bn")
             // The roots travel with the word list in the app, so the store
             // frame the sheet is judged from carries them too (owner
-            // decision, this session).
+            // decision, 17.7).
             store.install("word-root")
             runBlocking {
                 SettingsStore(context).apply {
@@ -142,7 +142,7 @@ class WordMeaningTest {
         // The study lines the word pack carries: the dictionary form and the
         // grammar, on the same sheet and in the reader's language. The word
         // is 1:1's first, whose lemma and part of speech the corpus names
-        // (owner decision, this session).
+        // (owner decision, 18.0).
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithTag("word-sheet-lemma", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
@@ -157,7 +157,7 @@ class WordMeaningTest {
         // sees. A sheet's semantics exist before its window has finished
         // rising, and the 18.0 frame was taken mid-rise, so the frame is kept
         // only when two captures in a row are identical: a settled sheet
-        // photographs the same twice (owner report, this session).
+        // photographs the same twice (owner report, 18.1).
         val frame = settle()
         File(screenshotOutputDirectory(), "word-meaning.png").outputStream().use { output ->
             frame.compress(Bitmap.CompressFormat.PNG, 100, output)
@@ -173,11 +173,11 @@ class WordMeaningTest {
      * word the reader is on (1:1), and Al-Baqarah 2:31 is the second place in
      * the Book's order. The tap on that place must put the sheet away, move
      * the reading to 2:31, and write the reader's place. The frame is the
-     * page's evidence, not only the semantics tree (owner decision, this
-     * session).
+     * page's evidence, not only the semantics tree
+     * (owner decision, 18.9).
      *
-     * **The sheet comes back as the reader left it** (owner decision, this
-     * session). The tap is a door the reader came through, so the reading's
+     * **The sheet comes back as the reader left it** (owner decision, 19.0).
+     * The tap is a door the reader came through, so the reading's
      * Back gives the list back, opened at the row they chose and marking it as
      * their place, because the reading stands there now. The sheet's own
      * ladder is the one it always was: its back mark steps to the word, and
@@ -188,7 +188,7 @@ class WordMeaningTest {
      * The press is the activity's own dispatcher, as the reading's Back is: a
      * platform Back aimed at the sheet the restore brings back does not arrive
      * in this harness, aimed at a window that has only just risen (owner
-     * report, this session), and the sheet's own page is not this session's
+     * report, 19.0), and the sheet's own page is not 19.0's
      * decision to pin.
      */
     @Test
@@ -227,7 +227,7 @@ class WordMeaningTest {
         frame.recycle()
         // The page's back returns to the word, and the door opens the same
         // page again: the reader's way back is not a dismissal of the sheet
-        // (owner decision, this session).
+        // (owner decision, 18.9).
         compose.onAllNodesWithContentDescription(
             compose.activity.getString(ReadingR.string.reading_word_places_back),
             useUnmergedTree = true,

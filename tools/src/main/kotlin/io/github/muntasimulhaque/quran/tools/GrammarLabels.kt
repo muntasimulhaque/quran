@@ -12,21 +12,21 @@ import io.github.muntasimulhaque.quran.core.WordForm
  * language. The translation from one to the other happens here, once, in the
  * pipeline, so the app never carries an Arabic label it has to match and a
  * label the build does not know is a build failure rather than a silent
- * blank line on the sheet (owner decision, this session).
+ * blank line on the sheet (owner decision, 18.0).
  *
  * Only what the sheet shows is mapped. The export's other qualifiers describe
  * the word's place in its sentence (a pronoun's person, a noun's role as an
  * adjective, a verb's family), and the sheet is one short line about the word
  * itself, so they are left where they are. The counts beside each label are
  * from the current export and are there to show how much of the Book a label
- * covers (owner decision, this session).
+ * covers (owner decision, 18.0).
  *
  * The 2026-11-14 export leaves nine rows' inline labels in the corpus's own
  * tag language, the same meaning under a different name. Those tags are read
  * here as the parts they name; where a tag is coarser than the Arabic label it
  * replaced (a noun that is a participle, a preposition that is a particle) the
  * build's GrammarErrata restores the fuller value the same word carried before
- * (owner decision, this session).
+ * (owner decision, 18.9).
  */
 object GrammarLabels {
 
@@ -78,7 +78,7 @@ object GrammarLabels {
         // The 2026-11-14 export's raw tags on the nine rows at 70:1 and
         // 78:30. The tag names the broader part; GrammarErrata restores the
         // finer label the same word carried in the previous export (owner
-        // decision, this session).
+        // decision, 18.9).
         "morphology.tags.N" to PartOfSpeech.NOUN,
         "morphology.tags.P" to PartOfSpeech.PREPOSITION,
         "morphology.tags.V morphology.tenses.PERF" to PartOfSpeech.PAST_VERB,

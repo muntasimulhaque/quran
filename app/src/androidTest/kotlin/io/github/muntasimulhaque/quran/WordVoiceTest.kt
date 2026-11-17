@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
  * A press on the speaker is the reader's ask, so the mark stands on every
  * word: a word whose file is here sounds, a word whose surah has not arrived
  * fetches the surah, and a word the alignment cut no clip for says so rather
- * than playing nothing (owner decision, this session). This class holds the
+ * than playing nothing (owner decision, 18.7). This class holds the
  * three sides it can hold without a network: Al-Fatiha, whose first 29 words
  * the app carries; Al-Baqarah, whose word pack is not here in this run, so its
  * speaker must still be drawn; and a surah installed with one word file and a
@@ -103,7 +103,7 @@ class WordVoiceTest {
      * The speaker answers on the sheet and nowhere else. A word is a sample,
      * not a session: it is one word file on its own player, so no capsule
      * rises behind the sheet while it sounds, and none is left behind when the
-     * word ends (owner decision, this session).
+     * word ends (owner decision, 18.6).
      */
     @Test
     fun theWordsVoiceRaisesNoCapsule() {
@@ -128,7 +128,7 @@ class WordVoiceTest {
     /**
      * Al-Baqarah's audio is a download the reader has not asked for, and the
      * speaker is drawn anyway: the press is the ask, so the sheet never opens
-     * without its one control (owner decision, this session).
+     * without its one control (owner decision, 18.7).
      *
      * The word is 2:7's first, which has a root (kh-t-m), because the sheet's
      * root line proves the sheet is whole while the voice is a download away.

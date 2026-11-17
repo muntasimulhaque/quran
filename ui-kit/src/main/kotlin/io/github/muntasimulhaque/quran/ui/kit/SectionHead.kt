@@ -16,7 +16,7 @@ import androidx.compose.ui.semantics.semantics
  * needs, in the secondary ink. It used to wear the accent, which is the color
  * every control that answers a tap wears: a group's name in lapis read as a
  * button the reader could press, and the sheet had one more blue thing than
- * it had doors (owner decision, this session). A label that only names what
+ * it had doors (owner decision, 13.3). A label that only names what
  * follows is quiet; the rows under it lead.
  *
  * It is small on purpose. A head that is larger than its rows competes with

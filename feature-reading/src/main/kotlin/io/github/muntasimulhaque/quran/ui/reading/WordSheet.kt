@@ -94,14 +94,14 @@ import kotlinx.coroutines.withContext
  * A word the reader pressed and held, with the meaning the word list gives it
  * and the reference that says where it stands.
  *
- * **The head is every sheet's head** (owner decision, this session). The name
+ * **The head is every sheet's head** (owner decision, 18.1). The name
  * at [SheetHead]'s 20 SemiBold, the place 4 dp under it in [SheetPlace]'s meta
  * line, both on the page's 20 dp edge: the footnote's own head, and the note's
  * and the settings page's, drawn by the same rule. It was not: the speaker's
  * 48 dp target made this head 48 dp tall under a 26 dp title, so the place
  * stood 15 dp under the name where the footnote's stood 4, and two sheets that
- * call themselves one page opened two different ways (owner report, this
- * session). [SheetHead] measures the head by its name and lets the mark's
+ * call themselves one page opened two different ways (owner report, 18.1).
+ * [SheetHead] measures the head by its name and lets the mark's
  * target reach outside that line, so no sheet with an action pays for it in
  * the air under its name. The scroll opens with [sheetHeadActionInset], the
  * room that reach needs above the line, so the top edge never clips the
@@ -110,10 +110,10 @@ import kotlinx.coroutines.withContext
  * The speaker is quiet at rest and wears the accent while the word sounds,
  * which is the rule every door that turns in this app follows: the mark is
  * lit because something is happening, not because it is a control (owner
- * decision, this session).
+ * decision, 18.1).
  *
  * **Every word offers its voice, and the tap is the ask** (owner decision,
- * this session). The mark used to be drawn only for a word whose file was
+ * 18.7). The mark used to be drawn only for a word whose file was
  * already on the device, so a surah whose voices were still on their way drew
  * a sheet with no speaker at all, which reads as a broken sheet rather than a
  * word waiting for its pack. The speaker now stands for every word: when the
@@ -126,8 +126,8 @@ import kotlinx.coroutines.withContext
  * one subject and the answer belongs to the word that was pressed. The
  * speaker is quiet while the pack is on its way: nothing is sounding yet.
  *
- * **The entry is centered; the facts are not** (owner decision, this
- * session). The word the reader pressed and the one gloss this ayah gives it
+ * **The entry is centered; the facts are not** (owner decision, 18.1). The
+ * word the reader pressed and the one gloss this ayah gives it
  * are one subject, and a subject is centered as the reading centers a single
  * display line: the Quran's own 26 sp on its 2.0 line, trimmed to the line's
  * ink, the page ink and the tajweed colors the reader has, then the gloss in
@@ -137,16 +137,16 @@ import kotlinx.coroutines.withContext
  * [Space.Block] for the rest, and the owner's frame showed the failure: the
  * count of one fact and the label of the next stood apart by almost the same
  * air as a label and its own value, so the eye could not read where one fact
- * ended and the next began (owner decision, this session). The entry above
+ * ended and the next began (owner decision, 18.3). The entry above
  * them is the block before the first. They are the app's facts about the
  * word, so they take the app's own shape: the page's left edge, the label at
  * [SectionHead]'s 12, the value 4 dp under it,
  * and a count where the pack carries one, 4 dp under the value. The sheet had
  * them as sentences, each label inline with a 24 sp Arabic run and a count, so
  * the root outshouted the gloss and at the largest text step a label could
- * orphan on its own line (owner report, this session).
+ * orphan on its own line (owner report, 18.2).
  *
- * **A fact's Arabic is 20 of the Quran's 26** (owner decision, this session).
+ * **A fact's Arabic is 20 of the Quran's 26** (owner decision, 18.1).
  * The word is the reading's own size and the gloss the translation's; a fact
  * is reference material and may outrank neither. It stood at 24, which is the
  * print's medallion and the reading's inline stand, a measure for Arabic
@@ -163,7 +163,7 @@ import kotlinx.coroutines.withContext
  * only the items that ask for it: with the Latin alone the letters kept the
  * line's top and the reading floated above them, a line clear of the letters
  * it reads, and the Root fact read as four lines rather than three (owner
- * report, this session). The root's own air is unchanged either way: the fact
+ * report, 18.3). The root's own air is unchanged either way: the fact
  * is the Arabic's line box, and the Latin rides inside it.
  *
  * The root's Latin rendering belongs to the page that is read in Latin script:
@@ -176,10 +176,10 @@ import kotlinx.coroutines.withContext
  * drew; a word the corpus gives no lemma says nothing rather than drawing an
  * empty line. The grammar's words are the app's own translated grammar
  * vocabulary, the same in both languages, and never a translation of scripture
- * (owner decision, this session).
+ * (owner decision, 18.1).
  *
  * **The count is a door, and the places are the sheet's second page** (owner
- * decision, this session). A count that names twenty words and cannot show
+ * decision, 18.9). A count that names twenty words and cannot show
  * them is a promise the sheet does not keep. The count line is now the row
  * itself: the number at the page's edge, the app's one forward chevron at the
  * row's end, and the row's card under the finger, because a fact is bare type
@@ -205,7 +205,7 @@ import kotlinx.coroutines.withContext
  * answers the same rows through the scan it always did.
  *
  * **The door out of the sheet is one level deep, as a result is** (owner
- * decision, this session). A place tap puts the sheet away and the reading
+ * decision, 19.0). A place tap puts the sheet away and the reading
  * lands on that ayah, and the phone's Back then gives the sheet back, on the
  * page and at the place the reader left it, so a second place is one press
  * away instead of a walk back through the word. It was not: a place was the
@@ -252,8 +252,8 @@ internal data class OpenWord(
  * The word is the reading's 26 and the gloss the translation's 16; the facts
  * under them are reference material. The reading's inline stand is 24 of 26,
  * which is Arabic *inside* a verse's line; a fact takes one step further down
- * so it can outrank neither the word nor its gloss (owner decision, this
- * session).
+ * so it can outrank neither the word nor its gloss
+ * (owner decision, 18.1).
  */
 private const val FactArabicOfQuran = 20f / 26f
 
@@ -277,7 +277,7 @@ internal sealed interface PlacesSubject {
  * be put back exactly as the reader left it. A place on the list is a door
  * out of the sheet, and the sheet it came through is kept, page and all, so
  * the phone's Back hands the reader the list they chose from (owner
- * decision, this session).
+ * decision, 19.0).
  *
  * [currentAyah] and [currentPosition] are the row the list opens at and
  * washes, and they are not always the word's own place: when Back brings the
@@ -333,7 +333,7 @@ internal fun WordSheet(
     val sheetState = rememberExpandedSheetState()
     // The word's own surah, never the one on the glass: a sheet that Back gave
     // back may stand over a surah the reading has since left, and its head
-    // still names where its word is (owner decision, this session).
+    // still names where its word is (owner decision, 19.0).
     val surahName = surahNameOf(word.surah)
     val palette = LocalPagePalette.current
     // The word's shaped line, so the wash can sit on the letters rather than
@@ -342,11 +342,11 @@ internal fun WordSheet(
     val ink = palette.ink
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
     // A fact's own Arabic, read from the reader's step so the sheet follows
-    // the size they chose for the Quran (owner decision, this session).
+    // the size they chose for the Quran (owner decision, 18.1).
     val factSp = metrics.arabicSp * FactArabicOfQuran
     // The mark is quiet at rest and lit while the word sounds: a door says its
-    // state in the accent, and at rest it asks for nothing (owner decision,
-    // this session).
+    // state in the accent, and at rest it asks for nothing
+    // (owner decision, 18.1).
     val markTint = if (hearing) MaterialTheme.colorScheme.primary else quiet
     // The pack this word's voice travels in, when the state is about this
     // surah: a state left over from the surah the reader just left says
@@ -354,7 +354,7 @@ internal fun WordSheet(
     val pack = voiceAudio?.takeIf { it.surah == word.surah }
     // What the press has to answer with. The transfer's own sizes come from
     // the manifest and the bytes already here, so the line counts up under
-    // the finger (owner decision, this session).
+    // the finger (owner decision, 18.7).
     val voiceLine: String? = when {
         voice == WordVoice.Missing -> stringResource(R.string.reading_word_voice_missing)
         voice == WordVoice.Failed -> stringResource(R.string.reading_word_voice_failed)
@@ -371,7 +371,7 @@ internal fun WordSheet(
     }
     // The counting line counts in the ear too if it is a live region, so it
     // is not one; the two sentences a reader acts on are (owner decision,
-    // this session, accessibility).
+    // 18.7, accessibility).
     val counting = voice == WordVoice.Preparing && pack?.failed != true
     // The head's one action. Every word offers its voice, so the sheet always
     // owes the mark the room its target reaches above the name.
@@ -391,8 +391,8 @@ internal fun WordSheet(
     }
     // The action's 48 dp target reaches above the head's 26 dp line. The
     // scroll's own top edge would clip it; this inset is the room it owes
-    // the target, and it follows the reader's type scale (owner decision,
-    // this session).
+    // the target, and it follows the reader's type scale
+    // (owner decision, 18.7).
     val headInset = sheetHeadActionInset()
     AppSheet(
         onDismiss = onDismiss,
@@ -402,7 +402,7 @@ internal fun WordSheet(
         // The page's own back steps out of the places and the sheet's back
         // stays the sheet's: the two are different rooms, and the reader
         // whose last act was opening a list must not be thrown out of the
-        // word they were reading (owner decision, this session).
+        // word they were reading (owner decision, 18.9).
         BackHandler(enabled = page is WordSheetPage.Places) {
             onPage(WordSheetPage.Word)
         }
@@ -419,7 +419,7 @@ internal fun WordSheet(
                 // The head and the entry keep the page's 20 dp edge; the
                 // count rows below are full-width rows, whose cards reach
                 // [SheetRowGutter] outside that edge and whose words stand
-                // on it (owner decision, this session).
+                // on it (owner decision, 18.9).
                 Box(Modifier.padding(horizontal = Space.Gutter)) {
                     SheetHead(
                         text = stringResource(R.string.reading_word_sheet_name),
@@ -441,7 +441,7 @@ internal fun WordSheet(
                 // word at the Quran's own size, drawn from the page's palette so
                 // the reader meets the letters and the rule colors they pressed
                 // and held, in the portable form rather than the print's encoding
-                // (owner decision, this session).
+                // (owner decision, 16.2).
                 TajweedText(
                     text = AnnotatedString(word.word),
                     code = word.tajweed,
@@ -511,8 +511,8 @@ internal fun WordSheet(
                 // The root, when the word has one: the letters the page writes,
                 // their reading on the page that is read in Latin script, and a
                 // door to every place the root stands in. The count that used
-                // to be a bare line is the door's own label (owner decision,
-                // this session).
+                // to be a bare line is the door's own label
+                // (owner decision, 18.9).
                 word.root?.let { root ->
                     Fact(
                         label = stringResource(R.string.reading_word_root),
@@ -541,8 +541,8 @@ internal fun WordSheet(
                     ) {
                         // The letters wrap rather than clipping at the largest
                         // system scale, and the Latin rides their line where it
-                        // fits, under them where it does not (owner decision, this
-                        // session).
+                        // fits, under them where it does not
+                        // (owner decision, 18.1).
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(Space.Line),
@@ -560,7 +560,7 @@ internal fun WordSheet(
                                 // The letters declare the baseline too: a flow row
                                 // aligns only the items that ask, and with the
                                 // Latin alone the letters kept the line's top
-                                // (owner report, this session).
+                                // (owner report, 18.3).
                                 modifier = Modifier
                                     .testTag("word-sheet-root-arabic")
                                     .alignByBaseline(),
@@ -584,7 +584,7 @@ internal fun WordSheet(
                     // count line is the door to the places it stands in. A
                     // pronoun and a disjoint letter have no lemma, and the sheet
                     // then says nothing rather than drawing a line with nothing
-                    // behind it (owner decision, this session).
+                    // behind it (owner decision, 18.9).
                     grammar.lemma?.let { lemma ->
                         Fact(
                             label = stringResource(R.string.reading_word_lemma),
@@ -668,7 +668,7 @@ internal fun WordSheet(
  * forward chevron says it opens a page rather than turning in place. The row
  * owns the 48 dp target and the card under the finger, and its words stand on
  * the page's 20 dp edge while the card reaches [SheetRowGutter] outside it,
- * the same row every list in a sheet wears (owner decision, this session).
+ * the same row every list in a sheet wears (owner decision, 18.9).
  */
 @Composable
 private fun CountDoor(
@@ -710,12 +710,12 @@ private fun CountDoor(
  *
  * The read starts when the door is pressed, never when the sheet opens: a
  * long press is the reader asking what a word means, and the thousand places
- * of a common root are a second question (owner decision, this session). It
+ * of a common root are a second question (owner decision, 18.9). It
  * runs on a worker, and the page's head and value stand while the list is
  * still on its way. A failed read or an empty one says so in a sentence; the
  * reader's library is local and a failure is a broken pack, not a network
  * that might come back, so the failure offers one quiet Try again and the
- * empty line offers none (owner decision, this session).
+ * empty line offers none (owner decision, 18.9).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -808,7 +808,7 @@ private fun PlacesPage(
 /**
  * The page's subject: the root with its reading on a Latin page, or the
  * dictionary form, at the reading's own size, centered as the entry it came
- * from was (owner decision, this session).
+ * from was (owner decision, 18.9).
  *
  * It is the value the page's title names, not a second heading: the root's
  * letters and the Latin ride one baseline, as the fact's did, and the lemma is
@@ -883,8 +883,8 @@ private fun PlacesEntry(
 
 /**
  * A sentence where the list would stand: a failed read has one answer, and an
- * empty one has nothing to offer but the truth (owner decision, this
- * session).
+ * empty one has nothing to offer but the truth
+ * (owner decision, 18.9).
  */
 @Composable
 private fun PlacesNote(
@@ -919,8 +919,8 @@ private fun PlacesNote(
  *
  * The list is lazy because a common root stands in thousands of places, and
  * the gate is the one every scrolling sheet page wears: a drag that reaches
- * this list's top belongs to the list, not to the sheet (owner decision, this
- * session). The initial item is the head of the surah the reader's place
+ * this list's top belongs to the list, not to the sheet (owner decision,
+ * 18.9). The initial item is the head of the surah the reader's place
  * stands in, so the list opens under the group's name with the reader's own
  * row marked one line below it, rather than on the row alone with its surah
  * scrolled away.
@@ -1012,8 +1012,8 @@ private fun SurahHead(surah: Int, name: String, count: Int) {
  * themselves, so the row shows the reader the word they will meet when the
  * row is pressed. The current place wears the app's quiet selected wash and
  * the accent reference, and says it out loud; the tap still answers, and a
- * tap on the reader's own place returns the reading to it (owner decision,
- * this session).
+ * tap on the reader's own place returns the reading to it
+ * (owner decision, 18.9).
  */
 @Composable
 private fun PlaceRow(
@@ -1073,15 +1073,15 @@ private fun PlaceRow(
 
 /**
  * One fact about the word: its label on the page's edge, the value 4 dp under
- * it, and the count's door where the pack carries one (owner decision, this
- * session).
+ * it, and the count's door where the pack carries one
+ * (owner decision, 18.9).
  *
  * The label is [SectionHead]'s voice, so it is a heading a screen reader can
  * jump to and it steps back from the value it names. [Space.Section] opens
  * every fact, the first and the rest alike: a fact has its own head, so it is
  * a block and it stands a block's break from the one before it, never the 16
- * that separates two thoughts inside one block (owner decision, this
- * session). The label carries a tag of its own beside the fact's, so a test
+ * that separates two thoughts inside one block (owner decision, 18.3). The
+ * label carries a tag of its own beside the fact's, so a test
  * can measure the room the fact opens with against the fact itself.
  *
  * The value keeps the page's 20 dp edge; the door is a full-width row, so its

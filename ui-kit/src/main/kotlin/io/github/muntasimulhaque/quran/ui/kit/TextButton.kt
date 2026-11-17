@@ -41,7 +41,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * sheet's Share text).
  *
  * **A surface that asks one question has one prominent answer** (owner
- * decision, this session). The wash is right for a door among doors, but a
+ * decision, 13.5). The wash is right for a door among doors, but a
  * note sheet, the reminder card, and a download offer exist to ask for one
  * act, and a pale shape beside a Cancel read as its equal. [prominent] is
  * the same pill in the accent at full strength, so the reader's eye has one
@@ -71,15 +71,15 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * the shape the reader is looking at. The touch target is the slab, not a
  * modifier outside the click: the accessibility test measures the node the
  * platform exposes, and that node has to be the whole target, not a wrapper
- * around it (owner decision, this session). The ripple is unbounded, so its
+ * around it (owner decision, 8.4). The ripple is unbounded, so its
  * circle is never sliced by the pill's shorter side: the pill's own clip is
- * what shapes the press (owner decision, this session).
+ * what shapes the press (owner decision, 8.4).
  *
  * Two text buttons side by side stand `Space.Action` (20 dp) apart between
  * their pills: each is a standalone action, so the pair reads as two answers
  * and the gap belongs between the shapes the reader sees, not between the
  * invisible 48 dp targets each one keeps. **The quiet word leads and the
- * filled answer trails** (owner decision, this session): the way out or the
+ * filled answer trails** (owner decision, 18.8): the way out or the
  * lesser answer is the first shape, and the surface's answer is the last, so
  * the pair ends on what the surface exists for and the filled shape is never
  * the one the eye meets first. The rule is written in leading and trailing
@@ -89,7 +89,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * and the download band's Close and Retry all read that one gap and that one
  * order. The app's other side-by-side gap, `Space.Line` (8 dp), belongs to a
  * cluster of same-kind small controls, the search and Browse chips, where the
- * eye reads one group (owner decision, this session).
+ * eye reads one group (owner decision, 18.8).
  *
  * A pair inside Material's own dialog is not outside the rule: the platform
  * lays two dialog buttons [DialogButtonSpacing] apart, so the caller asks for
@@ -210,7 +210,7 @@ private fun PillBox(
             // A button's word is one line: the app's labels are short, and a
             // caller that hands a long one (a recent search, a query the
             // reader wrote) gets an ellipsis at the row's edge rather than a
-            // shape that grows past it (owner decision, this session).
+            // shape that grows past it (owner decision, 14.9).
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -242,7 +242,7 @@ private fun buttonInk(enabled: Boolean, quiet: Boolean, prominent: Boolean): Col
  * padded its pair by the app's whole action gap drew a gap wider than every
  * other pair in the app, and nothing on the page said where the extra 8 dp
  * came from. The number stands here, named, so a Material update that moves it
- * is one constant to change rather than a silence (owner decision, this
- * session).
+ * is one constant to change rather than a silence
+ * (owner decision, 12.6).
  */
 val DialogButtonSpacing = 8.dp

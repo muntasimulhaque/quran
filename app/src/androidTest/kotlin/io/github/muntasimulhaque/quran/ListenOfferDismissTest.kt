@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
  * ayah pill goes, and a paused transport pill stops. The download offer used
  * to show Not now as a word beside Download; the one-row capsule cannot hold
  * a third answer, and the page tap and Back were already the app's answer
- * for every raised control (owner decision, this session). A reader who does
+ * for every raised control (owner decision, 17.2). A reader who does
  * not want the package taps the page, and Back answers it just as it did.
  *
  * The transfer's own cancel is the app's only remaining X, because a stray
@@ -48,8 +48,8 @@ class ListenOfferDismissTest {
      * A reading with no translation, on 2:1, whose audio is not bundled and
      * not downloaded, so Play raises the offer rather than starting a
      * download the test did not ask for. Al-Fatiha cannot raise it any more:
-     * both reciters' first surah travels in the app's assets (owner decision,
-     * this session).
+     * both reciters' first surah travels in the app's assets
+     * (owner decision, 15.8).
      */
     private val library = object : ExternalResource() {
         override fun before() {

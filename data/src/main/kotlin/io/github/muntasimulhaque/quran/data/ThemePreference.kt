@@ -30,7 +30,7 @@ class ThemePreference(context: Context) {
      * The stored page, or System before any choice has been made. The theme
      * has always had a default, so this never answers null: a fresh install
      * follows the phone's own day and night until the reader picks a ground
-     * (owner decision, this session).
+     * (owner decision, 13.5).
      */
     fun theme(): AppTheme {
         val auto = preferences.getBoolean(KEY_AUTO_NIGHT, false)

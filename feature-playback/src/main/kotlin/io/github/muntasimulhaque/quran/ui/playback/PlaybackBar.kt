@@ -44,12 +44,12 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * tap on Download, and only for one surah.
  *
  * **The playing pill is one row, and the offer is its sibling** (owner
- * decision, this session). A recitation's capsule is one 64 dp row: the words'
+ * decision, 17.0). A recitation's capsule is one 64 dp row: the words'
  * two-line lockup at the leading end, play or pause at the trailing end. It
  * used to be two rows of 48, the words over a transport row, and the second
  * row was 144 dp of circles centered in 328: the reader saw a capsule twice as
- * tall as the words it carried, with an empty band in it (owner report, this
- * session). 64 is the height the pill already stands at in its one-row voices
+ * tall as the words it carried, with an empty band in it (owner report, 17.0).
+ * 64 is the height the pill already stands at in its one-row voices
  * (8 + the finger's 48 + 8), and the offer is one row at 64 too: the place
  * line gives way at its size before the surah's name, and Download is the one
  * answer. The transfer keeps 10 dp more for its progress line. The capsule is
@@ -57,7 +57,7 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * is a transfer with a line to show.
  *
  * **The one row carries one mark, because the place never gives way** (owner
- * decision, this session). Three 48 dp targets take 144 dp of the capsule's
+ * decision, 17.0). Three 48 dp targets take 144 dp of the capsule's
  * 328 and leave the words 148; the longest place with its key and its turn
  * needs 149 dp in Bangla at the default type and 174 at the top step, so three
  * marks cut the place. Play or pause is the mark that stays, and Previous ayah
@@ -76,11 +76,11 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * is reading before where, and now it is the reading order of a lockup too.
  * The voices that are not a recitation keep one line, the name beside the
  * state's sentence, and their name opens the voice list alone, because the
- * pace and the end answer a recitation that is not there (owner decision, this
- * session).
+ * pace and the end answer a recitation that is not there
+ * (owner decision, 17.0).
  *
  * **The capsule is one measure, and it never changes it** (owner decision,
- * this session). Its width used to follow its words: about 285 dp at the
+ * 9.7). Its width used to follow its words: about 285 dp at the
  * shortest places, the page's own 328 at the longest, about 230 for an offer,
  * and about 210 for a transfer that widened again as the percent did. A
  * control that widens as a download moves throws its own edge around under
@@ -92,7 +92,7 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * width to be at, so it snaps to nothing and animates nothing.
  *
  * **The voice leads, the place follows, and the key never gives way** (owner
- * decision, this session). The lockup's first line is the chosen voice at 13
+ * decision, 17.0). The lockup's first line is the chosen voice at 13
  * in the accent, with the pace at 13 in the quiet ink after it when it is not
  * 1x; its second line is the surah's own name at the card's 14 Medium, the
  * ayah's key at 13 in the ink, and the chevron that closes it. The order is
@@ -104,7 +104,7 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * reader's scale.
  *
  * **The pace lives in the listening panel, and the pill reads it back**
- * (owner decision, this session). The panel is where the pace is set, and
+ * (owner decision, 14.3). The panel is where the pace is set, and
  * its own step row says the chosen value; the pill says it again beside the
  * voice when it is not 1x, so the reader who closed the panel still knows how
  * fast the recitation is. The pill says who, where, and how fast; the panel
@@ -118,13 +118,13 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * voices the words keep [PillEndAir] at their own end, the answer keeps
  * [PillAir] at its end, and [WordsGap] stands between the two. On the
  * unavailable pill, which is words alone, both ends keep [PillEndAir], so
- * the sentence is held as the name is (owner decision, this session).
+ * the sentence is held as the name is (owner decision, 17.0).
  *
  * The pill is also where its popup hangs. A menu takes the shape of the anchor
  * it is given, and an anchor on the word the reader touched stood the reciter
  * chooser at one end of the capsule and the listening menu at the other (owner
  * report): two popups in two places on one control. So the capsule holds the
- * menu, from one anchor on its own centre. The merged panel is taller than the
+ * menu, from one anchor on its own center. The merged panel is taller than the
  * two menus were apart, so the popup caps itself to the window's safe band
  * and scrolls what does not fit. It takes the whole band when the ground
  * above the capsule cannot hold it, so the pace and the ending are not hidden
@@ -141,39 +141,12 @@ fun PlaybackBar(
      */
     offerPrice: String,
     reciterName: String,
-    /** The reciter in use, by id, so the chooser can put its check on it. */
-    reciterId: String? = null,
-    /**
-     * The reciters the chooser offers, with what each would still need for
-     * the ayah the pill is about. Empty where there are none to offer, and
-     * the voice list is then not a door.
-     */
-    reciterOptions: List<ListenOption> = emptyList(),
     /**
      * The playing ayah's key, surah:ayah, for the pill's own line. The pill
      * localizes its digits where it draws them.
      */
     reference: String?,
-    /** The surah's name in the reader's language; null while it is not known. */
-    placeName: String? = null,
-    /**
-     * The playing ayah's number inside its surah, for the panel's spoken
-     * place. The state's own number is the running one (16:28 is 1929), and a
-     * panel that spoke it said "Ayah 1929" (owner report, this session).
-     */
-    ayahInSurah: Int? = null,
     pendingLabel: String?,
-    /**
-     * The pending surah's name and size, said while its package downloads
-     * on its own, whichever door asked for it: a download always names the
-     * surah that is arriving. A reader who cannot tell what is being fetched
-     * cannot tell whether it is the surah they wanted (owner report).
-     */
-    pendingAudio: String? = null,
-    /** The reader's pace, drawn in the panel and read back on the pill when it is not 1x. */
-    speed: Float = 1f,
-    /** What happens as the reading moves on, set from the panel's own list. */
-    end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
     onToggle: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
@@ -187,13 +160,40 @@ fun PlaybackBar(
     onStop: () -> Unit,
     /** The one X the app keeps: abort a package on its way. */
     onCancelDownload: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** The reciter in use, by id, so the chooser can put its check on it. */
+    reciterId: String? = null,
+    /**
+     * The reciters the chooser offers, with what each would still need for
+     * the ayah the pill is about. Empty where there are none to offer, and
+     * the voice list is then not a door.
+     */
+    reciterOptions: List<ListenOption> = emptyList(),
+    /** The surah's name in the reader's language; null while it is not known. */
+    placeName: String? = null,
+    /**
+     * The playing ayah's number inside its surah, for the panel's spoken
+     * place. The state's own number is the running one (16:28 is 1929), and a
+     * panel that spoke it said "Ayah 1929" (owner report, 19.2).
+     */
+    ayahInSurah: Int? = null,
+    /**
+     * The pending surah's name and size, said while its package downloads
+     * on its own, whichever door asked for it: a download always names the
+     * surah that is arriving. A reader who cannot tell what is being fetched
+     * cannot tell whether it is the surah they wanted (owner report).
+     */
+    pendingAudio: String? = null,
+    /** The reader's pace, drawn in the panel and read back on the pill when it is not 1x. */
+    speed: Float = 1f,
+    /** What happens as the reading moves on, set from the panel's own list. */
+    end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
     onOfferConfirm: () -> Unit = {},
     onOfferCancelDownload: () -> Unit = {},
     /** The pace, and the end of the audio, set from the panel exactly as from
      * settings. */
     onSpeed: (Float) -> Unit = {},
     onEndOfAudio: (EndOfAudio) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     if (offer != null) {
         ListenOfferBar(
@@ -227,8 +227,8 @@ fun PlaybackBar(
             val percent = (progress * 100).toInt()
             // The surah is always named while its package is on its way, not
             // only on the auto-continue path: a download the reader cannot
-            // name is a download they cannot judge (owner report, this
-            // session). The bare line is the fallback for a state that
+            // name is a download they cannot judge (owner report, 9.3).
+            // The bare line is the fallback for a state that
             // carries no name to give.
             if (!pendingAudio.isNullOrBlank()) {
                 stringResource(R.string.playback_downloading_named, pendingAudio, percent)
@@ -264,7 +264,7 @@ fun PlaybackBar(
     // leaving pause, speed, and the switches out of the keys means the panel
     // is not put away by the very state it just changed. The answer itself
     // closes it below, so one tap both changes the thing and returns the
-    // reader to the reading (owner decision, this session).
+    // reader to the reading (owner decision, 9.7).
     val voice = when {
         state.error -> PillVoice.Failed
         state.downloadFailed -> PillVoice.Failed
@@ -285,7 +285,7 @@ fun PlaybackBar(
         modifier = modifier
             .padding(horizontal = BarGutter)
             // One measure in every voice, never the words' (owner decision,
-            // this session). The capsule stands at the page's own 328 on the
+            // 9.7). The capsule stands at the page's own 328 on the
             // app's reference phone and clamps to a narrower glass, so a
             // download's percent and an offer's size can never move its edge.
             .widthIn(max = PillMeasure)
@@ -318,7 +318,7 @@ fun PlaybackBar(
                     // room that is left, so a long place would ellipsize rather
                     // than push the answer out; the capsule's measure and the
                     // answer's one mark are chosen so that it never has to
-                    // (owner decision, this session).
+                    // (owner decision, 16.2).
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -348,8 +348,8 @@ fun PlaybackBar(
                             // The first circle keeps [WordsGap] from the words'
                             // own shape: a glyph answer draws its circle
                             // [TransportInset] inside its target, so its lead
-                            // gives that inset back (owner decision, this
-                            // session).
+                            // gives that inset back
+                            // (owner decision, 17.0).
                             Spacer(Modifier.width(GlyphLead))
                             PillControls(controls)
                         }
@@ -360,7 +360,7 @@ fun PlaybackBar(
                         // lead with [PillEndAir] at one end, the answer keeps
                         // [PillAir] at the other, and the ground the words do
                         // not need stands between them rather than past the
-                        // answer (owner decision, this session).
+                        // answer (owner decision, 16.2).
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
@@ -390,7 +390,7 @@ fun PlaybackBar(
                             // inside its target, so its lead gives the inset
                             // back and the reader sees [WordsGap] either way;
                             // a word answer ends at its own edge and takes the
-                            // gap whole (owner decision, this session).
+                            // gap whole (owner decision, 16.2).
                             Spacer(
                                 Modifier.width(
                                     if (controls.first() is GlyphControl) GlyphLead else WordsGap,

@@ -54,7 +54,7 @@
              built, and nothing in the app recomposes the page when the phone's
              own day and night turn over underneath it. So the app promised to
              follow the system dark mode and did not: at ten in the morning,
-             the phone in its day colours, the app on the night page it was
+             the phone in its day colors, the app on the night page it was
              launched with, and the switch on (owner report, 37th session).
              Leaving uiMode to the platform makes the change do what it does
              everywhere else, which is recreate the window and draw the other

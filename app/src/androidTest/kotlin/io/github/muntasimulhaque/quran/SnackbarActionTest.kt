@@ -35,7 +35,7 @@ import org.junit.runner.RunWith
  * A finger ends a sentence by touching anywhere but on it. A screen reader
  * has no finger, and Material's host already answers that reader with a
  * dismiss action whose label the platform speaks in the reader's own
- * language, so the app adds no second one (owner decision, this session).
+ * language, so the app adds no second one (owner decision, 19.3).
  * This test pins the dependency: an upgrade that took that action away would
  * be read here, not learned from a TalkBack reader.
  */

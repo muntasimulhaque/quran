@@ -21,6 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.kit.IconButton
+import io.github.muntasimulhaque.quran.ui.kit.ReadingTitle
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlin.math.roundToInt
@@ -28,7 +30,7 @@ import kotlin.math.roundToInt
 /**
  * The reading's bar, and the one place its margins live.
  *
- * **The bar is the page's head** (owner decision, this session). It has its
+ * **The bar is the page's head** (owner decision, 19.4). It has its
  * own band at the top, and the reading begins at the band's bottom: no ayah,
  * no opening, and no translation is ever behind it. As the reader moves
  * forward, [shown] falls and the band, with the page's own top under it,
@@ -77,7 +79,7 @@ private val BarInset = Space.Gutter - 12.dp
  *
  * A fully away bar leaves the screen reader nothing: the page's own "Show the
  * bar" action is the way back, and a control the reader cannot see should not
- * be the next thing they hear (owner decision, this session).
+ * be the next thing they hear (owner decision, 19.4).
  */
 @Composable
 internal fun ReaderTopBar(
@@ -113,7 +115,7 @@ internal fun ReaderTopBar(
                     )
                     // The content is measured at its natural height, so the
                     // band's visible part and the row's own height are the
-                    // same measurement (owner decision, this session).
+                    // same measurement (owner decision, 19.4).
                     .onSizeChanged { onOwnHeight((it.height - statusPx).coerceAtLeast(0)) },
             ) {
                 Row(

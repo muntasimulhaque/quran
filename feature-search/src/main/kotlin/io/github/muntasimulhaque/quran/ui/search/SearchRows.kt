@@ -44,7 +44,7 @@ import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
  * results. The result line is a list size, not the page's and not the aid's,
  * and the line ratio is the reading's own, from `TextSize.lineRatio`, so the
  * two surfaces cannot drift apart at the hand of whoever edits one of them
- * next (owner decision, this session).
+ * next (owner decision, 13.7).
  */
 private val SearchArabicSp = TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT) - 2f
 
@@ -66,7 +66,7 @@ internal fun AyahRow(
     // needs a larger Quran reads a larger result too. The snippet follows the
     // translation's step as well: it is the same text the reader reads on the
     // page, and a reader who raised the translation must not meet it small
-    // again in the sheet they searched from (owner decision, this session).
+    // again in the sheet they searched from (owner decision, 13.3).
     val arabicSize = SearchArabicSp * TextSize.step(arabicStep)
     val arabicLine = arabicSize * TextSize.lineRatio(TypeRole.Arabic)
     Column(
@@ -192,8 +192,8 @@ internal fun AyahRow(
                 text = stringResource(R.string.search_word_meaning_label),
                 style = MaterialTheme.typography.labelMedium,
                 // A label naming the evidence under it is not an action: the
-                // accent belongs to what answers a tap (owner decision, this
-                // session).
+                // accent belongs to what answers a tap
+                // (owner decision, 13.3).
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Space.Block),
             )

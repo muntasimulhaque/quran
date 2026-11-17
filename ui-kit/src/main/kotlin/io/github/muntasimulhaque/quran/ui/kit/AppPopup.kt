@@ -58,7 +58,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * width, and the air the shared measure left on their right was paid for by
  * covering the page. The shape, the row rhythm, the leading rail, the lift,
  * and the behavior stay shared; the width follows the content (owner
- * decision, this session: one menu family, not one measure).
+ * decision, 13.6: one menu family, not one measure).
  */
 val PopupMeasure = 288.dp
 
@@ -78,7 +78,7 @@ val PopupGutter = 10.dp
  *
  * The popup wears the floating family's own paper, the same
  * `surfaceContainerHigh` the pill, the offer, and the snackbar wear, and its
- * own lift as well (owner decision, this session). It used to wear the
+ * own lift as well (owner decision, 17.2). It used to wear the
  * reading page's tone, so a menu over the page was held by a hairline and a
  * 10% shadow rather than by a surface of its own; in the night theme the
  * shadow is invisible and the menu read as a hole in the page while the pill
@@ -91,8 +91,8 @@ val PopupGutter = 10.dp
  * apart, so the menu is a card laid on the wash with no border. The night's
  * block is L* 15.6 and the floating paper is #322E2A at 19.2, dE76 5.9 apart;
  * the night's shadow is invisible, so that fill step is the whole edge. Both
- * grounds use the highest paper, never a shade of the page (owner decision,
- * this session). The ground
+ * grounds use the highest paper, never a shade of the page (owner
+ * decision, 19.1). The ground
  * between the two silhouettes is the page, not a seam: the popup's foot and
  * the capsule's own top never meet, and ten dp keeps the capsule's lift from
  * reaching the popup's foot.
@@ -130,7 +130,7 @@ val PopupEdge = 16.dp
  * leading mark, and its menu hangs from that edge the way a list under a
  * field does, so the menu's first line lands on the door's own line instead
  * of being pushed half off the glass by a center it never had (owner
- * decision, this session).
+ * decision, 13.3).
  */
 enum class PopupAlignment { Center, Start }
 
@@ -147,7 +147,7 @@ enum class PopupAlignment { Center, Start }
  * popup's place on the glass cannot be read back through a compose test.
  *
  * **It prefers the side with more room, but the whole safe band is the
- * limit** (owner decision, this session). A pill at the foot of the page has
+ * limit** (owner decision, 13.6). A pill at the foot of the page has
  * no room below it, so its menu still rises exactly as it always has; a door
  * in the middle of the page opens downward, the way a menu under a field
  * does, and one near the foot flips above. When the roomier side cannot hold
@@ -155,8 +155,8 @@ enum class PopupAlignment { Center, Start }
  * is hidden behind a scroll the reader did not ask for. **A door's menu does
  * not cover the door while it does that**: if the clamped menu would cross the
  * door, and the window has room beside it, the menu stands beside the door
- * instead, centred on it, so the number the reader tapped stays in sight with
- * every action (owner decision, this session). A capsule's menu (the pill's)
+ * instead, centered on it, so the number the reader tapped stays in sight with
+ * every action (owner decision, 13.9). A capsule's menu (the pill's)
  * has no beside to stand on without leaving the capsule's middle, so it keeps
  * the band's clamp. The ground between the popup and the anchor yields before
  * an action does. What does not fit even the whole band still scrolls, and the
@@ -167,13 +167,13 @@ enum class PopupAlignment { Center, Start }
  * at the head and foot, so the first and last rows stay clear of the curve. A
  * menu over the reading is the app's floating paper, the pill's own tone
  * unfolded: the sheet's paper on the day and the one-step night paper, held by
- * the same lift (owner decision, this session).
+ * the same lift (owner decision, 17.5).
  * [name] is its pane title, spoken and never drawn, the same shape the share
  * sheet's announcement already wears: a reader who cannot see the menu hears
  * what it belongs to before its first row. The panel takes the focus once it
  * has settled, so the first row never opens looking chosen, and a tap
- * outside, Back, or a scroll of the page puts it away (owner decision, this
- * session: the popup goes with the page, because an anchor that moves under a
+ * outside, Back, or a scroll of the page puts it away (owner decision, 13.6:
+ * the popup goes with the page, because an anchor that moves under a
  * hanging menu leaves it pointing at nothing).
  */
 @Composable
@@ -232,7 +232,7 @@ fun AppPopup(
         // The popup's window hands the focus to its first focusable child, and
         // Material draws that focus as a state layer over the first row: the
         // panel opened with the first row looking chosen before the reader had
-        // touched it (owner report, this session). The panel itself is the
+        // touched it (owner report, 13.3). The panel itself is the
         // first focus target and takes the focus once it has settled, so it
         // opens quiet; the rows keep their focus, reached with Tab, and the
         // panel's target draws nothing and carries no semantics.
@@ -315,7 +315,7 @@ internal fun popupRoomBelow(
  * one that can hold the menu. A tie goes below, which is the direction a menu
  * under a mark already reads in. The pill's capsule sits at the foot of the
  * page, so below is no room at all and its menu rises, exactly as it always
- * has (owner decision, this session).
+ * has (owner decision, 13.3).
  */
 internal fun popupSide(above: Int, below: Int): PopupSide =
     if (below >= above) PopupSide.Below else PopupSide.Above
@@ -386,9 +386,9 @@ internal class AppPopupPosition(
         }
         val lastTop = (bottomLimit - popupContentSize.height).coerceAtLeast(topLimit)
         var y = preferred.coerceIn(topLimit, lastTop)
-        // A door's menu keeps the door in sight (owner decision, this
-        // session). When the clamped menu would cross the door, it stands
-        // beside the door instead: on the side with more room, centred on the
+        // A door's menu keeps the door in sight (owner decision, 13.9).
+        // When the clamped menu would cross the door, it stands
+        // beside the door instead: on the side with more room, centered on the
         // door's own middle, with every row still on the glass. The number the
         // reader tapped is the one thing the menu must not hide, because it is
         // what says which ayah the menu is about. A capsule's menu (Center)

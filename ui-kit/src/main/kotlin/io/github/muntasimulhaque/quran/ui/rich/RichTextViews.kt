@@ -57,7 +57,7 @@ import io.github.muntasimulhaque.quran.ui.theme.title
  *
  * The size and the line are the caller's and have no defaults: the reader's
  * own step is a decision a surface makes, and a default here was a third body
- * size (17 on a 27 line) that nothing chose (owner decision, this session).
+ * size (17 on a 27 line) that nothing chose (owner decision, 13.3).
  */
 @Composable
 fun TranslationBody(
@@ -131,13 +131,13 @@ fun TranslationBody(
  * measurement is written here so the next session can redo it rather than
  * guess.
  *
- * The tafsir read in Amiri until this session. Amiri's punctuation was
+ * The tafsir read in Amiri until 14.4. Amiri's punctuation was
  * correct, but its ink reaches 2.5 em on the stacked marks and crowded the
  * 1.9 line; Hafs, the other candidate, is a Quran face whose prose
  * punctuation slots draw the Arabic footnote marker, so every comma became
  * a dotted circle. The tafsir reads in Kitab now, the body Naskh Quran.com
  * and Quran for Android use, which carries both the letters and the
- * punctuation and keeps the Quran's own line (owner decision, this session).
+ * punctuation and keeps the Quran's own line (owner decision, 14.4).
  */
 private fun lineHeightFor(mix: ScriptMix, latinLine: Float, arabicSp: Float): Float = when (mix) {
     ScriptMix.LATIN -> latinLine
@@ -175,8 +175,8 @@ private fun markerSp(bodySp: Float, share: Float) = maxOf(bodySp * share, Marker
  * The size and the line are the reader's own, passed in: a result is the same
  * text as the reading, and a reader who set the translation to a larger step
  * must not meet it small again in the sheet they searched from. The fixed base
- * it used to stand at was a size the reader could not move (owner decision,
- * this session).
+ * it used to stand at was a size the reader could not move
+ * (owner decision, 13.3).
  */
 @Composable
 fun HighlightedText(
@@ -191,12 +191,12 @@ fun HighlightedText(
 ) {
     // A snippet is reading, so it is set in the reading's own voice: the
     // interface face inside a result list put the book away the moment a
-    // reader searched it (owner decision, this session).
+    // reader searched it (owner decision, 13.2).
     val voice = LocalReadingVoice.current
     val resolvedStyle = style ?: voice.prose(sizeSp = sizeSp, lineSp = lineSp)
     // The found word's ground is the page's own warm tone and no longer a tint
     // of the accent: on the day sheet the tint measured a real blue, the only
-    // cool ground left in the app (owner decision, this session).
+    // cool ground left in the app (owner decision, 19.1).
     val wash = LocalPagePalette.current.match
     val weight = FontWeight.Medium
     Text(
@@ -234,15 +234,15 @@ fun HighlightedText(
  * the passage title above it, and the sub-head used to be a fourth size,
  * which made three heavy lines where the document needs one. The two levels
  * are weight, not size, so a long reading never carries a ladder of big heads
- * (owner decision, this session).
+ * (owner decision, 13.3).
  *
  * A head is set like a head and not like a paragraph: the heading breaker, no
  * hyphenation, [TypeLadder.TITLE_LINE] in Latin (1.6 in Bengali, through the
  * voice), and the heading semantics a screen reader navigates by. It carries a
  * step more air above it than the paragraph gap, so a sheet reads as sections
  * rather than as one run. The size and the line have no defaults: the
- * reader's own step is a decision the surface makes (owner decision, this
- * session).
+ * reader's own step is a decision the surface makes
+ * (owner decision, 13.3).
  */
 @Composable
 fun RichBlocks(
@@ -305,7 +305,7 @@ fun RichBlocks(
                     // A head opens a part of the prose, so it takes a step
                     // more air above it than the room between two paragraphs:
                     // the sheet reads as sections instead of as one run
-                    // (owner decision, this session).
+                    // (owner decision, 13.2).
                     .padding(top = if (head && index > 0) Space.Section - Space.Block else 0.dp),
             )
         }
@@ -395,7 +395,7 @@ private fun annotated(
                 // every letter and every prose punctuation mark the content
                 // carries, including the Urdu heh and the pre-shaped phrase
                 // the source keeps, so no run falls through to the Hafs face
-                // (owner decision, this session). No shipped content puts
+                // (owner decision, 14.4). No shipped content puts
                 // bold or italic on an Arabic run, and synthesis is off, so
                 // an emphasis that ever reached here would draw the face as
                 // it is rather than a smeared or slanted copy of it.
@@ -404,7 +404,7 @@ private fun annotated(
                 // size: it is a symbol inside a sentence, not a quotation, so
                 // it takes the sentence's size and sits in the line. At the
                 // quotation's size it stood a third above the words around it
-                // (owner decision, this session).
+                // (owner decision, 13.2).
                 //
                 // It reads a little low against capital letters, and that is
                 // the glyph, not the layout: measured on the 19.0 store frame
@@ -421,7 +421,7 @@ private fun annotated(
                 // baseline shift would offer is a couple of pixels of optical
                 // alignment, bought by re-growing the honourific-only blocks
                 // that were deliberately given the body's own line (owner
-                // decision, this session).
+                // decision, 19.1).
                 withStyle(
                     SpanStyle(
                         fontFamily = KitabBody,
@@ -436,7 +436,7 @@ private fun annotated(
                         // Emphasis is a step, not a shout: the bold run wears
                         // the face's Medium, so a word inside a paragraph
                         // cannot carry the same weight as the title above it
-                        // (owner decision, this session).
+                        // (owner decision, 13.3).
                         fontWeight = if (run.bold) FontWeight.Medium else null,
                         fontStyle = if (run.italic) FontStyle.Italic else null,
                         color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified,

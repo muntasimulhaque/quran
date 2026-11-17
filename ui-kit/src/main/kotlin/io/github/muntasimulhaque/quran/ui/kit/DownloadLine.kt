@@ -17,7 +17,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * every other shape in the app.
  *
  * The playing pill and the offer bar both wear it, so one download reads the
- * same whichever pill asked for it (owner decision, this session: the pill's
+ * same whichever pill asked for it (owner decision, 7.1: the pill's
  * line had been drawn by hand and the offer bar still wore Material's own
  * progress, two shapes for one event).
  *

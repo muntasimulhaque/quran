@@ -84,7 +84,7 @@ internal fun SearchField(
                 // other, so the sheet's first line stands on the same line as
                 // every row under it. It was 18 while the rows were 28, which
                 // made the field the one line in the app that was wider than
-                // the page it stood on (owner decision, this session).
+                // the page it stood on (owner decision, 17.6).
                 // The Close that used to stand beside it took the
                 // last 60 dp of the line and was the only visible dismissal of
                 // its kind in the app; the sheet closes by its handle, the
@@ -111,7 +111,7 @@ internal fun SearchField(
                         // inside it reaches the field: the words, and the quiet
                         // ground around them. The text field's own target is the
                         // line of text it draws, and the padding around that line
-                        // used to answer nothing (owner decision, this session).
+                        // used to answer nothing (owner decision, 10.0).
                         // The clear mark keeps its own tap beside this region, so
                         // emptying the field is never also a tap into it.
                         .pointerInput(focus) {
@@ -119,7 +119,7 @@ internal fun SearchField(
                         }
                         .padding(
                             start = Space.Block,
-                            end = if (field.text.isEmpty()) 16.dp else ClearGap,
+                            end = if (field.text.isEmpty()) Space.Block else ClearGap,
                             top = Space.Row,
                             bottom = Space.Row,
                         ),
@@ -128,7 +128,7 @@ internal fun SearchField(
                     // The field's leading mark is a search, not a nav arrow: the
                     // sheet is opened from the top bar and closed by its own
                     // Close, so the magnifier is the one thing a reader needs to
-                    // recognize at a glance (owner decision, this session). It is
+                    // recognize at a glance (owner decision, 13.8). It is
                     // a drawing, not a control, so it is cleared from semantics.
                     IconGlyph(
                         icon = Icon.Search,
@@ -164,7 +164,7 @@ internal fun SearchField(
                             // the hint as its spoken name whether or not it holds
                             // a query: a name that vanished when the reader typed
                             // left a text field with no name at all (owner
-                            // decision, this session).
+                            // decision, 13.8).
                             .semantics { contentDescription = hint },
                         decorationBox = { inner ->
                             Box {
@@ -191,7 +191,7 @@ internal fun SearchField(
                 // query to empty. It keeps the field focused and the keyboard up,
                 // so the reader types their next word straight away rather than
                 // reaching back for a backspace at the end of the line (owner
-                // decision, this session).
+                // decision, 10.0).
                 if (field.text.isNotEmpty()) {
                     ClearFieldButton(
                         onClick = {
@@ -219,7 +219,7 @@ private val ClearRipple = 40.dp
  * is a query to clear, so it is never a dead mark on an empty field. Its
  * 48 dp node carries a 40 dp drawn circle for the press, so the ripple stays
  * clear of the field's own pill and the mark reads as a mark inside the pill
- * rather than a control the size of it (owner decision, this session).
+ * rather than a control the size of it (owner decision, 15.0).
  */
 @Composable
 private fun ClearFieldButton(onClick: () -> Unit) {

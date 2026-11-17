@@ -38,7 +38,7 @@ object Arabic {
         0x06D6..0x06DC, // Quranic annotation signs and pause marks
         0x06DF..0x06E4, // small high marks
         0x06E7..0x06E8, // small high yeh and noon
-        0x06EA..0x06ED, // empty centre marks and small low/high meem
+        0x06EA..0x06ED, // empty center marks and small low/high meem
         0x08D3..0x08FF, // Arabic Extended-A marks
         0xFE00..0xFE0F, // variation selectors
         0x200B..0x200F, // zero width and directional marks
@@ -116,7 +116,7 @@ object Arabic {
      * its ayah, so an index that keeps it makes that word unreachable through
      * the full text index, whose tokenizer keeps every non-ASCII code point
      * inside its token: a reader typing "قل" does not find "۞قُلۡ"
-     * (owner report, this session). They are not in [STRIPPED_RANGES],
+     * (owner report, 10.7). They are not in [STRIPPED_RANGES],
      * because [isMark] means a part of a word, and these stand beside one.
      */
     fun isPageSign(codePoint: Int): Boolean =
@@ -175,7 +175,7 @@ object Arabic {
      * single code point needs no normalization pass of its own, because NFC
      * cannot compose a code point with itself; this exists so a caller that
      * walks a whole page of prose can fold one character at a time without
-     * the normalizer on the hot path (owner decision, this session).
+     * the normalizer on the hot path (owner decision, 6.5).
      */
     fun foldForSearch(codePoint: Int): Int = toAsciiDigit(searchFold(codePoint))
 
@@ -223,7 +223,7 @@ object Arabic {
      *   before a pause mark, are dropped.
      * - the page's signs are dropped: the rub el hizb (`U+06DE`), the waqf
      *   signs (`U+06D6` to `U+06DC`), the sajdah (`U+06E9`), and the empty
-     *   centre stops; they are furniture of the printed page, not the
+     *   center stops; they are furniture of the printed page, not the
      *   verse's words, and another font draws several as a floating mark.
      * - the print's tajweed marks (`U+06D9`, `U+06E2`, `U+06E7`, `U+06E8`,
      *   `U+06E3`, and `U+06ED`) are dropped; they name a rule the receiving
@@ -278,7 +278,7 @@ object Arabic {
      * verse. It is what the reading appends to close a verse: the KFGQPC Hafs
      * face draws the print's own medallion around a run of these digits, so
      * the number and the sign are one glyph and the app never types the sign
-     * itself (owner decision, this session). A pure value, so its shape is
+     * itself (owner decision, 8.1). A pure value, so its shape is
      * pinned without a device.
      */
     fun ayahNumber(number: Int): String = buildString {

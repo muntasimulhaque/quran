@@ -36,7 +36,7 @@ enum class EndOfAudio {
  * place kept and the audio put away. Two of them carry past that point, one by
  * beginning the surah again and one by continuing into the next. Which one the
  * boundary asks is this rule, kept here so the boundary is read one way and
- * every answer has one stated behaviour (owner decision, this session).
+ * every answer has one stated behavior (owner decision, 11.9).
  *
  * The player appends the surah after this one whatever the answer, because a
  * deliberate Next or Previous is a seek and still carries the reader out of
@@ -55,7 +55,7 @@ enum class SurahEnding {
     CARRY_ON,
 }
 
-/** The answer's own behaviour at the end of a surah. */
+/** The answer's own behavior at the end of a surah. */
 val EndOfAudio.surahEnding: SurahEnding
     get() = when (this) {
         EndOfAudio.REPEAT_SURAH -> SurahEnding.REPEAT
@@ -63,7 +63,7 @@ val EndOfAudio.surahEnding: SurahEnding
         // Continue to the next ayah is about the ayah, not the Book: the
         // surah's last ayah is the last thing it plays, and the next surah's
         // own answer is the one that carries past the surah (owner report,
-        // this session). The stop never reaches a surah's end, and the ayah
+        // 11.9). The stop never reaches a surah's end, and the ayah
         // repeat loops inside it, so both rest by the same rule.
         EndOfAudio.CONTINUE_AYAH,
         EndOfAudio.STOP_AFTER_AYAH,

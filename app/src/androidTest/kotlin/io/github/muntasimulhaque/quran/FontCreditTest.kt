@@ -24,7 +24,7 @@ import org.junit.runner.RunWith
  * is gone: it was a second copy of the same seven credits followed by a text
  * no reader asked for, and its opening sentence called the KFGQPC Hafs face
  * OFL when the file carries KFGQPC's own terms (owner report; owner decision,
- * this session). What the six open faces need is a copy of their license in
+ * 15.5). What the six open faces need is a copy of their license in
  * the package, and it ships there beside them, the way every library's LICENSE
  * travels in META-INF. The page's one door is the letter to the maker, which
  * opens the reader's own mail app on the maker's inbox and touches nothing on
@@ -55,8 +55,8 @@ class FontCreditTest {
             .performScrollTo()
             .assertIsDisplayed()
         // The hand that made a face and the use it is put to stand on one
-        // line, so a credit is a name and one line about it (owner decision,
-        // this session).
+        // line, so a credit is a name and one line about it
+        // (owner decision, 12.6).
         val literata = context.getString(SettingsR.string.credit_literata_by) +
             " · " + context.getString(SettingsR.string.credit_literata_use)
         compose.onNodeWithText(literata)
@@ -64,8 +64,8 @@ class FontCreditTest {
             .assertIsDisplayed()
 
         // One door, and it is the letter to the maker: the page is facts and
-        // credits, with no second account and no analytics (owner decision,
-        // this session).
+        // credits, with no second account and no analytics
+        // (owner decision, 15.5).
         compose.onNodeWithText(context.getString(SettingsR.string.about_feedback))
             .performScrollTo()
             .assertIsDisplayed()

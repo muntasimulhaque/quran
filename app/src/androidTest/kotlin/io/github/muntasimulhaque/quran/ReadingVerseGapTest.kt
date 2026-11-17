@@ -112,12 +112,12 @@ class ReadingVerseGapTest {
     /**
      * A note mark is the reader's, not the page's: it rides the verse's own
      * first line in a rail, so an Arabic-only block keeps the edge-to-edge
-     * rhythm with or without one (owner decision, this session). The mark used
+     * rhythm with or without one (owner decision, 16.9). The mark used
      * to sit in a 48 dp head, the door's finger target on a page that has no
      * door, which stood a noted verse six times the page's air from its
      * neighbours. The rail is reserved on every verse, so it must keep its
      * measure and its place now that the save draws nothing in it (owner
-     * decision, this session).
+     * decision, 17.7).
      */
     @Test
     fun aNoteMarkDoesNotChangeTheArabicOnlyGap() {
@@ -151,7 +151,7 @@ class ReadingVerseGapTest {
                     1f,
                 )
                 assertEquals(
-                    "the mark is centred on the first line's box",
+                    "the mark is centered on the first line's box",
                     Space.Tight.value + (line - GlyphSize.ChevronInline.value) / 2f,
                     mark.top.value - verses[0].top.value,
                     2f,

@@ -52,7 +52,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * never chosen wears the off ring, because the tap that adds it also chooses
  * it. The mark column used to stand empty on a pack that was not here, so a
  * removed pack lost the only visible sign of its state and its name hung off
- * a 38 dp void (owner report, this session). Drawing the ring changes no
+ * a 38 dp void (owner report, 14.9). Drawing the ring changes no
  * geometry: the column was already held open for it.
  *
  * A pack that is not here is a checkbox while the reader has not chosen it:
@@ -68,7 +68,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * clears the reader's choice: the row then draws the off ring, not a blank
  * column, and the page's switch says there is no translation. A chosen pack
  * whose file disappears outside the app keeps its check, because the choice is
- * the reader's (owner decision, this session).
+ * the reader's (owner decision, 14.9).
  */
 @Composable
 fun PackChoiceRow(
@@ -83,13 +83,13 @@ fun PackChoiceRow(
     onRemove: () -> Unit,
     /**
      * The reader's way out of a download they no longer want. A pack on its
-     * way in used to have no answer but to wait it out (owner report, this
-     * session): the reader is the one who asked for it, and the reader is
+     * way in used to have no answer but to wait it out (owner report, 6.6):
+     * the reader is the one who asked for it, and the reader is
      * the one who can call it off.
      */
     onCancel: () -> Unit,
     /** The room under the row; a row with a block beneath it keeps less. */
-    bottomPadding: Dp = 12.dp,
+    bottomPadding: Dp = Space.Row,
 ) {
     val setupHere = setup?.takeIf { it.packId == pack.id }
     val busy = setupHere != null && setupHere.failed.not()
@@ -98,7 +98,7 @@ fun PackChoiceRow(
     val chosenState = stringResource(R.string.settings_pack_chosen_missing)
     // The row's value says what the file is and what the choice is doing: a
     // chosen pack that is not here is a state a reader has to be told, not
-    // one they should have to infer from a mark (owner report, this session).
+    // one they should have to infer from a mark (owner report, 14.9).
     val value = if (absent && selected) {
         if (subtitle.isBlank()) chosenState else "$subtitle. $chosenState"
     } else {
@@ -107,8 +107,8 @@ fun PackChoiceRow(
     if (absent && selected.not() && failed.not() && busy.not()) {
         // The common case after Remove: an off choice the reader can turn on.
         // The row is the checkbox, the Add pill names what checking it costs,
-        // and the tap that checks it also brings the file (owner report, this
-        // session).
+        // and the tap that checks it also brings the file
+        // (owner report, 14.9).
         ChoiceRow(
             title = contentPackName(pack.id, pack.name),
             subtitle = value,
@@ -165,13 +165,13 @@ fun PackChoiceRow(
  * keeps: an off ring when the pack was never chosen, a check when the reader
  * chose a pack whose file is gone. It used to be drawn only for the chosen
  * one, so the never-chosen row's column stood empty and the list lost its off
- * state (owner report, this session).
+ * state (owner report, 14.9).
  *
  * The pill ends on [ChoiceRowTrailingInset], the same rail as the Remove of a
  * pack that is here, so the row does not change its right edge with its file.
  * While bytes move, the row is a status and the only button is Cancel,
  * because stopping a transfer is the one thing a finger should be able to do
- * from here (owner decision, this session).
+ * from here (owner decision, 14.9).
  */
 @Composable
 private fun PackActionRow(
@@ -245,8 +245,8 @@ private fun PackActionRow(
         }
         if (busy) {
             // The same 2 dp line the pill and the offer carry, so a download
-            // has one shape wherever it is shown (owner decision, this
-            // session).
+            // has one shape wherever it is shown
+            // (owner decision, 13.8).
             DownloadLine(
                 progress = setup?.progress ?: 0f,
                 modifier = Modifier
@@ -288,7 +288,7 @@ private fun PackTrailing(
         pack.shipped -> Text(
             text = stringResource(R.string.pack_included),
             // A fact about the row is its value, so it is the caption (owner
-            // decision, this session).
+            // decision, 13.3).
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

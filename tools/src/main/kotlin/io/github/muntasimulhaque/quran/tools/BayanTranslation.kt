@@ -25,7 +25,7 @@ internal data class BayanAyah(
  * The two ayahs whose note has no star in the QUL sentence but does have a
  * place in the publisher's sentence. 15:76's note belongs after its last word;
  * 31:12's note belongs beside জ্ঞান, the word it explains, where QUL's revised
- * sentence no longer says হিকমাত (owner decision, this session).
+ * sentence no longer says হিকমাত (owner decision, 12.0).
  */
 internal val bayanAnchors = mapOf(
     "15:76" to "বিদ্যমান",
@@ -37,7 +37,7 @@ internal val bayanAnchors = mapOf(
  * export is an array of objects with `verse_key` and `text`; the 2026 export
  * is one object keyed by verse with the sentence under `t`. Both carry the
  * same 6,236 rows, so the reader and the publisher's notes do not depend on
- * which file a maintainer has (owner decision, this session).
+ * which file a maintainer has (owner decision, 14.5).
  */
 internal fun bayanRows(root: JsonObject): List<Pair<String, String>> {
     val translations = root["translations"]
@@ -128,8 +128,8 @@ internal fun cleanNote(raw: String): String {
         .replace(Regex("\\s+"), " ")
         .trim()
     // The publisher's 18:80 note begins with a stray period. A note never
-    // starts with one, so it is not part of the note (owner decision, this
-    // session).
+    // starts with one, so it is not part of the note
+    // (owner decision, 12.0).
     val withoutStrayPeriod = oneLine.replaceFirst(Regex("^\\.\\s*"), "")
     return bayanSpelling(withoutStrayPeriod).trim()
 }
@@ -137,7 +137,7 @@ internal fun cleanNote(raw: String): String {
 /**
  * One spelling the publisher's file and the print both get wrong: ধরন is a
  * misspelling of ধরণ, and the owner asked for the correct form everywhere it
- * appears, in the notes and in the sentence (owner decision, this session).
+ * appears, in the notes and in the sentence (owner decision, 12.0).
  */
 internal fun bayanSpelling(text: String): String = text.replace("ধরন", "ধরণ")
 

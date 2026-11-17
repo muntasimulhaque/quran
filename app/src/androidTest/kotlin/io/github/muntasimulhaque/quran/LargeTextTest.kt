@@ -57,7 +57,7 @@ import org.junit.Test
  * dialog) are where a doubled word can run out of room. The test does not
  * pretend to measure every glyph; it keeps the controls reachable and on the
  * glass, which is the failure that matters, and the capture run can show the
- * type itself (owner decision, this session).
+ * type itself (owner decision, 14.7).
  */
 class LargeTextTest {
 
@@ -120,7 +120,7 @@ class LargeTextTest {
     /**
      * The pill at 200 percent: one row, its answer on the glass, and the place
      * whole. The two skips are the actions that mark offers to a screen reader
-     * now (owner decision, this session: three 48 dp targets cut the place), so
+     * now (owner decision, 17.0: three 48 dp targets cut the place), so
      * this leg reads the one mark and the words it shares the row with.
      */
     @Test

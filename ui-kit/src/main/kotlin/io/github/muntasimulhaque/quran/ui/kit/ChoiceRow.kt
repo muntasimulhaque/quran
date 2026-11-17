@@ -42,14 +42,14 @@ internal val CapsulePad = 8.dp
  * stands the mark's own edge on the app's 20 dp gutter, so a choice's ring
  * lands on the same line as the words of the row above it. The 8 is the press
  * card a sheet row already wears, so the shape a finger gets and the shape a
- * ring stands on are one inset (owner decision, this session). */
+ * ring stands on are one inset (owner decision, 17.6). */
 internal val RowGutter = 8.dp
 
 /**
  * The mark's own measure: the ring every choice row wears, and the column a
  * row that is not a choice reserves for it. One number, because a chosen
  * pack that is not on the device draws the mark in the same column a choice
- * row draws it (owner decision, this session).
+ * row draws it (owner decision, 14.8).
  */
 val ChoiceMarkSize = 22.dp
 
@@ -105,7 +105,7 @@ val ChoiceRowTrailingInset = RowGutter + Space.Row
  * [bottomPadding] closes the foot of a row that has a block under it. The
  * ripple is drawn on the capsule inside that target, so a row that answers a
  * tap wears the same shape the chips and the doors wear, wherever it stands
- * (owner decision, this session: the row's press was a rectangle while the
+ * (owner decision, 7.4: the row's press was a rectangle while the
  * app's other controls were capsules). The action slot is drawn
  * only where a row has an action, so a row that is only a mark and a name
  * keeps its whole width for the name. An unselected ring is a control
@@ -126,7 +126,7 @@ fun ChoiceRow(
     modifier: Modifier = Modifier,
     trailing: (@Composable () -> Unit)? = null,
     /** The room under the row; a row with a block beneath it keeps less. */
-    bottomPadding: Dp = 12.dp,
+    bottomPadding: Dp = Space.Row,
 ) {
     val press = remember { MutableInteractionSource() }
     Row(
@@ -145,8 +145,8 @@ fun ChoiceRow(
             // The gutter the capsule keeps from the row's own edge: the click
             // target still owns the whole row, and only the shape the eye
             // sees is inset, so stacked rows read as a list and the first and
-            // last capsules stay clear of the sheet (owner report, this
-            // session).
+            // last capsules stay clear of the sheet
+            // (owner report, 7.4). 
             .padding(
                 start = RowGutter,
                 end = RowGutter,
@@ -176,8 +176,8 @@ fun ChoiceRow(
             Text(
                 text = title,
                 // A choice's name wears the row-name voice, so a settings
-                // list and the pill's menus read as one hand (owner decision,
-                // this session).
+                // list and the pill's menus read as one hand
+                // (owner decision, 13.3).
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -186,7 +186,7 @@ fun ChoiceRow(
                     text = subtitle,
                     // A choice's second line is its value, so it wears the
                     // caption: 13 at Regular, under a 15 Medium name (owner
-                    // decision, this session).
+                    // decision, 13.3).
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Space.Tight),
@@ -212,13 +212,13 @@ fun ChoiceRow(
  * The ring is drawn on the glyph set's own grid, at the set's one stroke and
  * its round keyline, so the ring and the check it holds carry one weight. It
  * had drawn its own 0.09 of the box, which made a "v" of a ring heavier than
- * every mark beside it (owner decision, this session).
+ * every mark beside it (owner decision, 11.5).
  *
  * It is public for the one row that is not a choice but still has to carry
  * one: a pack the reader chose whose file is not on the device yet. The mark
  * says the choice stands while the row's action says the bytes are not here,
  * so a chosen translation can never look like one that was never chosen
- * (owner report, this session).
+ * (owner report, 14.8).
  */
 @Composable
 fun ChoiceMark(selected: Boolean, radio: Boolean) {

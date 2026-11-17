@@ -1,0 +1,25 @@
+# The shape of a file in this repository, so an editor and a hand agree.
+#
+# The prose in the KDoc is wrapped by hand at about 76 columns and the
+# long sentences are deliberate, so no line length is enforced. The line
+# endings are left alone: the tree carries files written on more than one
+# machine.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = unset
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+continuation_indent_size = 8
+ij_kotlin_imports_layout = *
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+[*.{md,yml,yaml,json,toml}]
+indent_size = 2

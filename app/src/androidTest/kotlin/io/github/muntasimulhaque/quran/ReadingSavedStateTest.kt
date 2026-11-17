@@ -37,7 +37,7 @@ import org.junit.runner.RunWith
  * the keep on the row that made it. So the page draws nothing for a save and
  * the menu's row wears the state in its own word, while the verse goes on
  * saying the keep to a screen reader, because the reader who cannot see a
- * lit row is the one who needed the mark most (owner decision, this session).
+ * lit row is the one who needed the mark most (owner decision, 17.7).
  *
  * This test saves 2:255 before the reading starts, reads the page back, and
  * then takes the keep away from the row that says it, so the word, the state

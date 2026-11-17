@@ -34,7 +34,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * Settings marks that stand edge to edge in the top bar lit two circles that
  * met at a single point, and the pill's transport could not come closer than
  * 48 dp apart without its circles closing on each other. One rule answers both
- * (owner decision, this session).
+ * (owner decision, 9.6).
  *
  * [GlyphPress] inside [GlyphTarget] is Material's own icon button, a 40 dp
  * container in a 48 dp target, and it is what makes a cluster possible: two
@@ -64,7 +64,7 @@ val GlyphPress = ControlMetrics.Press
  * One round control: the target, the spoken name, the press, and the mark the
  * caller draws in the middle. The mark is 24 dp at every caller, because the
  * circle every caller stands in is one: a transport mark and a way back that
- * took two sizes were one job with two answers (owner decision, this session).
+ * took two sizes were one job with two answers (owner decision, 11.5).
  *
  * The circle carries a test tag, because it is the shape a test reads to prove
  * that two neighbours keep their air while their targets touch.

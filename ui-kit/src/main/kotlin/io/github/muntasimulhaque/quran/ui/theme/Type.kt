@@ -35,8 +35,8 @@ import io.github.muntasimulhaque.quran.data.TypeRole
  * app says about itself: a sheet's or a page's name, an empty state, a
  * row's name, a value, a label, a count, a button, a status, a credit. A
  * sheet therefore opens as a surface of the app and the page inside it is
- * the Book; the two never borrow each other's words (owner decision, this
- * session).
+ * the Book; the two never borrow each other's words
+ * (owner decision, 13.4).
  *
  * The Book itself is the KFGQPC Hafs face: the reading, the basmalah, the
  * word-by-word aid, and the ayah's own medallion. Arabic outside the
@@ -61,7 +61,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
  * the axis is set: the declared [FontWeight] only tells Compose which member
  * to pick, and `fontSynthesis = None` forbids the platform from inventing
  * the missing weight. A family built without this drew every Bangla title,
- * row name, and bold run at Regular (owner report, this session).
+ * row name, and bold run at Regular (owner report, 13.4).
  */
 @OptIn(ExperimentalTextApi::class)
 private fun variableCut(
@@ -114,7 +114,7 @@ val Literata = FontFamily(
  * The Bangla reading face for translations, tafsir, notes, and the Book's
  * own names. The Medium and SemiBold members are what a bold run and a title
  * ask for; each member carries its own `wght` axis, because a variable file
- * otherwise draws every member at 400 (owner report, this session).
+ * otherwise draws every member at 400 (owner report, 13.4).
  */
 val NotoSerifBengali = FontFamily(
     variableCut(R.font.noto_serif_bengali, FontWeight.Normal),
@@ -139,7 +139,7 @@ val AmiriQuran = FontFamily(Font(R.font.amiri_quran))
  * Quran's Hafs face has no glyphs for: U+060C, U+061B, U+061F, U+066A to
  * U+066C, and U+06D4. Its line box is 1.688 of the em, so the tafsir's
  * Arabic line can be the Quran's own 2.0 without the tall marks crowding
- * (owner decision, this session: Hafs drew every prose comma as a dotted
+ * (owner decision, 14.4: Hafs drew every prose comma as a dotted
  * circle, and Amiri's tall marks crowded the 1.9 line).
  */
 val KitabBody = FontFamily(Font(R.font.kitab_regular))
@@ -171,7 +171,7 @@ fun rememberHafs(): FontFamily {
  * left-to-right one: invisible while a line is pure Arabic, wrong the day a
  * line carries a Latin word, a bracket, or a reference beside the verse.
  *
- * **A line box measured by the script, not centred in it.** Arabic sets its
+ * **A line box measured by the script, not centered in it.** Arabic sets its
  * extra air above the letters, where the marks are, so the alignment is
  * proportional; [trim] is the one choice a caller makes, because a verse's
  * own rhythm is measured in its line box while a prose block's air is the
@@ -201,7 +201,7 @@ fun arabicStyle(
  * beside a row's Latin one. The line box is 1.4 of the size, not the face's
  * 2.449, because the face's box is drawn for a Quran page's stacked marks and
  * would push every designed gap around a name out by most of an em. At 1.4
- * the ink still fits and the proportional alignment centres it, so the 14 dp
+ * the ink still fits and the proportional alignment centers it, so the 14 dp
  * under a surah's name is 14 dp.
  */
 fun amiriDisplay(sizeSp: Float, color: Color = Color.Unspecified): TextStyle =
@@ -217,8 +217,8 @@ fun amiriDisplay(sizeSp: Float, color: Color = Color.Unspecified): TextStyle =
  * carries everything the app says about itself: a sheet's or a page's
  * name, a row's name, a value, a label, a button, a count, a status, a
  * credit. A sheet opens as a surface of the app and the page inside it is
- * the Book; the two never borrow each other's words (owner decision, this
- * session).
+ * the Book; the two never borrow each other's words
+ * (owner decision, 13.4).
  *
  * The sizes are the jobs, and the steps between them are visible:
  *
@@ -280,7 +280,7 @@ object TypeLadder {
      * A Book name in a list: a surah's own name in the row it is one of. It
      * is the row name's size, and the Book's face is what makes it a Book
      * name; a list of 114 needs a name, not 114 page titles (owner
-     * decision, this session).
+     * decision, 13.9).
      */
     const val BOOK_ROW_SP = 15f
 
@@ -360,7 +360,7 @@ object TypeLadder {
      * An article's title over its own text: one point over the body it
      * titles, 17 at the default 16. The title's Semibold and its 1.3 line
      * carry the hierarchy; the cap below keeps it under the page's own 20 at
-     * the largest step (owner decision, this session).
+     * the largest step (owner decision, 14.0).
      */
     const val ARTICLE_TITLE_LEAD = 1f
 
@@ -373,8 +373,8 @@ object TypeLadder {
     /**
      * A section's head is the body's size at SemiBold; a sub-head is the same
      * size at Medium. The hierarchy is weight, not another size, because a
-     * long reading cannot carry a ladder of big heads (owner decision, this
-     * session).
+     * long reading cannot carry a ladder of big heads
+     * (owner decision, 13.3).
      */
     const val HEADING = 1f
     const val SUBHEADING = 1f
@@ -393,8 +393,8 @@ object TypeLadder {
 /**
  * The title ladder, in the book's face: the Book's names. The app's own
  * names (a sheet, a page, an empty state) are in the interface face, because
- * a surface of the app names itself in the app's voice (owner decision, this
- * session). The display and headline slots are the interface's; the Book's
+ * a surface of the app names itself in the app's voice (owner decision,
+ * 14.0). The display and headline slots are the interface's; the Book's
  * display lines are asked for by name.
  *
  * [trackingSp] is the optical tracking: a title is set a little tighter than
@@ -420,7 +420,7 @@ private fun readingStyle(
         // A title is not a paragraph: the heading breaker keeps a short line
         // from ending in one orphaned word, and the body's high-quality
         // paragraph breaker would spend its work where a title has nothing to
-        // optimize (owner decision, this session: titles keep Heading). A
+        // optimize (owner decision, 13.3: titles keep Heading). A
         // title never hyphenates either, at any size.
         lineBreak = LineBreak.Heading,
         hyphens = Hyphens.None,
@@ -467,8 +467,8 @@ private fun interStyle(
  * The meta and the value are one size now. The 13 meta line and the 12
  * caption were two names for the same quiet fact, and the 12 value read as a
  * footnote under the thing it described. A value is a caption no more: it
- * is the meta line that belongs to its row, tabular (owner decision, this
- * session).
+ * is the meta line that belongs to its row, tabular
+ * (owner decision, 14.0).
  *
  * The display and headline slots are the interface's, because no surface
  * asks a theme slot for a Book display line: the Book's display lines are
@@ -578,14 +578,14 @@ internal fun quranTypography(): Typography {
         ),
         // The value: a row's own line under its name, 13 at Regular, the
         // same size as a source line. A name and its value are told apart by
-        // weight and tone, not by a footnote's size (owner decision, this
-        // session).
+        // weight and tone, not by a footnote's size
+        // (owner decision, 13.3).
         //
         // The M3 slot names are read by job here, not by M3's baseline sizes:
         // this app's value is 13 and its group label is 12, so a stock
         // Material surface that asks for labelSmall gets the value size.
         // Scope one as the time picker is scoped rather than assuming the
-        // baseline scale (owner decision, this session).
+        // baseline scale (owner decision, 13.8).
         labelSmall = interStyle(
             FontWeight.Normal,
             TypeLadder.VALUE_SP,
@@ -604,8 +604,8 @@ internal fun quranTypography(): Typography {
  * and the script's line ratio follow the reader's language: Literata on a
  * 1.3 line, Noto Serif Bengali on its 1.6. The one point off the page's
  * Book name is the difference between a row and a page, and the face is
- * what still says the name belongs to the Book (owner decision, this
- * session).
+ * what still says the name belongs to the Book
+ * (owner decision, 13.9).
  */
 @Composable
 fun bookRowName(): TextStyle {
@@ -627,7 +627,7 @@ fun bookRowName(): TextStyle {
  * past the default. A row's name is 15, and the top two steps reach 17.6 and
  * 19.2: the row's title would become its smallest line, and the place the
  * reader is looking for would read as a caption under the note (owner
- * report, this session). Held at the reading's own 16, the preview stands
+ * report, 18.5). Held at the reading's own 16, the preview stands
  * one point over the row's name, the same hair the default step already
  * gives it, so no step can invert the row. The note's own sheet and its
  * field still take the reader's full size, because that is where the note is
@@ -647,8 +647,8 @@ fun notePreviewLineSp(translationLineSp: Float): Float =
  * 16 at Medium in both scripts, one step over the interface body and under
  * the page title. It is the app's voice, so it never borrows the Book's
  * face, and it takes the theme's own interface family, so a Bangla empty
- * state is Noto Sans Bengali and an English one is Inter (owner decision,
- * this session).
+ * state is Noto Sans Bengali and an English one is Inter
+ * (owner decision, 14.0).
  *
  * The line is the base style's own, not a second number: the English title
  * style's 1.333 and the Bangla 1.45 are the scripts' boxes, and a hard-coded
@@ -676,7 +676,7 @@ fun screenSubtitle(): TextStyle {
  * A compact surface's body line: the download notice, and the pill's status
  * if a caller wants it at 14. 14 at the base body style's own line, so the
  * notice is one step over meta and one under the body, and the Bangla line
- * stays the script's 1.45 (owner decision, this session).
+ * stays the script's 1.45 (owner decision, 14.0).
  */
 @Composable
 fun compactBody(): TextStyle {
@@ -697,7 +697,7 @@ fun compactBody(): TextStyle {
 /**
  * A compact surface's label: the playback pill's title at 14 Medium. It is
  * separate from [compactBody] because the pill's title is a name at Medium,
- * not a sentence at Regular (owner decision, this session).
+ * not a sentence at Regular (owner decision, 14.0).
  */
 @Composable
 fun compactLabel(): TextStyle {
@@ -724,7 +724,7 @@ fun compactLabel(): TextStyle {
  *
  * The cache key is the pair itself, as a string: it used to be a hash of the
  * two numbers, which can collide, and a collision would hand one size the
- * cut another size had already cached (owner report, this session).
+ * cut another size had already cached (owner report, 6.6).
  */
 @OptIn(ExperimentalTextApi::class)
 private fun interAt(weight: FontWeight, drawnSp: Float): FontFamily =
@@ -748,7 +748,7 @@ private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamil
  * ladder, read from [TypeLadder] so the two can never drift, in the script's
  * own two voices. The app's voice is Noto Sans Bengali; the Book's voice is
  * Noto Serif Bengali. The sizes are the same in both scripts; only the line
- * is the script's own (owner decision, this session).
+ * is the script's own (owner decision, 14.0).
  *
  * The display and headline slots are the interface's, because no surface
  * asks a theme slot for a Book display line. The Book's display lines are
@@ -764,7 +764,7 @@ private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamil
  * Each member carries its own `wght` axis: the family used to declare Medium
  * and SemiBold on one variable file without setting the axis, so every
  * Bangla weight drew at 400 and the titles and heads had no weight hierarchy
- * at all (owner report, this session).
+ * at all (owner report, 13.4).
  *
  * Bengali is not letterspaced: the script's conjuncts and matras are drawn as
  * clusters, and the optical tracking the Latin ladder carries would pull them
@@ -934,7 +934,7 @@ class ReadingVoice(
  * the page's 45 to 70 characters it splits words the eye did not need split
  * (the owner's own capture carried "what-ever" and "Here-after"). The
  * content's locale stays, because it shapes the script's local forms; it no
- * longer decides a break (owner decision, this session).
+ * longer decides a break (owner decision, 13.3).
  *
  * The Arabic verse keeps its own line box and does not come through here: its
  * 2.0 leading is the Quran Foundation's own for the QPC Hafs face, and

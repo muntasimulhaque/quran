@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
  * for the surah being read on the network the reader is on, because the tap is
  * the ask. And the word sheet's speaker may be pressed for any word: the tap
  * is approval enough, so a surah whose voices are not here is fetched then and
- * the word sounds when its pack lands (owner decision, this session).
+ * the word sounds when its pack lands (owner decision, 18.7).
  *
  * Every surah the reader reaches afterwards arrives quietly on an unmetered
  * connection, after the page is readable, the way the root pack does, and the
@@ -52,7 +52,7 @@ internal class WordAudioDownloads(
      * The one transfer. It is a value and not a call to the downloader so a
      * test can hand in a pack it writes itself, and the tap's whole path
      * (fetch, commit, publish, hand back) is measured with no network (owner
-     * decision, this session).
+     * decision, 18.7).
      */
     private val fetch: suspend (WordAudioPackage, (Long, Long) -> Unit) -> Result<Unit> =
         { pack, onProgress -> WordAudioDownloader(context).download(pack, onProgress) },
@@ -156,8 +156,8 @@ internal class WordAudioDownloads(
             )
             // The line under the finger counts in whole kilobytes, and the
             // reading stands behind it, so the transfer publishes one state
-            // per percent rather than one per socket read (owner decision,
-            // this session).
+            // per percent rather than one per socket read
+            // (owner decision, 18.7).
             val result = fetch(pack) { read, total ->
                 val step = (total / 100).coerceAtLeast(1L)
                 _state.update { previous ->

@@ -92,12 +92,12 @@ class SheetStillnessTest {
         // The window is up before the sheet has finished moving, and the
         // gesture has to start where the sheet will rest, not under it. A
         // sleep guessed at that moment and guessed wrong on a slow runner: a
-        // sheet still travelling when the clock is paused reads as a sheet at
+        // sheet still traveling when the clock is paused reads as a sheet at
         // rest that will not answer a drag, and the interface suite went red
         // on a runner while the same test passed on the developer's own
         // phone. The wait is the sheet's own stillness, read twice over one
         // frame, so no machine's speed can put the finger in the wrong place
-        // (owner report, this session).
+        // (owner report, 12.3).
         var last = Float.NaN
         compose.waitUntil(timeoutMillis = 20_000) {
             val now = compose.onAllNodesWithTag("footnote-sheet", useUnmergedTree = true)
@@ -127,7 +127,7 @@ class SheetStillnessTest {
         // that begins there belongs to the page under it: it moved the sheet
         // 11 dp on a runner and a hundred on a fast phone, and the reading of
         // the shrug after it was a reading of the reading's gesture, not the
-        // sheet's (owner report, this session: the interface suite went red on
+        // sheet's (owner report, 12.3: the interface suite went red on
         // the runner while the app behaved).
         handle.performTouchInput { down(center) }
         repeat(20) {

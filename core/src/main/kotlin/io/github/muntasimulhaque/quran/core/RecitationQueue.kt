@@ -11,7 +11,7 @@ package io.github.muntasimulhaque.quran.core
  * that recorded its surah after handing the playlist over was measured from
  * the old surah: the first report either appended the next surah twice, or,
  * when the start was on a surah's last ayah, appended nothing and offered a
- * package that was already on the device (owner report, this session). The
+ * package that was already on the device (owner report, 9.9). The
  * bookkeeping lives here, away from the player, so that order is pinned in
  * the JVM suite.
  */

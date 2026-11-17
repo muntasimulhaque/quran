@@ -49,7 +49,7 @@ import org.junit.runner.RunWith
  * pin what the reading needs from that: the word ends by itself and leaves the
  * session's playlist and the saved place untouched, and a recitation that was
  * playing waits at the word and is given back when the word ends (owner
- * decision, this session).
+ * decision, 18.0).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackServiceTest {
@@ -92,7 +92,7 @@ class PlaybackServiceTest {
      * A word's own voice on real audio from the app's own assets: the word ends
      * by itself, and the session's player is never handed the word at all, so
      * the playlist, the capsule, and the saved place stand exactly as they
-     * were (owner decision, this session).
+     * were (owner decision, 18.0).
      */
     @Test
     fun theWordsOwnFileEndsAndLeavesTheSessionAlone() = runBlocking {
@@ -107,8 +107,8 @@ class PlaybackServiceTest {
         val database = ContentDatabase.open(context, PackCatalog.load(context), store.installed())
         playback.attach(database)
         // A place the reader left behind before the word was asked for: the
-        // sample must neither write it nor wipe it (owner decision, this
-        // session).
+        // sample must neither write it nor wipe it
+        // (owner decision, 18.0).
         val place = PlaybackPosition("husary", 7, 1_234L)
         withContext(Dispatchers.IO) { PlaybackPositionStore(context).write(place) }
         val (watcher, future) = connect(context)
@@ -127,7 +127,7 @@ class PlaybackServiceTest {
             )
             // A word is not a session: the session's player never held it, so
             // there is no item, no capsule, and no notification left standing
-            // for one word (owner decision, this session).
+            // for one word (owner decision, 18.0).
             assertEquals(
                 "a word must never stand in the session's playlist",
                 0,

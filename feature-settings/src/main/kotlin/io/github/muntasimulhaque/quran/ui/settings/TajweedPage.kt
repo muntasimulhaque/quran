@@ -61,8 +61,8 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  *
  * A rule is one paragraph, not two lines: the name runs into its sentence in
  * the page's ink and the app's medium weight, and a period ends the name before
- * the sentence begins. The middot is gone from this page (owner decision, this
- * session). It was defended as the app's separator between a name and its fact,
+ * the sentence begins. The middot is gone from this page (owner decision, 19.1).
+ * It was defended as the app's separator between a name and its fact,
  * which is true of `Al-Kahf · 18:10` because both halves are facts; a sentence
  * is not a fact, and a wrapped one left the dot floating in the middle of a
  * line. The weight change and the period say the step, and eighteen rules cost
@@ -105,11 +105,11 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  * learn which color they are reading about. The head is drawn on the sheet's
  * own ground, so the rules slide under it rather than through it, and each
  * family's name is a heading to a screen reader, so TalkBack moves from family
- * to family instead of hearing every rule in order (owner decision, this
- * session).
+ * to family instead of hearing every rule in order
+ * (owner decision, 12.9).
  *
  * **A family is closer to its own rules than to the next family** (owner
- * decision, this session). The head stood [Space.Line] over the first rule's
+ * decision, 19.1). The head stood [Space.Line] over the first rule's
  * [Space.Block], and the family's block kept [Space.Section] under its last
  * one: 24 dp to its own rules and 24 dp to the next family, so a family's name
  * was measurably as far from its rules as from a different family's, and the
@@ -119,8 +119,8 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  * between groups. The lead paragraph's own foot is [Space.Section] too, so the
  * list starts as cleanly as one family ends.
  *
- * **The rules are the legend's detail, not its subject** (owner decision, this
- * session). A rule's sentence is explanatory prose, so it takes the meta
+ * **The rules are the legend's detail, not its subject** (owner decision,
+ * 19.1). A rule's sentence is explanatory prose, so it takes the meta
  * voice's 13 where the family, its sample word, and the page's own name are the
  * things the reader came to see. The page had every line at 15, which made
  * eighteen explanations the loudest thing on a page that exists to show seven
@@ -255,7 +255,7 @@ private fun FamilyRules(family: TajweedFamily) {
             // The page is lazy and the head is sticky: a head can be the last
             // thing in a short window, and the block under it is then not
             // composed yet. This tag is the seam a test scrolls to before it
-            // reads the rule names (owner decision, this session: the legend
+            // reads the rule names (owner decision, 17.6: the legend
             // test named a rule the window had never composed).
             .testTag("tajweed-rules-${family.name}")
             .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Section),

@@ -68,6 +68,8 @@ import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.settings.SettingsPage
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
+import io.github.muntasimulhaque.quran.ui.reading.ReadingListActions
+import io.github.muntasimulhaque.quran.ui.reading.ReadingListState
 import io.github.muntasimulhaque.quran.ui.reading.SelectionClearer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -80,7 +82,7 @@ import kotlinx.coroutines.withContext
  * recitation is heard. A minute gives the reader time to settle and to notice
  * the wash, and then the phone's own screen timeout is allowed to do its work.
  * The recitation keeps playing in the foreground service, so the page can go
- * dark without ending the listening (owner decision, this session).
+ * dark without ending the listening (owner decision, 10.2).
  */
 private const val LISTENING_AWAKE_MILLIS = 60_000L
 
@@ -88,14 +90,14 @@ private const val LISTENING_AWAKE_MILLIS = 60_000L
  * How long the screen stays awake after the last touch while the page is being
  * read. Reading needs the page, and a long ayah can hold the eye for a while
  * without a touch, so this window is generous; a reader who is actually
- * reading scrolls far more often than this (owner decision, this session).
+ * reading scrolls far more often than this (owner decision, 10.2).
  */
 private const val READING_AWAKE_MILLIS = 10 * 60_000L
 
 /**
  * The longest the wash sleeps between checks. The wait to the next word is
  * exact, and this is only a ceiling so a missed event cannot park the wash for
- * the length of a surah (owner decision, this session).
+ * the length of a surah (owner decision, 16.3).
  */
 private const val MAX_WORD_WAIT_MILLIS = 2_000L
 
@@ -106,7 +108,7 @@ internal enum class ReaderSheet { None, Browse, Search, Settings }
  * The unsaved note drafts, written into the window's saved state as strings.
  * A note is the reader's own writing, and a closed sheet is not a decision to
  * throw it away: a draft survives the sheet, a rotation, and a process death
- * until the note is saved or cleared (owner decision, this session).
+ * until the note is saved or cleared (owner decision, 13.8).
  */
 private val NoteDraftsSaver = listSaver<Map<Int, String>, String>(
     save = { drafts -> drafts.map { (ayah, text) -> "$ayah\u0000$text" } },
@@ -153,35 +155,35 @@ fun ReaderScreen(
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
     // The wash is read at each scheduled change and handed down as a State
     // this screen never reads, so a change that moves it invalidates the one
-    // ayah being heard instead of the page (owner decision, this session).
+    // ayah being heard instead of the page (owner decision, 16.3).
     val playedWord = remember { mutableStateOf<Int?>(null) }
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     // The Save marks, by ayah, so a door can say what the reader kept. A note
     // alone is not a Save: the two marks are the reader's own and the app
-    // keeps them apart (owner decision, this session).
+    // keeps them apart (owner decision, 13.5).
     val savedAyahs = remember(saved) {
         saved.filter { it.marked }.map { it.ayahNumber }.toSet()
     }
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
     // The surah's voices on their way, for the word sheet's own line. The
     // line is the only reader of it: the state moves on a page turn, a press,
-    // and a transfer's percent, and on nothing else (owner decision, this
-    // session).
+    // and a transfer's percent, and on nothing else
+    // (owner decision, 18.7).
     val wordAudio by viewModel.wordAudioState.collectAsStateWithLifecycle()
 
     // The bar is the reading's head: it stands when the reading arrives,
     // steps away as the reader moves forward, and comes back on the first
     // backward move or a tap. A moment, not a place: it is not saved across
     // a rotation, because a reader who arrives at the page has just arrived
-    // (owner decision, this session).
+    // (owner decision, 19.4).
     val bar = remember { ReaderBarState() }
     // The ayah whose own menu is open, and the door it hangs from. One at a
     // time, never across a rotation: a popup is a moment and not a place
-    // (owner decision, this session).
+    // (owner decision, 13.3).
     var menu by remember { mutableStateOf<AyahMenuRequest?>(null) }
     // The reading's text selection is a moment, not a place: it is cleared by
     // the next touch anywhere on the page or the bar, and it is never saved
-    // across a rotation (owner decision, this session).
+    // across a rotation (owner decision, 13.7).
     val selectionClearer = remember { SelectionClearer() }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
     // The tafsir pack a search hit opened the card for; null for the normal
@@ -193,7 +195,7 @@ fun ReaderScreen(
     var cardNote by rememberSaveable { mutableStateOf<Int?>(null) }
     // The reader's unsaved note text, by ayah. A sheet that closes without
     // saving is not a discarded note: the next opening hands the words back
-    // (owner decision, this session).
+    // (owner decision, 13.8).
     var noteDrafts by rememberSaveable(stateSaver = NoteDraftsSaver) {
         mutableStateOf<Map<Int, String>>(emptyMap())
     }
@@ -206,7 +208,7 @@ fun ReaderScreen(
     // Whether the remove question's answer belongs to the reading's Snackbar
     // (true) or to Browse's own (false). The question can be raised from
     // either surface, and the reading's Snackbar is behind the Browse sheet
-    // when the reader is still standing in it (owner decision, this session).
+    // when the reader is still standing in it (owner decision, 14.7).
     var pendingRemoveUndoable by remember { mutableStateOf(true) }
     // The open sheet survives the window, not only the composition: a change
     // of language recreates the Activity, and a sheet kept in plain `remember`
@@ -217,8 +219,8 @@ fun ReaderScreen(
     var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
     // The settings page a door outside Settings asked for. The word meanings'
     // door and the ayah card's tafsir offer name a pack, so they land on the
-    // page that carries it rather than on the hub (owner decision, this
-    // session).
+    // page that carries it rather than on the hub
+    // (owner decision, 19.1).
     var settingsPage by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     // The sheet a result came from, one level deep. A search or Browse result
     // closes its sheet, and Back from the reading reopens it at the same
@@ -244,7 +246,7 @@ fun ReaderScreen(
     val scope = rememberCoroutineScope()
     // The sentence the reading owes the reader, and the one value the two
     // halves of the rule share: the paper's ground, and the touch that ends
-    // it (owner decision, this session).
+    // it (owner decision, 19.3).
     val sentence = rememberSentence()
     LaunchedEffect(Unit) {
         viewModel.messages.collect { message ->
@@ -274,7 +276,7 @@ fun ReaderScreen(
         // A notice may name no door, and then it is only a sentence: the
         // phone that answered with nothing is told so on the app's own
         // paper, in the place the missing door was tapped from, and the
-        // reader's next touch puts it away (owner decision, this session).
+        // reader's next touch puts it away (owner decision, 19.3).
         val result = sentence.host.showSnackbar(
             message = resources.getString(notice.text),
             actionLabel = notice.action?.let { resources.getString(it) },
@@ -299,7 +301,7 @@ fun ReaderScreen(
     // separate because the sheet stays up while the capture runs: a reader who
     // sends the card to one app can send it to another from the same sheet,
     // instead of raising the sheet again for every receiver (owner report,
-    // this session). `sharing` is non-null for the whole visit, so the sheet
+    // 14.1). `sharing` is non-null for the whole visit, so the sheet
     // is composed from the first preview until the reader dismisses it.
     var sharing by remember { mutableStateOf<ShareCard?>(null) }
     var capturing by remember { mutableStateOf(false) }
@@ -325,7 +327,7 @@ fun ReaderScreen(
         sheet = ReaderSheet.None
         settingsPage = null
         // The reader is back on the page, at rest: the page's head stands
-        // again (owner decision, this session).
+        // again (owner decision, 19.4).
         bar.showNow()
         if (returnTo == null) clearSheet = closing
     }
@@ -344,7 +346,7 @@ fun ReaderScreen(
      * A result closes its sheet but keeps it as the reading's way back. The
      * arrival is the text, and the bar stands at the head of the page the
      * reader arrives on: the target ayah begins below it, never under it
-     * (owner decision, this session).
+     * (owner decision, 19.4).
      */
     fun resultOpened(from: ReaderSheet) {
         returnTo = from
@@ -396,7 +398,7 @@ fun ReaderScreen(
     // A sheet, an ayah's actions, a note, or a share is the reader using the
     // app, not listening to it from across the room. Those keep the screen
     // awake; the plain reading and the plain listening are the two that give
-    // it back after their own window (owner decision, this session).
+    // it back after their own window (owner decision, 10.2).
     val usingControls = sheet != ReaderSheet.None || menu != null ||
         cardAyah != null || cardNote != null || pendingRemove != null || sharing != null
 
@@ -422,7 +424,7 @@ fun ReaderScreen(
 
     // What a tap on the page, and the phone's own Back, answer at the foot of
     // the reading. The pill wears no close any more, so this is the one way a
-    // raised control is put away (owner decision, this session): a paused or
+    // raised control is put away (owner decision, 9.4): a paused or
     // failed recitation goes with its state, a package in flight is left to
     // its own X, and a download offer is answered "not now". The rule lives
     // in [raisedAnswer] so it can be pinned without a screen.
@@ -490,7 +492,7 @@ fun ReaderScreen(
     // reader's own touch. The window timer below releases the flag, and the
     // phone's normal screen timeout takes it from there. The recitation is a
     // foreground service, so it keeps playing when the screen goes dark (owner
-    // decision, this session).
+    // decision, 10.2).
     val view = LocalView.current
     DisposableEffect(view) {
         onDispose { view.keepScreenOn = false }
@@ -521,7 +523,7 @@ fun ReaderScreen(
     // timer the player keeps is the place. A screen that has gone dark, a
     // backgrounded app, and a phone in someone else's hand keep the place
     // instead, at a ten-second checkpoint, and the processor is left to sleep
-    // (owner decision, this session).
+    // (owner decision, 16.3).
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
@@ -532,7 +534,7 @@ fun ReaderScreen(
                     touch++
                     // A reader coming back to the page is at its head: the
                     // bar stands, with the page's place below it (owner
-                    // decision, this session).
+                    // decision, 19.4).
                     bar.showNow()
                 }
                 Lifecycle.Event.ON_STOP -> {
@@ -622,8 +624,8 @@ fun ReaderScreen(
     val navigationBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     // A Snackbar stands above whatever the foot of the page has raised, and
     // above the system bar when nothing is raised. The height is the one the
-    // stack already measured, so the two cannot overlap (owner decision,
-    // this session).
+    // stack already measured, so the two cannot overlap
+    // (owner decision, 13.8).
     val snackbarBottom = if (bottomStackHeight > 0) {
         with(LocalDensity.current) { bottomStackHeight.toDp() } + Space.Line
     } else {
@@ -636,7 +638,7 @@ fun ReaderScreen(
             // Every touch is the reader still being here, including a scroll
             // that lands on an ayah's own handler. The initial pass sees it
             // without taking it from the child that owns the gesture (owner
-            // decision, this session).
+            // decision, 10.2).
             .pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {
@@ -652,15 +654,15 @@ fun ReaderScreen(
             }
             // The sentence answers the reader the way every other raised
             // thing here does: the first touch puts it away, and the touch
-            // still reaches the page it landed on (owner decision, this
-            // session).
+            // still reaches the page it landed on
+            // (owner decision, 19.3).
             .putAwaySentence(sentence),
     ) {
         // The bar is the page's head: the column is the glass, the bar's band
         // is its first row, and the reading gets everything below it. The page
         // never scrolls under the bar, and the status band at the screen's
-        // top covers the phone's own bar in the same paper (owner decision,
-        // this session).
+        // top covers the phone's own bar in the same paper
+        // (owner decision, 19.4).
         Column(Modifier.fillMaxSize()) {
             ReaderTopBar(
                 title = surahName(viewModel, settings.ayah),
@@ -670,7 +672,7 @@ fun ReaderScreen(
                 // way a reader flips to the beginning of a surah in a printed
                 // copy. The arrival is the surah's head, so the bar stands
                 // over the page's own top, never over the name (owner
-                // decision, this session).
+                // decision, 19.4).
                 titleAction = stringResource(R.string.action_surah_top),
                 onTitle = {
                     viewModel.jumpToSurahOpening(settings.ayah)
@@ -690,167 +692,171 @@ fun ReaderScreen(
                 ReadingList(
                     content = content,
                     selectionClearer = selectionClearer,
-                    surah = surah,
-                    loadRows = {
-                        viewModel.readingRows(
-                            surah = surah.number,
-                            wordByWord = settings.wordByWord || revealForSurah?.wordByWord == true,
-                        )
-                    },
-                    // The copy read ahead while the reader was still in the
-                    // surah before this one, and the read of the surah after
-                    // it. Together they make the turn at the end of a surah
-                    // land on text rather than on the paper.
-                    cachedRows = { viewModel.cachedRows(it) },
-                    onReadAhead = { viewModel.readAheadSurah(it) },
-                    onHearWord = { ayah, position -> viewModel.hearWord(ayah, position) },
-                    wordVoice = viewModel.wordVoice,
-                    wordAudio = wordAudio,
-                    onWordClosed = { viewModel.closeWordSheet() },
-                    surahNameOf = { number ->
-                        viewModel.surahs.firstOrNull { it.number == number }?.nameSimple
-                            ?: number.toString()
-                    },
-                    onOpenPlace = { ayah, position ->
-                        // The place the reader chose is the reading's next
-                        // stop: the word sheet has gone, and the word wears
-                        // the same reveal a search arrival gives it (owner
-                        // decision, this session). The sheet itself is one
-                        // Back away, and that memory is the reading's own
-                        // (ReadingList), because the word sheet is the
-                        // reading's surface and not one of this screen's
-                        // doors (owner decision, this session).
-                        reveal = ReadingReveal(ayah = ayah, words = setOf(position))
-                        viewModel.jumpToAyah(ayah)
-                        bar.showNow()
-                        menu = null
-                        cardAyah = null
-                        cardTafsirPack = null
-                        cardNote = null
-                    },
-                    metrics = settings.readingMetrics(),
-                    reveal = revealForSurah,
-                    place = settings.ayah,
-                    hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
-                    // The word meanings are the reading's one undiscoverable
-                    // aid: a Settings row and nothing else. The door stands at
-                    // the surah's arrival while the list is not on the device,
-                    // and the tap lands on the page that has the pack (owner
-                    // decision, this session).
-                    wordsInstalled = content.installedPack(
-                        ContentDatabase.wordsPackId(viewModel.readingLanguage),
+                    state = ReadingListState(
+                        surah = surah,
+                        wordVoice = viewModel.wordVoice,
+                        wordAudio = wordAudio,
+                        metrics = settings.readingMetrics(),
+                        reveal = revealForSurah,
+                        place = settings.ayah,
+                        hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
+                        // The word meanings are the reading's one undiscoverable
+                        // aid: a Settings row and nothing else. The door stands at
+                        // the surah's arrival while the list is not on the device,
+                        // and the tap lands on the page that has the pack (owner
+                        // decision, 19.1).
+                        wordsInstalled = content.installedPack(
+                            ContentDatabase.wordsPackId(viewModel.readingLanguage),
+                        ),
+                        contentLanguage = viewModel.readingLanguage,
+                        nextSurahName = viewModel.surahs
+                            .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
+                        selectedAyah = washedAyah,
+                        menuAyah = menuAyah,
+                        notedAyahs = saved
+                            .filter { !it.note.isNullOrBlank() }
+                            .map { it.ayahNumber }
+                            .toSet(),
+                        savedAyahs = savedAyahs,
+                        playingAyah = playback.ayahNumber,
+                        // The word whose own voice is sounding, when the sound is
+                        // a sample: the sheet washes it and the pill stays away
+                        // (owner decision, 17.9).
+                        hearingAyah = playback.sample?.takeIf { playback.isPlaying }?.ayahNumber,
+                        hearingWord = playback.sample?.takeIf { playback.isPlaying }?.position,
+                        playedWord = playedWord,
+                        // The reminder is offered after the reader has read the
+                        // surah, never before the text. Turning it on is the act
+                        // that asks the phone for the notification and the exact
+                        // time; Not now writes the no and the card never returns
+                        // (owner decision, 15.5).
+                        reminderOffer = !settings.reminderAnswered,
+                        startAtOpening = viewModel.startAtSurahOpening == surah.number,
+                        // The air above a surah's opening, under the bar. The
+                        // page is drawn edge to edge; the status band covers the
+                        // phone's bar in the page's own color, and the bar's band
+                        // is the page's head. The opening keeps one block under
+                        // the band, plus its own 40 dp, so the surah's name stands
+                        // one gutter under the title's capsule (4 + 16), and the
+                        // title page keeps its air (owner decision, 19.4).
+                        contentPaddingTop = Space.Block,
+                        contentPaddingBottom = readingFoot(
+                            // Nothing is raised until the reader asks for a
+                            // recitation or a pack, so the page's own foot is the
+                            // page's (owner decision, 16.0).
+                            bottomStack = with(LocalDensity.current) {
+                                bottomStackHeight.toDp()
+                            },
+                            navigationBar = navigationBar,
+                        ),
                     ),
-                    onAddWords = { openSheet(ReaderSheet.Settings, SettingsPage.Words) },
-                    contentLanguage = viewModel.readingLanguage,
-                    nextSurahName = viewModel.surahs
-                        .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
-                    selectedAyah = washedAyah,
-                    menuAyah = menuAyah,
-                    notedAyahs = saved
-                        .filter { !it.note.isNullOrBlank() }
-                        .map { it.ayahNumber }
-                        .toSet(),
-                    savedAyahs = savedAyahs,
-                    playingAyah = playback.ayahNumber,
-                    // The word whose own voice is sounding, when the sound is
-                    // a sample: the sheet washes it and the pill stays away
-                    // (owner decision, this session).
-                    hearingAyah = playback.sample?.takeIf { playback.isPlaying }?.ayahNumber,
-                    hearingWord = playback.sample?.takeIf { playback.isPlaying }?.position,
-                    playedWord = playedWord,
-                    onAyahMenu = { ayah, anchor ->
-                        menu = AyahMenuRequest(ayah, anchor)
-                        reveal = null
-                        touch++
-                    },
-                    onBackgroundTap = {
-                        bar.show(scope, reducedMotion)
-                        menu = null
-                        reveal = null
-                        // A tap on the page is how a raised control is put
-                        // away: the paused recitation, a failure, the offer.
-                        // It never silences a playing recitation, and never
-                        // aborts a package on its way (owner decision, this
-                        // session).
-                        putAwayRaised()
-                        touch++
-                    },
-                    onScrolled = {
-                        // The menu goes with the page: its door moves under
-                        // it, and a popup hung from a moving anchor is worse
-                        // than no popup (owner decision, this session).
-                        menu = null
-                        // The bar's own distance is spent by the scroll
-                        // connection in the app; this is the menu and the
-                        // reader still being here (owner decision, this
-                        // session).
-                        touch++
-                    },
-                    onBarScroll = { delta ->
-                        bar.stop()
-                        bar.consume(delta)
-                    },
-                    onBarSettled = { bar.settle(scope, reducedMotion) },
-                    onNextSurah = { number ->
-                        // The next surah is an arrival at its head; the bar
-                        // stands over the page's own top (owner decision,
-                        // this session).
-                        bar.showNow()
-                        viewModel.jumpToSurah(number)
-                    },
-                    // The reminder is offered after the reader has read the
-                    // surah, never before the text. Turning it on is the act
-                    // that asks the phone for the notification and the exact
-                    // time; Not now writes the no and the card never returns
-                    // (owner decision, this session).
-                    reminderOffer = !settings.reminderAnswered,
-                    onReminderOn = {
-                        viewModel.setDailyAyah(
-                            enabled = true,
-                            onPermission = onReminderPermission,
-                        )
-                        viewModel.markReminderAnswered()
-                    },
-                    onReminderNotNow = {
-                        viewModel.setDailyAyah(
-                            enabled = false,
-                            onPermission = onReminderPermission,
-                        )
-                        viewModel.markReminderAnswered()
-                    },
-                    onAddContent = {
-                        openSheet(ReaderSheet.Settings, SettingsPage.Translations)
-                    },
-                    onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
-                    onJumped = { ayah ->
-                        announceView.announceForAccessibility(
-                            resources.getString(
-                                io.github.muntasimulhaque.quran.feature.reading.R.string.reading_ayah_reference,
-                                io.github.muntasimulhaque.quran.core.localizedDigits(
-                                    ayah.verseKey,
-                                    locale,
-                                ),
-                            ),
-                        )
-                    },
-                    startAtOpening = viewModel.startAtSurahOpening == surah.number,
-                    onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
-                    // The air above a surah's opening, under the bar. The
-                    // page is drawn edge to edge; the status band covers the
-                    // phone's bar in the page's own color, and the bar's band
-                    // is the page's head. The opening keeps one block under
-                    // the band, plus its own 40 dp, so the surah's name stands
-                    // one gutter under the title's capsule (4 + 16), and the
-                    // title page keeps its air (owner decision, this session).
-                    contentPaddingTop = Space.Block,
-                    contentPaddingBottom = readingFoot(
-                        // Nothing is raised until the reader asks for a
-                        // recitation or a pack, so the page's own foot is the
-                        // page's (owner decision, this session).
-                        bottomStack = with(LocalDensity.current) {
-                            bottomStackHeight.toDp()
+                    actions = ReadingListActions(
+                        loadRows = {
+                            viewModel.readingRows(
+                                surah = surah.number,
+                                wordByWord = settings.wordByWord || revealForSurah?.wordByWord == true,
+                            )
                         },
-                        navigationBar = navigationBar,
+                        // The copy read ahead while the reader was still in the
+                        // surah before this one, and the read of the surah after
+                        // it. Together they make the turn at the end of a surah
+                        // land on text rather than on the paper.
+                        cachedRows = { viewModel.cachedRows(it) },
+                        onReadAhead = { viewModel.readAheadSurah(it) },
+                        onHearWord = { ayah, position -> viewModel.hearWord(ayah, position) },
+                        onWordClosed = { viewModel.closeWordSheet() },
+                        surahNameOf = { number ->
+                            viewModel.surahs.firstOrNull { it.number == number }?.nameSimple
+                                ?: number.toString()
+                        },
+                        onOpenPlace = { ayah, position ->
+                            // The place the reader chose is the reading's next
+                            // stop: the word sheet has gone, and the word wears
+                            // the same reveal a search arrival gives it (owner
+                            // decision, 19.0). The sheet itself is one
+                            // Back away, and that memory is the reading's own
+                            // (ReadingList), because the word sheet is the
+                            // reading's surface and not one of this screen's
+                            // doors (owner decision, 19.0).
+                            reveal = ReadingReveal(ayah = ayah, words = setOf(position))
+                            viewModel.jumpToAyah(ayah)
+                            bar.showNow()
+                            menu = null
+                            cardAyah = null
+                            cardTafsirPack = null
+                            cardNote = null
+                        },
+                        onAddWords = { openSheet(ReaderSheet.Settings, SettingsPage.Words) },
+                        onAyahMenu = { ayah, anchor ->
+                            menu = AyahMenuRequest(ayah, anchor)
+                            reveal = null
+                            touch++
+                        },
+                        onBackgroundTap = {
+                            bar.show(scope, reducedMotion)
+                            menu = null
+                            reveal = null
+                            // A tap on the page is how a raised control is put
+                            // away: the paused recitation, a failure, the offer.
+                            // It never silences a playing recitation, and never
+                            // aborts a package on its way
+                            // (owner decision, 9.4). 
+                            putAwayRaised()
+                            touch++
+                        },
+                        onScrolled = {
+                            // The menu goes with the page: its door moves under
+                            // it, and a popup hung from a moving anchor is worse
+                            // than no popup (owner decision, 13.3).
+                            menu = null
+                            // The bar's own distance is spent by the scroll
+                            // connection in the app; this is the menu and the
+                            // reader still being here
+                            // (owner decision, 19.4).
+                            touch++
+                        },
+                        onBarScroll = { delta ->
+                            bar.stop()
+                            bar.consume(delta)
+                        },
+                        onBarSettled = { bar.settle(scope, reducedMotion) },
+                        onNextSurah = { number ->
+                            // The next surah is an arrival at its head; the bar
+                            // stands over the page's own top
+                            // (owner decision, 19.4).
+                            bar.showNow()
+                            viewModel.jumpToSurah(number)
+                        },
+                        onReminderOn = {
+                            viewModel.setDailyAyah(
+                                enabled = true,
+                                onPermission = onReminderPermission,
+                            )
+                            viewModel.markReminderAnswered()
+                        },
+                        onReminderNotNow = {
+                            viewModel.setDailyAyah(
+                                enabled = false,
+                                onPermission = onReminderPermission,
+                            )
+                            viewModel.markReminderAnswered()
+                        },
+                        onAddContent = {
+                            openSheet(ReaderSheet.Settings, SettingsPage.Translations)
+                        },
+                        onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
+                        onJumped = { ayah ->
+                            announceView.announceForAccessibility(
+                                resources.getString(
+                                    io.github.muntasimulhaque.quran.feature.reading.R.string.reading_ayah_reference,
+                                    io.github.muntasimulhaque.quran.core.localizedDigits(
+                                        ayah.verseKey,
+                                        locale,
+                                    ),
+                                ),
+                            )
+                        },
+                        onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                     ),
                 )
             }
@@ -859,7 +865,7 @@ fun ReaderScreen(
         // The page's own band across the status bar. It is composed after the
         // column, so a scrolled line is cut at the page's edge while the
         // clock, the signal, and the battery stand on paper (owner report,
-        // this session: they stood on the Quran's own line). The band carries
+        // 19.4: they stood on the Quran's own line). The band carries
         // no pointer input, so a tap on it is still the page's tap.
         StatusBand(
             modifier = Modifier
@@ -869,14 +875,14 @@ fun ReaderScreen(
 
         // The long press and its one-time note are gone with the gesture: the
         // ayah's own number is its door, visible on every ayah, and a
-        // signifier that has to be taught is not a signifier (owner decision,
-        // this session).
+        // signifier that has to be taught is not a signifier
+        // (owner decision, 13.3).
 
         val offer = viewModel.listenOffer
         val showPlayback = playback.isAnything() || offer != null
         // The foot belongs to the player and the pack alone. The stack is
         // composed only while one of them is raised, so an idle page pays for
-        // no bar at all (owner decision, this session).
+        // no bar at all (owner decision, 16.0).
         BottomStack(
             viewModel = viewModel,
             playback = playback,
@@ -905,8 +911,8 @@ fun ReaderScreen(
 
         // The ayah's own menu, hung from its door. Every answer closes it and
         // then does its work, so the reader is returned to the reading rather
-        // than to a panel they have to put away (owner decision, this
-        // session). The popup is the app's one popup, and it is the same one
+        // than to a panel they have to put away (owner decision, 13.3). The
+        // popup is the app's one popup, and it is the same one
         // the playback pill opens.
         menu?.let { request ->
             val savedRow = saved.firstOrNull { it.ayahNumber == request.ayah.number }
@@ -1037,8 +1043,8 @@ fun ReaderScreen(
                 cardAyah = null
                 cardTafsirPack = null
                 // The card offered a tafsir pack, so the door lands on the page
-                // that has it rather than on the hub (owner decision, this
-                // session).
+                // that has it rather than on the hub
+                // (owner decision, 19.1).
                 openSheet(ReaderSheet.Settings, SettingsPage.Tafsirs)
             },
             onDismiss = {
@@ -1120,8 +1126,8 @@ private val PageFoot = 32.dp
  * whatever the list draws there. The foot was 32 dp alone, which a three
  * button bar (about 50 dp) swallowed whole: the door to the next surah
  * ended 3 dp above the glass while the design asked for 52, and the last
- * ayah of any surah could be read half hidden under the bar (owner report,
- * this session).
+ * ayah of any surah could be read half hidden under the bar
+ * (owner report, 12.2).
  *
  * The bar is cleared first and the page's own room is added after it, so
  * the air the reader sees is the same on a phone with three buttons, a
@@ -1139,7 +1145,7 @@ internal fun readingFoot(bottomStack: Dp, navigationBar: Dp): Dp =
  *
  * It was weighed against the full-height page and kept off, so the status bar
  * stood over the page itself; the icons then landed on the Quran's own line
- * (owner report, this session). They now stand on the page's color, and the
+ * (owner report, 18.5). They now stand on the page's color, and the
  * line under them is cut by the band the way a printed page ends rather than
  * sitting half visible under a glyph. The measure is the inset and never a
  * number: a phone with a cutout reports its own, a landscape phone whose bar

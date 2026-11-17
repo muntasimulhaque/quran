@@ -54,9 +54,9 @@ fun LanguagePage(
         // names are never a guess.
         //
         // The page title already names this list, so it carries no heading of
-        // its own (owner decision, this session). The ring stands on the
+        // its own (owner decision, 9.1). The ring stands on the
         // default, English, when nothing is stored yet, the same default the
-        // hub row names (owner decision, this session).
+        // hub row names (owner decision, 9.1).
         val chosen = settings.uiLanguage ?: UiLanguage.English.tag
         val entries = UiLanguage.entries.map { it to languageName(it.tag) }
         entries.sortedBy { it.second.lowercase() }.forEach { (language, _) ->
@@ -81,7 +81,7 @@ fun LanguagePage(
  * The switch that used to stand under the swatches is gone: System is the
  * third swatch, so following the phone is one tap in the same list as the two
  * fixed grounds, and a reader never reconciles a swatch with a toggle (owner
- * decision, this session).
+ * decision, 6.0).
  */
 @Composable
 fun AppearancePage(
@@ -117,7 +117,7 @@ fun TextPage(
         // translation and the tafsir, because a reader thinks "make the
         // meaning bigger," not two roles. The word meaning sheet reads the
         // Quran's word at the Arabic step and its gloss at the translation's,
-        // so the two controls reach it too (owner decision, this session).
+        // so the two controls reach it too (owner decision, 16.2).
         SizeRow(TypeRole.Arabic, settings.arabicSize) { onSize(TypeRole.Arabic, it) }
         SizeRow(TypeRole.Translation, settings.translationSize) { onSize(TypeRole.Translation, it) }
         Spacer(Modifier.height(Space.Section))
@@ -133,7 +133,7 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
             // The sample is its own block, not the first row's label: the
             // page keeps a block's gap under it and a block's gap between
             // every two rows, so the two controls read as two blocks under
-            // one page of text (owner decision, this session).
+            // one page of text (owner decision, 12.5).
             .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Block),
     ) {
         val palette = LocalPagePalette.current
@@ -150,8 +150,8 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
         // reading: the ayah and its translation, and nothing else. It carries
         // no pack name and no reading switch of its own, because the reader
         // came here to judge the size of the type; the reading still names
-        // each column and follows its own switch (owner decision, this
-        // session).
+        // each column and follows its own switch
+        // (owner decision, 15.4).
         row.translations.firstOrNull()?.let { line ->
             TranslationBody(
                 runs = remember(line.text.text) { RichText.footnotes(line.text.text) },

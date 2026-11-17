@@ -35,7 +35,7 @@ data class TextRun(
  * apart (`h1` and `h2` in a tafsir, `h2` and `h3` in a surah's introduction),
  * and a parser that folds all four tags into one kind draws a sub-topic as
  * loudly as the chapter it belongs to. The screen keeps the level the source
- * wrote (owner decision, this session).
+ * wrote (owner decision, 13.3).
  */
 enum class TextBlockKind { PARAGRAPH, HEADING, SUBHEADING }
 
@@ -170,7 +170,7 @@ object RichText {
      * sentence, where it is drawn in the Arabic face at the sentence's own
      * size, so it sits in the line instead of towering over it. A Quranic
      * quotation is letters and keeps the reading's inline size (owner
-     * decision, this session).
+     * decision, 13.2).
      */
     fun isHonorific(text: String): Boolean = text.isNotEmpty() && text.all { it == 'ﷺ' }
 
@@ -397,7 +397,7 @@ object RichText {
      * codepoint is the same in every passage; a tafsir alone repeats the same
      * few hundred characters across tens of thousands of positions, and
      * running the normalizer again for every one of them was the cost the
-     * reader felt as the tafsir opened (owner report, this session). The
+     * reader felt as the tafsir opened (owner report, 6.7). The
      * cache is small and bounded: content has a few thousand distinct
      * codepoints at most, and beyond [MAX_DISPLAY_FORMS] the work is simply
      * done again rather than remembered.

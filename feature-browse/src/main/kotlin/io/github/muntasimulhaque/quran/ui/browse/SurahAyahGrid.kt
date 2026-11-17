@@ -64,7 +64,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * its number with a 48 dp target and a circular press; the reader's place is
  * the one filled circle, so the eye lands on where they are instead of on
  * 286 repeated shapes. A numeric index is bare type with a target; the shape
- * belongs to the place (owner decision, this session).
+ * belongs to the place (owner decision, 13.7).
  */
 @Composable
 internal fun SurahAyahGrid(

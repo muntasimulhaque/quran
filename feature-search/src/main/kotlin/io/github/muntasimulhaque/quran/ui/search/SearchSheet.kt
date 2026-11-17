@@ -31,7 +31,7 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SearchHit
-import io.github.muntasimulhaque.quran.data.SearchHistory
+import io.github.muntasimulhaque.quran.data.SearchHistoryStore
 import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
@@ -145,15 +145,15 @@ fun SearchSheet(
     var results by remember { mutableStateOf(SearchResults()) }
     // The key the results belong to. The old results stay in memory while a
     // new query runs, but they are never drawn under a query that did not
-    // produce them (owner decision, this session).
+    // produce them (owner decision, 13.8).
     var resultKey by remember { mutableStateOf<SearchKey?>(null) }
     // The queries the reader acted on before, newest first. The list is read
     // from the phone's own shelf when the sheet opens and written back as a
     // result is opened, so a word typed and abandoned is never kept: the
     // reader's hand outruns their intent, and a list of half-typed words is
-    // noise (owner decision, this session).
+    // noise (owner decision, 13.5).
     val context = LocalContext.current
-    val history = remember(context) { SearchHistory(context) }
+    val history = remember(context) { SearchHistoryStore(context) }
     var recents by remember { mutableStateOf(history.read()) }
     val keepQuery: () -> Unit = {
         if (text.isNotBlank()) recents = history.record(text)
@@ -162,7 +162,7 @@ fun SearchSheet(
     var failed by remember { mutableStateOf(false) }
     // A retry is the same query asked again, not a new query: the counter is
     // part of the search's key, so the effect runs once more without the
-    // reader touching the field (owner decision, this session).
+    // reader touching the field (owner decision, 15.0).
     var attempt by remember { mutableStateOf(0) }
     // The source flags survive the window like the query does: a rotation
     // with a chip turned off must not silently turn it back on and change
@@ -185,7 +185,7 @@ fun SearchSheet(
         if (sheetState.currentValue == SheetValue.Expanded) {
             // Type into a fresh search; return from a result to read the
             // results, not to type over them. The keyboard is the difference
-            // the reader feels (owner decision, this session).
+            // the reader feels (owner decision, 13.8).
             if (text.isBlank()) {
                 focus.requestFocus()
             } else {
@@ -266,7 +266,7 @@ fun SearchSheet(
         // The results stand on the app's one page, which is the sheet, which
         // is the glass: a row's words stop at Space.Gutter and its own card
         // reaches outside that line, the same grammar the settings sheet and
-        // the reading keep (owner decision, this session).
+        // the reading keep (owner decision, 12.3).
         Box(Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
@@ -280,8 +280,8 @@ fun SearchSheet(
                     // The field's own clear mark empties the query. The sheet
                     // itself ends by its handle, the scrim, or Back, like every
                     // other sheet; a Close beside the field was the only one of
-                    // its kind and took the field's own room (owner decision,
-                    // this session).
+                    // its kind and took the field's own room
+                    // (owner decision, 9.0).
                     focus = focus,
                 )
                 FilterRow(
@@ -296,8 +296,8 @@ fun SearchSheet(
                 // Before a query the sheet is the field, the filter door, and the
                 // note that says what the field can be asked, so a reader who
                 // opens the search with a reference in hand does not have to
-                // guess that a reference is a query (owner decision, this
-                // session). The note is the app's one empty page, drawn by
+                // guess that a reference is a query (owner decision, 12.9).
+                // The note is the app's one empty page, drawn by
                 // Browse's lists too, and it goes the moment the field holds a
                 // word: it teaches, it does not stand beside an answer.
                 //

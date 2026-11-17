@@ -28,7 +28,7 @@ import kotlin.math.sin
  * unit stroke rises as the box falls. The set used to scale the unit stroke
  * with the box, and the tick in a chip carried a 1.28 dp line beside marks
  * with 2 dp; the eye saw the outlier before it saw the grid (owner report,
- * this session). The drawings are cut to survive the thickest stroke, the one
+ * 11.5). The drawings are cut to survive the thickest stroke, the one
  * a 14 dp box draws: every mark keeps the two unit margin there.
  *
  * ## Screens
@@ -67,7 +67,7 @@ object GlyphGrid {
      * falls. A smaller mark is not a thinner mark. The set used to scale the
      * unit stroke with the box, and the tick in a chip carried a 1.28 dp line
      * beside marks with 2 dp, the outlier the eye could not unsee (owner
-     * report, this session).
+     * report, 11.5).
      */
     fun strokeFor(sizeDp: Float): Float = Stroke * Size / sizeDp
 }
@@ -112,7 +112,7 @@ sealed interface GlyphShape {
      * A part of the ring: the speaker's two waves. The set draws its corners
      * at 45 degrees, and an arc has no corners at all; it is the ring's own
      * curvature, cut, and a sound wave is the one thing in the set that is
-     * not a straight line (owner decision, this session).
+     * not a straight line (owner decision, 17.7).
      */
     data class Arc(
         val center: GlyphPoint,
@@ -131,7 +131,7 @@ sealed interface GlyphShape {
  * the brand mark stays cut flat, because it is an illustration at launcher
  * scale and not a control; a joint is one polyline, never two strokes that
  * end at the same point, because two tips butted at an angle leave a wedge,
- * which was the clock hands' flaw at their centre (owner report); and a
+ * which was the clock hands' flaw at their center (owner report); and a
  * filled shape carries the corner a join does, half the line, so the kept
  * ribbon, the play triangle, and the skips are round at every point too.
  *
@@ -264,7 +264,7 @@ object Glyphs {
         // from, and the waves are the ring's curvature in two lengths. The
         // mark is the sheet's one control, so both ends are drawn to the live
         // area: the cone's tail on the left keyline and the outer wave on the
-        // right (owner decision, this session).
+        // right (owner decision, 17.7).
         Icon.Speaker to listOf(
             closed(
                 3.25f, 9.25f, 7.75f, 9.25f, 12.75f, 4.25f,

@@ -37,7 +37,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * target, the same [CapsuleGutter] and [CapsulePad] around the capsule the
  * press draws, and the same 12 dp foot. A menu of answers and a menu of
  * actions can therefore stand in one app without the two lists' names
- * starting on two different lines (owner decision, this session). The
+ * starting on two different lines (owner decision, 13.3). The
  * numbers are read from `ChoiceRow` rather than copied, so a later change to
  * the row's rhythm reaches both.
  *
@@ -49,7 +49,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * thing to a screen reader, so a lit mark is never the only way a reader
  * learns that an ayah is kept or noted (owner report). [state] is the
  * caller's: a row whose own word already names the state passes none, and
- * the reader is not told the same thing twice (owner decision, this session).
+ * the reader is not told the same thing twice (owner decision, 17.7).
  *
  * The press is drawn on the capsule inside the target, never on the target,
  * for the reason every other control in the app gives: the shape the reader
@@ -68,7 +68,7 @@ fun MenuActionRow(
      * it. A row whose own word names the state passes none. */
     state: String? = null,
     /** The room under the row; a row that ends a list keeps the popup's own. */
-    bottomPadding: Dp = 12.dp,
+    bottomPadding: Dp = Space.Row,
 ) {
     val press = remember { MutableInteractionSource() }
     val ink = if (active) {

@@ -108,7 +108,7 @@ internal data class DailyAyahContent(
          * dropped and the note they belong to is left for the reading. The
          * reader's own language leads, so the reminder speaks the same line
          * the reading does even when a second translation is on (owner
-         * decision, this session).
+         * decision, 15.3).
          */
         private fun firstTranslation(
             database: ContentDatabase,

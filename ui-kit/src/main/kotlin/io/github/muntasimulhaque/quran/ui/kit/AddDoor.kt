@@ -23,13 +23,22 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
+ * The air the door keeps inside its card, at its two ends.
+ *
+ * It is the shape's own padding and not the page's [Space.Gutter]: the door is
+ * a card that stands inside the reading, so its sentence and its action word
+ * keep the card's air rather than the glass's.
+ */
+private val DoorPad = 14.dp
+
+/**
  * The app's one door to content the reader does not have yet: the sentence
  * that says what is missing, and the one word that adds it.
  *
  * The reading and the ayah card both draw this door, and they used to draw it
  * by hand, twice: two copies that match today drift apart on the next edit,
- * and a reader meets the same door wearing two faces (owner decision, this
- * session). Each surface passes its own sentence and its own action word, so
+ * and a reader meets the same door wearing two faces (owner decision, 6.5).
+ * Each surface passes its own sentence and its own action word, so
  * the component owns the shape and the module owns the words.
  */
 @Composable
@@ -45,7 +54,7 @@ fun AddDoor(
             .fillMaxWidth()
             // The door's click is the whole 48 dp, and the shape the eye
             // reads is drawn inside it, so the accessibility node and the
-            // touch target are the same box (owner decision, this session).
+            // touch target are the same box (owner decision, 6.6).
             .clickable(
                 interactionSource = press,
                 indication = null,
@@ -60,7 +69,7 @@ fun AddDoor(
             // An indication on the click node would flash the whole slab as
             // a rectangle over the shape (the same rule TextButton wears).
             .indication(press, ripple(color = MaterialTheme.colorScheme.primary))
-            .padding(horizontal = 14.dp, vertical = Space.Row),
+            .padding(horizontal = DoorPad, vertical = Space.Row),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

@@ -12,7 +12,7 @@ import org.junit.Test
  * first page's default. The word aid is the reader's ask. The reminder card
  * is unanswered only after the first-open write, so the stored default for
  * an existing install stays answered and no upgrade is asked again (owner
- * decision, this session).
+ * decision, 15.5).
  */
 class SettingsDefaultsTest {
 

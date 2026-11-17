@@ -22,7 +22,7 @@ import java.util.Locale
  * The digits come from the locale's own [DecimalFormatSymbols], never a
  * hand-written table: every script Android carries is already described
  * there, and a language added later names its own digits without a change
- * here (owner decision, this session).
+ * here (owner decision, 8.3).
  */
 fun localizedDigits(text: String, locale: Locale): String {
     val zero = DecimalFormatSymbols.getInstance(locale).zeroDigit
@@ -49,7 +49,7 @@ fun localizedDigits(text: String, locale: Locale): String {
  *
  * This is the query's own fold only: the indexed columns keep the shape
  * [Arabic.normalizeForSearch] gives them, and a reference the reader meets is
- * still drawn in their language's digits (owner decision, this session).
+ * still drawn in their language's digits (owner decision, 9.1).
  */
 fun asciiDigits(input: String): String {
     var changed = false

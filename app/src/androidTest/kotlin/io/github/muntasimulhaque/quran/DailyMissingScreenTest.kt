@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
  * The Daily page already carries the one line that says where the phone
  * stands, and the one door the phone offers. A phone whose settings app
  * answers nothing is the same shape of fact, except that there is no door to
- * draw, so the line stays and the word goes (owner decision, this session).
+ * draw, so the line stays and the word goes (owner decision, 19.3).
  * The sentence used to be a Toast, which no tap can put away and which no
  * screen reader can act on.
  */

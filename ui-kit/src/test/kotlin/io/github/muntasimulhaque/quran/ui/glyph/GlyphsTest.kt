@@ -102,7 +102,7 @@ class GlyphsTest {
             grips.all { it.from.x == it.to.x },
         )
         assertTrue(
-            "a grip must be centred on a rail",
+            "a grip must be centered on a rail",
             grips.all { grip ->
                 rails.any { rail ->
                     abs(rail.points.first().y - (grip.from.y + grip.to.y) / 2f) <= 0.01f
@@ -158,7 +158,7 @@ class GlyphsTest {
     @Test
     fun theSizesAreTheSetsOwn() {
         // Four numbers over five names: a mark inside the app's round control,
-        // a mark above a labelled action, a row's tail, and the two 14 dp marks
+        // a mark above a labeled action, a row's tail, and the two 14 dp marks
         // that sit inside a smaller shape.
         assertEquals("the control's mark", 24f, GlyphSize.Control.value, Tolerance)
         assertEquals("the action's mark", 20f, GlyphSize.Action.value, Tolerance)

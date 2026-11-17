@@ -26,7 +26,7 @@ import org.junit.runner.RunWith
  * The sample used to draw the first translation the catalog held, and the
  * catalog sorts by pack name: Al-Bayan stood before Saheeh, so an English
  * reader's sample was Bangla. The lead now follows the reader's language,
- * and the sample draws it alone (owner decision, this session).
+ * and the sample draws it alone (owner decision, 15.4).
  */
 @RunWith(AndroidJUnit4::class)
 class SizeSampleTest {

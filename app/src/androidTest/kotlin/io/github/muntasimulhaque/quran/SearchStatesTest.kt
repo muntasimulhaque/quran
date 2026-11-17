@@ -27,12 +27,12 @@ import org.junit.runner.RunWith
  * **One source off is named.** "6 of 7" is a count, and the reader whose one
  * missing source is the reason a query found nothing could not read which one
  * from the door. One source off now says "Everything but Quran text", so the
- * closed door can explain the empty result (owner decision, this session).
+ * closed door can explain the empty result (owner decision, 15.0).
  *
  * **No matches teaches the forms.** "No matches." left most of the sheet blank
  * at the moment the reader needed to know that a shorter word or a reference
  * is a query. The hint under the count is the empty sheet's teaching at the
- * one moment it is an answer (owner decision, this session).
+ * one moment it is an answer (owner decision, 15.0).
  */
 @RunWith(AndroidJUnit4::class)
 class SearchStatesTest {

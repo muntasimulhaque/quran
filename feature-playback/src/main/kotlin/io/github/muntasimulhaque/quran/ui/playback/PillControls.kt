@@ -36,7 +36,7 @@ internal sealed interface PillControl
  * more: stopping the recitation. The close that used to carry it was a mark
  * the capsule paid for with its own width, and it has been taken off the
  * glass, so the stop now lives where a screen reader already is when it
- * reaches the transport (owner decision, this session).
+ * reaches the transport (owner decision, 9.4).
  */
 internal class GlyphControl(
     val kind: Transport,
@@ -58,9 +58,9 @@ internal class WordControl(
  * three. A voice that is not a recitation opens the voices alone: a failure,
  * an unavailable answer, and a download request ask one question, which voice
  * is chosen, and a pace and an ending over a recitation that is not there are
- * answers before the question (owner decision, this session).
+ * answers before the question (owner decision, 9.5).
  *
- * The capsule draws both, from one anchor on its own centre, so the reader's
+ * The capsule draws both, from one anchor on its own center, so the reader's
  * eye is sent to one place on the control rather than to two (owner report).
  */
 internal enum class PillMenu { Reciters, Listening }
@@ -73,7 +73,7 @@ internal enum class PillMenu { Reciters, Listening }
  * transport. That count is what the words have to share the row with, so it
  * is read from here rather than counted a second time.
  *
- * **The transport carries no close** (owner decision, this session). The
+ * **The transport carries no close** (owner decision, 9.4). The
  * close was one mark with four meanings in one place, Stop, Close, Close,
  * and Cancel download, and the three that were not the transfer were already
  * answered by a tap on the page. What is left is one X on the one surface
@@ -89,7 +89,7 @@ internal enum class PillMenu { Reciters, Listening }
  * dismissal for everything it raises.
  *
  * **The recitation's transport is one mark, and two more live on it** (owner
- * decision, this session). The playing pill used to draw three circles, and
+ * decision, 17.0). The playing pill used to draw three circles, and
  * the one-row shape cannot hold them beside the place: the three targets take
  * 144 dp of the capsule's 328, which leaves the words a 148 dp block and 140
  * dp of type, and the longest place with its key and its turn needs 149 dp in
@@ -98,14 +98,14 @@ internal enum class PillMenu { Reciters, Listening }
  * alone, the one act a recitation is asked for all the time, and Previous ayah
  * and Next ayah are the two actions it offers beside the tap, where Stop
  * already stands. A screen-reader reader keeps all three in the pill; the media
- * notification keeps them for everyone (owner decision, this session: the
+ * notification keeps them for everyone (owner decision, 17.0: the
  * measurement settled it, and the shape is the transfer's own, one mark at its
  * trailing end).
  *
  * The words and the answer stand in their row with the app's air between
  * them, and the words' own end keeps the larger air the shoulder asks for, so
- * no press shape touches another or the capsule (owner decision, this
- * session).
+ * no press shape touches another or the capsule
+ * (owner decision, 9.5). 
  */
 @Composable
 internal fun pillControls(
@@ -123,7 +123,7 @@ internal fun pillControls(
     // failures of the same shape: one sentence and the one action that can
     // help. The reader is never left with a silent pill, and neither state
     // wears a close: a page tap, or Back, puts a failure away (owner
-    // decision, this session).
+    // decision, 9.4).
     state.error -> listOf(
         WordControl(stringResource(R.string.playback_retry), onDownload),
     )
@@ -132,7 +132,7 @@ internal fun pillControls(
     )
     // The one X the app keeps: a transfer in flight is the one thing a stray
     // tap must not end, so its abort keeps a shape of its own (owner
-    // decision, this session).
+    // decision, 9.4).
     downloading -> listOf(
         GlyphControl(
             Transport.Close,
@@ -142,7 +142,7 @@ internal fun pillControls(
     )
     // A request the reader has not answered is not a trap: a page tap, or
     // Back, answers it with "not now", so the offer needs no mark of its own
-    // (owner decision, this session).
+    // (owner decision, 9.4).
     needsDownload -> listOf(
         WordControl(
             stringResource(
@@ -159,7 +159,7 @@ internal fun pillControls(
     // One mark, and the two skips it cannot carry as shapes are the actions it
     // offers beside the tap. Three targets would take 144 dp of the capsule's
     // 328, and the place the pill never cuts needs more than the 148 that are
-    // left at the top text step (owner decision, this session: see the note
+    // left at the top text step (owner decision, 17.0: see the note
     // above).
     else -> listOf(
         GlyphControl(
@@ -177,7 +177,7 @@ internal fun pillControls(
                 },
                 // The pill's own stop, offered to a screen reader where the
                 // mark used to stand: the same word, the same act, and no shape
-                // for a reader who has the page (owner decision, this session).
+                // for a reader who has the page (owner decision, 17.0).
                 CustomAccessibilityAction(stringResource(R.string.playback_stop)) {
                     onStop()
                     true
@@ -195,7 +195,7 @@ internal fun pillControls(
  * apart, which is no air at all, because each circle is [TransportInset]
  * inside its own target: the air belongs between the shapes the reader sees,
  * and a finger that slides from one control to the next finds no dead pixel
- * between them (owner decision, this session).
+ * between them (owner decision, 9.6).
  */
 @Composable
 internal fun PillControls(
@@ -257,7 +257,7 @@ internal fun TransportButton(
     // press, and the glyph inside it at [GlyphSize.Control]. The press is a
     // circle the size of the app's icon button rather than the whole target,
     // so three of them stand edge to edge with the app's air between the
-    // circles (owner decision, this session). The mark is the control's size
+    // circles (owner decision, 11.5). The mark is the control's size
     // and not the press's: the press must not flash a dot inside the target
     // the finger hit (owner report, an earlier session).
     GlyphButton(

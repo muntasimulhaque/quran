@@ -74,12 +74,12 @@ import java.util.Locale
  *    of the audio, and all of them call the pill's one setter, so there is one
  *    value with one door. Every answer in that panel puts it away: the voice
  *    list has always closed on its choice, and the pace and the ending follow
- *    it, so one question is answered by one tap (owner decision, this
- *    session).
+ *    it, so one question is answered by one tap
+ *    (owner decision, 9.7). 
  * 3. The automatic download says what it is fetching: the name and the size
  *    are on the pill even when no offer preceded it (owner decision).
  * 4. The playing pill is one row, and the offer is its sibling (owner
- *    decision, this session): a 64 dp capsule with the words' lockup at the
+ *    decision, 17.0): a 64 dp capsule with the words' lockup at the
  *    leading end and one answer at the trailing one. The offer is the pill's
  *    own two-line block: the reciter's name over the surah and its size, with
  *    Download. The voices that are not a recitation keep the same 64 dp row,
@@ -96,15 +96,15 @@ import java.util.Locale
  *    offer's own line, each with what every voice would still cost for the
  *    surah at hand, so the choice is made with the number in view (owner
  *    report). The offer's list is read for the offer's surah, not the playing
- *    pill's (owner decision, this session).
+ *    pill's (owner decision, 16.2).
  * 7. The pill says who is reading, where, and how fast: the voice and the pace
  *    when it is not 1x over the place and its key. The place, the key, and the
  *    pace never give way; the voice does, and it is the only part of the
- *    lockup that can (owner decision, this session). The pace is read back from
+ *    lockup that can (owner decision, 17.0). The pace is read back from
  *    the listening panel, where it is set. It does not say what happens at the
  *    end of the audio: the switch that carries the answer says its own state
  *    where the reader turned it (owner report).
- * 8. The popup stands on the capsule's own centre, on the phone and on the
+ * 8. The popup stands on the capsule's own center, on the phone and on the
  *    wide glass alike. A menu is placed from the box it hangs on, and an
  *    anchor on the word the reader touched put the reciter chooser at one
  *    end of the pill and the listening menu at the other (owner report).
@@ -115,9 +115,9 @@ import java.util.Locale
  *    head over a list, which is small, accent, and a heading to a screen
  *    reader: a head at the size of the rows under it made the panel twelve
  *    lines of one voice, with no hierarchy for the air between them to lean on
- *    (owner decision, this session).
- * 10. The capsule is one measure in every voice (owner decision, this
- *     session). It used to follow its words: about 285 dp at the shortest
+ *    (owner decision, 9.6).
+ * 10. The capsule is one measure in every voice (owner decision, 9.7). It
+ *     used to follow its words: about 285 dp at the shortest
  *     places, the page's own 328 at the longest, about 230 for an offer, and
  *     about 210 for a transfer that widened again as its percent did. The
  *     playing capsule, the offer, and the transfer now stand at 328 dp on a
@@ -128,28 +128,28 @@ import java.util.Locale
  * 11. The offer prints the surah's own name whole on the place line, and the
  *     voice's size whole beside the voice, in either language: the size is
  *     the voice's value, so the voice is the only part that gives way (owner
- *     report, this session).
+ *     report, 18.4).
  * 12. The transfer's X keeps the capsule's air at its end, and the block and
  *     the transport stand the app's row air apart, measured between the shapes
  *     the reader sees (owner decision).
  * 13. The recitation's stop has no shape on the glass and is still reachable:
  *     it is the action TalkBack offers on Play or pause, so the close's own
- *     act is not lost with the close's mark (owner decision, this session).
+ *     act is not lost with the close's mark (owner decision, 9.4).
  * 14. The one X the app keeps is the transfer's own abort, and it is the last
  *     thing in the row: a package on its way is the one thing a stray tap on
- *     the page must never end (owner decision, this session).
+ *     the page must never end (owner decision, 9.4).
  * 15. The answer is the app's one round control: a 40 dp press circle inside
- *     its 48 dp target (owner decision, this session).
+ *     its 48 dp target (owner decision, 17.0).
  * 16. The offer is one row, 64 dp tall: the whole two-line block is the door
  *     to the voice list, the reciter's name and its size over the surah, and
  *     Download is the only answer. The size stands with the voice it prices,
  *     so a change of voice explains a change of price, and the place is whole
  *     at both languages' longest. An offer with no voice to offer keeps the
- *     block as a notice and draws no chevron (owner report, this session).
+ *     block as a notice and draws no chevron (owner report, 18.4).
  * 17. Every door says its state: the pill's three doors speak Expanded and
  *     Collapsed the way the ayah's door and every disclosure row do, and
  *     their chevron turns up while the popup they opened is on the glass
- *     (owner decision, this session). The turn itself is arithmetic, pinned
+ *     (owner decision, 16.5). The turn itself is arithmetic, pinned
  *     in `AppChevronTurnTest`; this suite reads the spoken half.
  */
 @RunWith(AndroidJUnit4::class)
@@ -355,7 +355,7 @@ class PlaybackPillTest {
     /**
      * The playing words are one door, and it opens the whole listening panel:
      * the voices, the pace, and the end of the audio, in one popup (owner
-     * decision, this session: the block is one door, and the three questions
+     * decision, 9.5: the block is one door, and the three questions
      * are one subject). The pace is reached from the panel's own row.
      */
     @Test
@@ -375,7 +375,7 @@ class PlaybackPillTest {
      * The panel opens quiet: a focusable popup hands the focus to its first
      * focusable child, and Material draws that focus as a state layer over the
      * first voice, which read as the chosen one even when another was (owner
-     * report, this session). The panel clears its focus once it has settled;
+     * report, 9.5). The panel clears its focus once it has settled;
      * the rows keep their focus for Tab and for a screen reader, which reaches
      * them through the semantics rather than through this focus.
      */
@@ -390,7 +390,7 @@ class PlaybackPillTest {
 
     /**
      * The pace keeps the settings page's own place: the label is a bare line
-     * at the menu's left inset, and the five paces stand centred under it
+     * at the menu's left inset, and the five paces stand centered under it
      * (owner decision, forty-seventh session). Against the menu's left edge
      * they were 10 dp from one side and 28 from the other.
      */
@@ -494,11 +494,11 @@ class PlaybackPillTest {
     }
 
     /**
-     * The playing pill is one row (owner decision, this session): one 64 dp
+     * The playing pill is one row (owner decision, 17.0): one 64 dp
      * capsule whose words lead and whose answer closes it. It used to stand
      * 96 dp tall, the words over a transport row, and that second row was
      * three marks centered in the capsule's whole measure, which read as an
-     * empty band under the words (owner report, this session). 64 is the
+     * empty band under the words (owner report, 17.0). 64 is the
      * height the pill's one-row voices already wear: 8 dp, the finger's 48 dp,
      * 8 dp.
      */
@@ -544,7 +544,7 @@ class PlaybackPillTest {
 
     /**
      * The playing words are a lockup in the offer's own order (owner decision,
-     * this session): the voice and its pace over the place and its key, one
+     * 17.0): the voice and its pace over the place and its key, one
      * line each, with the place's key closing the second. One line cannot hold
      * the four facts beside the answer at the top step, and stacking them costs the
      * block nothing, because a lockup is as wide as its wider line and never
@@ -607,7 +607,7 @@ class PlaybackPillTest {
     /**
      * The two skips and the stop have no shape any more, and they are not lost
      * with it: a screen reader finds all three on Play or pause, under the words
-     * they were announced with (owner decision, this session). The skips left
+     * they were announced with (owner decision, 17.0). The skips left
      * the glass when the pill became one row: three 48 dp targets cut the place
      * the pill never cuts (see `pillControls`), so they live where Stop already
      * lived, and the media notification keeps them for every reader.
@@ -638,8 +638,8 @@ class PlaybackPillTest {
     }
 
     /**
-     * The capsule is one measure in every voice (owner decision, this
-     * session). It used to follow its words, from about 285 dp at the shortest
+     * The capsule is one measure in every voice (owner decision, 9.7). It used
+     * to follow its words, from about 285 dp at the shortest
      * places to the page's own 328 at the longest while playing, and a share
      * of that while an offer or a transfer stood: one download was two widths,
      * and the transfer's edge moved as its percent did. Now the playing
@@ -685,7 +685,7 @@ class PlaybackPillTest {
     }
 
     /**
-     * A percent never moves the capsule's edge (owner report, this session):
+     * A percent never moves the capsule's edge (owner report, 9.7):
      * the transfer used to widen again as the status's digits grew, so its
      * shape reported the download rather than the reading. One measure and one
      * line, from the first percent to the last.
@@ -731,7 +731,7 @@ class PlaybackPillTest {
     }
 
     /**
-     * Every answer puts the panel away (owner decision, this session): the
+     * Every answer puts the panel away (owner decision, 9.7): the
      * voice list has always closed on its choice, and the pace and the ending
      * follow it. One panel asked one question, and the tap answered it, so the
      * reader is back on the reading rather than in a panel to dismiss.
@@ -769,7 +769,7 @@ class PlaybackPillTest {
 
     /**
      * The place and the key are whole at the pill's capped type (owner
-     * decision, this session). The pill's type follows the system scale only
+     * decision, 16.2). The pill's type follows the system scale only
      * up to the app's largest step, 1.2, and stops there. The place's line is
      * the room the answer's one 48 dp target leaves, less the shoulder and
      * the block's own inset; the place and the key never give way, so they are
@@ -792,7 +792,7 @@ class PlaybackPillTest {
 
     /**
      * The same promise in the wider script, at the same step (owner decision,
-     * this session). Bangla is where the line is longest: `আল-মুতাফফিফীন` is
+     * 17.0). Bangla is where the line is longest: `আল-মুতাফফিফীন` is
      * the content's own longest surah name, and its 36 is the widest key on it.
      * This is the leg that chose the answer's one mark: beside three 48 dp
      * targets the line was 174 dp of text in 148, so the place was cut, and the
@@ -815,7 +815,7 @@ class PlaybackPillTest {
 
     /**
      * The place is the pill's and the pane's, not a line the panel draws
-     * (owner decision, this session). The compact pill says the surah and the
+     * (owner decision, 16.9). The compact pill says the surah and the
      * key, the popup speaks the whole place as its pane title, and the panel
      * opens on its first question: the same sentence in the same type, 10 dp
      * apart, was the app's only drawn popup title.
@@ -840,7 +840,7 @@ class PlaybackPillTest {
     }
 
     /**
-     * The playing pill wears one row (owner decision, this session): a 64 dp
+     * The playing pill wears one row (owner decision, 17.0): a 64 dp
      * capsule whose words are a 48 dp door at the leading end and whose answer
      * closes it, with the circle 4 dp inside its target. Nothing in it touches
      * a neighbour or the capsule's edge.
@@ -891,7 +891,7 @@ class PlaybackPillTest {
 
     /**
      * Nothing in the pill touches, and nothing sits on a dead pixel either
-     * (owner decision, this session): the words' shape and the answer's circle
+     * (owner decision, 17.0): the words' shape and the answer's circle
      * keep the app's shape air apart, and the circle keeps its inset inside the
      * target the finger gets.
      *
@@ -934,8 +934,8 @@ class PlaybackPillTest {
 
     /**
      * The one X the app keeps trails the words on the capsule's own line,
-     * alone in its row, and it is the last shape in the pill (owner decision,
-     * this session).
+     * alone in its row, and it is the last shape in the pill
+     * (owner decision, 9.5).
      */
     @Test
     fun theTransfersOwnAbortIsTheOnlyMarkInItsRow() {
@@ -958,7 +958,7 @@ class PlaybackPillTest {
         val line = compose.onNodeWithTag("download-line").getUnclippedBoundsInRoot()
         // One answer shares the words' line: the capsule is one row tall plus
         // the line's own room, where the two-row shape stood 130 dp to hold a
-        // single mark under its words (owner decision, this session).
+        // single mark under its words (owner decision, 9.4).
         assertEquals(
             "the transfer's abort stands the app's row air from the words, between the shapes",
             Space.Row.value,
@@ -988,7 +988,7 @@ class PlaybackPillTest {
     }
 
     /**
-     * The offer is one row (owner decision, this session): the words' lockup
+     * The offer is one row (owner decision, 17.2): the words' lockup
      * at the leading end and the one answer at the trailing one. Its 64 dp is
      * the playing pill's own height, 8 + 48 + 8; the 96 dp of the two-row
      * capsule went with Not now, and the place line keeps the surah and its
@@ -1065,7 +1065,7 @@ class PlaybackPillTest {
     /**
      * The offer's two facts on the voice's line stand apart by the app's own
      * middot, as "Makki · 44 ayahs" and the Continue pill's own line do
-     * (owner decision, this session). The mark is a separator, not a fact, so
+     * (owner decision, 18.5). The mark is a separator, not a fact, so
      * the door still speaks the two values and never the dot, and the turn
      * keeps the block's foot where the playing pill wears it.
      */
@@ -1112,8 +1112,8 @@ class PlaybackPillTest {
     }
 
     /**
-     * The offer's line is the door to its own voice list (owner decision, this
-     * session): the same reciter rows the playing pill carries, with what each
+     * The offer's line is the door to its own voice list (owner decision,
+     * 16.2): the same reciter rows the playing pill carries, with what each
      * voice would still need for the offer's surah. A chosen voice reaches the
      * pill's one setter, which re-asks the offer with its name and size.
      */
@@ -1152,7 +1152,7 @@ class PlaybackPillTest {
     /**
      * The offer prints the surah's own name whole on its place line, and the
      * voice's own size whole beside the voice, in the reader's own language
-     * (owner report, this session). The size is a fact about the voice: the
+     * (owner report, 18.4). The size is a fact about the voice: the
      * bytes are that reciter's timings plus that reciter's audio for the
      * surah, the list the block opens prices every voice, and choosing a voice
      * asks the offer again with that voice's size. The size used to share the
@@ -1208,7 +1208,7 @@ class PlaybackPillTest {
     }
 
     /**
-     * The size is never the part the line cuts (owner report, this session).
+     * The size is never the part the line cuts (owner report, 18.4).
      * The voice gives way, because the size stands after the name and before
      * it there is only the name: at a name longer than any the two shipped
      * reciters carry, the credit the app's own catalog prints,
@@ -1301,7 +1301,7 @@ class PlaybackPillTest {
         // Every download names the surah it is fetching, whichever door asked
         // for it: the auto-continue path has no offer to carry the name, and a
         // reader's own download has no offer left by the time the progress
-        // line stands (owner report, this session: a progress line with no
+        // line stands (owner report, 9.3: a progress line with no
         // name does not say what the reader is paying for). The status line
         // names the pending package and the percent, and the string adds the
         // percent to what it is given, so the line reads the name once and the
@@ -1314,8 +1314,8 @@ class PlaybackPillTest {
     /**
      * The words owe the finger the app's 48 dp: the playing block is one door,
      * and a reader tapping the thin strips of type must land on the control
-     * behind them, not on the letter under their fingertip (owner decision,
-     * this session).
+     * behind them, not on the letter under their fingertip
+     * (owner decision, 9.5).
      */
     @Test
     fun theWordDoorsAreFullTargets() {
@@ -1326,7 +1326,7 @@ class PlaybackPillTest {
     /**
      * The voice's own door, on the line a voice that is not a recitation
      * wears: the name is still a full 48 dp target, and the sentence beside it
-     * is a notice (owner decision, this session).
+     * is a notice (owner decision, 9.5).
      */
     @Test
     fun theVoiceNameIsAFullTarget() {
@@ -1335,8 +1335,8 @@ class PlaybackPillTest {
     }
 
     /**
-     * A door says its state on the mark that opened it (owner decision, this
-     * session). The playing line's chevron turns up while the listening panel
+     * A door says its state on the mark that opened it (owner decision, 16.5).
+     * The playing line's chevron turns up while the listening panel
      * is on the glass, and the line speaks the app's Expanded and Collapsed
      * words, so the reader who cannot see the turn is told the same thing.
      */
@@ -1405,8 +1405,8 @@ class PlaybackPillTest {
 
     /**
      * The one-row voices keep the same door: the reciter's name opens the
-     * voice list alone, and it speaks and turns with it (owner decision, this
-     * session).
+     * voice list alone, and it speaks and turns with it
+     * (owner decision, 16.5).
      */
     @Test
     fun theVoiceDoorSaysWhenTheVoiceListIsOpen() {
@@ -1438,7 +1438,7 @@ class PlaybackPillTest {
      * the app lights. It is not the 20 dp glyph, because an indication on the
      * glyph flashed a dot inside the button the finger hit (owner report, an
      * earlier session), and it is not the whole target, because the circle is
-     * the shape the reader sees (owner decision, this session).
+     * the shape the reader sees (owner decision, 17.0).
      */
     @Test
     fun theAnswerPressIsTheAppRoundControl() {
@@ -1461,7 +1461,7 @@ class PlaybackPillTest {
 
     /**
      * The panel's three sections are heads over lists, not rows of their own
-     * (owner decision, this session): the app's one head, which a screen reader
+     * (owner decision, 9.6): the app's one head, which a screen reader
      * is told is a heading, so the voices, the pace, and the ending can be
      * skipped to instead of heard row by row.
      */
@@ -1516,8 +1516,8 @@ class PlaybackPillTest {
     fun thePillReadsBackAPaceThatIsNotTheDefault() {
         // The panel is where the pace is set; the pill is where it is read
         // back after the panel closes. The line leads with the voice, then
-        // the pace, then the place and its key (owner decision, this
-        // session).
+        // the pace, then the place and its key
+        // (owner decision, 16.2).
         showPill(speed = 0.75f)
         compose.onNodeWithText("Al-Baqarah").assertIsDisplayed()
         compose.onNodeWithText("0.75x", useUnmergedTree = true).assertExists()
@@ -1531,7 +1531,7 @@ class PlaybackPillTest {
     }
 
     /**
-     * Both of the pill's popups hang from the capsule's own centre, and this
+     * Both of the pill's popups hang from the capsule's own center, and this
      * pins the capsule's half of that: the anchor they share is the pill's
      * measure wide and stands on the pill's middle, on the phone and on the
      * wide glass alike.
@@ -1571,7 +1571,7 @@ class PlaybackPillTest {
         val anchor = compose.onNodeWithTag("pill-menu-anchor").fetchSemanticsNode().boundsInWindow
         assertTrue(
             "the popup's anchor must be the pill's own measure, so the popup can stand on the " +
-                "pill's centre: pill $pill, anchor $anchor",
+                "pill's center: pill $pill, anchor $anchor",
             anchor.width > 0,
         )
         assertEquals(
@@ -1579,18 +1579,18 @@ class PlaybackPillTest {
             (pill.left + pill.right) / 2,
             (anchor.left + anchor.right) / 2,
             // One pixel, which is the rounding the layout can do and not a
-            // second centre: the anchor is 288 dp centred in a capsule whose
+            // second center: the anchor is 288 dp centered in a capsule whose
             // own width can be an odd number of pixels, so the two middles
             // can land a pixel apart on a profile the ATD phone never drew
             // (owner report, forty-seventh session). The promise is one
-            // centre, not one integer.
+            // center, not one integer.
             1f,
         )
     }
 
     /**
      * The offer must print the place and the size whole, and the size must
-     * stand on the voice's line above the place (owner report, this session).
+     * stand on the voice's line above the place (owner report, 18.4).
      * The claim is read from the text's own layout through the semantics
      * action Compose gives every `Text`: `isLineEllipsized` is true where the
      * line gave something up, and the bounds are what the eye sees.

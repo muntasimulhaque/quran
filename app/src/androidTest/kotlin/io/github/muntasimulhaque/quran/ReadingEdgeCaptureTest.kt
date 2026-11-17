@@ -26,7 +26,7 @@ import java.io.File
  *
  * The page keeps a band of its own color at the status bar's height, so the
  * clock, the signal, and the battery stand on paper while a scrolled line is
- * cut at the page's edge (owner report, this session). The band is invisible
+ * cut at the page's edge (owner report, 18.5). The band is invisible
  * wherever the reading stands at the top of a surah, where the page already
  * keeps its 64 dp of air, and the tour's frames are taken exactly there: no
  * store frame can show this state.

@@ -46,7 +46,7 @@ import org.junit.runner.RunWith
  * the download offer, a paused recitation, the ayah menu, and the sheets. The
  * sentence was the one that did not, and a reader who touched the page to
  * reach an ayah wore "Note saved" over the foot of it until the timer ran out
- * (owner report, this session).
+ * (owner report, 19.3).
  *
  * The sentence here is shown with no timer at all, so the only thing that can
  * end it is the touch the test makes. Three answers are pinned: a touch on

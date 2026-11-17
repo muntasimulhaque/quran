@@ -26,12 +26,12 @@ import org.junit.runner.RunWith
  * platform lays its own dialog actions 8 dp apart and the app added its whole
  * gap on top. The owner's eye called the dialog's pair the good one and the
  * sheet's pair too tight, so the gap moved to the number the dialog already
- * drew and every pair in the app stands on it now (owner decision, this
- * session).
+ * drew and every pair in the app stands on it now
+ * (owner decision, 12.6).
  *
  * The order is the other half: the quiet door leads and the default trails, so
  * Share text stands first and Share image, the door the sheet is for, ends the
- * pair (owner decision, this session).
+ * pair (owner decision, 18.8).
  *
  * Both doors are wider than the 48 dp target each one keeps, so the node a
  * reader taps is the pill a reader sees and the two bounds below are the

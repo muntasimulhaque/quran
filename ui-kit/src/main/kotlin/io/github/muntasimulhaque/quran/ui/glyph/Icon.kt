@@ -7,11 +7,11 @@ package io.github.muntasimulhaque.quran.ui.glyph
  * is a drawing in [Glyphs], and the one hand is what makes the pill, the bar,
  * the sheets, and the card read as one surface. A set taken from a source would
  * cover seventeen of the eighteen and leave the one that matters most, the
- * tafsir's commentary, drawn in another hand beside them (owner decision, this
- * session).
+ * tafsir's commentary, drawn in another hand beside them
+ * (owner decision, 11.5).
  *
  * **A mark is a control or a state, never a category label** (owner decision,
- * this session). The settings hub carries its values instead: Aa, System,
+ * 18.2). The settings hub carries its values instead: Aa, System,
  * English, the pack names, the reciter's name, the time. A category rail
  * would need seven new drawings and would take 32 dp from every row's
  * words, and this set would stop being the vocabulary of things that answer
@@ -63,7 +63,7 @@ enum class Icon {
     /**
      * A cone with two waves: a word said aloud. The word sheet's one
      * control, and the only mark in the set that is about hearing one word
-     * rather than a verse (owner decision, this session).
+     * rather than a verse (owner decision, 17.7).
      */
     Speaker,
 

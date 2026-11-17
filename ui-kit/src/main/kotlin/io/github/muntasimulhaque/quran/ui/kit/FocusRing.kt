@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
  *
  * No touch, no ring: focus interactions are keyboard and accessibility
  * focus, not a finger's press, so the app looks exactly as it did for a
- * reader with no keyboard attached (owner decision, this session).
+ * reader with no keyboard attached (owner decision, 14.7).
  */
 @Composable
 fun Modifier.focusRing(

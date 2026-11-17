@@ -23,27 +23,27 @@ import kotlin.math.min
  * the same number, because dp is a physical measure and the finger that reaches
  * for the control does not grow with the glass. What grows on a larger screen is
  * the page around the marks, and that is the reading's measure to keep (owner
- * decision, this session).
+ * decision, 11.5).
  *
  * The set had six names over four jobs, and two of them were one job wearing
  * two numbers: the pill's transport and the search field's clear are both a mark
  * in the app's one round control, and they read 20 dp and 22 dp on the same
  * screen. A mark is the control's size now, so the two cannot drift apart (owner
- * decision, this session).
+ * decision, 11.5).
  *
  * The set does not follow the system font scale, for the reason it does not
  * follow the screen: a mark is a shape, not a word, and the control it stands
  * in is measured in dp. The label beside a mark grows with the reader's text,
  * and every mark that is a cue on its own is spoken as well, so the mark keeps
- * the size the drawing and the finger were made for (owner decision, this
- * session).
+ * the size the drawing and the finger were made for
+ * (owner decision, 11.5).
  */
 object GlyphSize {
 
     /** A mark inside the app's one round control, [GlyphButton]'s target. */
     val Control = 24.dp
 
-    /** The mark above the word of a labelled action, like the ayah bar's five. */
+    /** The mark above the word of a labeled action, like the ayah bar's five. */
     val Action = 20.dp
 
     /** A chevron that ends a row or says a door opens. */
@@ -62,7 +62,7 @@ object GlyphSize {
      * below, so it is 36 dp at the default and its X is half of that. The
      * mark stays 18 dp at a larger system font scale while the capsule and
      * the target grow around it, because a mark is a fixed drawing and the
-     * word beside it is the thing that scales (owner decision, this session).
+     * word beside it is the thing that scales (owner decision, 15.1).
      * At 24 dp it stood two thirds of the default capsule and read as loud as
      * the query beside it.
      */

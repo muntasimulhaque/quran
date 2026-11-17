@@ -18,7 +18,7 @@ import java.util.Locale
  * here, and a size's digits take the same road inside [formatBytes], which
  * formats with the interface's own locale. One language's digits reach every
  * number the reader meets, and no surface can forget one (owner decision,
- * this session). The pure rule and its own test live in `core`.
+ * 8.3). The pure rule and its own test live in `core`.
  */
 @Composable
 fun localizedDigits(text: String): String {
@@ -30,7 +30,7 @@ fun localizedDigits(text: String): String {
  * Human sizes for a download the reader is about to approve. The digits, the
  * decimal mark, and the unit's own name follow the interface's language, so a
  * Bangla reading reads ২.৮ এমবি while an English one reads 2.8 MB (owner
- * decision, this session: the unit used to stay KB and MB in every language,
+ * decision, 8.7: the unit used to stay KB and MB in every language,
  * and a reader reading Bengali meets Bengali).
  *
  * The unit words come from the interface's own strings, and the locale is a
@@ -64,7 +64,7 @@ fun formatBytes(bytes: Long): String {
  *
  * [reciterName] is the same rule for the one caller with no composition, the
  * playback service's own notification, which takes a context wearing the
- * reader's locale (owner decision, this session).
+ * reader's locale (owner decision, 8.8).
  */
 fun reciterName(context: Context, id: String, fallback: String): String = when (id) {
     "minshawi" -> context.getString(R.string.reciter_minshawi)
@@ -86,7 +86,7 @@ fun reciterShortName(id: String, fallback: String): String {
  * সরল অর্থানুবাদ", and "ইবনে কাসীর" where an English one meets the Latin names. The
  * core text and the reciters are named here too, because the About page
  * credits them from the same catalog and a Bangla reader should not meet
- * "Quran text" or "Husary" on it (owner decision, this session). A pack the
+ * "Quran text" or "Husary" on it (owner decision, 8.8). A pack the
  * app does not know keeps its own catalog name, so a pack added later is
  * never nameless.
  */
@@ -108,7 +108,7 @@ fun contentPackName(id: String, fallback: String): String = when (id) {
  * other than the interface's, so a line the reader did not expect is never
  * left unannounced under the ayah. The reading and the Font size sample ask
  * this one question, so the sample can never preview a column the page would
- * not draw (owner decision, this session).
+ * not draw (owner decision, 15.3).
  */
 fun translationIsNamed(drawn: Int, language: String, readingLanguage: String): Boolean =
     drawn > 1 || language != readingLanguage
@@ -119,7 +119,7 @@ fun translationIsNamed(drawn: Int, language: String, readingLanguage: String): B
  * pace and the pill that reports it must name it the same way; a reader who
  * chose 0.75x in settings and sees 0.7500001x on the pill has been told two
  * different things about one choice. The digits follow the interface's own
- * language, so a Bangla reading reads ০.৭৫x (owner decision, this session).
+ * language, so a Bangla reading reads ০.৭৫x (owner decision, 8.3).
  */
 fun speedText(speed: Float, locale: Locale): String {
     val plain = if (speed == speed.toInt().toFloat()) "${speed.toInt()}x" else "${speed}x"

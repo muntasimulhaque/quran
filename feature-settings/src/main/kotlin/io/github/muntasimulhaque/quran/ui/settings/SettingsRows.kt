@@ -30,7 +30,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * under it, so the air over the first row is 20 (a line's 8 plus the row's own
  * 12) and the air between two groups is 32 (the row's 12 plus the head's 20).
  * The word meaning sheet's facts are the other job: a fact is a block, so it
- * stands a section from the fact before it (owner decision, this session).
+ * stands a section from the fact before it (owner decision, 18.3).
  */
 @Composable
 fun Group(title: String) {
@@ -58,7 +58,7 @@ fun Group(title: String) {
  * that names it, and the switch stands at the top of that page, next to the
  * list it governs. So a setting is read in one place and changed in one place,
  * and a reader who came to look at the translations cannot switch them off by
- * looking (owner decision, this session).
+ * looking (owner decision, 15.2).
  *
  * [enabled] is for the page that has nothing to draw yet, which is a fact about
  * the file and not about the reader's answer: the switch keeps reading on

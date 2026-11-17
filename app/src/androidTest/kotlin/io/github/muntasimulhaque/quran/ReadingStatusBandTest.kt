@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
  * The reading's page keeps a band of its own color across the status bar, at
  * the height the phone reports: the system's icons stand on paper, and a
  * scrolled line is cut at the page's edge rather than standing under the
- * clock (owner report, this session).
+ * clock (owner report, 18.5).
  *
  * The band's place is arithmetic, so this class reads it off the glass: the
  * top of the window, the whole width, and exactly the status bar's inset. Its

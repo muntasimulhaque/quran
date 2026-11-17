@@ -21,8 +21,8 @@ import org.junit.Test
  * app then capped every column at 65 characters, which made a line shorten
  * when a reader turned the text down, and that was the worse mistake. A count
  * of characters decides no width here: the page is [Space.Measure], fixed, and
- * whatever the glass has over it belongs to the glass (owner decision, this
- * session).
+ * whatever the glass has over it belongs to the glass
+ * (owner decision, 12.7).
  */
 class PageEdgeTest {
 
@@ -114,7 +114,7 @@ class PageEdgeTest {
         // the page's line; the word inside it may not. The 20 dp rail stands
         // the pill's own edge on the page's line, so its 14 dp inset puts the
         // word 14 dp inside the gutter, and that is the rail a pack's Add and
-        // Remove share (owner decision, this session).
+        // Remove share (owner decision, 17.6).
         assertEquals("the shape's line", 20f, ChoiceRowTrailingInset.value, 0.001f)
         assertTrue(
             "the button's word must stand inside the page's gutter",

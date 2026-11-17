@@ -22,11 +22,11 @@ import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
  *
  * The download offer carries this list too, in its own popup: its line is a
  * 48 dp door, and a reader who is about to spend a megabyte can choose the
- * voice it is spent on (owner decision, this session).
+ * voice it is spent on (owner decision, 16.2).
  *
  * The rows fill the popup, which is drawn at the pill's own
  * [PopupMeasure], also the measure of the anchor the playing pill hangs it
- * from, so the list stands on the capsule's centre rather than beside the
+ * from, so the list stands on the capsule's center rather than beside the
  * word that opened it (owner report).
  */
 @Composable

@@ -10,7 +10,7 @@ import org.junit.Test
  * has a say. The rule is small and it is the whole of the System value: a
  * dark system is Dark and a light one is Light, while Light and Dark are the
  * reader's own and never move, whichever way the phone is turned (owner
- * decision, this session: System is the third value that replaced the
+ * decision, 6.0: System is the third value that replaced the
  * automatic switch, and a fixed choice is finally a fixed choice).
  */
 class ThemeResolveTest {

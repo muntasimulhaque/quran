@@ -37,8 +37,8 @@ import org.junit.runner.RunWith
  * and the owner's frame is why. With a block between two facts and a section
  * only after the entry, one fact's count and the next fact's label stood
  * apart by almost the same air as a label and its own value, and the three
- * facts read as one column of type rather than three entries (owner decision,
- * this session).
+ * facts read as one column of type rather than three entries
+ * (owner decision, 18.3).
  *
  * The measurement is the fact's label against the fact's own top, and against
  * the fact before it. The label is the fact's first child, so the first number
@@ -50,7 +50,7 @@ import org.junit.runner.RunWith
  * the transliteration shares the letters' baseline, so its box starts a few dp
  * into theirs, where a Latin pinned to the line's top starts at zero. That was
  * the sheet's one line that its KDoc promised and the code did not draw (owner
- * report, this session).
+ * report, 18.3).
  *
  * The sheet is its own window, so every node below is measured inside that
  * window: a difference between two of its bounds is the room on the glass,

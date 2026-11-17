@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
      * The one thing the phone withheld, waiting for the reading to say it.
      * A permission answer can arrive from Settings before the reading is
      * composed, so the notice is held here until the reading's own Snackbar
-     * host can draw it (owner decision, this session).
+     * host can draw it (owner decision, 15.5).
      */
     private var permissionNotice by mutableStateOf<PermissionNotice?>(null)
 
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
      * state where the switch that needs it is drawn, and once more on the
      * reading's own paper at the door that was tapped. It used to be a Toast,
      * which is the one thing on the glass a tap cannot put away, and the app
-     * says nothing in the platform's bubble (owner decision, this session).
+     * says nothing in the platform's bubble (owner decision, 19.3).
      */
     private var notificationScreenMissing by mutableStateOf(false)
     private var alarmScreenMissing by mutableStateOf(false)
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
         // reminder's Material clock is the one that showed Latin digits in a
         // Bangla interface) read Locale.getDefault(), not this Activity's
         // resources, so the reader's one language choice is written there
-        // too (owner decision, this session).
+        // too (owner decision, 8.2).
         Locale.setDefault(locale)
         val configuration = Configuration(newBase.resources.configuration).apply {
             setLocale(locale)
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
     // The notification permission, asked only from the acts that set the
     // reminder: the reminder cannot arrive without it, so it goes first, and
     // its answer leads on to the exact alarm's own screen. It is never asked
-    // before the reader has read a page (owner decision, this session).
+    // before the reader has read a page (owner decision, 15.5).
     private val askReminderNotifications =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) {
@@ -184,7 +184,7 @@ class MainActivity : ComponentActivity() {
      * the same switch. A phone with no settings app at all is told so where
      * the door was tapped, and the Daily page keeps the sentence beside the
      * switch, rather than being left tapping a word that did nothing (owner
-     * decision, this session).
+     * decision, 19.3).
      *
      * A reader who turned off this one reminder in the phone's own settings is
      * sent to that reminder's own page rather than to the app's, because the
@@ -241,7 +241,7 @@ class MainActivity : ComponentActivity() {
      * the answer is read where the switch is, not announced over the reading.
      * A phone with no such screen at all keeps the line and loses the door:
      * the fact is a property of the phone, so it is kept as state and not
-     * said in a bubble (owner decision, this session).
+     * said in a bubble (owner decision, 19.3).
      */
     private fun askExactAlarmIfNeeded() {
         // Without the notification granted, an exact alarm fires into a shade

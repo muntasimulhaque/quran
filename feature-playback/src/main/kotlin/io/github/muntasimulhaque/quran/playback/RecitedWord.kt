@@ -23,8 +23,8 @@ import io.github.muntasimulhaque.quran.data.WordSegment
  * reciter repeats a phrase; holding the word that was last named is a lie the
  * reader can hear, so past this many milliseconds the wash rests instead. A
  * real word is never this long, including its madd. The last word of an ayah
- * has no next region and is ended by [lastSpeechMs] instead (owner decision,
- * this session).
+ * has no next region and is ended by [lastSpeechMs] instead
+ * (owner decision, 16.3).
  */
 internal fun recitedWordAt(
     segments: List<WordSegment>,
@@ -67,8 +67,8 @@ internal fun recitedWordAt(
  * change that comes every half second. This is the wait to the next of those
  * moments; null means nothing can change until the player moves to another
  * item. The reading scales it by the reader's pace and sleeps exactly that
- * long, which keeps a 1.5x recitation on time without a poll (owner decision,
- * this session).
+ * long, which keeps a 1.5x recitation on time without a poll
+ * (owner decision, 16.3).
  */
 internal fun nextWordChangeMs(
     segments: List<WordSegment>,

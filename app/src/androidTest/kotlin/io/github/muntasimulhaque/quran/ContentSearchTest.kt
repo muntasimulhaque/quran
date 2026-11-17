@@ -266,7 +266,7 @@ class ContentSearchTest {
         // The name the reader says and the name the interface draws both come
         // from the content: search finds a surah by its Bangla name whatever
         // the interface language, and the drawn name follows the reader's own
-        // choice (owner decision, this session).
+        // choice (owner decision, 8.2).
         val bangla = content.search(request("ফুসসিলাত"))
         val hit = bangla.hits.filterIsInstance<SearchHit.SurahHit>().firstOrNull()
         assertEquals(41, hit?.surah?.number)
@@ -323,7 +323,7 @@ class ContentSearchTest {
         // the way the reading draws it and the ayah in their own digits, and
         // the reference row must still open 2:7. The short name resolves
         // through the Bengali article and the digit through Character.digit
-        // (owner report, this session).
+        // (owner report, 9.1).
         val results = content.search(request("বাকারা ৭"))
         val hit = results.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()
         assertEquals(2, hit?.ayah?.surah)
@@ -391,11 +391,11 @@ class ContentSearchTest {
         // measurement, then measure three warm runs and keep the best. The
         // emulator is shared with the whole suite, and one loaded run is a
         // fact about the machine, not about the search; a search that really
-        // regressed is slow three times running (owner report, this session).
+        // regressed is slow three times running (owner report, 6.6).
         // The same content measured 1.86 s on an idle host and 4.2 s on a
         // loaded one, so the line is five seconds: it still catches a search
         // that has really regressed without failing on a shared machine
-        // (owner decision, this session).
+        // (owner decision, 10.4).
         content.search(request("mercy", tafsir = true))
         val times = (1..3).map {
             val t0 = android.os.SystemClock.uptimeMillis()

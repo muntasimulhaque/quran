@@ -120,7 +120,7 @@ class TafsirCardHeadTest {
         // The frame this head is reviewed from: the single-pack card the
         // owner's report came from, kept beside the tour's frames so the two
         // head lines and the passage title can be read on the glass, not only
-        // in the semantics tree (owner decision, this session).
+        // in the semantics tree (owner decision, 14.1).
         compose.waitForIdle()
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         File(screenshotOutputDirectory(), "tafsir-head.png").outputStream().use { output ->

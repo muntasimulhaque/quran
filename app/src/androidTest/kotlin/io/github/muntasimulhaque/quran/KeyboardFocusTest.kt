@@ -30,7 +30,7 @@ import org.junit.Test
  * focus mode those system-defined controls wait for, so the rail, which is
  * explicitly focusable, is the instrumented proof; the clickable controls
  * are covered by the same focus-ring modifier and are reached by a hardware
- * keyboard's first Tab (owner decision, this session).
+ * keyboard's first Tab (owner decision, 14.7).
  */
 class KeyboardFocusTest {
 

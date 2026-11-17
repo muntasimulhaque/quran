@@ -38,8 +38,8 @@ enum class UiLanguage(val tag: String) {
         /**
          * The language this phone speaks, when it speaks one the app carries,
          * and English otherwise. A fresh install takes this answer without a
-         * question: English is the fallback, not a screen (owner decision,
-         * this session).
+         * question: English is the fallback, not a screen
+         * (owner decision, 15.5).
          */
         fun ofSystem(languageTag: String? = java.util.Locale.getDefault().language): UiLanguage =
             of(languageTag) ?: English
@@ -68,7 +68,7 @@ data class LanguageContent(
      * The packs a language choice asks the download queue for: its
      * translation at once, and its tafsir when the connection is unmetered.
      * The word list is not here, because it is the reader's own switch and
-     * not a language's default (owner decision, this session).
+     * not a language's default (owner decision, 14.8).
      */
     val asked: Set<String> get() = setOf(translation, tafsir)
 }
@@ -79,7 +79,7 @@ data class LanguageContent(
  * Al-Fatiha. English is the fallback when the phone speaks neither language
  * the app carries. This is the first decision the app makes on the reader's
  * behalf, and it makes only the ones the phone already answered (owner
- * decision, this session).
+ * decision, 15.5).
  */
 fun AppSettings.bootstrapFor(language: UiLanguage): AppSettings =
     withLanguage(language).copy(
@@ -87,7 +87,7 @@ fun AppSettings.bootstrapFor(language: UiLanguage): AppSettings =
         // The tafsir is a download the reader asks for, not a pack the first
         // open selects behind their back. The Tafsir action offers it when
         // they want it; the translation is the only content the first page
-        // needs (owner decision, this session).
+        // needs (owner decision, 15.5).
         tafsirPacks = emptySet(),
         dailyAyah = false,
         reminderAnswered = false,
@@ -148,7 +148,7 @@ fun translationSelectionAfterRemoval(
  * removed. The day a content update detached that pack, the queue fetched it
  * again and the app treated the arrival as a choice, so a former language's
  * translation came back under the ayah with nothing on the glass to explain
- * it (owner report, this session).
+ * it (owner report, 14.8).
  */
 fun pendingAfterLanguage(
     previous: UiLanguage?,
@@ -160,7 +160,7 @@ fun pendingAfterLanguage(
  * The packs that speak [language]: what search reads when the reader's chosen
  * language decides. A reader who reads in Bangla searches Bangla, even when a
  * pack of another language was added by hand, because one field over two
- * languages answers in two voices (owner decision, this session).
+ * languages answers in two voices (owner decision, 6.5).
  */
 fun List<ContentPack>.forLanguage(language: String): List<ContentPack> =
     filter { it.language == language }
@@ -174,7 +174,7 @@ fun List<ContentPack>.forLanguage(language: String): List<ContentPack> =
  * the other column still follows, named. The catalog's own order is by name,
  * so "Al-Bayan Simple Translation" stood above "Saheeh International" in an
  * English reading, and the Font size sample, which draws the first line,
- * previewed Bangla under an English interface (owner report, this session).
+ * previewed Bangla under an English interface (owner report, 15.3).
  */
 fun List<ContentPack>.leadingWith(language: String): List<ContentPack> =
     sortedBy { if (it.language == language) 0 else 1 }

@@ -117,7 +117,7 @@ class PlaybackController(
      * Whether the reading that draws the recited word is on the glass. The
      * wash is scheduled by the reading now, so the player keeps no
      * wash timer. This flag is what keeps the place checkpoint off while the
-     * eyes are there (owner decision, this session).
+     * eyes are there (owner decision, 16.3).
      */
     private var tracking = false
 
@@ -149,8 +149,8 @@ class PlaybackController(
      * one player carries the reader's playlist, its pill, its notification, and
      * the place it was heard at, and a glance at a word must not take any of
      * them away: a word file handed to that player would have to replace its items,
-     * and the reader's recitation would be gone with the word (owner report,
-     * this session).
+     * and the reader's recitation would be gone with the word
+     * (owner report, 18.0).
      */
     private var sample: ExoPlayer? = null
 
@@ -158,7 +158,7 @@ class PlaybackController(
      * True when the session was playing as the word was asked for, so a word
      * heard over a recitation gives it back at the word's last millisecond.
      * A recitation that was already paused was paused by the reader, and stays
-     * as they left it (owner decision, this session).
+     * as they left it (owner decision, 18.0).
      */
     private var resumeAfterSample = false
 
@@ -181,8 +181,8 @@ class PlaybackController(
      * The running number is the id's own number and the reading's place; it is
      * not the verse's number inside its surah (16:28 is running 1929). The
      * pill's key and the panel's spoken place are the only readers, and they
-     * must never take the running number for the reader's (owner report, this
-     * session). A zero means no item was built for that ayah.
+     * must never take the running number for the reader's (owner report,
+     * 19.2). A zero means no item was built for that ayah.
      */
     private val ayahsInSurah = IntArray(DailyAyah.TOTAL_AYAHS + 1)
 
@@ -204,7 +204,7 @@ class PlaybackController(
      * only about the place: while the eyes are not there, the heard offset is
      * written on a ten-second checkpoint. That checkpoint is what keeps a
      * process that dies mid-ayah answered by the rest of the ayah rather than
-     * by its top (owner decision, this session).
+     * by its top (owner decision, 16.3).
      */
     fun setWordTracking(visible: Boolean) {
         if (tracking == visible) return
@@ -248,7 +248,7 @@ class PlaybackController(
      * changes only at a boundary, and every boundary is in the same table the
      * word itself comes from. The wait is media time divided by the reader's
      * pace, and a change of pace restarts the sleep, so 0.5x and 1.5x are both
-     * on time (owner decision, this session).
+     * on time (owner decision, 16.3).
      */
     fun millisToNextWord(): Long? {
         val player = controller ?: return null
@@ -278,8 +278,8 @@ class PlaybackController(
     suspend fun play(recitation: String, ayahNumber: Int, resume: Boolean = true) {
         // A real Play is a session, and a word sample is not one: the word's
         // file goes first, and it does not give the old session back, because
-        // the reader has just asked for this one (owner decision, this
-        // session).
+        // the reader has just asked for this one
+        // (owner decision, 18.0).
         finishSample(resume = false)
         downloadJob?.cancel()
         downloadJob = null
@@ -302,7 +302,7 @@ class PlaybackController(
      *
      * True when the player was handed the playlist and told to play. A surah
      * that is not here is a question for the reader, and this is the door that
-     * asks it (owner decision, this session).
+     * asks it (owner decision, 18.0).
      */
     private suspend fun startPlayback(
         recitation: String,
@@ -325,8 +325,8 @@ class PlaybackController(
             // at, and downloading the surah would not change that: say so
             // rather than offer a download that cannot help. A partial surah
             // lands here too, and that is a package the reader has not got:
-            // it is offered rather than played in pieces (owner decision,
-            // this session).
+            // it is offered rather than played in pieces
+            // (owner decision, 15.8).
             val timings = withContext(Dispatchers.IO) {
                 database.recitationAyah(recitation, ayah.number)
             }
@@ -349,7 +349,7 @@ class PlaybackController(
         }
         if (index < 0) {
             // The surah is not fully on the device; ask before fetching it
-            // (owner decision, this session).
+            // (owner decision, 18.0).
             val packageToFetch = manifest.packageFor(recitation, ayah.surah)
             _state.value = _state.value.copy(
                 recitation = recitation,
@@ -381,7 +381,7 @@ class PlaybackController(
         // next surah from this value. Recording it after the call measured
         // the report from the old surah, which missed the next surah at a
         // start on a surah's last ayah and appended it twice at a start
-        // inside the surah (owner report, this session).
+        // inside the surah (owner report, 9.9).
         queue.load(ayah.surah)
         // The offset this ayah was last heard at, under this reciter. A
         // process that died mid-ayah is answered by the rest of it. A
@@ -454,8 +454,8 @@ class PlaybackController(
      * The progress belongs to the request the reader still holds. Cancel
      * clears the pending surah, and every write below is gated on it, so a
      * chunk that lands while the cancel is being answered cannot paint the
-     * pill again with a transfer that is no longer anyone's (owner report,
-     * this session).
+     * pill again with a transfer that is no longer anyone's
+     * (owner report, 9.3).
      */
     fun confirmDownload() {
         val recitation = _state.value.recitation ?: recitationId ?: return
@@ -532,7 +532,7 @@ class PlaybackController(
      * The reader's Cancel. The job goes first, so the downloader's next chunk
      * sees the cancellation and the transfer stops; the state is cleared after
      * it, and every progress write is gated on the pending surah, so a chunk
-     * already in flight cannot put the pill back (owner report, this session).
+     * already in flight cannot put the pill back (owner report, 9.3).
      */
     fun cancelDownload() {
         downloadJob?.cancel()
@@ -560,7 +560,7 @@ class PlaybackController(
      * This is reached only for an answer that carries on
      * ([SurahEnding.CARRY_ON]): a reading that rests at the surah's end never
      * offers the surah after it for a download it did not ask for (owner
-     * report, this session).
+     * report, 11.9).
      */
     private fun carryOnToTheNextSurah() {
         val surah = _state.value.surah
@@ -628,7 +628,7 @@ class PlaybackController(
      *
      * The answer is read when the boundary arrives, not when the playlist was
      * grown, so a reader who changes the answer mid-surah is answered at that
-     * surah's end and not the next one's (owner decision, this session).
+     * surah's end and not the next one's (owner decision, 11.9).
      *
      * False when that surah is not in the playlist, which is the one case
      * the caller has to answer for itself.
@@ -663,7 +663,7 @@ class PlaybackController(
      * reader's playlist, pill, notification, and saved place are not touched.
      * A recitation that was playing waits at the word and is given back at its
      * last millisecond; one that was already paused was paused by the reader
-     * and stays as they left it (owner decision, this session).
+     * and stays as they left it (owner decision, 18.0).
      *
      * False when the word's file is not on the device: the sheet's speaker is
      * drawn for every word, so this is the guard behind a press that has
@@ -673,7 +673,7 @@ class PlaybackController(
         val database = content ?: return false
         if (position < 1) return false
         // The file and the ayah are disk work: the tap answers on the frame,
-        // so neither is read there (owner decision, this session).
+        // so neither is read there (owner decision, 18.6).
         val uri = withContext(Dispatchers.IO) {
             val ayah = database.ayah(ayahNumber) ?: return@withContext null
             wordAudio.uri(ayah.surah, ayah.ayah, position)
@@ -710,7 +710,7 @@ class PlaybackController(
      * It asks for no audio focus of its own: the recitation holds the reader's
      * focus, and a word is heard inside a reading rather than beside it. The
      * session is paused for the word's length, so the two never sound at once
-     * (owner decision, this session).
+     * (owner decision, 18.0).
      *
      * It is built on the main thread, where every call to it and to the
      * session's controller is made: the reading's doors and its word sheet all
@@ -737,7 +737,7 @@ class PlaybackController(
      * The word's end is its item's end, so the player says so by itself. A
      * word that will not sound ends the sample too: a wash with no voice
      * behind it would sit on the sheet until the reader pressed something
-     * else (owner decision, this session).
+     * else (owner decision, 18.0).
      */
     private val sampleListener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -754,8 +754,8 @@ class PlaybackController(
      * The reader's own play and pause. A word's voice is not the session, so
      * this is only ever the recitation's transport: a tap here while a word
      * sounds is the reader reaching for their recitation, and the word ends
-     * with its own file rather than answering for it (owner decision, this
-     * session).
+     * with its own file rather than answering for it
+     * (owner decision, 18.0).
      */
     fun toggle() {
         // The reader's own transport ends a word that is still sounding: they
@@ -852,14 +852,14 @@ class PlaybackController(
      * The reader's Stop and the end of the last surah arrive here together. An
      * ended player is not an empty one: it keeps its last ayah as the current
      * item, so the media notification wore a Play that answers nothing, and an
-     * ended player never restarts (owner decision, this session). An ended
+     * ended player never restarts (owner decision, 11.9). An ended
      * recitation and a stopped one are one state: nothing is loaded, nothing
      * is marked, and the next Play starts from the reader's place.
      */
     private fun clearRecitation() {
         // A word still sounding goes with the recitation: the reader put the
         // whole of it away, and a word has nothing to give back to a session
-        // that is no longer here (owner decision, this session).
+        // that is no longer here (owner decision, 18.0).
         finishSample(resume = false)
         releaseItems()
         _state.value = PlaybackUiState(connected = true, speed = speed)
@@ -875,7 +875,7 @@ class PlaybackController(
      * notification, and the reading's mark have nothing left to stand on.
      *
      * The place is the caller's to keep or clear. A word never stood in this
-     * player, so its end takes nothing here (owner decision, this session).
+     * player, so its end takes nothing here (owner decision, 18.0).
      */
     private fun releaseItems() {
         val player = controller
@@ -896,7 +896,7 @@ class PlaybackController(
      * moment. The recitation that waited for the word is given back when it was
      * playing, and left alone when it was not, because a pause the reader made
      * is theirs to undo. The saved listening place was never the word's, so it
-     * is not touched here either (owner decision, this session).
+     * is not touched here either (owner decision, 18.0).
      *
      * Like the sample player itself, this is called on the main thread: by the
      * word file's own listener or by a door the reader pressed.
@@ -946,7 +946,7 @@ class PlaybackController(
         segmentsByAyah.clear()
         // The word's own player is not the session's, so it is let go here
         // too: a window that is gone has no sheet to wash and no word to say
-        // (owner decision, this session).
+        // (owner decision, 18.0).
         sample?.release()
         sample = null
         resumeAfterSample = false
@@ -967,12 +967,12 @@ class PlaybackController(
                             // timeout. The reading keeps its place, and the
                             // pill goes with the player rather than staying
                             // as a control that answers nothing (owner
-                            // decision, this session).
+                            // decision, 10.2).
                             if (controller !== disconnected) return
                             // A package that was in flight belongs to the
                             // player that has just gone; it must not surface
                             // later as a surah that starts on its own (owner
-                            // decision, this session).
+                            // decision, 10.2).
                             downloadJob?.cancel()
                             downloadJob = null
                             controller = null
@@ -1010,7 +1010,7 @@ class PlaybackController(
      * book mark on the reading's paper, drawn once from the launcher icon so
      * the media surface wears the same hand as the home screen. A reader who
      * has no launcher icon (an OEM that refuses one) gets no artwork rather
-     * than a broken image (owner decision, this session).
+     * than a broken image (owner decision, 14.7).
      */
     private val artwork: ByteArray? by lazy { mediaArtwork(context) }
 
@@ -1022,7 +1022,7 @@ class PlaybackController(
      * set is a missing download, not a surah to play in pieces. The debug
      * sample carries three Al-Baqarah ayahs; before this rule the end of
      * Al-Fatiha could auto-play that fragment instead of asking for the surah
-     * (owner decision, this session).
+     * (owner decision, 15.8).
      */
     private fun itemsFor(recitation: String, surah: Int): List<MediaItem> {
         val database = content ?: return emptyList()
@@ -1042,7 +1042,7 @@ class PlaybackController(
             segmentsForSurah[ayah.number] = audio.segments
             // The ayah's own number travels beside the item, because the id
             // carries the running one and the pill must draw this one (owner
-            // report, this session).
+            // report, 19.2).
             if (ayah.number in 1..DailyAyah.TOTAL_AYAHS) {
                 ayahsInSurah[ayah.number] = ayah.ayah
             }
@@ -1106,7 +1106,7 @@ class PlaybackController(
      * language choice writes, and the reciter's name and the ayah's own
      * number come from it, so the lock screen says the place in the language
      * the reader is reading in, whatever the phone's own language is (owner
-     * decision, this session).
+     * decision, 8.8).
      */
     private fun spokenContext(): Context {
         val locale = Locale.forLanguageTag(LanguagePreference(context).tag() ?: "en")
@@ -1137,8 +1137,8 @@ class PlaybackController(
                     // The boundary is where the reader's one answer is read. The
                     // next surah is in the playlist because a deliberate Next
                     // may cross into it; the answer, and not the playlist,
-                    // decides whether the audio does (owner decision, this
-                    // session).
+                    // decides whether the audio does
+                    // (owner decision, 11.9).
                     when (end.surahEnding) {
                         SurahEnding.REPEAT -> if (restartSurah(player, ended)) {
                             publish(player)
@@ -1229,7 +1229,7 @@ class PlaybackController(
      * by the reading, so the player has no wash timer at all; this is only
      * the memory of where the recitation had reached, at a pace that costs
      * the disk almost nothing and still answers a process that died mid-ayah
-     * (owner decision, this session).
+     * (owner decision, 16.3).
      */
     private fun startCheckpoint() {
         if (tracking) return
@@ -1265,8 +1265,8 @@ class PlaybackController(
     /**
      * The one cadence the player needs: the place while the reading is hidden,
      * and neither while the player is paused. The wash is not the player's
-     * timer any more; the reading schedules it (owner decision,
-     * this session).
+     * timer any more; the reading schedules it
+     * (owner decision, 16.3).
      */
     private fun syncTicker() {
         val cadence = playbackCadence(_state.value.isPlaying, tracking)
@@ -1333,7 +1333,7 @@ class PlaybackController(
      * 9.9), so the surah after this one is loaded while the reader is in this
      * one; whether the audio follows it is the answer's own rule at the
      * boundary ([surahEnding]), so a change of answer mid-surah is honoured at
-     * that surah's end (owner decision, this session).
+     * that surah's end (owner decision, 11.9).
      *
      * [RecitationQueue] is what keeps one transition from appending the same
      * surah twice.
@@ -1365,8 +1365,8 @@ class PlaybackController(
          * belongs to is written the moment it changes; this is the offset
          * inside it, which moves constantly and costs a disk write to keep
          * exact. Ten seconds is also the hidden reading's checkpoint, and a
-         * resume a few seconds out is one nobody can hear (owner decision,
-         * this session).
+         * resume a few seconds out is one nobody can hear
+         * (owner decision, 10.2).
          */
         const val POSITION_WRITE_MS = 10_000L
     }

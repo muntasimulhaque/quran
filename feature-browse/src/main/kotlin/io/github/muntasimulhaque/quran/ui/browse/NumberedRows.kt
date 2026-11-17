@@ -108,7 +108,7 @@ internal fun NumberCell(
  *
  * The list's name is [bookRowName], the row name's 15 in the Book's face; a
  * page's head (the ayah grid) keeps the Book's 16, because it names the page
- * it leads and has the back mark beside it (owner decision, this session).
+ * it leads and has the back mark beside it (owner decision, 13.9).
  *
  * [nameMaxLines] is one where the header shares its row with the back mark
  * and the name may have to give; the list row lets its name run whole.
@@ -157,7 +157,7 @@ internal fun SurahArabicName(surah: Surah, modifier: Modifier = Modifier) {
  * well: the copy above it changes with the interface language, and a door a
  * test has to find cannot be found by its words alone.
  *
- * **The reader's own surah says so** (owner decision, this session). The list
+ * **The reader's own surah says so** (owner decision, 13.5). The list
  * opens centered on the surah the reader is in, and a centering with no mark
  * reads as an accident: the row wears the app's quiet selected wash and its
  * number takes the accent, the same pair the ayah grid already puts on the
@@ -196,7 +196,7 @@ internal fun SurahRow(
             // The number is read, so it takes the theme's own secondary
             // tone and not a quiet alpha; the reader's own surah takes the
             // accent, because it is the one number on the page that is a
-            // state as well as a name (owner decision, this session).
+            // state as well as a name (owner decision, 13.5).
             color = if (current) {
                 MaterialTheme.colorScheme.primary
             } else {
@@ -259,7 +259,7 @@ internal fun JuzRow(
             // (owner decision, the theme and consistency session). The line
             // names the place the way a reader says it, the surah and the
             // ayah inside it, rather than repeating the surah's number in a
-            // reference (owner decision, this session).
+            // reference (owner decision, 7.9).
             if (surahName != null) {
                 Text(
                     text = stringResource(R.string.juz_starts_at, surahName, surahAyah),

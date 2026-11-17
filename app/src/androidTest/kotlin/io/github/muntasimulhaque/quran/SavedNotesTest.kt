@@ -105,7 +105,7 @@ class SavedNotesTest {
      * A place row used to stand every line under its name 8 dp apart, which
      * unified the row and put the ayah further from its surah than the same
      * pair sits one tab away in Surahs: there the step is 4 dp (owner report,
-     * this session). The row now reads as a name and its label, and then the
+     * 12.6). The row now reads as a name and its label, and then the
      * row's own line about it.
      */
     @Test
