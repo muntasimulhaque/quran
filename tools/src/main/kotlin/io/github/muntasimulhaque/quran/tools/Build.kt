@@ -361,11 +361,13 @@ class Build(private val root: File) {
     private fun meaningAt(list: Map<String, String>, word: Word): String =
         list["${word.surah}:${word.ayah}:${word.sourcePosition}"].orEmpty()
 
+    /**
+     * The word list's meanings. A missing source is a build failure, not an
+     * empty list: [sourceDb] names the dataset and says to run verify, and a
+     * build that quietly shipped without a word list would be worse than one
+     * that stopped.
+     */
     private fun readWordList(datasetId: String): Map<String, String> {
-        if (sourceDb(datasetId) == null) {
-            println("build: skipping $datasetId (source not present)")
-            return emptyMap()
-        }
         val out = HashMap<String, String>(90_000)
         openSqlite(sourceDb(datasetId)).use { connection ->
             connection.each("SELECT surah_number, ayah_number, word_number, text FROM word_translation") { rs ->
@@ -383,13 +385,10 @@ class Build(private val root: File) {
      * Buckwalter, which is a keyboard not a spelling (`Ebd`, `Alh`). The gap
      * is closed here and the Buckwalter is read as the letters it stands for,
      * so the sheet shows `ع ب د` and `ʿ-b-d` and not the export's own
-     * shorthand (owner decision, 17.7).
+     * shorthand (owner decision, 17.7). A missing source fails the build; it
+     * is not an empty list.
      */
     private fun readRoots(): Map<String, Root> {
-        if (sourceDb("word-root") == null) {
-            println("build: skipping word-root (source not present)")
-            return emptyMap()
-        }
         val out = HashMap<String, Root>(60_000)
         openSqlite(sourceDb("word-root")).use { connection ->
             connection.each(
