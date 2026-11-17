@@ -267,9 +267,10 @@ leg, uninstall the app and its test APK from that AVD. Collect the frames from
 `app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/<AVD>/`
 before another call replaces them, read the eight of each, and commit them to
 `play-store/screenshots/phone/`, `play-store/screenshots/tablet7/`, and
-`play-store/screenshots/tablet10/`. The 7 inch leg runs at 1200 x 1920 and
-320 dpi (see This machine); the 10 inch at its own 2560 x 1800. When no visible
-surface changed, the three committed sets stand.
+`play-store/screenshots/tablet10/`. The phone leg runs at 1080 x 1920,
+the 7 inch at 1200 x 1920 and 320 dpi (see This machine), and the 10 inch at its
+own 2560 x 1800. When no visible surface changed, the three committed sets
+stand.
 
 When the Bangla interface changed, one separate leg photographs it, on the
 same phone:
@@ -318,6 +319,10 @@ bundle.
   boot refuses is refreshed by one start with `-no-snapshot-load` and a clean
   exit. A software renderer is never used here; the CI runners keep their own
   flags. `gh` is authenticated.
+- The phone AVD's display is 1080 x 2280 and the store set Play has is
+  1080 x 1920, so its leg runs with `adb shell wm size 1080x1920` at the
+  AVD's own 440 dpi, and the size is reset after it: without the override the
+  frames come out 360 px taller than the set they stand in.
 - The 7 inch AVD's display is 800 x 1280 and the store set Play has is
   1200 x 1920, the same page at 1.5 times the pixels. The set is captured every
   time, and the leg runs with `adb shell wm size 1200x1920` and `wm density
