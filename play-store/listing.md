@@ -96,6 +96,22 @@ status from the content manifest. The source code is MIT.
 - Privacy policy URL:
   https://muntasimulhaque.github.io/quran/privacy.html
 
+### Play Console answers
+
+- Does your app collect or share any of the required user data types? No.
+- Data types selected: none.
+- Is all user data encrypted in transit? No user data is collected; every
+  request the app makes is HTTPS to the project's own Releases.
+- Do you provide a way for users to request deletion of their data? No user
+  data is collected or stored off the device; local reading state, packs,
+  and recitations are removed by uninstalling the app or removing a pack or
+  a surah.
+- Independent security review: No.
+- Prominent disclosure: not applicable.
+
+The declaration above is the repository's record; the Play Console itself
+is submitted by the account owner.
+
 ## Graphics
 
 The icon and the feature graphic are made; the screenshots are captured by the
