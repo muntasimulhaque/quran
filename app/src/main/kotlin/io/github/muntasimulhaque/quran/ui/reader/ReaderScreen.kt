@@ -726,11 +726,12 @@ fun ReaderScreen(
                         hearingWord = playback.sample?.takeIf { playback.isPlaying }?.position,
                         playedWord = playedWord,
                         // The reminder is offered after the reader has read the
-                        // surah, never before the text. Turning it on is the act
-                        // that asks the phone for the notification and the exact
-                        // time; Not now writes the no and the card never returns
-                        // (owner decision, 15.5).
-                        reminderOffer = !settings.reminderAnswered,
+                        // surah, never before the text, and never once it is
+                        // on: setting it in Settings is an answer too. Turning
+                        // it on is the act that asks the phone for the
+                        // notification and the exact time; Not now writes the
+                        // no and the card never returns (owner decision, 15.5).
+                        reminderOffer = settings.reminderOffer,
                         startAtOpening = viewModel.startAtSurahOpening == surah.number,
                         // The air above a surah's opening, under the bar. The
                         // page is drawn edge to edge; the status band covers the
@@ -827,6 +828,22 @@ fun ReaderScreen(
                             bar.showNow()
                             viewModel.jumpToSurah(number)
                         },
+                        // An internal reference in the surah's introduction:
+                        // the reader is taken to the place the source names,
+                        // not to a browser, and the bar stands over the page
+                        // it lands on (owner decision, 19.7).
+                        onOpenReference = { surah, ayah ->
+                            if (ayah == null) {
+                                viewModel.jumpToSurah(surah)
+                            } else {
+                                viewModel.jumpToReference(surah, ayah)
+                            }
+                            bar.showNow()
+                            menu = null
+                            cardAyah = null
+                            cardTafsirPack = null
+                            cardNote = null
+                        },
                         onReminderOn = {
                             viewModel.setDailyAyah(
                                 enabled = true,
@@ -835,10 +852,8 @@ fun ReaderScreen(
                             viewModel.markReminderAnswered()
                         },
                         onReminderNotNow = {
-                            viewModel.setDailyAyah(
-                                enabled = false,
-                                onPermission = onReminderPermission,
-                            )
+                            // Not now is a dismissal, not a switch: it never
+                            // turns off a reminder the reader set elsewhere.
                             viewModel.markReminderAnswered()
                         },
                         onAddContent = {

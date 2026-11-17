@@ -268,4 +268,25 @@ class RichTextTest {
         val runs = RichText.footnotes("In the name of Allah,[2] the Merciful.[3]")
         assertEquals(ScriptMix.LATIN, scriptMix(runs))
     }
+
+    @Test
+    fun `a printed ayah number is spaced from the word after it`() {
+        assertEquals(
+            "(9) When the young men fled",
+            RichText.plain("<p>(9)When the young men fled</p>"),
+        )
+        val block = RichText.parseHtml("<p>(9)When the young men fled</p>").single()
+        assertEquals("(9) When the young men fled", block.runs.joinToString("") { it.text })
+    }
+
+    @Test
+    fun `a link keeps its target and its words`() {
+        val block = RichText.parseHtml(
+            "<p>Read <a href=\"/2/67-73\">Al-Baqarah 2:67-73</a>.</p>",
+        ).single()
+        val link = block.runs.single { it.link != null }
+        assertEquals("/2/67-73", link.link)
+        assertEquals("Al-Baqarah 2:67-73", link.text)
+        assertEquals("Read Al-Baqarah 2:67-73.", block.runs.joinToString("") { it.text })
+    }
 }

@@ -169,6 +169,33 @@ class SearchCheck(private val root: File) {
                 }
             }
             println("search: $passed of $checked ayah index probes passed")
+            // The recall index: the modern spelling of a word finds verses
+            // even where the print writes the long vowel differently. The
+            // list is the words the audit found missing from the exact
+            // index; a new print letter that the recall shape forgets fails
+            // here (owner decision, 19.7).
+            val modern = listOf(
+                "الصلاة", "الشيطان", "القرآن", "إبراهيم", "القيامة", "الكتاب", "الملائكة",
+            )
+            var recallChecked = 0
+            var recallPassed = 0
+            for (typed in modern) {
+                val query = Search.parse(typed) ?: continue
+                val expression = Search.skeletonExpression(query.terms) ?: continue
+                recallChecked++
+                val found = exists(
+                    connection,
+                    "SELECT 1 FROM ayah WHERE rowid IN " +
+                        "(SELECT docid FROM ayah_skeleton_fts WHERE ayah_skeleton_fts MATCH ?)",
+                    listOf(expression),
+                )
+                if (found) {
+                    recallPassed++
+                } else {
+                    problems += "the recall index missed \"$typed\""
+                }
+            }
+            println("search: $recallPassed of $recallChecked recall probes passed")
         }
     }
 
@@ -207,8 +234,13 @@ class SearchCheck(private val root: File) {
      */
     private fun auditArabicColumns() {
         openSqlite(File(root, "content/quran.db")).use { connection ->
-            for ((table, key) in listOf("ayah" to "number", "word" to "id")) {
-                connection.each("SELECT $key, text_search FROM $table WHERE text_search <> '' ORDER BY $key") { rs ->
+            for ((table, key, column) in listOf(
+                Triple("ayah", "number", "text_search"),
+                Triple("ayah", "number", "text_skeleton"),
+                Triple("word", "id", "text_search"),
+                Triple("word", "id", "text_skeleton"),
+            )) {
+                connection.each("SELECT $key, $column FROM $table WHERE $column <> '' ORDER BY $key") { rs ->
                     val id = rs.getInt(1)
                     for (codepoint in (rs.getString(2) ?: "").codePoints()) {
                         if (Character.isWhitespace(codepoint)) continue
@@ -216,8 +248,16 @@ class SearchCheck(private val root: File) {
                             problems += "$table $id indexes U+${hex(codepoint)}, which a Latin query could match"
                             continue
                         }
-                        if (Arabic.isSkippedForSearch(codepoint) || Arabic.foldForSearch(codepoint) != codepoint) {
+                        if (Arabic.isSkippedForSearch(codepoint) ||
+                            Arabic.foldForSearch(codepoint) != codepoint
+                        ) {
                             problems += "$table $id indexes U+${hex(codepoint)}, which is not the search shape"
+                        }
+                        if (column == "text_skeleton" &&
+                            (codepoint == 'ا'.code || codepoint == 'و'.code ||
+                                codepoint == 'ي'.code || codepoint == 0x0621)
+                        ) {
+                            problems += "$table $id keeps U+${hex(codepoint)} in its recall shape"
                         }
                     }
                 }

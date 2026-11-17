@@ -84,6 +84,29 @@ class ContentSearchTest {
     }
 
     @Test
+    fun arabicSearchFindsAModernSpellingThroughTheRecallIndex() = runBlocking {
+        val results = content.search(request("الشيطان", tafsir = false, limit = 20))
+        val hit = results.hits.filterIsInstance<SearchHit.AyahHit>().firstOrNull()
+        assertNotNull("the recall index must find a verse for الشيطان", hit)
+        val found = hit ?: return@runBlocking
+        assertTrue("the verse must carry a matched word", found.arabicMatchedWords.isNotEmpty())
+        assertTrue("the recall count must be reported", results.counts.arabic > 0)
+    }
+
+    @Test
+    fun aTypedReferenceIsTheOnlyAnswer() = runBlocking {
+        val results = content.search(request("kahf 10"))
+        assertTrue(
+            "a reference must not drag the tafsir sources with it: " + results.hits,
+            results.hits.all { it is SearchHit.ReferenceHit || it is SearchHit.SurahHit },
+        )
+        assertEquals(1, results.counts.reference)
+        val reference = results.hits.filterIsInstance<SearchHit.ReferenceHit>().first()
+        assertEquals(18, reference.ayah.surah)
+        assertEquals(10, reference.ayah.ayah)
+    }
+
+    @Test
     fun arabicSearchFindsTheAyahAndMarksItsLetters() = runBlocking {
         val results = content.search(request("\u0627\u0644\u0631\u062d\u0645\u0646", limit = 50))
         val hit = results.hits.filterIsInstance<SearchHit.AyahHit>()

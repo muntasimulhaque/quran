@@ -202,13 +202,16 @@ class ContentDatabase private constructor(
      * tafsir, and the word meanings keep the strict rule and never fall back.
      */
     fun surahInfo(surah: Int, language: String = "en"): String? {
-        // The core pack carries the introductions now, so a fresh install and
-        // a Bangla word list both have the door. A held core from before the
-        // move still falls back to the English word list.
+        // The reader's language's list carries an introduction when that
+        // language has one, and the core's English is the fallback. A
+        // language whose list has none (Bangla today) reads the English
+        // introduction, the one documented exception. The language is asked
+        // first so a Bangla introduction can arrive in words-bn without this
+        // function having to be changed again (owner decision, 19.7).
         val preferred = wordsPack(language)
         val pack = when {
-            hasTable(null, "surah_info") -> null
             hasTable(preferred, "surah_info") -> preferred
+            hasTable(null, "surah_info") -> null
             preferred != WORDS_PACK && hasTable(WORDS_PACK, "surah_info") -> WORDS_PACK
             else -> return null
         }
@@ -331,7 +334,7 @@ class ContentDatabase private constructor(
                 val start = starts[ayah] ?: 0
                 val end = start + text.length
                 val slice = if (end <= code.length) code.substring(start, end) else ""
-                val meaning = meanings[ayah]?.get(position)?.trim()?.takeIf { it.isNotEmpty() }
+                val meaning = meaningfulGloss(meanings[ayah]?.get(position))
                 out.getOrPut(ayah) { mutableListOf() }.add(WordMeaning(text, meaning, slice))
                 starts[ayah] = end + 1
             }
@@ -508,7 +511,7 @@ class ContentDatabase private constructor(
                     val code = cursor.getString(2) ?: ""
                     val end = start + text.length
                     val slice = if (end <= code.length) code.substring(start, end) else ""
-                    add(WordMeaning(text, meanings[position]?.trim()?.takeIf { it.isNotEmpty() }, slice))
+                    add(WordMeaning(text, meaningfulGloss(meanings[position]), slice))
                     start = end + 1
                 }
             }
@@ -597,9 +600,12 @@ class ContentDatabase private constructor(
         }
     }
 
-    fun firstAyahOfSurah(surah: Int): Int =
-        query("SELECT MIN(number) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
-            .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
+    /** The first ayah of a surah, or null when the number is not one. */
+    fun firstAyahOfSurah(surah: Int): Int? {
+        if (surah !in 1..114) return null
+        return query("SELECT MIN(number) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
+            .use { cursor -> if (cursor.moveToFirst() && !cursor.isNull(0)) cursor.getInt(0) else null }
+    }
 
     /**
      * The first ayah of each juz, with the reference it lands on, for the juz
@@ -767,20 +773,45 @@ class ContentDatabase private constructor(
         }
 
         val referenceNumber = if (sources.references) referencedAyahNumber(query.input) else null
+        val referenceHit = referenceNumber?.let { number ->
+            ayah(number)?.let { SearchHit.ReferenceHit(it) }
+        }
+        referenceHit?.let { leading.add(0, it) }
         if (referenceNumber != null) {
-            ayah(referenceNumber)?.let { leading += SearchHit.ReferenceHit(it) }
+            // A typed reference is the answer: the text, the translations,
+            // the tafsir, and the word list are not asked, so a number in an
+            // unrelated passage cannot become a "match" beside the verse the
+            // reader named. The Search in row is how the reader asks for the
+            // text instead (owner decision, 19.7).
+            val (hits, capped) = orderSearchHits(leading, emptyList(), emptyList(), limit)
+            return SearchResults(
+                hits = hits,
+                counts = SearchCounts(
+                    surahs = counts[4],
+                    reference = if (referenceHit == null) 0 else 1,
+                ),
+                capped = capped,
+            )
         }
         coroutineContext.ensureActive()
 
         // The Arabic text, matched on the normalized column, and only for a
         // query that could match it: a Latin query carries no Arabic letter,
-        // and the column carries no Latin one.
-        val arabicNumbers = if (sources.text && query.arabic) {
-            arabicMatches(query, limit).also { counts[0] = it.size }
+        // and the column carries no Latin one. The exact index is asked
+        // first; the recall shape is asked only when it names no ayah, so a
+        // query the print already answers keeps its precise result and never
+        // gains the broader spellings beside it (owner decision, 19.7).
+        val arabicMatch = if (sources.text && query.arabic) {
+            arabicMatches(query, limit).also { counts[0] = it.numbers.size }
         } else {
-            emptyList()
+            ArabicMatch(emptyList(), skeleton = false)
         }
-        val arabicWords = matchedWords(arabicNumbers, query.terms)
+        val arabicNumbers = arabicMatch.numbers
+        val arabicWords = matchedWords(
+            arabicNumbers,
+            if (arabicMatch.skeleton) Search.skeletonTerms(query.terms) else query.terms,
+            if (arabicMatch.skeleton) "text_skeleton" else "text_search",
+        )
         coroutineContext.ensureActive()
 
         // Word meanings, in the reader's language, a single word finding its ayahs.
@@ -1052,23 +1083,38 @@ class ContentDatabase private constructor(
      */
     private fun indexedMatch(terms: List<String>): String? = Search.matchExpression(terms)
 
-    private fun arabicMatches(query: SearchQuery, limit: Int): List<Int> {
+    private class ArabicMatch(val numbers: List<Int>, val skeleton: Boolean)
+
+    /**
+     * The ayahs the exact index names, and, only when it names none, the
+     * ayahs the recall index names.
+     *
+     * The exact index stores the print's own search shape; the recall index
+     * stores that shape with the long vowels and the hamza seat removed. The
+     * exact answer is never widened with the recall one: a reader who typed a
+     * word the print already holds gets those verses and no others, and only
+     * a query that finds no verse at all falls back to the broader shape
+     * (owner decision, 19.7). [skeleton] tells the caller which column the
+     * matched words must be read from, so the highlight and the row cannot
+     * disagree.
+     */
+    private fun arabicMatches(query: SearchQuery, limit: Int): ArabicMatch {
         if (hasTable(null, "ayah_fts")) {
             indexedMatch(query.terms)?.let { match ->
-                return query(
-                    "SELECT number FROM ayah WHERE rowid IN " +
-                        "(SELECT docid FROM ayah_fts WHERE ayah_fts MATCH ?) " +
-                        "ORDER BY number LIMIT ?",
-                    arrayOf(match, limit.toString()),
-                ).use { cursor ->
-                    buildList(cursor.count) {
-                        while (cursor.moveToNext()) add(cursor.getInt(0))
-                    }
+                val exact = ftsAyahs("ayah_fts", match, limit)
+                if (exact.isNotEmpty()) return ArabicMatch(exact, skeleton = false)
+            }
+            if (hasTable(null, "ayah_skeleton_fts")) {
+                Search.skeletonExpression(query.terms)?.let { match ->
+                    val recall = ftsAyahs("ayah_skeleton_fts", match, limit)
+                    if (recall.isNotEmpty()) return ArabicMatch(recall, skeleton = true)
                 }
             }
+            return ArabicMatch(emptyList(), skeleton = false)
         }
+        // The old LIKE path, for a core pack built before the index existed.
         val condition = query.terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
-        return query(
+        val numbers = query(
             "SELECT number FROM ayah WHERE $condition ORDER BY number LIMIT ?",
             (query.terms.map { Search.pattern(it) } + limit.toString()).toTypedArray(),
         ).use { cursor ->
@@ -1076,12 +1122,30 @@ class ContentDatabase private constructor(
                 while (cursor.moveToNext()) add(cursor.getInt(0))
             }
         }
+        return ArabicMatch(numbers, skeleton = false)
     }
 
-    private fun matchedWords(numbers: List<Int>, terms: List<String>): Map<Int, Set<Int>> {
-        if (numbers.isEmpty()) return emptyMap()
+    /** The running numbers one index names, in the Book's own order. */
+    private fun ftsAyahs(table: String, match: String, limit: Int): List<Int> =
+        query(
+            "SELECT number FROM ayah WHERE rowid IN " +
+                "(SELECT docid FROM $table WHERE $table MATCH ?) " +
+                "ORDER BY number LIMIT ?",
+            arrayOf(match, limit.toString()),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) add(cursor.getInt(0))
+            }
+        }
+
+    private fun matchedWords(
+        numbers: List<Int>,
+        terms: List<String>,
+        column: String = "text_search",
+    ): Map<Int, Set<Int>> {
+        if (numbers.isEmpty() || terms.isEmpty()) return emptyMap()
         val inClause = numbers.joinToString(",")
-        val condition = terms.joinToString(" OR ") { "text_search LIKE ? ESCAPE '\\'" }
+        val condition = terms.joinToString(" OR ") { "$column LIKE ? ESCAPE '\\'" }
         return query(
             "SELECT ayah_number, position FROM word WHERE ayah_number IN ($inClause) AND ($condition)",
             terms.map { Search.pattern(it) }.toTypedArray(),
@@ -1376,11 +1440,12 @@ class ContentDatabase private constructor(
                 addAll(Search.surahNameForms(surah.nameLatin))
                 addAll(Search.surahNameForms(surah.nameArabic))
                 addAll(Search.surahNameForms(surah.nameBangla))
+                addAll(Search.surahNameAliases(surah.number))
             }
         }
     }
 
-    private val firstAyahCache: Map<Int, Int> by lazy {
+    private val firstAyahCache: Map<Int, Int?> by lazy {
         surahCache.keys.associateWith { firstAyahOfSurah(it) }
     }
 

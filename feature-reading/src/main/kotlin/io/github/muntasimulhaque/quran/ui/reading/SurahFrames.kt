@@ -32,6 +32,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Arabic
+import io.github.muntasimulhaque.quran.core.ReferenceLink
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -78,6 +79,8 @@ internal fun SurahOpening(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onPaperTap: () -> Unit,
+    /** Opens an internal reference the introduction links to, when it does. */
+    onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
     metrics: ReadingMetrics,
 ) {
     // The introduction is read as the surah opens, not when its door is
@@ -217,6 +220,9 @@ internal fun SurahOpening(
                     lineSp = metrics.translationLineSp,
                     arabicSp = metrics.arabicInlineSp,
                     color = palette.introInk,
+                    onLink = { href ->
+                        ReferenceLink.parse(href)?.let { onOpenReference(it.surah, it.ayah) }
+                    },
                 )
             }
         }

@@ -265,12 +265,36 @@ object Arabic {
         return out.toString().trim()
     }
 
-    /** The print's page and annotation signs, which the export does not carry. */
+    /**
+     * The print's page and annotation signs, which the export does not carry.
+     */
     private fun isPortableDropped(codePoint: Int): Boolean = when (codePoint) {
         in 0x06D6..0x06E0 -> true // waqf signs, ayah end, rub el hizb, zeros
         0x06E2, 0x06E3 -> true // small high meem and small low seen
         in 0x06E7..0x06ED -> true // small high yeh and noon, sajdah, stops
         else -> false
+    }
+
+    /**
+     * The recall shape: the search shape with the long vowels and the hamza
+     * seat removed.
+     *
+     * The exact index asks for the print's own letters, and the print writes
+     * a long vowel in ways a reader does not type: the superscript alef
+     * (`U+0670`), the small waw and yeh (`U+06E5`, `U+06E6`), the dotless
+     * alef-maksura base (`U+066E`), and the hamza seat (`U+0621`). The search
+     * shape keeps some of those, so a reader typing "الصلاة" did not meet
+     * "الصلوة", and "القرآن" did not meet "القرءان" (owner report, the
+     * audit). Removing the long vowels (alef, waw, yeh) and the hamza seat
+     * from both sides lets those spellings meet without touching a letter of
+     * the text. It is broader than the exact shape, so the app asks it only
+     * when the exact index names no ayah at all (owner decision, 19.7).
+     *
+     * The input is the stored search shape, already normalized; a raw text is
+     * passed through [normalizeForSearch] first by the caller.
+     */
+    fun recallShape(input: String): String = input.filterNot { character ->
+        character == 'ا' || character == 'و' || character == 'ي' || character == '\u0621'
     }
 
     /**

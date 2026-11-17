@@ -99,6 +99,8 @@ internal fun ReadingRows(
     /** The reader's scroll stopped with the bar between its two ends. */
     onBarSettled: () -> Unit = {},
     onNextSurah: (Int) -> Unit,
+    /** Opens an internal reference the surah's introduction links to. */
+    onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
     /** True while the one-time daily reminder offer is still unanswered. */
     reminderOffer: Boolean = false,
     onReminderOn: () -> Unit = {},
@@ -324,6 +326,7 @@ internal fun ReadingRows(
                     expanded = aboutOpen,
                     onExpandedChange = { aboutOpen = it },
                     onPaperTap = { if (!aboutOpen) onBackgroundTap() },
+                    onOpenReference = onOpenReference,
                     metrics = metrics,
                 )
                 // The door asks for a translation only while translations

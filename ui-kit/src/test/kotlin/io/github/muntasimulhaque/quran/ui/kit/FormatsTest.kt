@@ -18,16 +18,18 @@ class FormatsTest {
 
     @Test
     fun sizesReadInTheInterfacesOwnDigitsAndWords() {
-        assertEquals("৩০০ কেবি", formatBytes(300L * 1024, bangla, "কেবি", "এমবি"))
-        assertEquals("২.৮ এমবি", formatBytes(2_936_012L, bangla, "কেবি", "এমবি"))
-        assertEquals("২২ এমবি", formatBytes(22L * 1024 * 1024, bangla, "কেবি", "এমবি"))
+        assertEquals("৩০৭ কেবি", formatBytes(300L * 1024, bangla, "কেবি", "এমবি"))
+        assertEquals("২.৯ এমবি", formatBytes(2_936_012L, bangla, "কেবি", "এমবি"))
+        assertEquals("২৩ এমবি", formatBytes(22L * 1024 * 1024, bangla, "কেবি", "এমবি"))
     }
 
     @Test
     fun sizesReadInEnglishForAnEnglishInterface() {
-        assertEquals("300 KB", formatBytes(300L * 1024, Locale.US, "KB", "MB"))
-        assertEquals("2.8 MB", formatBytes(2_936_012L, Locale.US, "KB", "MB"))
-        assertEquals("22 MB", formatBytes(22L * 1024 * 1024, Locale.US, "KB", "MB"))
+        assertEquals("307 KB", formatBytes(300L * 1024, Locale.US, "KB", "MB"))
+        assertEquals("2.9 MB", formatBytes(2_936_012L, Locale.US, "KB", "MB"))
+        assertEquals("23 MB", formatBytes(22L * 1024 * 1024, Locale.US, "KB", "MB"))
+        // Al-Baqarah's recitation, the size the listen offer shows.
+        assertEquals("186 MB", formatBytes(185_606_125L, Locale.US, "KB", "MB"))
     }
 
     @Test

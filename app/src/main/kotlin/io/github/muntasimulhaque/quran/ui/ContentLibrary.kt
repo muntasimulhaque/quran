@@ -170,7 +170,9 @@ class ContentLibrary(
             network: Network,
             networkCapabilities: NetworkCapabilities,
         ) {
-            if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) {
+            if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+            ) {
                 scope.launch { drainPendingPacks() }
             }
         }
@@ -313,6 +315,13 @@ class ContentLibrary(
         stored: AppSettings,
         catalog: PackCatalog,
     ): AppSettings {
+        // A catalog that cannot name the core pack is not a catalog: the
+        // asset did not load, or it is damaged. Nothing may be retired on
+        // that answer, because "every installed pack is unknown" would
+        // delete the reader's whole library. The open then fails with the
+        // content's own problem screen, which is the honest answer, and no
+        // file is touched (owner report, the audit).
+        if (catalog.get(PackCatalog.CORE_ID) == null) return stored
         val offered = catalog.ofType(PackType.Translation).map { it.id }.toSet()
         val repaired = translationSelectionAfterRemoval(
             language = stored.uiLanguage,

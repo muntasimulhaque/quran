@@ -63,6 +63,10 @@ internal fun ReaderSheets(
             saved = saved,
             lastRead = lastRead,
             currentAyah = settings.ayah,
+            // The first frame of Last Read and Saved names its places from
+            // the index already in memory, so the running number is never
+            // drawn as the ayah of its surah while the labels load.
+            fallback = viewModel::ayahPlace,
             noteSp = settings.translationSp,
             noteLineSp = settings.translationLineSp,
             onDismiss = onDismiss,

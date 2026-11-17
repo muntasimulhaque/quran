@@ -82,6 +82,14 @@ fun BrowseSheet(
     saved: List<SavedAyah>,
     lastRead: List<ReadPlace>,
     currentAyah: Int,
+    /**
+     * A list's first frame, before the database's own labels arrive: the
+     * surah and the ayah inside it for a running ayah number, from the index
+     * the reading already holds. Null is a number the reading cannot place,
+     * and the row then says the number it has. The database's labels replace
+     * these when they land, so the two paths cannot disagree about a name.
+     */
+    fallback: (Int) -> Pair<Surah, Int>? = { null },
     /** The reader's translation size and line, for the saved notes. */
     noteSp: Float,
     noteLineSp: Float,
@@ -246,6 +254,24 @@ fun BrowseSheet(
         }
     }
 
+    // The first frame of the two lists, before the database's labels land:
+    // the surah and the ayah inside it from the index the reading already
+    // holds, so a row never says "Ayah 262" for 2:255 while it waits (owner
+    // report, the audit). The database's labels replace these when they
+    // arrive, and the two paths read the same names.
+    val immediate = remember(fallback, saved, lastRead, locale, ayahLabel) {
+        (saved.map { it.ayahNumber } + lastRead.map { it.ayahNumber }).distinct()
+            .mapNotNull { number ->
+                fallback(number)?.let { (surah, ayah) ->
+                    number to AyahText(
+                        surahName = surah.nameSimple,
+                        ayahLabel = String.format(locale, ayahLabel, ayah),
+                    )
+                }
+            }
+            .toMap()
+    }
+
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -367,7 +393,7 @@ fun BrowseSheet(
                     }
                     BrowseTab.LastRead -> LastReadList(
                         places = lastRead,
-                        texts = texts,
+                        texts = immediate + texts,
                         listState = lastReadList,
                         listModifier = Modifier.sheetDragGate(lastReadGate),
                         onAyah = onAyah,
@@ -375,7 +401,7 @@ fun BrowseSheet(
                     )
                     BrowseTab.Saved -> SavedList(
                         saved = saved,
-                        texts = texts,
+                        texts = immediate + texts,
                         listState = savedList,
                         listModifier = Modifier.sheetDragGate(savedGate),
                         noteSp = noteSp,

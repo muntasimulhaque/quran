@@ -154,8 +154,15 @@ data class SearchCounts(
     val surahs: Int = 0,
     /** The reader's own notes that carried the query. */
     val notes: Int = 0,
+    /**
+     * The ayah a typed reference named. It is not one of the searched
+     * sources: it is the row the reader asked for, and the status line owes
+     * it a count or a pure reference would read "No matches" above its own
+     * row (owner report, 19.7).
+     */
+    val reference: Int = 0,
 ) {
-    val total: Int get() = arabic + translation + tafsir + words + surahs + notes
+    val total: Int get() = arabic + translation + tafsir + words + surahs + notes + reference
 }
 
 data class SearchResults(

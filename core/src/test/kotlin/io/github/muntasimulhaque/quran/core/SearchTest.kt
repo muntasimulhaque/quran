@@ -314,4 +314,27 @@ class SearchTest {
         assertFalse("a marker must not reach the reader: $excerpt", excerpt.contains("[2]"))
         assertEquals("Merciful", excerpt.substring(ranges.first().first, ranges.first().last + 1))
     }
+
+    @Test
+    fun `the recall shape removes the long vowels and the hamza seat`() {
+        assertEquals("لصله", Search.skeletonForIndex("الصلاة"))
+        assertEquals("لقرن", Search.skeletonForIndex("القرآن"))
+        assertEquals("لشطن", Search.skeletonForIndex("الشيطان"))
+        assertEquals("برهم", Search.skeletonForIndex("إبراهيم"))
+    }
+
+    @Test
+    fun `the recall expression is one prefix per term and refuses a one-letter shape`() {
+        assertEquals("لصله*", Search.skeletonExpression(listOf("الصلاه")))
+        assertEquals("لصله* AND لقرن*", Search.skeletonExpression(listOf("الصلاه", "القران")))
+        assertNull(Search.skeletonExpression(listOf("في")))
+    }
+
+    @Test
+    fun `an older QUL name still finds the surah it named`() {
+        assertTrue("anbya" in Search.surahNameAliases(21))
+        assertTrue("mujadila" in Search.surahNameAliases(58))
+        assertTrue("saf" in Search.surahNameAliases(61))
+        assertTrue(Search.surahNameAliases(1).isEmpty())
+    }
 }

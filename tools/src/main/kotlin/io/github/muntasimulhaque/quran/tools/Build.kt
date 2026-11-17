@@ -134,7 +134,7 @@ class Build(private val root: File) {
             connection.autoCommit = false
             schema(connection)
             insertSurahs(connection, surahs)
-            val inserted = insertAyahsAndWords(
+            insertAyahsAndWords(
                 connection, words, ayahNumbers, wordLists, roots, grammar, navigation,
             )
             insertTranslation(connection, translation)
@@ -160,7 +160,7 @@ class Build(private val root: File) {
             insertRecitations(connection, manifest, ayahNumbers, wordCounts)
             insertSurahInfo(connection)
             insertPacks(connection, manifest)
-            insertMeta(connection, manifest, inserted)
+            insertMeta(connection, manifest, words.count { !it.marker })
             connection.commit()
             connection.autoCommit = true
             connection.createStatement().use { it.execute("VACUUM") }
@@ -631,6 +631,20 @@ class Build(private val root: File) {
         val bismillahPre: Boolean,
     )
 
+    /**
+     * The English names the app draws and searches, where QUL's simple name
+     * differs from the common spelling. "Al-Anbya" missed the i a reader
+     * types, and four other names carried QUL's longer vowel (owner decision,
+     * 19.7). The Arabic name is the source's, untouched.
+     */
+    private val surahNameFixes = mapOf(
+        21 to "Al-Anbiya",
+        42 to "Ash-Shura",
+        58 to "Al-Mujadilah",
+        61 to "As-Saff",
+        93 to "Ad-Duha",
+    )
+
     private fun readSurahs(): List<Surah> {
         val json = Json.parseToJsonElement(
             sourceDir("metadata-surah-names").firstWithExtension(".json")!!.readText(),
@@ -645,11 +659,16 @@ class Build(private val root: File) {
         val out = ArrayList<Surah>(114)
         for (number in 1..114) {
             val o = json[number.toString()]?.jsonObject ?: continue
+            // The five English names QUL spells in a way a reader does not
+            // search: "Al-Anbya" for Al-Anbiya, and four variants beside it.
+            // The Arabic and the ayat are untouched; this is the name a list
+            // and a search read (owner decision, 19.7).
+            val fixed = surahNameFixes[number]
             out += Surah(
                 number = number,
                 nameArabic = o["name_arabic"]?.jsonPrimitive?.contentOrNull ?: "",
-                nameSimple = o["name_simple"]?.jsonPrimitive?.contentOrNull ?: "",
-                nameLatin = o["name"]?.jsonPrimitive?.contentOrNull ?: "",
+                nameSimple = fixed ?: o["name_simple"]?.jsonPrimitive?.contentOrNull ?: "",
+                nameLatin = fixed ?: o["name"]?.jsonPrimitive?.contentOrNull ?: "",
                 nameBangla = bangla[number.toString()]?.jsonPrimitive?.contentOrNull.orEmpty(),
                 revelationPlace = o["revelation_place"]?.jsonPrimitive?.contentOrNull ?: "",
                 revelationOrder = o["revelation_order"]?.jsonPrimitive?.intOrNull ?: 0,
@@ -736,13 +755,13 @@ class Build(private val root: File) {
                     "verse_key TEXT NOT NULL, words_count INTEGER NOT NULL, juz INTEGER NOT NULL, " +
                     "hizb INTEGER NOT NULL, rub INTEGER NOT NULL, manzil INTEGER NOT NULL, ruku INTEGER NOT NULL, " +
                     "sajdah INTEGER NOT NULL, sajdah_type TEXT, text TEXT NOT NULL, text_search TEXT NOT NULL, " +
-                    "tajweed TEXT NOT NULL)",
+                    "text_skeleton TEXT NOT NULL, tajweed TEXT NOT NULL)",
             )
             statement.execute("CREATE INDEX ayah_surah ON ayah(surah, ayah)")
             statement.execute(
                 "CREATE TABLE word (id INTEGER PRIMARY KEY, ayah_number INTEGER NOT NULL, surah INTEGER NOT NULL, " +
                     "ayah INTEGER NOT NULL, position INTEGER NOT NULL, marker INTEGER NOT NULL, text TEXT NOT NULL, " +
-                    "text_search TEXT NOT NULL)",
+                    "text_search TEXT NOT NULL, text_skeleton TEXT NOT NULL)",
             )
             // Every read of a surah's words filters on the ayah number, and
             // the word table is the largest one in the core pack at over
@@ -823,7 +842,14 @@ class Build(private val root: File) {
         }
     }
 
-    private fun insertMeta(connection: Connection, manifest: Manifest, words: Int) {
+    /**
+     * The facts a maintainer reads from the database itself. [drawnWords] is
+     * the words the reading draws, not the rows of the `word` table: the
+     * table keeps one marker row per ayah, and a count that included them
+     * made `meta.words` read 6,236, the same as the ayahs (owner report, the
+     * audit).
+     */
+    private fun insertMeta(connection: Connection, manifest: Manifest, drawnWords: Int) {
         connection.prepareStatement("INSERT INTO meta(key, value) VALUES(?, ?)").use { statement ->
             fun put(key: String, value: String) {
                 statement.setString(1, key)
@@ -831,7 +857,7 @@ class Build(private val root: File) {
                 statement.addBatch()
             }
             put("content_version", manifest.contentVersion)
-            put("words", words.toString())
+            put("words", drawnWords.toString())
             put("ayahs", "6236")
             put("text_source", "QPC Hafs word by word, distributed via QUL, audited against the QUL QPC text")
             put("translation_source", "Saheeh International, Noor International Center, QuranEnc version 1.1.2")
@@ -950,7 +976,7 @@ class Build(private val root: File) {
 
         connection.prepareStatement(
             "INSERT INTO ayah(number, surah, ayah, verse_key, words_count, juz, hizb, rub, manzil, ruku, " +
-                "sajdah, sajdah_type, text, text_search, tajweed) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "sajdah, sajdah_type, text, text_search, text_skeleton, tajweed) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for ((key, group) in grouped) {
                 val number = ayahNumbers[key] ?: continue
@@ -971,7 +997,8 @@ class Build(private val root: File) {
                 statement.setString(12, nav.sajdahType[number])
                 statement.setString(13, text)
                 statement.setString(14, Search.normalizeForIndex(text))
-                statement.setString(15, tajweed)
+                statement.setString(15, Search.skeletonForIndex(text))
+                statement.setString(16, tajweed)
                 statement.addBatch()
             }
             statement.executeBatch()
@@ -1068,8 +1095,8 @@ class Build(private val root: File) {
         }
 
         connection.prepareStatement(
-            "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, text_search) " +
-                "VALUES(?,?,?,?,?,?,?,?)",
+            "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, text_search, text_skeleton) " +
+                "VALUES(?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for (word in words) {
                 statement.setInt(1, word.id)
@@ -1080,6 +1107,7 @@ class Build(private val root: File) {
                 statement.setInt(6, if (word.marker) 1 else 0)
                 statement.setString(7, word.text)
                 statement.setString(8, if (word.marker) "" else Search.normalizeForIndex(word.text))
+                statement.setString(9, if (word.marker) "" else Search.skeletonForIndex(word.text))
                 statement.addBatch()
             }
             statement.executeBatch()

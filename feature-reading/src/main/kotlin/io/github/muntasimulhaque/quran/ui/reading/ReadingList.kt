@@ -120,6 +120,8 @@ data class ReadingListActions(
     /** The reader's scroll stopped with the bar between its two ends. */
     val onBarSettled: () -> Unit = {},
     val onNextSurah: (Int) -> Unit,
+    /** Opens an internal reference the surah's introduction links to. */
+    val onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
     val onReminderOn: () -> Unit = {},
     val onReminderNotNow: () -> Unit = {},
     val onAddContent: () -> Unit,
@@ -265,6 +267,7 @@ fun ReadingList(
         onBarScroll = actions.onBarScroll,
         onBarSettled = actions.onBarSettled,
         onNextSurah = actions.onNextSurah,
+        onOpenReference = actions.onOpenReference,
         reminderOffer = state.reminderOffer,
         onReminderOn = actions.onReminderOn,
         onReminderNotNow = actions.onReminderNotNow,

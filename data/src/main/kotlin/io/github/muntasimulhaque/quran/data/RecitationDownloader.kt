@@ -158,8 +158,6 @@ class RecitationDownloader(private val context: Context) {
             throw IllegalStateException("the surah folder is not a safe name")
         }
         val imported = File(context.filesDir, "recitations")
-        val target = SafePaths.childUnder(imported, folder)
-            ?: throw IllegalStateException("the surah folder is not a safe name")
         val staging = File(imported, STAGING)
         staging.mkdirs()
         staging.listFiles()?.forEach { it.deleteRecursively() }
@@ -207,33 +205,11 @@ class RecitationDownloader(private val context: Context) {
         if (unpacking.listFiles().orEmpty().isEmpty()) {
             throw IllegalStateException("the package held no ayah files")
         }
-        // The folder rename is the commit. Moving the files one by one left
-        // a surah that the app counted as downloaded after a process death
-        // halfway through the list. A directory rename is one filesystem
-        // operation, and the old folder is kept until the new one is in
-        // place, so a failed commit restores the previous surah.
-        val landing = SafePaths.childUnder(imported, "$folder-$surah.new")
-            ?: throw IllegalStateException("the surah landing is not a safe name")
-        val backup = SafePaths.childUnder(imported, "$folder-$surah.old")
-            ?: throw IllegalStateException("the surah backup is not a safe name")
-        if (landing.exists()) landing.deleteRecursively()
-        if (!target.exists() && backup.exists()) backup.renameTo(target)
-        if (!unpacking.renameTo(landing)) {
-            throw IllegalStateException("the surah folder could not be completed")
-        }
-        if (target.exists()) {
-            if (backup.exists()) backup.deleteRecursively()
-            if (!target.renameTo(backup)) {
-                landing.renameTo(unpacking)
-                throw IllegalStateException("the previous surah folder could not be moved aside")
-            }
-        }
-        if (!landing.renameTo(target)) {
-            if (backup.exists()) backup.renameTo(target)
-            throw IllegalStateException("the surah folder could not be committed")
-        }
-        backup.deleteRecursively()
-        unpacking.deleteRecursively()
+        // The reciter's folder holds every surah of that voice, so the
+        // commit moves this surah's files into it; it never renames the
+        // folder over the reciter's own, which deleted every surah already
+        // downloaded (owner report, the audit).
+        RecitationCommit.commit(imported, folder, unpacking)
         staging.delete()
         Unit
     }

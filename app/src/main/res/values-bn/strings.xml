@@ -6,6 +6,8 @@
 
     <string name="reader_fallback_title">কুরআন</string>
     <string name="surah_fallback_name">সূরা %1$d</string>
+    <!-- A link or a typed reference that names no place in the Book. -->
+    <string name="reference_not_found">এই রেফারেন্সটি কিতাবে নেই।</string>
     <string name="juz_label">পারা %1$d</string>
 
     <string name="first_paint_preparing">লেখা প্রস্তুত হচ্ছে…</string>

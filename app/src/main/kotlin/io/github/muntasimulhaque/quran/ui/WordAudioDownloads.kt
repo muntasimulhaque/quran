@@ -77,6 +77,7 @@ internal class WordAudioDownloads(
             network: android.net.Network,
             capabilities: NetworkCapabilities,
         ) {
+            if (!capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) return
             if (!capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) return
             val waiting = _state.value
             if (!enabled || !waiting.waiting || waiting.installed) return

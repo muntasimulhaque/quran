@@ -30,6 +30,8 @@
     <string name="first_paint_preparing">Preparing the text…</string>
     <string name="reader_fallback_title">Quran</string>
     <string name="surah_fallback_name">Surah %1$d</string>
+    <!-- A link or a typed reference that names no place in the Book. -->
+    <string name="reference_not_found">That reference is not in the Book.</string>
     <string name="juz_label">Juz %1$d</string>
 
     <string name="action_browse">Browse the Quran</string>

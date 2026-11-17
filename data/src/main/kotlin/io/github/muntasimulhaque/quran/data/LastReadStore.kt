@@ -262,13 +262,17 @@ class LastReadStore internal constructor(
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            // The list used to be one row per ayah, and there is no reader to
-            // carry across: the app has not shipped, and the old rows cannot
-            // be rebuilt into the readings they never recorded. The table is
-            // made new, so the first reading after the update is the first
-            // row in it (owner decision, 7.8).
-            db.execSQL("DROP TABLE IF EXISTS $TABLE")
-            onCreate(db)
+            // Version 3 is the shipped reading model. An install from the
+            // one-row-per-ayah shape (version 2) cannot be rebuilt into the
+            // readings it never recorded, so that one step resets the list.
+            // No later version may drop the table: a schema change adds a
+            // column and carries the rows (owner decision, 19.7). The
+            // comment that stood here said the app had not shipped; it has,
+            // and a reader's Last Read is their work.
+            if (oldVersion < 3) {
+                db.execSQL("DROP TABLE IF EXISTS $TABLE")
+                onCreate(db)
+            }
         }
     }
 

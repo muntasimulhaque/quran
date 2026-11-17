@@ -38,12 +38,17 @@ fun localizedDigits(text: String): String {
  * language the surface is drawn in, which is not always the process default.
  * The composable below is the app's one caller; a test can pin the rule
  * without a window.
+ *
+ * The units are decimal: one MB is a million bytes, the way Android's own
+ * data use and a carrier report it. A reader deciding about cellular data is
+ * owed the number the carrier bills, not the binary one under the same name
+ * (owner decision, 19.7).
  */
 fun formatBytes(bytes: Long, locale: Locale, kb: String, mb: String): String = when {
     bytes <= 0 -> ""
-    bytes < 1024 * 1024 -> String.format(locale, "%d %s", (bytes + 512) / 1024, kb)
-    bytes < 10 * 1024 * 1024 -> String.format(locale, "%.1f %s", bytes / 1048576.0, mb)
-    else -> String.format(locale, "%.0f %s", bytes / 1048576.0, mb)
+    bytes < 1_000_000 -> String.format(locale, "%d %s", (bytes + 500) / 1000, kb)
+    bytes < 10_000_000 -> String.format(locale, "%.1f %s", bytes / 1_000_000.0, mb)
+    else -> String.format(locale, "%.0f %s", bytes / 1_000_000.0, mb)
 }
 
 /** [formatBytes] in the interface's own digits and words, read where it is drawn. */

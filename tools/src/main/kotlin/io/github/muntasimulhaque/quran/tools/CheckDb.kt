@@ -7,6 +7,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import io.github.muntasimulhaque.quran.core.PartOfSpeech
+import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.TajweedCodec
 import java.io.File
 
@@ -106,6 +107,8 @@ class CheckDb(private val root: File) {
             if (badTajweed == 0) println("checkdb: every ayah's tajweed code matches its text")
             failures += checkWordsAndMeanings(connection)
             failures += checkWordGrammar(connection)
+            failures += checkSkeleton(connection)
+            failures += checkSurahNames(connection)
             failures += checkRecitationSegments(connection, catalogReciters)
             failures += checkBundledAudio(connection)
             // Every pack must cover every ayah, or the reader would meet a
@@ -229,8 +232,63 @@ class CheckDb(private val root: File) {
         return failures
     }
 
+    /**
+     * The five English names are reviewed app data, not the source's simple
+     * line: a list that says "Al-Anbya" cannot be searched by the name a
+     * reader knows (owner decision, 19.7).
+     */
+    private fun checkSurahNames(connection: java.sql.Connection): Int {
+        val expected = mapOf(
+            21 to "Al-Anbiya",
+            42 to "Ash-Shura",
+            58 to "Al-Mujadilah",
+            61 to "As-Saff",
+            93 to "Ad-Duha",
+        )
+        var failures = 0
+        for ((number, name) in expected) {
+            val actual = connection.prepareStatement(
+                "SELECT name_simple FROM surah WHERE number = ?",
+            ).use { statement ->
+                statement.setInt(1, number)
+                statement.executeQuery().use { rs -> if (rs.next()) rs.getString(1) else null }
+            }
+            if (actual != name) {
+                println("checkdb: surah $number is named $actual, expected $name")
+                failures++
+            }
+        }
+        if (failures == 0) println("checkdb: the five reviewed surah names are in place")
+        return failures
+    }
+
     /** The ayah-number rows in the QUL word lists, in either numeral set. */
     private val markerMeaning = Regex("^\\((?:(?:\\d+)|[\u0660-\u0669]+)\\)$")
+
+    /**
+     * The recall column is the exact search shape with the long vowels and
+     * the hamza seat removed, in both tables. The app asks it only when the
+     * exact index names no ayah, so a drift here is the difference between a
+     * reader's modern spelling finding the verse and finding nothing (owner
+     * decision, 19.7).
+     */
+    private fun checkSkeleton(connection: java.sql.Connection): Int {
+        var failures = 0
+        for ((table, key) in listOf("ayah" to "number", "word" to "id")) {
+            connection.each("SELECT $key, text_search, text_skeleton FROM $table") { rs ->
+                val expected = Arabic.recallShape(rs.getString(2) ?: "")
+                val actual = rs.getString(3) ?: ""
+                if (expected != actual) {
+                    failures++
+                    if (failures <= 5) {
+                        println("checkdb: $table ${rs.getInt(1)} has a recall shape that is not its search shape")
+                    }
+                }
+            }
+        }
+        if (failures == 0) println("checkdb: every recall column is its search shape")
+        return failures
+    }
 
     /**
      * The reading's two halves must meet: the ayah's text is its drawn words

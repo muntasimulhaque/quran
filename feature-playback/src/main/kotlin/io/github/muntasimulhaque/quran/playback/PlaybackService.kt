@@ -18,6 +18,7 @@ import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.UiLanguage
 import java.util.Locale
 
 /**
@@ -80,8 +81,10 @@ class PlaybackService : MediaSessionService() {
      * language is English (owner decision, 8.8).
      */
     override fun attachBaseContext(newBase: Context) {
-        val tag = LanguagePreference(newBase).tag()
-            ?: return super.attachBaseContext(newBase)
+        // A fresh install has no tag yet; the phone's own language seeds the
+        // service's notification, and an unsupported phone takes the English
+        // fallback, as the Activity does (owner decision, 19.7).
+        val tag = LanguagePreference(newBase).tag() ?: UiLanguage.ofSystem().tag
         val locale = Locale.forLanguageTag(tag)
         Locale.setDefault(locale)
         val configuration = Configuration(newBase.resources.configuration).apply {

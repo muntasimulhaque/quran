@@ -22,12 +22,13 @@ import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
 import io.github.muntasimulhaque.quran.daily.rememberExactGrantWithheld
 import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
 import io.github.muntasimulhaque.quran.daily.reminderChannelHidden
+import androidx.lifecycle.lifecycleScope
 import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
 import io.github.muntasimulhaque.quran.ui.QuranApp
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -62,12 +63,14 @@ class MainActivity : ComponentActivity() {
      * change of language writes that mirror and recreates the Activity.
      */
     override fun attachBaseContext(newBase: Context) {
-        val locale = LanguagePreference(newBase).tag()
-            ?.let { Locale.forLanguageTag(it) }
-        if (locale == null) {
-            super.attachBaseContext(newBase)
-            return
-        }
+        // A fresh install has no tag yet, so the phone's own language seeds
+        // the first frame; an unsupported phone takes English, the fallback,
+        // and therefore LTR. Without this the first session on an Arabic or
+        // Hebrew phone came up as an English interface mirrored for the
+        // phone's direction, and only the next launch was LTR (owner
+        // decision, 19.7).
+        val tag = LanguagePreference(newBase).tag() ?: UiLanguage.ofSystem().tag
+        val locale = Locale.forLanguageTag(tag)
         // The platform controls that take a locale of their own (the daily
         // reminder's Material clock is the one that showed Latin digits in a
         // Bangla interface) read Locale.getDefault(), not this Activity's
@@ -120,12 +123,16 @@ class MainActivity : ComponentActivity() {
         // switch is off: the setting is read, and no alarm is set. A launch
         // cannot throw away a delivery the platform is still holding, because
         // each day is armed under its own pending intent.
-        val scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
-            val settings = runCatching { SettingsStore(this@MainActivity).settings.first() }
+        //
+        // The work runs on the window's own lifecycle scope, so a launch one
+        // rotation long is cancelled with the window, and the application
+        // context is what it carries: a coroutine that outlives the Activity
+        // must not hold it (owner decision, 19.7).
+        lifecycleScope.launch(Dispatchers.IO) {
+            val settings = runCatching { SettingsStore(applicationContext).settings.first() }
                 .getOrNull() ?: return@launch
             DailyAyahScheduler.apply(
-                this@MainActivity,
+                applicationContext,
                 enabled = settings.dailyAyah,
                 minuteOfDay = settings.dailyAyahMinute,
             )

@@ -193,6 +193,25 @@ object Search {
     }
 
     /**
+     * The spellings a surah carried before its English name was reviewed:
+     * "Al-Anbya" still finds Al-Anbiya, and the four other QUL variants find
+     * the surahs they name. A reader who learned a name from an older release
+     * is not left with a search that no longer knows it (owner decision,
+     * 19.7).
+     */
+    private val surahAliases = mapOf(
+        21 to listOf("Al-Anbya"),
+        42 to listOf("Ash-Shuraa"),
+        58 to listOf("Al-Mujadila"),
+        61 to listOf("As-Saf"),
+        93 to listOf("Ad-Duhaa"),
+    )
+
+    /** Every key an older spelling of a surah's name may be typed by. */
+    fun surahNameAliases(number: Int): Set<String> =
+        surahAliases[number].orEmpty().flatMap { surahNameForms(it) }.toSet()
+
+    /**
      * Where each term appears in [text], as offsets into the original text.
      * The text is folded once with an offsets map, so a match survives
      * diacritics, letter form differences, and transliteration marks while
@@ -443,6 +462,40 @@ object Search {
         if (parts.isEmpty()) return null
         return parts.joinToString(" AND ")
     }
+
+    /**
+     * The recall shape of each term, in order and once each. A shape shorter
+     * than [MIN_TERM_LENGTH] is refused: two letters is the shortest useful
+     * term, and a one-letter skeleton would match a large part of the Book.
+     */
+    fun skeletonTerms(terms: List<String>): List<String> =
+        terms.map { Arabic.recallShape(it) }
+            .filter { it.length >= MIN_TERM_LENGTH }
+            .distinct()
+
+    /**
+     * The fallback expression: every term in the recall shape, as a token
+     * prefix, all required. The exact [matchExpression] is asked first; this
+     * one is asked only when the exact index names no ayah, so a query the
+     * print already answers keeps its precise result and never gains the
+     * broader spellings beside it (owner decision, 19.7).
+     *
+     * The seat expansion in [expandedTerms] is deliberately not used here:
+     * the recall shape has already removed the seats and the long vowels, and
+     * putting them back would undo the fallback.
+     */
+    fun skeletonExpression(terms: List<String>): String? {
+        val parts = skeletonTerms(terms).map { "$it*" }
+        return if (parts.isEmpty()) null else parts.joinToString(" AND ")
+    }
+
+    /**
+     * The shape a text is indexed under for the recall fallback. The same
+     * rule as [skeletonTerms], applied to a whole ayah or word at build time,
+     * so the indexed column and a typed query cannot be two stories (owner
+     * decision, 19.7).
+     */
+    fun skeletonForIndex(input: String): String = Arabic.recallShape(normalizeForIndex(input))
 
     /**
      * What the index's tokenizer treats as a break: an ASCII character that is

@@ -26,6 +26,14 @@ data class TextRun(
     val arabic: Boolean = false,
     val quote: Boolean = false,
     val marker: Int? = null,
+    /**
+     * The target of a link around this run, when the source wrapped one. The
+     * tafsir and the surah introductions carry internal references as
+     * `<a href="/2/67-73">`; the text stays a run, and the surface that can
+     * open the target draws it as a door. A surface with no handler keeps the
+     * words and no promise (owner decision, 19.7).
+     */
+    val link: String? = null,
 )
 
 /**
@@ -132,8 +140,23 @@ object RichText {
 
     private val marker = Regex("\\[(\\d+)]")
 
+    /**
+     * A printed ayah number welded to the word after it: `(9)When`. The
+     * tafsir source marks a quoted ayah's number in parentheses and often
+     * sets the sentence against it without a space, which the panel and the
+     * search excerpt read as one run-on word. A space is a display rule, not
+     * an edit of the text (owner report, 19.7).
+     */
+    private val ayahNumberThenLetter = Regex("\\((\\d+)\\)(?=\\p{L})")
+
+    private fun spaceAfterAyahNumber(text: String): String =
+        ayahNumberThenLetter.replace(text) { match -> match.value + " " }
+
     /** A tag-shaped run: `<`, an optional slash, a letter, then to the `>`. */
     private val tag = Regex("</?[a-zA-Z][^>]*>")
+
+    /** The target inside an `<a>` tag, kept as the source wrote it. */
+    private val anchor = Regex("""href\s*=\s*["']([^"']*)["']""", RegexOption.IGNORE_CASE)
 
     /**
      * True when a string still carries something tag-shaped, which means it
@@ -191,6 +214,7 @@ object RichText {
         var bold = 0
         var italic = 0
         var quote = false
+        var link: String? = null
         // A closing emphasis that lands against the next word without a
         // space in the source is a heading welded to its sentence in the
         // Bangla tafsir. The flag inserts the missing space only when the
@@ -224,7 +248,7 @@ object RichText {
 
         fun flushText() {
             if (text.isEmpty()) return
-            runs += splitRuns(text.toString(), bold > 0, italic > 0, quote)
+            runs += splitRuns(spaceAfterAyahNumber(text.toString()), bold > 0, italic > 0, quote, link)
             text.clear()
         }
 
@@ -242,6 +266,7 @@ object RichText {
             bold = 0
             italic = 0
             quote = false
+            link = null
         }
 
         var index = 0
@@ -257,7 +282,8 @@ object RichText {
                 append(html.substring(open))
                 break
             }
-            val tag = html.substring(open + 1, close).trim().lowercase()
+            val rawTag = html.substring(open + 1, close).trim()
+            val tag = rawTag.lowercase()
             when {
                 tag == "p" || tag == "/p" -> flushBlock()
                 heading.matches(tag) -> {
@@ -266,6 +292,15 @@ object RichText {
                 }
                 tag.startsWith("/") && heading.matches(tag.removePrefix("/")) -> flushBlock()
                 tag == "br" || tag == "br/" -> if (started && text.isNotEmpty() && text.last() != '\n') text.append('\n')
+                tag == "a" || tag.startsWith("a ") -> {
+                    flushText()
+                    link = anchor.find(rawTag)?.groupValues?.get(1)
+                }
+                tag == "/a" -> {
+                    flushText()
+                    link = null
+                    pendingSpace = true
+                }
                 tag == "strong" || tag == "b" -> {
                     flushText()
                     bold++
@@ -353,6 +388,7 @@ object RichText {
     fun plain(text: String): String =
         tag.replace(text, " ")
             .let { marker.replace(it, "") }
+            .let { spaceAfterAyahNumber(it) }
             .replace(horizontalSpace, " ")
             .replace(spaceBeforePunctuation, "$1")
             .replace(spaceAfterOpening, "$1")
@@ -365,6 +401,7 @@ object RichText {
         bold: Boolean = false,
         italic: Boolean = false,
         quote: Boolean = false,
+        link: String? = null,
     ): List<TextRun> {
         val runs = mutableListOf<TextRun>()
         val builder = StringBuilder()
@@ -372,7 +409,7 @@ object RichText {
 
         fun flush() {
             if (builder.isEmpty()) return
-            runs += TextRun(builder.toString(), bold, italic, arabic, quote)
+            runs += TextRun(builder.toString(), bold, italic, arabic, quote, link = link)
             builder.clear()
         }
 
@@ -467,7 +504,8 @@ object RichText {
                 last.italic == run.italic &&
                 last.arabic == run.arabic &&
                 last.quote == run.quote &&
-                last.marker == run.marker
+                last.marker == run.marker &&
+                last.link == run.link
             if (mergeable) {
                 out[out.size - 1] = last.copy(text = last.text + run.text)
             } else {

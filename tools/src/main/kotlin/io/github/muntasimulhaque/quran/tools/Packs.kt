@@ -73,7 +73,10 @@ class Packs(private val root: File) {
             // hizb is found by a reader typing it (owner report, 10.7).
             // Version 5 carries the surah introductions, so every reader has
             // them without a word list.
-            version = "5",
+            // Version 6 carries the recall column and its index, so a
+            // reader's modern spelling finds a verse the exact index cannot
+            // name (owner decision, 19.7).
+            version = "6",
             shipped = true,
             ayahs = 6236,
         ),
@@ -475,7 +478,7 @@ class Packs(private val root: File) {
                         statement.execute("CREATE TABLE ayah AS SELECT * FROM src.ayah")
                         statement.execute(
                             "CREATE TABLE word AS SELECT id, ayah_number, surah, ayah, position, marker, " +
-                                "text, text_search FROM src.word",
+                                "text, text_search, text_skeleton FROM src.word",
                         )
                         // The core pack is the one place the running ayah number had
                         // no index of its own: every other pack indexes its
@@ -502,6 +505,11 @@ class Packs(private val root: File) {
                         // to them at all.
                         statement.execute("CREATE TABLE surah_info AS SELECT * FROM src.surah_info")
                         createFts(statement, "ayah_fts", "text_search", "ayah")
+                        // The recall index: the print's long vowels and hamza
+                        // seat removed, so a modern spelling meets a word the
+                        // print writes another way. The app asks it only when
+                        // the exact index names no ayah (owner decision, 19.7).
+                        createFts(statement, "ayah_skeleton_fts", "text_skeleton", "ayah")
                     }
                     "translation" -> {
                         when (pack.id) {

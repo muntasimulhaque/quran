@@ -494,6 +494,20 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         return surahByNumber[number]
     }
 
+    /**
+     * The surah and the ayah inside it for a running number, from the index
+     * the library already built. It is a list's first frame: the database's
+     * own labels arrive on a worker, and a row drawn before them must not
+     * call the running number an ayah of its surah (owner report, the audit).
+     */
+    fun ayahPlace(number: Int): Pair<Surah, Int>? {
+        val surah = surahOf(number) ?: return null
+        val first = firstAyahOf.getOrNull(surah.number)?.takeIf { it > 0 } ?: return null
+        val inside = number - first + 1
+        if (inside !in 1..surah.versesCount) return null
+        return surah to inside
+    }
+
     private val surahByNumber: Map<Int, Surah>
         get() = surahIndexByNumber ?: surahs.associateBy { it.number }.also { surahIndexByNumber = it }
 
@@ -597,10 +611,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * reading uses is the surah's first ayah plus the one inside it.
      */
     fun jumpToReference(surah: Int, ayah: Int) {
-        if (surah !in 1..TOTAL_SURAHS || ayah < 1) return
-        val count = surahByNumber[surah]?.versesCount ?: return
-        if (ayah > count) return
-        val first = firstAyahOf.getOrNull(surah)?.takeIf { it > 0 } ?: return
+        val count = if (surah in 1..TOTAL_SURAHS) surahByNumber[surah]?.versesCount else null
+        if (count == null || ayah < 1 || ayah > count) {
+            // A link or a typed reference the Book does not contain is said,
+            // not silently dropped. The reading stays where it is (owner
+            // decision, 19.7).
+            _messages.tryEmit(ReaderMessage(R.string.reference_not_found))
+            return
+        }
+        val first = firstAyahOf.getOrNull(surah)?.takeIf { it > 0 }
+        if (first == null) {
+            _messages.tryEmit(ReaderMessage(R.string.reference_not_found))
+            return
+        }
         jumpToAyah(first + ayah - 1)
     }
 
@@ -654,7 +677,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
         startAtSurahOpening = surah
-        jumpToAyah(database.firstAyahOfSurah(surah))
+        jumpToAyah(database.firstAyahOfSurah(surah) ?: return)
     }
 
     /**
@@ -668,7 +691,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val database = library.database ?: return
         val surah = surahOf(ayah)?.number ?: return
         startAtSurahOpening = surah
-        jumpToAyah(database.firstAyahOfSurah(surah))
+        jumpToAyah(database.firstAyahOfSurah(surah) ?: return)
     }
 
     /** The reading has landed on the surah's opening; the request is done. */
@@ -741,7 +764,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun setDailyAyah(enabled: Boolean, onPermission: () -> Unit) {
         if (enabled) onPermission()
-        settings = settings.copy(dailyAyah = enabled)
+        // Setting the reminder is the reader's answer to the one-time offer,
+        // whether they turned it on or off here; the card must not return
+        // after it (owner report, the audit).
+        settings = settings.copy(dailyAyah = enabled, reminderAnswered = true)
         viewModelScope.launch {
             settingsStore.setDailyAyah(enabled)
             withContext(Dispatchers.IO) {

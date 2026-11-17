@@ -67,6 +67,8 @@ fun TranslationBody(
     arabicSp: Float,
     modifier: Modifier = Modifier,
     onFootnote: ((Int) -> Unit)? = null,
+    /** Opens an internal link the source wrapped, when the surface can. */
+    onLink: ((String) -> Unit)? = null,
     /** The notes this text actually carries; null means every marker is a door. */
     footnoteNumbers: Set<Int>? = null,
     /**
@@ -101,6 +103,7 @@ fun TranslationBody(
             symbolSize = if (mix == ScriptMix.ARABIC) arabicSp.sp else body.sp,
             quoteColor = color,
             onFootnote = onFootnote,
+            onLink = onLink,
             footnoteNumbers = footnoteNumbers,
         ),
         style = base,
@@ -253,6 +256,8 @@ fun RichBlocks(
     modifier: Modifier = Modifier,
     /** The ink of the document; the reading's own unless a surface's ground differs. */
     color: Color = LocalPagePalette.current.ink,
+    /** Opens an internal link the source wrapped, when the surface can. */
+    onLink: ((String) -> Unit)? = null,
 ) {
     val voice = LocalReadingVoice.current
     Column(
@@ -293,6 +298,7 @@ fun RichBlocks(
                     markerSize = markerSp(sizeSp, MarkerShare),
                     symbolSize = if (mix == ScriptMix.ARABIC) arabicSp.sp else drawn.sp,
                     quoteColor = if (head) null else color,
+                    onLink = onLink,
                 ),
                 style = if (head) {
                     voice.title(drawn, line, weight = headWeight, color = color)
@@ -321,6 +327,7 @@ private fun annotated(
     symbolSize: TextUnit,
     quoteColor: Color?,
     onFootnote: ((Int) -> Unit)? = null,
+    onLink: ((String) -> Unit)? = null,
     footnoteNumbers: Set<Int>? = null,
 ): AnnotatedString {
     // The marker is a door to the note, so it wears the theme's one action
@@ -338,6 +345,7 @@ private fun annotated(
     return buildAnnotatedString {
         runs.forEach { run ->
             val marker = run.marker
+            val link = run.link
             if (marker != null) {
                 val style = SpanStyle(
                     // The marker is a door to the note; it wears the action
@@ -389,6 +397,30 @@ private fun annotated(
                             linkInteractionListener = { onFootnote(marker) },
                         ),
                     ) { withStyle(style) { append(marker.toString()) } }
+                }
+            } else if (link != null && onLink != null) {
+                // A link the content wrapped: the reference's words wear the
+                // action color and answer a tap, and the source's target is
+                // handed to the surface that knows how to open it. A surface
+                // with no handler keeps the words as plain type, so no
+                // surface can draw a door that answers nothing (owner
+                // decision, 19.7).
+                val open = onLink
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "link-$link",
+                        styles = TextLinkStyles(
+                            style = SpanStyle(color = MaterialTheme.colorScheme.primary),
+                        ),
+                        linkInteractionListener = { open(link) },
+                    ),
+                ) {
+                    withStyle(
+                        SpanStyle(
+                            fontWeight = if (run.bold) FontWeight.Medium else null,
+                            fontStyle = if (run.italic) FontStyle.Italic else null,
+                        ),
+                    ) { append(run.text) }
                 }
             } else if (run.arabic) {
                 // One face for the tafsir's Arabic: Kitab's body text covers

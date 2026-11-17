@@ -174,6 +174,16 @@ data class AppSettings(
     val dailyAyahMinute: Int = DEFAULT_DAILY_MINUTE,
 ) {
     /**
+     * Whether the one-time reminder offer stands. It stands before the
+     * reader has answered the offer and while the reminder is not already
+     * on: setting the reminder in Settings is an answer, so the card must
+     * not return after it, and a reader who already asked for the reminder
+     * is not offered it again.
+     */
+    val reminderOffer: Boolean
+        get() = !reminderAnswered && !dailyAyah
+
+    /**
      * The language the reader chose, or English before the choice.
      *
      * One question with one answer: the reading, the order of the translation
@@ -464,7 +474,12 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun setDailyAyah(enabled: Boolean) {
-        context.settingsStore.edit { it[DAILY_AYAH] = enabled }
+        context.settingsStore.edit {
+            it[DAILY_AYAH] = enabled
+            // Setting the reminder is the reader's answer to the one-time
+            // offer, either way; the card must not return after it.
+            it[REMINDER_ANSWERED] = true
+        }
     }
 
     /** Writes the one-time reminder offer as answered, once. */
