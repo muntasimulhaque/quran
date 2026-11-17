@@ -4,7 +4,47 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 19.5 (versionCode 197) was submitted for Play review from commit `b1d4ecf2`, taken from `build` run 44019436724, the newest green run on `main`, whose gates and signed-bundle jobs both passed, in 2m30s and 4m33s. The signed bundle `quran-19.5-vc197.aab` has SHA-256 `571fa676b417bfaa930a67f2eec4244c9b7c00e651654e74a6b5dc3c9a2eb0fc`, the workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 through 19.5 were signed with. The release gates are the CI unit tests, lint, and `assembleDebug`, all green; the same suite ran here on this machine, green in 9m29s. The instrumented suites are an audit, not a gate: this session ran the store capture classes (`ScreenshotTest`, `ScreenshotVariantsTest`, `WordMeaningTest`) on `quran_phone`, `quran_tablet7`, and `quran_tablet10`, 5 tests each, green, after both packages were uninstalled first; the eight frames of each set were read and committed. The full app and data suites were not rerun. The store's phone, 7 inch, and 10 inch sets are current: the pill at every verse head and the print's medallion closing every verse. Content is 1.8.0: database `content-db-7668312b`; the word packs `pack-words-en-e1fa6684` and `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1` (QUL 2); the morphology source Quranpedia's 2026-11-14 export, with the database rebuilding to its committed SHA-256; the word pronunciation pack is 1.0 (352 MB, tag `word-audio-alafasy`) downloaded one surah at a time and Al-Fatiha's 29 words in the app.
+**Status:** 19.6 (versionCode 198) is the consistency release. The gates that `build.yml` runs on `main` are the unit suites, lint, and `assembleDebug`, and the whole command in AGENTS ran here in one call, green in 2m29s, with lint reporting no issues: the reading list's 51 parameters folded into a state and an actions value, the question before a removal drawn once instead of twice, the pill's and the bar's modifier where Compose wants it (the one warning lint had printed is gone), and the numbers that said they were the theme's own now are. The instrumented work is the Bangla evidence leg alone (`BanglaCaptureTest` on `quran_phone`), because two Bangla sentences changed and the rule asks for the frame when the Bangla interface moves. The store's three sets stand and were not recaptured: no visible surface changed in any of the eight frames, since the two sentences are a raised line no frame draws and the note's label in a search row, which reads "Note" in the store's English set. Content is unchanged at 1.8.0. The signed bundle, its SHA-256, and the run's own record follow the push.
+
+**In 19.6.** The app's own prose is one dialect. The comments and the KDoc were
+written on more than one machine over many releases, and 61 words had drifted
+into British spellings, `centre`, `grey`, `behaviour`, and `labelled` among them,
+against the one style rule the repository states; they are US English now,
+identifiers included.
+
+The decisions themselves were dated by the phrase "this session", 862 times. A
+reader a year from now could not tell which session it was, so could not find
+the commit, which is the record this file leans on. Every one of them now
+carries the release that shipped it, `owner decision, 6.6`, `owner report, 15.0`,
+`owner decision, 19.3`, taken from the commit that wrote the line, and the rule
+is written down.
+
+Two gates hold what the tree now says. `CopyParityTest` reads every module's
+`strings.xml` and its `values-bn` and fails when a translatable sentence has no
+Bangla twin, when a Bangla sentence names nothing, or when one English sentence
+reads two ways in Bangla: a saved ayah's note was `নোট` in the reading and
+`টীকা` in search, which is the word for a commentary. `DeviceTestNamesTest` fails
+the build over a backticked test name under `src/androidTest`, because the
+Android runtime cannot hold a space in a method name: such a test compiles,
+installs, and then the runner cannot call it.
+
+The reading's own surface is the same pixels. The question before a removal was
+drawn twice, once in the reading and once in Settings, and the second copy
+described itself as the first one's shape; it is one `ConfirmSheet` now, with the
+same two answers and the same tags the tests read. `ReadingList` took 51
+parameters, in which a value that belongs to the reading stood beside a callback
+that belongs to the screen; what it shows is `ReadingListState` and what it may
+do is `ReadingListActions`. The pill's word gap and its gutter, the three rows'
+bottom air, the search field's end, the time page's gutters, and the air of the
+add door and the two surah frames are the theme's own numbers now or are named
+where they are drawn. `SearchHistory` is `SearchHistoryStore`, the sixth store,
+and the last two files without a KDoc have one. One sentence that ends in a
+period now does: the share sheet's failure line had lost it, in both languages.
+
+Every settled decision in this release is tagged `owner decision, 19.6`, and
+nothing about the Quran changed: the text, both translations, both tafsirs, the
+recitations, the word lists, the roots, and the content database are 1.8.0, and
+the word pronunciation pack is 1.0. Version 19.6 (198).
 
 **In 19.5.** The ayah's number is a door the reader can see. The reference at the head of a verse wore the action color and the app's one turn, and a turn that ends a line of small type is the same cue the pill's doors carry, so it taught only the reader who had already met the pill, and the first control a reader needs was borrowing its lesson from a feature they may never have opened. The number now wears the app's quiet pill, the reference's own line plus 8 dp above and below, filled with the quiet tone the text buttons wear, and it holds the accent's chosen ground while its menu is open, so the door reads as a control before the tap and as a chosen control after it. Every verse also closes with the medallion the QPC face draws, on a page that carries a translation as well as on the page that draws the Quran alone: the same verse ended two ways depending on a setting, and the difference was the print's own roundel. On the page that draws the Quran alone the medallion is still the verse's number and its door, so that page keeps its rhythm and its tap. `AyahDoorShapeTest`'s bounds are unchanged, and the full JVM suite, lint, and `assembleDebug` are green here in 9m29s. The store's phone, 7 inch, and 10 inch sets were recaptured on the three AVDs, 5 tests each and green, and the eight frames of each were read and committed. The Quran text, both translations, both tafsirs, the recitations, the word lists, the roots, and the content database are unchanged at 1.8.0. The word pronunciation pack is 1.0. Version 19.5 (197).
 
