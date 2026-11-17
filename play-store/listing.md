@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.6 (versionCode 198)
+Version: 19.7 (versionCode 199)
 
 ## Listing
 
@@ -57,16 +57,16 @@ player. Everything you download works offline forever after.
 
 There are no ads, no trackers, no analytics, and no account. The app is
 free and its source code is public. It reaches the project's own release
-page only for content: a pack or a surah's recitation you ask for, or a
-quiet refresh of a pack you already have when a newer version ships, on
-Wi-Fi only.
+page only for content: a pack, a surah's recitation, or a surah's word
+pronunciations you ask for, or a quiet refresh of a pack you already have
+when a newer version ships, on Wi-Fi only.
 
 Credits: Quran text by the King Fahd Complex for the Printing of the Holy
 Quran, audited against the QUL QPC text, with Tanzil as the independent
 cross-reference. Translation by Saheeh International via QuranEnc. Tafsir
 Ibn Kathir and the recitations via the Quranic Universal Library by Tarteel.
-The app's About page names each source and records each dataset's license
-from the content manifest. The source code is MIT.
+The app's About page names each source and records each dataset's licensing
+status from the content manifest. The source code is MIT.
 
 ## Classification
 
@@ -85,7 +85,9 @@ from the content manifest. The source code is MIT.
   device.
 - The app declares `INTERNET` for content from the project's own GitHub
   Releases: the tafsir of the language the reader chose, on an unmetered
-  connection; a word list when word by word is turned on; a recitation
+  connection; a word list when word by word is turned on; a word
+  pronunciation pack for the surah being read, when the reader presses a
+  word's speaker or quietly on an unmetered connection; a recitation
   package the reader asks for after seeing its size (or the next surah after
   Continue is turned on); and a quiet refresh of an installed pack when the
   app carries a newer version. The refresh runs on an unmetered connection
@@ -202,6 +204,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.7, 493 characters)
+19.7 makes search find the words you actually type, including prayer, Satan, the Quran, and Abraham; exact matches still come first. Downloaded recitations keep every surah, so a second download no longer deletes the first. The daily reminder card stays away once the reminder is set, and Not now never turns it off. English surah names are corrected, the surah introductions' references open on a tap, and download sizes read in decimal MB. Content is 1.8.1. No ads, no trackers, no accounts.
 
 ## Release notes (19.5, 388 characters)
 19.5 makes the ayah number a button you can see. The verse's number at the head now wears the app's quiet pill, and it takes the accent while its menu is open. Every verse also ends with the printed medallion the Quran page uses, whether you read with a translation or the Quran alone. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
