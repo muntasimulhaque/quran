@@ -22,21 +22,24 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The ayah number's press shape, measured on the glass.
+ * The ayah number's pill, measured on the glass.
  *
  * The flash used to be the row's own bounds: no air on the leading end, so the
  * digits touched it, 4 dp above and below, and the reader's marks stood inside
- * it. It is the app's compact pill now, 8 dp of air at each end and above and
- * below, inside the 48 dp target (owner decision, an earlier session). A press
- * cannot be photographed without a finger on it, so this reads the shape's
- * bounds.
+ * it. It became the app's compact pill, 8 dp of air at each end and above and
+ * below, inside the 48 dp target (owner decision, an earlier session), and it
+ * is a drawn pill now rather than only a press shape: the quiet tone at rest
+ * and the chosen chip's tone while its menu is open (owner decision, this
+ * session). The drawing cannot be photographed here, so this reads the shape's
+ * bounds, and the tone is the theme's own pair.
  *
  * The flash is also a control on the washed card, so its shape stands on the
  * card's content line, one wash inset inside the card's edge, and the digits
- * stand one wash inset inside the flash (owner decision, this session). It used
- * to reach out to the card's own edge so that the digits landed on the line the
- * translation keeps, and the two rounded shapes met along that edge: two blues
- * with one silhouette. Now the flash keeps the card's air on every side.
+ * stand one wash inset inside the flash (owner decision, an earlier session).
+ * It used to reach out to the card's own edge so that the digits landed on the
+ * line the translation keeps, and the two rounded shapes met along that edge:
+ * two blues with one silhouette. Now the flash keeps the card's air on every
+ * side.
  */
 @RunWith(AndroidJUnit4::class)
 class AyahDoorShapeTest {

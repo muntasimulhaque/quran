@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.4 (versionCode 196)
+Version: 19.5 (versionCode 197)
 
 ## Listing
 
@@ -202,6 +202,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.5, 388 characters)
+19.5 makes the ayah number a button you can see. The verse's number at the head now wears the app's quiet pill, and it takes the accent while its menu is open. Every verse also ends with the printed medallion the Quran page uses, whether you read with a translation or the Quran alone. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (19.4, 417 characters)
 19.4 makes the top bar the page's head. It stands when you arrive and at the top of a surah, steps away as you read forward, and returns on the first backward scroll or a tap. The reading begins below it, never under it, so no verse is ever behind it. The first-surah sentence is gone with the tap it had to teach. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.

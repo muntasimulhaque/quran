@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.indication
@@ -37,11 +38,12 @@ import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
- * The ayah's own door: the number at the head of the verse, in the app's one
- * action color, the one turn that says it opens, and the reader's note beside
- * them when the verse carries one.
+ * The ayah's own door: the number at the head of the verse, on the app's
+ * quiet pill, in the app's one action color, the one turn that says it opens,
+ * and the reader's note inside the pill when the verse carries one.
  *
  * **The save is not drawn here** (owner decision, this session). A saved ayah
  * used to wear the app's filled bookmark in this row. The mark answered no
@@ -69,17 +71,36 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * told the reader that it answers a tap. Every other door in the app ends in
  * the one turn the set draws, and the pill's reciter door, the closest
  * sibling the app has, is a line of small type with that same 14 dp chevron
- * standing 4 dp after it in the same ink. The reading's number wears the pair
- * now, so a reader who has learned the pill has already learned the ayah.
+ * standing 4 dp after it in the same ink. The reading's number wears the same
+ * pair, so a reader who has met the pill reads the door at once, and a reader
+ * who has not is the case the pill below is for.
  *
- * It has no capsule. A shape around every number would turn the page into a
- * list of buttons, and the turn and the action color already say that a
- * number answers a tap. The state is the turn and the page's own wash: while
- * this ayah's menu is open the block wears the selected ground, so the door
- * has only to say which way it went. The visible line is the reference and
- * its turn; the 48 dp the finger needs is the row the head already keeps, so
- * the numbers still form one rail down the page and the card gap is
- * untouched.
+ * **The door wears the app's quiet pill** (owner decision, this session). It
+ * had no capsule, on the argument that a shape around every number would turn
+ * the page into a list of buttons and that the turn and the action color
+ * already said a number answers a tap. They did not. A number in the accent
+ * read as the verse's citation, and the turn is the same 14 dp mark the
+ * pill's doors wear, so it taught only the reader who had already met the
+ * pill: the first control a reader needs borrowed its lesson from a feature
+ * they may never have opened. The app's own law is the quiet button's: a
+ * heading, a name, or a label is bare type, and a control is a shape the
+ * finger can see. So the door wears the shape the app already draws, the
+ * reference's own line plus 8 dp above and below, which lands one dp under
+ * the app's 36 dp pill at the default type and follows the system font scale
+ * with it. The shape is a capsule and not a card, because it holds one
+ * citation and its turn, and the card's own gap between verses is untouched.
+ *
+ * The ground is two of the app's own tones and no third one. At rest it is
+ * the quiet tone every quiet text button wears, the ink at [Wash.Door]; while
+ * this ayah's menu is open it is the accent at [Wash.Control], the chosen
+ * chip's own ground, so the door reads as a control before the tap and as a
+ * chosen control after it, beside the warm wash the block takes and the turn
+ * that says which way it went. The ink does not change, so the digits and the
+ * turn do not move between the two states.
+ *
+ * The visible line is the reference and its turn; the 48 dp the finger needs
+ * is the row the head already keeps, so the numbers still form one rail down
+ * the page and the card gap is untouched.
  *
  * **The press is the app's pill, and it stands on the card's own line**
  * (owner decision, this session). The flash used to be the row's own bounds:
@@ -138,6 +159,13 @@ internal fun AyahDoor(
     // it wears the app's one action color. Gold stays the page's ornament
     // (owner decision, the consistency audit).
     val ink = MaterialTheme.colorScheme.primary
+    // The pill's two grounds: the quiet tone it rests in, and the chosen
+    // chip's own tone while its menu is open (owner decision, this session).
+    val ground = if (open) {
+        ink.copy(alpha = Wash.Control)
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+    }
     val name = stringResource(R.string.reading_door, reference)
     Box(
         modifier = Modifier
@@ -165,6 +193,7 @@ internal fun AyahDoor(
         Row(
             modifier = Modifier
                 .clip(Radii.Pill)
+                .background(ground)
                 .focusRing(press, Radii.Pill)
                 .indication(press, ripple(color = ink, bounded = false))
                 .testTag("door-flash")

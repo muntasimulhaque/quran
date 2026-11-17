@@ -122,13 +122,17 @@ internal fun AyahBlock(
     val savedState = stringResource(R.string.reading_door_saved)
     val notedState = stringResource(R.string.reading_door_noted)
     val paperActions = stringResource(R.string.reading_paper_actions)
-    // The end of an ayah in an Arabic-only reading: the KFGQPC face's own
-    // printed medallion, in the ornament gold, closing the verse it belongs
-    // to. The face draws the print's medallion around a run of Arabic-Indic
-    // digits, so the reading appends the number alone and the medallion comes
-    // with the face (owner decision, this session). The reference line at
-    // the head of the block is not drawn then, so the screen holds the Quran
-    // and nothing else.
+    // The end of an ayah: the KFGQPC face's own printed medallion, in the
+    // ornament gold, closing the verse it belongs to. The face draws the
+    // print's medallion around a run of Arabic-Indic digits, so the reading
+    // appends the number alone and the medallion comes with the face (owner
+    // decision, an earlier session). Every verse closes this way now, on the
+    // page that carries a translation as well as on the one that draws the
+    // Quran alone: the same verse ended two ways depending on a setting, and
+    // the difference was the print's own roundel (owner decision, this
+    // session). On the page that draws the Quran alone the medallion is also
+    // the verse's only number and its door, and the reference line at the
+    // head is not drawn, so the screen holds the Quran and nothing else.
     val arabicOnly = !metrics.showTranslation && !showWordAid
     // The page that draws the Quran alone keeps its line's rhythm, so the
     // reader's own marks ride the verse's first line in a rail at its leading
@@ -323,14 +327,14 @@ internal fun AyahBlock(
                 ),
         ) {
             // The reader's own marks, and the reader's own door. On a page
-            // that carries a translation the head is the reference: the one
-            // visible signifier on the reading, in the action color, with the
-            // turn that says it opens, and the note beside them when the
-            // reader wrote one. On a page that draws the Quran alone there is
-            // no reference line: the verse's printed medallion is its number
-            // and its door, and the reader's note rides the verse's first line
-            // in a rail at its leading edge, so nothing stands above the verse
-            // and the page keeps its rhythm (owner decision, this session).
+            // that carries a translation the head is the reference on the
+            // app's quiet pill, in the action color, with the turn that says
+            // it opens, and the note inside the pill when the reader wrote
+            // one. On a page that draws the Quran alone there is no reference
+            // line: the verse's printed medallion is its number and its door,
+            // and the reader's note rides the verse's first line in a rail at
+            // its leading edge, so nothing stands above the verse and the
+            // page keeps its rhythm (owner decision, an earlier session).
             if (!arabicOnly) {
                 AyahDoor(
                     reference = reference,
@@ -362,7 +366,6 @@ internal fun AyahBlock(
                 row.words,
                 playing,
                 recitedWord,
-                arabicOnly,
                 ornamentStyle,
                 revealWords,
                 revealMeanings,
@@ -371,17 +374,13 @@ internal fun AyahBlock(
                     row,
                     playing,
                     recitedWord,
-                    // One number per verse, and it is the number the reader can
-                    // tap. A page that draws a translation carries the
-                    // reference line at the head of the block, and that line is
-                    // the door, so the verse needs no second number closing it.
-                    // A page that draws the Quran alone has no head, so the
-                    // face's own medallion is the number and the door. The
-                    // medallion used to close every verse, which put the same
-                    // key twice on a page that carries a translation: once as
-                    // the head's control and once as the print's mark, 40 dp
-                    // apart (owner decision, this session).
-                    arabicOnly,
+                    // Every verse closes with the print's own medallion, and
+                    // on a page that carries a translation the medallion is a
+                    // mark and not a door: the head's pill is the door there,
+                    // and the roundel only closes the verse the way the
+                    // printed page closes it. On the page that draws the
+                    // Quran alone it is the number and the door both (owner
+                    // decision, this session).
                     ornamentStyle,
                     revealWords,
                     revealMeanings,
@@ -647,7 +646,10 @@ private data class ArabicLine(
     val matchRanges: List<IntRange>,
     /** Each word's own span, in the verse's order, for a long press to find its meaning. */
     val wordRanges: List<IntRange>,
-    /** The printed medallion's own span, which is the ayah's door in Arabic only. */
+    /**
+     * The printed medallion's own span: the verse's close on every page, and
+     * the ayah's door on the page that carries no reference line.
+     */
     val ornamentRange: IntRange?,
 )
 
@@ -662,17 +664,18 @@ private data class ArabicLine(
  * re-shape the run and put a mark at the bottom of its letter (owner decision,
  * the QPC rendering audit).
  *
- * In an Arabic-only reading the verse closes with its own number, drawn in
- * the face's own printed medallion: [ornament] appends the number to the same
- * line, where a printed page puts it, and the KFGQPC face wraps it in the
- * medallion, so the reference at the head of the block is not drawn (owner decision,
- * this session).
+ * Every verse closes with its own number, drawn in the face's own printed
+ * medallion: the number is appended to the same line, where a printed page
+ * puts it, and the KFGQPC face wraps it in the medallion. On a page that
+ * carries a translation the medallion is only the verse's close, and the
+ * reference and its door stand at the head; on the page that draws the Quran
+ * alone it is the number and the door both, so nothing is drawn above the
+ * verse (owner decision, this session).
  */
 private fun arabic(
     row: ReadingRow,
     playing: Boolean,
     playingWord: Int?,
-    ornament: Boolean,
     ornamentStyle: SpanStyle,
     revealWords: Set<Int>,
     revealMeanings: Set<String>,
@@ -697,15 +700,13 @@ private fun arabic(
                 }
             }
         }
-        if (ornament) {
-            append(' ')
-            val start = length
-            withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
-            // The medallion's own span, handed up so the reading can make it
-            // the ayah's door on a page that carries no reference line (owner
-            // decision, this session).
-            ornamentRange = start until length
-        }
+        append(' ')
+        val start = length
+        withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
+        // The medallion's own span, handed up so the reading can make it the
+        // ayah's door on a page that carries no reference line (owner
+        // decision, an earlier session).
+        ornamentRange = start until length
     }
     return ArabicLine(text, recitedRange, matchRanges, wordRanges, ornamentRange)
 }
