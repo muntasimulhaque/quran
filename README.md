@@ -198,7 +198,18 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.0 (versionCode 202).**
+**20.0 (versionCode 202).** The signed bundle comes from `build` run
+44403521765, the newest green run on `main`: the unit tests, lint, and
+`assembleDebug` passed, and the signed bundle `quran-20.0-vc202.aab` has
+SHA-256
+`e50b1646939e913d02c01f1c6cb62e33a0b5a33d315fdaea97137536ea3d3097`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. A change that touches the player ran
+the affected classes on the phone, green: `BundledFatihaTest`, `FatihaPlayTest`,
+and `PlaybackServiceTest`. The three store sets were recaptured on the three
+AVDs and committed, and the Bangla leg photographed the Bangla reading and
+settings. The hand-off copy stands in `play-store/aab/` until Play has it.
 
 **What changed in 20.0.** Two more voices join the recitation, Mishari Rashid
 al-Afasy and Abdul Basit Abdul Samad, both murattal, so the reader chooses
