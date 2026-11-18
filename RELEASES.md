@@ -6,6 +6,51 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.0
+
+Two more voices join the recitation, Mishari Rashid al-Afasy and Abdul Basit
+Abdul Samad, both murattal, so the reader chooses from four: Minshawi, Husary,
+Alafasy, and Abdul Basit. Their word timings ship in the app beside the other
+two voices', Al-Fatiha's audio is bundled in every voice so the first Play on
+1:1 needs no network whichever voice the reader chose, and every other surah
+still downloads one voice's package at a time from the project's own Releases.
+Both voices' per-surah packages are published as their own releases, and the
+voice edge table, the word timing pins, and the recitation manifest all cover
+four voices now.
+
+The voice the reader chose is the one whose timing pack is attached beside the
+core. SQLite allows ten attached databases, and four voices are four packs: a
+reader who holds both tafsirs, both word lists, and the root could not have
+held a fourth voice too, and the capture leg met the ceiling as the word list
+reading as not installed while the reading still drew. The parent commit ran
+the same leg green, which is what named the cause. The fix is the one attached
+voice: the core pack now carries a recitation map, four rows naming every
+voice's audio folder, so any voice's files can be named without attaching that
+voice's pack, and the voices the reader did not choose keep their files and
+their listing while their segments wait for their turn. The core pack moves to
+version 7 for the map, and choosing a voice reopens the library over it before
+the ayah that is playing is asked for again.
+
+The one recording QUL numbered a word short, Abdul Basit's Al-Mujadila 22, gets
+its closing word from the measured tail: the span between the export's own
+last region and the last voiced millisecond the audio holds, the same 81,140
+the voice edge table carries, and a test pins the two to agreement so the
+number can never drift from the audio it was measured from.
+
+The gates are the unit tests, lint, and `assembleDebug`, green here and in
+`build.yml`. A change that touches the player ran the affected classes on the
+phone: `BundledFatihaTest`, `FatihaPlayTest`, and `PlaybackServiceTest`, green,
+with the bundled Fatiha pinned for all four voices and the chosen voice pinned
+as the only one attached. The three store capture legs ran on the three AVDs,
+and the eight frames of each, captured by the green leg, were committed; the
+Bangla leg photographed the Bangla reading and settings after the interface
+gained the two voices' names. Content is 1.9.0: the database
+`content-db-9f808fdf`, the core pack `pack-core-45b53fe7` at version 7, the
+reciter packs `pack-reciter-minshawi-af264024`,
+`pack-reciter-husary-9b09e6cb`, `pack-reciter-alafasy-0cc69f8b`, and
+`pack-reciter-abdulbasit-e25ca017`; the word packs, the root, and the word
+pronunciation pack are unchanged. Version 20.0 (versionCode 202).
+
 ## 19.9
 
 The reading stops paying for the screen when nobody is reading. A sheet, an

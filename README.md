@@ -198,38 +198,28 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**19.9 (versionCode 201).** Play received the bundle on 18 November 2026 from
-`build` run 44305146426, the newest green run on `main`: the unit tests, lint,
-and `assembleDebug` passed, and the signed bundle
-`quran-19.9-vc201.aab` has SHA-256
-`a0e9cb0e3d7497bcd7e83271944ec9c62c5412f2e46e527d7e8814533b9c339e`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. The instrumented suites were skipped:
-this release changes when the screen sleeps and when the page draws, not a
-surface a test drives. The three store sets stand, because no visible surface
-changed. The hand-off copy in `play-store/aab/` was deleted once Play had it.
+**20.0 (versionCode 202).**
 
-**What changed in 19.9.** The screen stops holding itself on when nobody is
-reading. A sheet, an ayah card, a note, or a confirm used to keep the phone lit
-for as long as it stood, which could be until the battery died; the raised
-control now gets five minutes, and the reading gets five minutes after the last
-touch instead of ten. The note and search fields renew the window as the reader
-types. A covered page keeps still: the wash, the reciter's follow, and the
-ayah's mark wait for the page to be the glass, and the player takes the place
-checkpoint at thirty seconds instead of ten. The wash also left composition:
-an ayah's line is built once and the word is read in the draw, so a word
-boundary redraws one line instead of rebuilding its AnnotatedString. The
-tafsir index is built when Search opens rather than at every launch, and the
-surah after this one is read when the reader is twelve ayahs from its end
-rather than at the surah's opening.
+**What changed in 20.0.** Two more voices join the recitation, Mishari Rashid
+al-Afasy and Abdul Basit Abdul Samad, both murattal, so the reader chooses
+from four. Their word timings ship in the app, Al-Fatiha's audio is bundled in
+every voice, and every other surah still downloads one voice's package at a
+time from the project's own Releases. The voice the reader chose is the one
+whose timing pack is attached beside the core, because SQLite allows ten
+attached databases and four voices are four packs: the core pack now carries a
+recitation map, four rows naming every voice's audio folder, so any voice's
+files can be named without attaching that voice's pack. The core pack moves to
+version 7 for the map, and choosing a voice reopens the library over it. The
+one recording QUL numbered a word short, Abdul Basit's Al-Mujadila 22, gets its
+closing word from the measured tail, pinned to the voice edge table by a test.
 
-Content is 1.8.1 and unchanged in this release: database `content-db-1f7c5339`,
-core pack `pack-core-d7797f77`, word packs `pack-words-en-e1fa6684` and
-`pack-words-bn-6e620b10`, root pack `pack-word-root-f15b9ef1`, and the word
-pronunciation pack `word-audio-alafasy` at 1.0.
+Content is 1.9.0: database `content-db-9f808fdf`, core pack
+`pack-core-45b53fe7` (version 7), reciter packs `pack-reciter-minshawi-af264024`,
+`pack-reciter-husary-9b09e6cb`, `pack-reciter-alafasy-0cc69f8b`, and
+`pack-reciter-abdulbasit-e25ca017`; word packs, root, and word pronunciation
+unchanged from 19.9.
 
-Every earlier release, from 15.2 to 19.8, is in [RELEASES.md](RELEASES.md).
+Every earlier release, from 15.2 to 19.9, is in [RELEASES.md](RELEASES.md).
 
 ## Corrections and contributions
 

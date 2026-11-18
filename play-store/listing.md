@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.9 (versionCode 201)
+Version: 20.0 (versionCode 202)
 
 ## Listing
 
@@ -392,7 +392,7 @@ Continue package downloads, and a SHA-256 check before it is used:
 | English | Saheeh International (ships) | Ibn Kathir (29.5 MB) | 6.3 MB |
 | Bangla | Al-Bayan Simple Translation (ships) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
-Recitations: Al-Fatiha ships in both voices; every other surah downloads
+Recitations: Al-Fatiha ships in every voice; every other surah downloads
 one at a time (about 0.2 to 185 MB each). The 1.7 MB of word timings per
 reciter ships with the app.
 
