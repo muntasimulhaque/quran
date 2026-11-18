@@ -68,6 +68,8 @@ fun AyahNoteSheet(
     onSave: (String?) -> Unit,
     /** The draft as it changes, so closing the sheet never loses it. */
     onDraftChange: (String) -> Unit,
+    /** The reader is still writing: the page stays awake for another window. */
+    onInteraction: () -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
@@ -95,6 +97,7 @@ fun AyahNoteSheet(
                 onSave = onSave,
                 onClear = { if (!saving) onSave(null) },
                 onDraftChange = onDraftChange,
+                onInteraction = onInteraction,
             )
         }
     }
@@ -110,6 +113,7 @@ private fun NoteEditor(
     onSave: (String?) -> Unit,
     onClear: () -> Unit,
     onDraftChange: (String) -> Unit,
+    onInteraction: () -> Unit,
 ) {
     // The draft survives a theme change, a language change, and the window
     // being rebuilt while the reader is still writing. `remember` alone
@@ -157,7 +161,10 @@ private fun NoteEditor(
                         if (!initial.isNullOrBlank()) {
                             TextButton(
                                 label = stringResource(R.string.action_clear),
-                                onClick = onClear,
+                                onClick = {
+                                    onInteraction()
+                                    onClear()
+                                },
                                 modifier = Modifier.padding(start = Space.Row),
                                 enabled = !saving,
                                 quiet = true,
@@ -167,7 +174,10 @@ private fun NoteEditor(
                             label = stringResource(
                                 if (saving) R.string.reading_note_saving else R.string.reading_note_save,
                             ),
-                            onClick = { onSave(draft.text.trim().takeIf { it.isNotEmpty() }) },
+                            onClick = {
+                                onInteraction()
+                                onSave(draft.text.trim().takeIf { it.isNotEmpty() })
+                            },
                             // Save and Clear are two standalone actions, so they stand
                             // the action gap apart (owner decision, 13.5). Save
                             // is the one act the sheet exists for, so it is the app's
@@ -186,6 +196,7 @@ private fun NoteEditor(
             BasicTextField(
                 value = draft,
                 onValueChange = { next ->
+                    onInteraction()
                     val text = next.text.take(MAX_NOTE_LENGTH)
                     val previous = draft.text
                     draft = if (text.length == next.text.length) {

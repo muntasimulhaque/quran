@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.8 (versionCode 200)
+Version: 19.9 (versionCode 201)
 
 ## Listing
 
@@ -220,6 +220,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.9, 485 characters)
+19.9 is lighter on the battery. The screen turns off five minutes after you stop touching the page, and a sheet left open no longer keeps it lit forever. While the page is hidden, the reciter's wash and the reader's place wait, and the place is saved every thirty seconds instead of ten. Tafsir search builds when you open Search, and the next surah is prepared near this one's end. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (19.8, 447 characters)
 19.8 makes the reading lighter under the finger: the page no longer rebuilds itself while you scroll, and each verse paints its tajweed colors from work already done instead of measuring every character again on each redraw. Long-press selection is gone from the translation and the tafsir passage; the verse still leaves the app through Share. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.

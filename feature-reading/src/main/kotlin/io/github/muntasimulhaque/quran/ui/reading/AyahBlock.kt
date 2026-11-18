@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -83,7 +84,12 @@ internal fun AyahBlock(
     metrics: ReadingMetrics,
     isSelected: Boolean,
     playingAyah: Int?,
-    playingWord: Int?,
+    /**
+     * The word the reciter is on, read in the draw and only for the ayah
+     * being heard. The null on every other block keeps a word change from
+     * rebuilding its line (owner decision, 19.9).
+     */
+    playedWord: State<Int?>?,
     /** The search arrival to reveal on this ayah, when it is this one. */
     reveal: ReadingReveal? = null,
     /** True when the reader's own word-by-word switch is on. */
@@ -348,8 +354,11 @@ internal fun AyahBlock(
             // reader's size change and a change of ground both reach the
             // line only through it, and a remembered line that missed it
             // kept the old size and the old gold
-            // (owner report, 6.6). 
-            val recitedWord = playingWord.takeIf { playing }
+            // (owner report, 6.6).
+            // The word the reciter is on is not a key here. Only the wash
+            // over it changes, and the wash is read in the draw below, so a
+            // word boundary redraws the line instead of rebuilding its
+            // AnnotatedString (owner decision, 19.9).
             // The code is read by the painter, not by the layout: the line's
             // letters are the same whether the switch is on or off, so the
             // reader's place never moves when the colors do (owner decision,
@@ -368,16 +377,12 @@ internal fun AyahBlock(
                 row.ayah.ayah,
                 row.ayah.text,
                 row.words,
-                playing,
-                recitedWord,
                 ornamentStyle,
                 revealWords,
                 revealMeanings,
             ) {
                 arabic(
                     row,
-                    playing,
-                    recitedWord,
                     // Every verse closes with the print's own medallion, and
                     // on a page that carries a translation the medallion is a
                     // mark and not a door: the head's pill is the door there,
@@ -500,7 +505,14 @@ internal fun AyahBlock(
                             },
                         )
                         .drawWithContent {
-                            val recited = arabicLine.recitedRange
+                            // The word is read here, in the draw, so a change
+                            // of it invalidates the wash and not the block
+                            // (owner decision, 19.9).
+                            val recited = if (playing) {
+                                playedWord?.value?.let { arabicLine.wordRangeByPosition[it] }
+                            } else {
+                                null
+                            }
                             val layout = textLayout
                             if (layout == null) {
                                 drawContent()
@@ -651,11 +663,12 @@ private fun MarksRail(
 /** The room the marks' rail keeps on a page that draws the Quran alone. */
 private val MarkRail = GlyphSize.ChevronInline + Space.Tight
 
-/** One Arabic line: its words, the range the reciter is on, and any search match. */
+/** One Arabic line: its words, the reciter's ranges, and any search match. */
 private data class ArabicLine(
     val text: AnnotatedString,
-    val recitedRange: IntRange?,
     val matchRanges: List<IntRange>,
+    /** Each word's own span by its position, so the wash needs no second walk. */
+    val wordRangeByPosition: Map<Int, IntRange>,
     /** Each word's own span, in the verse's order, for a long press to find its meaning. */
     val wordRanges: List<IntRange>,
     /**
@@ -686,16 +699,14 @@ private data class ArabicLine(
  */
 private fun arabic(
     row: ReadingRow,
-    playing: Boolean,
-    playingWord: Int?,
     ornamentStyle: SpanStyle,
     revealWords: Set<Int>,
     revealMeanings: Set<String>,
 ): ArabicLine {
     val words = row.words
-    var recitedRange: IntRange? = null
     val matchRanges = mutableListOf<IntRange>()
     val wordRanges = mutableListOf<IntRange>()
+    val wordRangeByPosition = HashMap<Int, IntRange>(words.size)
     var ornamentRange: IntRange? = null
     val text = buildAnnotatedString {
         if (words.isEmpty()) {
@@ -705,10 +716,11 @@ private fun arabic(
                 if (index > 0) append(' ')
                 val start = length
                 append(word.text)
-                wordRanges += start until length
-                if (playing && word.position == playingWord) recitedRange = start until length
+                val range = start until length
+                wordRanges += range
+                wordRangeByPosition[word.position] = range
                 if (word.position in revealWords || word.text in revealMeanings) {
-                    matchRanges += start until length
+                    matchRanges += range
                 }
             }
         }
@@ -720,7 +732,13 @@ private fun arabic(
         // decision, an earlier session).
         ornamentRange = start until length
     }
-    return ArabicLine(text, recitedRange, matchRanges, wordRanges, ornamentRange)
+    return ArabicLine(
+        text = text,
+        matchRanges = matchRanges,
+        wordRangeByPosition = wordRangeByPosition,
+        wordRanges = wordRanges,
+        ornamentRange = ornamentRange,
+    )
 }
 
 /**

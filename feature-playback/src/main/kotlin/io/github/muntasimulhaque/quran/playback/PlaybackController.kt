@@ -202,9 +202,9 @@ class PlaybackController(
      *
      * The wash is scheduled by the reading, so this flag is
      * only about the place: while the eyes are not there, the heard offset is
-     * written on a ten-second checkpoint. That checkpoint is what keeps a
+     * written on a half-minute checkpoint. That checkpoint is what keeps a
      * process that dies mid-ayah answered by the rest of the ayah rather than
-     * by its top (owner decision, 16.3).
+     * by its top (owner decision, 16.3; 19.9 widened the pace).
      */
     fun setWordTracking(visible: Boolean) {
         if (tracking == visible) return
@@ -939,6 +939,11 @@ class PlaybackController(
 
     /** The reading window is gone: let the controller go, not only its state. */
     fun release() {
+        // The last place before the window goes. The checkpoint's next write is
+        // half a minute away, so a reader who closes the app in between is
+        // written here; the write is best effort because the window's own
+        // scope may be closing under it (owner decision, 19.9).
+        checkpointPlace()
         downloadJob?.cancel()
         downloadJob = null
         checkpoint?.cancel()
@@ -1229,7 +1234,7 @@ class PlaybackController(
      * by the reading, so the player has no wash timer at all; this is only
      * the memory of where the recitation had reached, at a pace that costs
      * the disk almost nothing and still answers a process that died mid-ayah
-     * (owner decision, 16.3).
+     * (owner decision, 16.3; 19.9 widened the pace to half a minute).
      */
     private fun startCheckpoint() {
         if (tracking) return
@@ -1364,10 +1369,12 @@ class PlaybackController(
          * How far apart two writes of the heard offset may be. The ayah it
          * belongs to is written the moment it changes; this is the offset
          * inside it, which moves constantly and costs a disk write to keep
-         * exact. Ten seconds is also the hidden reading's checkpoint, and a
-         * resume a few seconds out is one nobody can hear
-         * (owner decision, 10.2).
+         * exact. Thirty seconds is also the hidden reading's checkpoint, and
+         * a resume half a minute out is still inside the same ayah for almost
+         * every verse. It is a third of the writes the ten-second pace made,
+         * for an offset the reader cannot hear (owner decision, 19.9,
+         * widening 10.2).
          */
-        const val POSITION_WRITE_MS = 10_000L
+        const val POSITION_WRITE_MS = 30_000L
     }
 }

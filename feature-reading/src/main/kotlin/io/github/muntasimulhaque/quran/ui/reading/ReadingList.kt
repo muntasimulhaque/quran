@@ -200,12 +200,6 @@ fun ReadingList(
     val rows = ahead ?: loaded?.takeIf { it.first == state.surah.number }?.second.orEmpty()
     val ayahs = remember(rows) { rows.map { it.ayah.number } }
 
-    // The surah after this one is read while the reader is still in this one,
-    // so the turn at its end has its text on hand when it comes.
-    LaunchedEffect(state.surah.number, content, effective.wordByWord, effective.recitation) {
-        actions.onReadAhead(state.surah.number)
-    }
-
     var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
     // The word the reader pressed and held. It is a sheet of its own, at the
     // reading's level rather than inside the ayah, so the page never grows
@@ -263,6 +257,9 @@ fun ReadingList(
         onScrolled = actions.onScrolled,
         onBarScroll = actions.onBarScroll,
         onBarSettled = actions.onBarSettled,
+        // The next surah is read when the reader is close to the end of this
+        // one, where [ReadingRows] asks for it (owner decision, 19.9).
+        onReadAhead = { actions.onReadAhead(state.surah.number) },
         onNextSurah = actions.onNextSurah,
         onOpenReference = actions.onOpenReference,
         reminderOffer = state.reminderOffer,

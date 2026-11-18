@@ -48,6 +48,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -87,11 +88,21 @@ private const val LISTENING_AWAKE_MILLIS = 60_000L
 
 /**
  * How long the screen stays awake after the last touch while the page is being
- * read. Reading needs the page, and a long ayah can hold the eye for a while
- * without a touch, so this window is generous; a reader who is actually
- * reading scrolls far more often than this (owner decision, 10.2).
+ * read. Five minutes covers a long ayah or a page of tafsir without a touch
+ * and then lets the phone's own screen timeout do its work. Ten minutes was
+ * twice the pause a reader takes, and every put-down paid for the whole of it
+ * (owner decision, 19.9, shortening 10.2).
  */
-private const val READING_AWAKE_MILLIS = 10 * 60_000L
+private const val READING_AWAKE_MILLIS = 5 * 60_000L
+
+/**
+ * The longest a raised control keeps the screen awake after the reader
+ * stopped touching it. A sheet, a menu, an ayah card, or a note used to hold
+ * the screen on for as long as it stood, so a phone left on Settings stayed
+ * lit until the battery died. Five minutes is longer than reading a card and
+ * shorter than forgetting it (owner decision, 19.9, closing the gap in 10.2).
+ */
+private const val CONTROLS_AWAKE_MILLIS = 5 * 60_000L
 
 /**
  * The longest the wash sleeps between checks. The wait to the next word is
@@ -234,6 +245,18 @@ fun ReaderScreen(
     // The screen is kept awake while the reader is here, but not forever. The
     // window timer releases the flag; a touch takes it back.
     var keepAwake by remember { mutableStateOf(true) }
+    // The reader is still here: every touch in the page, and every word typed
+    // in a sheet, is the same answer. It is remembered as a lambda because the
+    // sheets take it as a callback and a fresh lambda on every recomposition
+    // would rebuild them for nothing.
+    val woke: () -> Unit = remember {
+        {
+            touch++
+            keepAwake = true
+        }
+    }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val lifecycleState by lifecycle.currentStateAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
     val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales[0]
@@ -396,6 +419,15 @@ fun ReaderScreen(
     val usingControls = sheet != ReaderSheet.None || menu != null ||
         cardAyah != null || cardNote != null || pendingRemove != null || sharing != null
 
+    // The reading is the glass only when the window is started and no control
+    // covers it. The wash and the reciter's follow belong to that state: a
+    // hidden reading keeps still, and the player takes over the place
+    // checkpoint while the eyes are elsewhere (owner decision, 19.9).
+    val readingOnGlass = lifecycleState.isAtLeast(Lifecycle.State.STARTED) && !usingControls
+    LaunchedEffect(readingOnGlass) {
+        viewModel.setWordTracking(readingOnGlass)
+    }
+
     // A search reveal belongs to the arrival, not to the page. It leaves on
     // the reader's first touch (the reading's own handlers below) or after a
     // few seconds, whichever comes first.
@@ -494,8 +526,17 @@ fun ReaderScreen(
     SideEffect { view.keepScreenOn = keepAwake }
 
     LaunchedEffect(touch, playback.isPlaying, usingControls, keepAwake) {
-        if (!keepAwake || usingControls) return@LaunchedEffect
-        delay(if (playback.isPlaying) LISTENING_AWAKE_MILLIS else READING_AWAKE_MILLIS)
+        if (!keepAwake) return@LaunchedEffect
+        // A control is not an endless reading: it gets the same short window
+        // whether the recitation is playing or not, and the phone's own screen
+        // timeout takes it from there (owner decision, 19.9).
+        delay(
+            when {
+                usingControls -> CONTROLS_AWAKE_MILLIS
+                playback.isPlaying -> LISTENING_AWAKE_MILLIS
+                else -> READING_AWAKE_MILLIS
+            },
+        )
         keepAwake = false
     }
 
@@ -504,8 +545,19 @@ fun ReaderScreen(
     // instead of asking every frame. The wait is media time in the reader's
     // pace, and a change of pace restarts it. A frame-by-frame loop kept
     // Compose permanently busy, which is how the store test found it.
-    LaunchedEffect(playback.isPlaying, playback.ayahNumber, playback.speed) {
-        if (!playback.isPlaying || playback.ayahNumber == null) return@LaunchedEffect
+    LaunchedEffect(
+        readingOnGlass,
+        playback.isPlaying,
+        playback.ayahNumber,
+        playback.speed,
+    ) {
+        if (!readingOnGlass || !playback.isPlaying || playback.ayahNumber == null) {
+            // A hidden reading wears no wash: the one it left is cleared so a
+            // return starts from the word the reciter is on, not from the one
+            // the screen went dark on (owner decision, 19.9).
+            playedWord.value = null
+            return@LaunchedEffect
+        }
         while (isActive) {
             playedWord.value = viewModel.playedWordNow()
             val wait = viewModel.millisToNextWord() ?: break
@@ -515,15 +567,14 @@ fun ReaderScreen(
 
     // The recited word is scheduled by the reading, so the only
     // timer the player keeps is the place. A screen that has gone dark, a
-    // backgrounded app, and a phone in someone else's hand keep the place
-    // instead, at a ten-second checkpoint, and the processor is left to sleep
-    // (owner decision, 16.3).
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    // backgrounded app, a sheet over the page, and a phone in someone else's
+    // hand keep the place instead, at a half-minute checkpoint, and the
+    // processor is left to sleep (owner decision, 16.3; 19.9 widened the
+    // checkpoint from ten seconds).
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
-                    viewModel.setWordTracking(true)
                     keepAwake = true
                     touch++
                     // A reader coming back to the page is at its head: the
@@ -532,6 +583,9 @@ fun ReaderScreen(
                     bar.showNow()
                 }
                 Lifecycle.Event.ON_STOP -> {
+                    // The screen is going dark with the page behind it, so the
+                    // player takes the place at once rather than a half-minute
+                    // later (owner decision, 19.9).
                     viewModel.setWordTracking(false)
                     keepAwake = false
                 }
@@ -539,7 +593,6 @@ fun ReaderScreen(
             }
         }
         lifecycle.addObserver(observer)
-        viewModel.setWordTracking(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
         onDispose {
             lifecycle.removeObserver(observer)
             viewModel.setWordTracking(false)
@@ -638,8 +691,7 @@ fun ReaderScreen(
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         if (event.changes.any { it.pressed && !it.previousPressed }) {
-                            touch++
-                            keepAwake = true
+                            woke()
                             reveal = null
                         }
                     }
@@ -728,7 +780,10 @@ fun ReaderScreen(
                         menuAyah = menuAyah,
                         notedAyahs = notedAyahs,
                         savedAyahs = savedAyahs,
-                        playingAyah = playback.ayahNumber,
+                        // A hidden reading is not driven: the reciter's
+                        // follow and the ayah's mark wait for the page to be
+                        // the glass again (owner decision, 19.9).
+                        playingAyah = playback.ayahNumber.takeIf { readingOnGlass },
                         // The word whose own voice is sounding, when the sound is
                         // a sample: the sheet washes it and the pill stays away
                         // (owner decision, 17.9).
@@ -1034,6 +1089,7 @@ fun ReaderScreen(
                 onOpenNotificationSettings = onOpenNotificationSettings,
                 onAskExactAlarm = onAskExactAlarm,
                 onReminderPermission = onReminderPermission,
+                onInteraction = woke,
                 onDismiss = { closeSheet() },
                 onResult = { resultOpened(it) },
                 onSearchResult = { openSearchResult(it) },
@@ -1111,6 +1167,7 @@ fun ReaderScreen(
                     noteDrafts + (ayahNumber to text)
                 }
             },
+            onInteraction = woke,
             onDismiss = {
                 noteSaving = false
                 noteFailed = false

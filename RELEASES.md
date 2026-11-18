@@ -6,6 +6,45 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 19.9
+
+The reading stops paying for the screen when nobody is reading. A sheet, an
+ayah card, a note, or a confirm used to hold the screen on for as long as it
+stood, so a phone left on Settings stayed lit until the battery died; the
+raised control now gets five minutes, and the page gets five minutes after the
+last touch instead of ten. The note and the search field renew the window as
+the reader types, so a long note or query does not go dark under the hands that
+are writing it. The listening window is unchanged at a minute, because the
+recitation is a foreground service and the page is not needed to hear it.
+
+A reading that is covered now keeps still. The wash, the reciter's follow, and
+the ayah's mark are gated on the window being started and the page being the
+glass, so a sheet over the page no longer recomposes a hidden ayah at every
+word; the player takes the place checkpoint instead. The checkpoint is thirty
+seconds rather than ten, and the place is written once when the page goes out
+of sight and once when the reader closes the window, so the writes fall to a
+third without moving the resume out of its ayah.
+
+The wash itself moved out of composition. An ayah's line was rebuilt, its word
+ranges and medallion with it, at every word the reciter reached; the line is
+built once now and a word-position map gives the wash its range, read in the
+draw. A word boundary redraws one line instead of rebuilding its
+AnnotatedString, and the painter keeps the geometry it already had.
+
+Two speculative reads moved to where they are wanted. The tafsir index, 18 MB
+of folded prose, was built on every launch for a search the reader might not
+make; it is built when the Search sheet opens, where the field is already empty
+and the sheet says it is searching. The surah after this one was read when this
+one opened, for a turn the reader might not take; it is read when the last
+visible ayah is within twelve of the end, so the turn still lands on text.
+
+The gates are the unit tests, lint, and `assembleDebug`, green here; the same
+suite runs in `build.yml`. The instrumented suites were skipped: this release
+changes when the screen sleeps, when the page recomposes, and when two
+speculative reads start, not a surface the tests drive. No visible surface
+changed, so the three committed store sets stand. Content is 1.8.1 and
+unchanged. Version 19.9 (versionCode 201).
+
 ## 19.8
 
 The reading does less work while it moves. The bar's travel was a

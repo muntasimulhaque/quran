@@ -197,29 +197,32 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**19.8 (versionCode 200).** Handed to Google Play on 18 November 2026 from
-`build` run 44262671689, the newest green run on `main`: the unit tests, lint,
-and `assembleDebug` passed, and the signed bundle
-`quran-19.8-vc200.aab` has SHA-256
-`20d79a432a0521b687cf0486275ead2a9407efe280f8d30737ea0c4fb757d936`.
-The same suite is green on this machine. The instrumented suites are an audit
-and never a release gate.
+**19.9 (versionCode 201).** The bundle is with `build.yml` on `main`. The
+unit tests, lint, and `assembleDebug` passed here, and the same suite runs in
+the workflow. The instrumented suites were skipped: this release changes when
+the screen sleeps and when the page draws, not a surface a test drives. The
+three store sets stand, because no visible surface changed.
 
-**What changed in 19.8.** The reading does less work while it moves: the bar's
-travel is Compose state read in its own layout pass, so a drag re-lays one band
-while the page stands still. Each verse's tajweed geometry is measured once and
-kept, so a redraw that changes no word reuses the boxes it already has. Long
-press selection is gone from the translation line and the tafsir passage, where
-it could only ever copy the English or the Bangla sentence; Share is the one
-door that leaves the app, and it leaves with the whole verse. The word-by-word
-long press stays, because it is a gesture and not a selection.
+**What changed in 19.9.** The screen stops holding itself on when nobody is
+reading. A sheet, an ayah card, a note, or a confirm used to keep the phone lit
+for as long as it stood, which could be until the battery died; the raised
+control now gets five minutes, and the reading gets five minutes after the last
+touch instead of ten. The note and search fields renew the window as the reader
+types. A covered page keeps still: the wash, the reciter's follow, and the
+ayah's mark wait for the page to be the glass, and the player takes the place
+checkpoint at thirty seconds instead of ten. The wash also left composition:
+an ayah's line is built once and the word is read in the draw, so a word
+boundary redraws one line instead of rebuilding its AnnotatedString. The
+tafsir index is built when Search opens rather than at every launch, and the
+surah after this one is read when the reader is twelve ayahs from its end
+rather than at the surah's opening.
 
 Content is 1.8.1 and unchanged in this release: database `content-db-1f7c5339`,
 core pack `pack-core-d7797f77`, word packs `pack-words-en-e1fa6684` and
 `pack-words-bn-6e620b10`, root pack `pack-word-root-f15b9ef1`, and the word
 pronunciation pack `word-audio-alafasy` at 1.0.
 
-Every earlier release, from 15.2 to 19.7, is in [RELEASES.md](RELEASES.md).
+Every earlier release, from 15.2 to 19.8, is in [RELEASES.md](RELEASES.md).
 
 ## Corrections and contributions
 

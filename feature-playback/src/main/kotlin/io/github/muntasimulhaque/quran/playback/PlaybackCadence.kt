@@ -11,7 +11,7 @@ package io.github.muntasimulhaque.quran.playback
  * player needs neither (owner decision, 16.3).
  */
 internal data class PlaybackCadence(
-    /** Whether the ten-second place checkpoint should run. */
+    /** Whether the half-minute place checkpoint should run. */
     val checkpoint: Boolean,
 )
 

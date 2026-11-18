@@ -45,6 +45,14 @@ import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import kotlinx.coroutines.flow.first
+
+/**
+ * How close to the end of the surah the next one is read ahead. Twelve ayahs
+ * is more than a screen, so the turn at the end still lands on text while the
+ * read has all the time it needs.
+ */
+private const val READ_AHEAD_AYAHS = 12
 
 /** The surah's rows, drawn and driven once the text is on hand. */
 @Composable
@@ -95,6 +103,8 @@ internal fun ReadingRows(
     onBarScroll: (Float) -> Float = { 0f },
     /** The reader's scroll stopped with the bar between its two ends. */
     onBarSettled: () -> Unit = {},
+    /** The reader is close to the end: read the surah after this one. */
+    onReadAhead: () -> Unit = {},
     onNextSurah: (Int) -> Unit,
     /** Opens an internal reference the surah's introduction links to. */
     onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
@@ -218,6 +228,19 @@ internal fun ReadingRows(
                 // surah's first one, which is where the reader is.
                 AyahList.ayahAt(ayahs, index)?.let(onPlaceChanged)
             }
+    }
+    // The surah after this one is read when the reader is close to the end,
+    // not when this one opens: a turn they may never make is not a whole
+    // surah of rows to pay for, and the last screen is still read ahead of
+    // the turn (owner decision, 19.9). The flag resets with the rows, so a
+    // change of the reading's mode reads the next surah again.
+    var readAheadAsked by remember(surah.number, rows) { mutableStateOf(false) }
+    LaunchedEffect(listState, rows, surah.number, readAheadAsked) {
+        if (readAheadAsked || rows.isEmpty()) return@LaunchedEffect
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 }
+            .first { it >= rows.size - READ_AHEAD_AYAHS }
+        readAheadAsked = true
+        onReadAhead()
     }
 
     // A place that arrives from elsewhere moves the list, and a place the list
@@ -376,12 +399,12 @@ internal fun ReadingRows(
                 metrics = metrics,
                 isSelected = selectedAyah == row.ayah.number,
                 playingAyah = playingAyah,
-                // The word is read here, inside this item, and only for the
-                // ayah being recited: a tick that moves the wash invalidates
-                // this one item and leaves the page around it alone (owner
-                // decision, 13.0). Every other block keeps a stable
-                // null, so a word change never rebuilds its AnnotatedString.
-                playingWord = if (playingAyah == row.ayah.number) playedWord.value else null,
+                // The word is handed down as a state and read in the draw,
+                // only for the ayah being recited: a tick that moves the wash
+                // invalidates that one line's draw and neither the item's
+                // composition nor the page around it (owner decision, 19.9).
+                // Every other block keeps a stable null.
+                playedWord = if (playingAyah == row.ayah.number) playedWord else null,
                 reveal = reveal?.takeIf { it.ayah == row.ayah.number },
                 showWordAid = wordAid ||
                     (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),

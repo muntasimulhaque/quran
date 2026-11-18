@@ -568,38 +568,6 @@ class ContentDatabase private constructor(
         }
     }
 
-    /**
-     * Builds the tafsir search index ahead of the first query. Called after
-     * the first page is on screen, on a worker thread, so the reader's first
-     * search never pays for it.
-     *
-     * The build is speculative and it can outlive the library: a reader who
-     * leaves the app, or who adds a pack while it runs, closes this database
-     * underneath it. A query against a closed pool throws, and the index has
-     * nowhere to go then, so the build stops where it is instead of taking
-     * the process down. A failure while the library is open is a real one and
-     * still propagates.
-     */
-    fun prewarmSearch(tafsirPacks: List<String>) {
-        try {
-            // A pack that carries its own index does not need the in-memory
-            // copy, and loading it would spend the memory the index just
-            // saved (owner decision, 6.5).
-            val withoutIndex = tafsirPacks.filterNot { hasTable(it, "tafsir_passage_fts") }.toSet()
-            if (withoutIndex.isNotEmpty()) {
-                synchronized(tafsirIndex) { tafsirIndex.ensure(withoutIndex) }
-            }
-        } catch (failure: Throwable) {
-            // The build is speculative, so a pack that will not read costs
-            // the reader tafsir hits until it is repaired, never a crash.
-            if (closed) {
-                Log.i(TAG, "the tafsir index stopped early: the library closed", failure)
-            } else {
-                Log.e(TAG, "the tafsir index could not be built", failure)
-            }
-        }
-    }
-
     /** The first ayah of a surah, or null when the number is not one. */
     fun firstAyahOfSurah(surah: Int): Int? {
         if (surah !in 1..114) return null

@@ -135,6 +135,8 @@ fun SearchSheet(
     onDismiss: () -> Unit,
     onAyah: (SearchArrival) -> Unit,
     onSurah: (Surah) -> Unit,
+    /** The reader is still typing: the page stays awake for another window. */
+    onInteraction: () -> Unit = {},
 ) {
     val sheetState = rememberExpandedSheetState()
     val focus = remember { FocusRequester() }
@@ -276,7 +278,10 @@ fun SearchSheet(
             ) {
                 SearchField(
                     value = text,
-                    onChange = { text = it },
+                    onChange = {
+                        text = it
+                        onInteraction()
+                    },
                     // The field's own clear mark empties the query. The sheet
                     // itself ends by its handle, the scrim, or Back, like every
                     // other sheet; a Close beside the field was the only one of

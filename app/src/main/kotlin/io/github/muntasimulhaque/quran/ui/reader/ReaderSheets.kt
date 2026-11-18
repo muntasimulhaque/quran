@@ -41,6 +41,8 @@ internal fun ReaderSheets(
     onOpenNotificationSettings: () -> Unit,
     onAskExactAlarm: () -> Unit,
     onReminderPermission: () -> Unit,
+    /** A touch inside a sheet is the reader still being here. */
+    onInteraction: () -> Unit = {},
     onDismiss: () -> Unit,
     /** A sheet's result opens the sheet's way back. */
     onResult: (ReaderSheet) -> Unit,
@@ -132,6 +134,7 @@ internal fun ReaderSheets(
             // same text at the same size as the page it came from.
             proseSp = settings.translationSp,
             proseLineSp = settings.translationLineSp,
+            onInteraction = onInteraction,
             onDismiss = onDismiss,
             onAyah = { arrival ->
                 onSearchResult(arrival)

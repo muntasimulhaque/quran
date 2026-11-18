@@ -285,9 +285,10 @@ class ContentLibrary(
         // A language choice from this launch or an earlier one: whatever
         // is still missing arrives now, without another question.
         scope.launch { drainPendingPacks() }
-        // The tafsir index is the one thing a first search would wait for,
-        // so it is built now, on a worker, while the reader is reading.
-        withContext(Dispatchers.IO) { fresh.prewarmSearch(stored.tafsirPacks.toList()) }
+        // The tafsir index is not built here. It is 18 MB of folded prose
+        // for a search the reader may never make this session, so the Search
+        // sheet builds it when it opens, while the field is still empty
+        // (owner decision, 19.9).
         // A pack the app has updated since this install is replaced
         // quietly, on an unmetered connection, and the library is
         // reopened over it. The reading never waits: this runs after the
@@ -432,8 +433,9 @@ class ContentLibrary(
         // The old library is retired on a worker, because retiring it waits
         // for the last in-flight reader, and the main thread must never wait.
         if (old != null) withContext(Dispatchers.IO) { old.close() }
-        // The tafsir search index changes with the packs, so it is rebuilt.
-        withContext(Dispatchers.IO) { fresh.prewarmSearch(settings().tafsirPacks.toList()) }
+        // The tafsir index is left empty with the new library; the Search
+        // sheet builds the packs it is asked for when it opens
+        // (owner decision, 19.9).
     }
 
     /**
