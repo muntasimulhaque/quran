@@ -6,7 +6,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TextSize
@@ -205,10 +207,12 @@ fun QuranTheme(
         AppTheme.Dark -> DarkSwitch
         else -> LightSwitch
     }
-    CompositionLocalProvider(
-        LocalPagePalette provides palette,
-        LocalSwitchPalette provides switches,
-        LocalReadingVoice provides when (language) {
+    // The reading voice and the ladder are built once per language and per
+    // type scale, not once per rebuild of this theme: a new instance is a new
+    // value for every surface that reads the local, and a reading that only
+    // changed its bar would have re-read its type (owner decision, 19.8).
+    val voice = remember(language) {
+        when (language) {
             UiLanguage.Bangla -> ReadingVoice(
                 BengaliReading,
                 TextSize.BENGALI_PROSE_RATIO,
@@ -227,12 +231,20 @@ fun QuranTheme(
                 ::literataAt,
                 EnglishReadingLocale,
             )
-        },
-    ) {
-        val typography = when (language) {
-            UiLanguage.Bangla -> BanglaTypography
-            UiLanguage.English -> quranTypography()
         }
+    }
+    val fontScale = LocalDensity.current.fontScale
+    val typography = remember(language, fontScale) {
+        when (language) {
+            UiLanguage.Bangla -> BanglaTypography
+            UiLanguage.English -> quranTypography(fontScale)
+        }
+    }
+    CompositionLocalProvider(
+        LocalPagePalette provides palette,
+        LocalSwitchPalette provides switches,
+        LocalReadingVoice provides voice,
+    ) {
         MaterialTheme(colorScheme = colors, typography = typography, content = content)
     }
 }

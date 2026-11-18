@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -51,8 +50,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 @Composable
 internal fun ReadingRows(
     content: ContentDatabase,
-    /** The surface's selection clearer, so one touch puts the menu away. */
-    selectionClearer: SelectionClearer,
     surah: Surah,
     rows: List<ReadingRow>,
     ayahs: List<Int>,
@@ -318,52 +315,53 @@ internal fun ReadingRows(
         ),
     ) {
         item(key = "surah-${surah.number}", contentType = "opening") {
-            DisableSelection {
-                SurahOpening(
-                    surah = surah,
-                    content = content,
-                    language = contentLanguage,
-                    expanded = aboutOpen,
-                    onExpandedChange = { aboutOpen = it },
-                    onPaperTap = { if (!aboutOpen) onBackgroundTap() },
-                    onOpenReference = onOpenReference,
-                    metrics = metrics,
+            SurahOpening(
+                surah = surah,
+                content = content,
+                language = contentLanguage,
+                expanded = aboutOpen,
+                onExpandedChange = { aboutOpen = it },
+                onPaperTap = { if (!aboutOpen) onBackgroundTap() },
+                onOpenReference = onOpenReference,
+                metrics = metrics,
+            )
+            // The door asks for a translation only while translations
+            // are something the reading draws at all: a reader who hid
+            // them in Settings is not looking for one here.
+            if (metrics.showTranslation && !hasTranslation) {
+                AddDoor(
+                    text = stringResource(R.string.reading_add_translation),
+                    action = stringResource(R.string.reading_action_add),
+                    onClick = onAddContent,
+                    modifier = Modifier.padding(vertical = Space.Tight),
                 )
-                // The door asks for a translation only while translations
-                // are something the reading draws at all: a reader who hid
-                // them in Settings is not looking for one here.
-                if (metrics.showTranslation && !hasTranslation) {
-                    AddDoor(
-                        text = stringResource(R.string.reading_add_translation),
-                        action = stringResource(R.string.reading_action_add),
-                        onClick = onAddContent,
-                        modifier = Modifier.padding(vertical = Space.Tight),
-                    )
-                }
-                // The word meanings and the tafsir were the app's two
-                // undiscoverable features: both live behind a Settings row and
-                // neither is named anywhere in the reading, so a reader met an
-                // app that appeared to be text and a translation. The words'
-                // door stands where the reading arrives, on the one screen a
-                // reader always sees, and leaves for good once the list is on
-                // the device (owner decision, 19.1).
-                if (!wordsInstalled) {
-                    AddDoor(
-                        text = stringResource(R.string.reading_add_words),
-                        action = stringResource(R.string.reading_action_add),
-                        onClick = onAddWords,
-                        modifier = Modifier.padding(vertical = Space.Tight),
-                    )
-                }
-                // The reading's whole navigation is one tap on the paper, and
-                // nothing on a bare page says so. The bar is the page's head,
-                // so the sentence that taught the tap retired with the tap
-                // itself (owner decision, 19.4).
             }
+            // The word meanings and the tafsir were the app's two
+            // undiscoverable features: both live behind a Settings row and
+            // neither is named anywhere in the reading, so a reader met an
+            // app that appeared to be text and a translation. The words'
+            // door stands where the reading arrives, on the one screen a
+            // reader always sees, and leaves for good once the list is on
+            // the device (owner decision, 19.1).
+            if (!wordsInstalled) {
+                AddDoor(
+                    text = stringResource(R.string.reading_add_words),
+                    action = stringResource(R.string.reading_action_add),
+                    onClick = onAddWords,
+                    modifier = Modifier.padding(vertical = Space.Tight),
+                )
+            }
+            // The reading's whole navigation is one tap on the paper, and
+            // nothing on a bare page says so. The bar is the page's head,
+            // so the sentence that taught the tap retired with the tap
+            // itself (owner decision, 19.4).
         }
         items(
             count = rows.size,
-            key = { "ayah-${rows[it].ayah.number}" },
+            // The ayah's own number is the key: it is unique in the Book, it
+            // is what the list already holds, and it costs no string per item
+            // per composition (owner decision, 19.8).
+            key = { rows[it].ayah.number },
             // One slot type for every ayah, so a block that scrolls out
             // is the block the next one reuses; the opening and the
             // closing line are their own kinds and never borrow an
@@ -375,7 +373,6 @@ internal fun ReadingRows(
             AyahBlock(
                 row = row,
                 hafs = hafs,
-                selectionClearer = selectionClearer,
                 metrics = metrics,
                 isSelected = selectedAyah == row.ayah.number,
                 playingAyah = playingAyah,
@@ -420,18 +417,16 @@ internal fun ReadingRows(
             )
         }
         item(key = "end-${surah.number}", contentType = "end") {
-            DisableSelection {
-                SurahEnd(
-                    surah = surah,
-                    nextSurahName = nextSurahName,
-                    onNextSurah = onNextSurah,
+            SurahEnd(
+                surah = surah,
+                nextSurahName = nextSurahName,
+                onNextSurah = onNextSurah,
+            )
+            if (reminderOffer) {
+                ReadingReminderOffer(
+                    onTurnOn = onReminderOn,
+                    onNotNow = onReminderNotNow,
                 )
-                if (reminderOffer) {
-                    ReadingReminderOffer(
-                        onTurnOn = onReminderOn,
-                        onNotNow = onReminderNotNow,
-                    )
-                }
             }
         }
     }

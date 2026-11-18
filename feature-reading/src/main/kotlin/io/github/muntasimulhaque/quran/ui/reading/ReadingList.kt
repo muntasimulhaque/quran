@@ -145,8 +145,6 @@ data class ReadingListActions(
 @Composable
 fun ReadingList(
     content: ContentDatabase,
-    /** The reading's selection clearer, so one touch puts the menu away. */
-    selectionClearer: SelectionClearer,
     modifier: Modifier = Modifier,
     /** What the reading is showing. */
     state: ReadingListState,
@@ -238,7 +236,6 @@ fun ReadingList(
     }
     ReadingRows(
         content = content,
-        selectionClearer = selectionClearer,
         surah = state.surah,
         rows = rows,
         ayahs = ayahs,

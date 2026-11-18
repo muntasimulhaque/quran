@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -85,7 +89,14 @@ private val BarInset = Space.Gutter - 12.dp
 internal fun ReaderTopBar(
     title: String,
     detail: String?,
-    shown: Float,
+    /**
+     * How much of the bar stands, as state: 1 standing and 0 away.
+     *
+     * A state and not a number, because a number would be read by the screen
+     * that owns this bar, and the screen would be rebuilt on every scroll
+     * delta for a value only the bar draws (owner decision, 19.8).
+     */
+    shown: State<Float>,
     /** What a tap on the title does, said out loud; null when it does nothing. */
     titleAction: String?,
     onTitle: () -> Unit,
@@ -97,8 +108,13 @@ internal fun ReaderTopBar(
 ) {
     val status = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val statusPx = with(LocalDensity.current) { status.roundToPx() }
-    val reveal = shown.coerceIn(0f, 1f)
-    val away = reveal <= 0.001f
+    // The two things a rebuild is owed for: the bar arriving or leaving for
+    // good, and the name a test finds it by. Both are derived, so the 200ms a
+    // settle spends does not rebuild this row 12 times on the way.
+    val away by remember(shown) { derivedStateOf { shown.value <= 0.001f } }
+    val tag by remember(shown) {
+        derivedStateOf { if (shown.value >= 0.99f) "reading-bar-shown" else "reading-bar" }
+    }
     Layout(
         content = {
             Box(
@@ -153,8 +169,12 @@ internal fun ReaderTopBar(
         },
         modifier = modifier
             .fillMaxWidth()
-            .testTag(if (reveal >= 0.99f) "reading-bar-shown" else "reading-bar"),
+            .testTag(tag),
     ) { measurables, constraints ->
+        // Read in the layout, where it is spent: the band's height on this
+        // frame. A read here re-lays the band out and never rebuilds
+        // anything, which is the whole of the rule above.
+        val reveal = shown.value.coerceIn(0f, 1f)
         val content = measurables.first().measure(constraints.copy(minHeight = 0))
         val own = (content.height - statusPx).coerceAtLeast(0)
         val visible = statusPx + (own * reveal).roundToInt()

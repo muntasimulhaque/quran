@@ -79,11 +79,31 @@ fun DrawScope.drawTajweedColors(
     colors: TajweedColors,
     enabled: Boolean,
 ) {
-    if (!enabled || code.isEmpty()) return
+    if (!enabled) return
+    val paint = tajweedPaint(layout, code, colors) ?: return
+    drawTajweed(layout, paint)
+}
+
+/**
+ * One line's color geometry: the runs the code names, and one path per family
+ * holding every box they cover.
+ *
+ * This is the expensive half of the paint and the only half that depends on
+ * the shape of the line. It is a plain function and not a draw, so a caller
+ * can compute it once, keep it, and only paint with it. The reading used to
+ * recompute it on every redraw of every ayah, which is a
+ * `layout.getBoundingBox` for every character of the verse (owner decision,
+ * 19.8).
+ */
+fun tajweedPaint(
+    layout: TextLayoutResult,
+    code: String,
+    colors: TajweedColors,
+): TajweedPaint? {
     val text = layout.layoutInput.text.text
-    if (code.length > text.length) return
-    val runs = tajweedColorRuns(code, colors, enabled)
-    if (runs.isEmpty()) return
+    if (code.isEmpty() || code.length > text.length) return null
+    val runs = tajweedColorRuns(code, colors)
+    if (runs.isEmpty()) return null
     val paths = LinkedHashMap<Color, Path>()
     for (run in runs) {
         val from = run.start.coerceIn(0, code.length)
@@ -133,8 +153,56 @@ fun DrawScope.drawTajweedColors(
             }
         }
     }
-    for ((color, path) in paths) {
+    if (paths.isEmpty()) return null
+    return TajweedPaint(paths.entries.map { it.key to it.value })
+}
+
+/** One shaped line's color geometry, ready to paint. */
+class TajweedPaint internal constructor(
+    /** One path per family, in the order the runs named them. */
+    internal val paths: List<Pair<Color, Path>>,
+)
+
+/**
+ * Paints [paint] over [layout]: one clipped copy of the line per family.
+ *
+ * The line was shaped once, so nothing here can move a letter or a mark; each
+ * family is the same text drawn again through its own clip.
+ */
+fun DrawScope.drawTajweed(layout: TextLayoutResult, paint: TajweedPaint) {
+    for ((color, path) in paint.paths) {
         clipPath(path) { drawText(textLayoutResult = layout, color = color) }
+    }
+}
+
+/**
+ * One ayah's paint, kept between draws.
+ *
+ * A line's geometry depends on exactly three things: the shaped layout, the
+ * code, and the palette. The layout lands once when the line is measured, the
+ * palette changes when the reader changes the theme, and the code never
+ * changes after the content is read. A wash that moves while the reciter
+ * reads, the search arrival's mark, and a scroll all redraw the line without
+ * changing any of the three, so they are answered by the paint already in
+ * hand. One entry is the whole cache: a block paints its own line and nothing
+ * else (owner decision, 19.8).
+ */
+class TajweedPainter {
+
+    private var layout: TextLayoutResult? = null
+    private var code: String = ""
+    private var colors: TajweedColors? = null
+    private var paint: TajweedPaint? = null
+
+    /** [layout]'s paint in [colors], computed only when one of the three changed. */
+    fun paint(layout: TextLayoutResult, code: String, colors: TajweedColors): TajweedPaint? {
+        if (this.layout === layout && this.code == code && this.colors == colors) return paint
+        val next = tajweedPaint(layout, code, colors)
+        this.layout = layout
+        this.code = code
+        this.colors = colors
+        this.paint = next
+        return next
     }
 }
 

@@ -6,6 +6,50 @@ trackers, no accounts, nothing collected, ever.
 
 **Status:** 19.7 (versionCode 199) was handed over for Play from commit `277aaab7`, taken from `build` run 44123930426, the newest green run on `main`, whose gates and signed-bundle jobs both passed, in 5m06s and 4m37s. The signed bundle `quran-19.7-vc199.aab` has SHA-256 `de52b8e0ae6360c44242b8c5414fd89f9cdc515491f4e768720b334045cec379`; the workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 through 19.7 were signed with. The release gates are the CI unit tests, lint, and `assembleDebug`, all green; the same suite ran here on this machine, green in 1m15s, with lint reporting no issues. The instrumented suites are an audit, not a gate: this session ran `ContentSearchTest` on `quran_phone`, 24 tests, green after both packages were uninstalled first; the three store capture legs ran 5 tests each on `quran_phone`, `quran_tablet7`, and `quran_tablet10`, green, and the eight frames of each were read and committed. The full app and data suites were not rerun. Content is 1.8.1: database `content-db-1f7c5339`; the core pack `pack-core-d7797f77` (version 6); the word packs `pack-words-en-e1fa6684` and `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1` (QUL 2); the word pronunciation pack is 1.0 (352 MB, tag `word-audio-alafasy`) downloaded one surah at a time and Al-Fatiha's 29 words in the app. The new content database and core pack are published; the other packs are unchanged. The hand-off copy was deleted after Play received it; the run's artifact is retained for 14 days. A post-release tools cleanup, `ae80c189`, removed two dead source checks; its `build` run 44129139362 is green, and the app and the submitted bundle are unchanged.
 
+**In 19.8.** The reading does less work while it moves. The bar's travel was a
+number the whole screen read, so every scroll delta rebuilt the page and every
+ayah on the glass; it is Compose state now, read by the bar in its own layout
+pass, so a drag re-lays one band out while the page stands still. A settle no
+longer rebuilds the bar at each frame either: the two things a rebuild is owed
+for, the bar going away for good and the tag a test finds it by, are derived.
+The screen's own derived answers, whether a translation is on, whether the word
+list is on the device, the next surah's name, and the ayahs the reader wrote a
+note on, are remembered against what they are made of instead of walking the
+reader's saves on every rebuild. The view model is marked stable, so the
+callbacks the reading hands down can be remembered rather than rebuilt.
+
+Each verse's tajweed colors are measured once per shaped line and kept. The
+geometry of every color family was rebuilt on every redraw, which is a
+`getBoundingBox` for every character of the verse, and the wash that moves while
+the reciter reads was the loudest case. `TajweedPaint` and `TajweedPainter`
+split that geometry from the painting, and a block holds one painter, so a
+redraw that changes no word reuses the boxes it already has.
+
+The block, the Arabic line, and the doorway write their own place on the glass
+only when it has changed; a lazy item is keyed by the ayah's own number instead
+of a string built per item per composition; and the theme builds its reading
+voice per language and its ladder per language and type scale, so a rebuild
+hands no surface a new `Typography`.
+
+Long-press selection is gone from the translation line and from the tafsir
+passage in the ayah card. Every translation line of every ayah on the glass
+carried the platform's own selection machinery, created as the ayah arrived and
+thrown away as it left, with a finger watcher for the long press that opened it.
+The Quran's own line was never selectable, so the feature copied the English or
+the Bangla sentence and never the verse. `SelectionClearer`, both
+`DisableSelection` wrappers, and the per-line provider go with it, and Share is
+the one door that leaves the app with the whole verse. The word-by-word long
+press stays: it is a gesture, not a selection. The contrast check that guarded
+the selection mark stays too, pointed at the reciter's word wash and the search
+arrival, which draw the same tone behind the Quran's letters.
+
+The gates are the unit tests, lint, and `assembleDebug`, green here and in
+`build.yml`. The instrumented suites are a signal: 12 classes and 32 tests ran
+on `quran_phone`, 31 green, and both red legs are red at the parent commit as
+well, so neither is this change. The three store capture legs ran on the three
+AVDs, and the eight frames of each were read and committed. Version 19.8
+(versionCode 200).
+
 **In 19.7.** Search now meets the reader's own spelling. The exact index still answers first, and it is never widened: a query the print already holds returns exactly what it returned before. Only when it names no ayah at all does the recall index answer, over a new column that removes the long vowels and the hamza seat from both sides. الصلاة, الشيطان, القرآن and إبراهيم now reach their verses; الرحمن keeps its exact 45. The tools search gate has seven recall probes beside the exact ones, and `ContentSearchTest` runs 24 tests on the phone, including the recall and a reference that is now the only answer. A typed reference no longer drags the tafsir sources beside it, so `kahf 10` is 18:10 and nothing else.
 
 The recitation download no longer deletes the surahs already here. The commit moves one surah's files into the reciter's shared folder, and `RecitationCommit` has three JVM tests: a second surah joins the first, a repeated surah replaces only its own files, and an empty package moves nothing. A partial commit removes only what it moved; the whole-surah check refuses a half surah and the next download repairs it.

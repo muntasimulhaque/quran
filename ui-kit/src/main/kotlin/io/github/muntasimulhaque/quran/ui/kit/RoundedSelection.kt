@@ -61,9 +61,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * kept Material's own selection: the accent at forty percent. Forty percent is
  * above every ceiling the page keeps, and on the ground it produced six of the
  * seven rule colors fell under 4.5:1 on paper and all seven on night, on the
- * one surface where a rule color matters most. [ReadingSelection] is the
- * reading's own pair, and [readingSelectionColors] is what the contrast test
- * measures (owner decision, the long read session).
+ * one surface where a rule color matters most. The reading carries no
+ * selection any more (owner decision, 19.8), so the pair that replaced
+ * Material's is no longer a surface's: [readingSelectionColors] is kept
+ * because the mark it names is the one the reciter's word and a search
+ * arrival draw behind the Quran's own letters, and the contrast test measures
+ * the seven families on it there.
  */
 @Composable
 fun RoundedSelectionColors(content: @Composable () -> Unit) {
@@ -75,29 +78,15 @@ fun RoundedSelectionColors(content: @Composable () -> Unit) {
 }
 
 /**
- * The reading's copy selection: the page's own word mark behind the selected
- * words, and the accent's handles and cursor around them.
+ * The reading's mark pair, named so the contrast test can measure it.
  *
- * The mark is [PagePalette.highlight], the tone the reciter's word and a
- * search arrival already wear and the strongest tint the seven rule colors
- * keep their 4.5:1 on, so selecting a verse cannot make its tajweed unreadable.
- * The day page's mark is 1.30 against the paper, the night's 1.40, and every
- * family clears the floor on both (the contrast test measures them there).
- *
- * The selection keeps the platform's rectangular shape, for the reason the
- * file notes: a range can span a translation and a tafsir at once, and Compose
- * does not expose the pieces needed to round it. The color is the app's, and
- * that is what the reading owed (owner decision, the long read session).
+ * It was the reading's copy selection until the reading stopped carrying one
+ * (owner decision, 19.8). The mark is [PagePalette.highlight], the tone the
+ * reciter's word and a search arrival draw behind the words, and it is the
+ * strongest tint the seven rule colors keep their 4.5:1 on. The day page's
+ * mark is 1.30 against the paper, the night's 1.40, and every family clears
+ * the floor on both.
  */
-@Composable
-fun ReadingSelection(content: @Composable () -> Unit) {
-    val primary = MaterialTheme.colorScheme.primary
-    val mark = LocalPagePalette.current.highlight
-    val colors = remember(primary, mark) { readingSelectionColors(primary, mark) }
-    CompositionLocalProvider(LocalTextSelectionColors provides colors, content = content)
-}
-
-/** The reading's selection pair, named so the contrast test can measure it. */
 internal fun readingSelectionColors(handle: Color, mark: Color): TextSelectionColors =
     TextSelectionColors(handleColor = handle, backgroundColor = mark)
 

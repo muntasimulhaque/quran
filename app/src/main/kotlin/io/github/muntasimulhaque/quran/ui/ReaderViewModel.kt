@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.app.Application
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -79,7 +80,19 @@ data class ReaderMessage(
  * Holds the reader's place, their choices, and the content they read.
  *
  * The place is one ayah: the reading derives its scroll position from it.
+ *
+ * **Stable, and it has to stay stable.** The reading hands this object to
+ * every ayah's callbacks, and Compose may only remember a lambda that
+ * captures stable values: without this, every callback the screen builds is a
+ * new object on each rebuild, and a rebuild of the screen for any reason
+ * rebuilds every ayah on the glass (owner decision, 19.8). The promise the
+ * annotation makes is that every property a composition reads is Compose
+ * state. `settings`, the library's own fields, `wordVoice`, `pillReciters`,
+ * `listenOffer`, and `startAtSurahOpening` are all `mutableStateOf`. A plain
+ * `var` added here and read from a composable would be read once and never
+ * again, so a value a surface draws belongs in state.
  */
+@Stable
 class ReaderViewModel(application: Application) : AndroidViewModel(application) {
 
     private val settingsStore = SettingsStore(application)

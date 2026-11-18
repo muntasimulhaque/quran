@@ -403,15 +403,16 @@ object TypeLadder {
  * style rather than one global value, because the correction follows the
  * size.
  */
-@Composable
 private fun readingStyle(
     weight: FontWeight,
     sizeSp: Float,
     lineSp: Float,
+    /** The system's type scale, so the cut is the one drawn at the real size. */
+    scale: Float,
     trackingSp: Float = 0f,
 ): TextStyle =
     TextStyle(
-        fontFamily = literataAt(sizeSp),
+        fontFamily = literataFamily(sizeSp, scale),
         fontWeight = weight,
         fontSize = sizeSp.sp,
         lineHeight = lineSp.sp,
@@ -479,9 +480,7 @@ private fun interStyle(
  * way [literataAt] does, so a reader at 2.0 scale reads the cut for double
  * size.
  */
-@Composable
-internal fun quranTypography(): Typography {
-    val scale = LocalDensity.current.fontScale
+internal fun quranTypography(scale: Float): Typography {
     return Typography(
         displayLarge = interStyle(
             FontWeight.SemiBold,
@@ -543,6 +542,7 @@ internal fun quranTypography(): Typography {
             FontWeight.Medium,
             TypeLadder.BOOK_NAME_SP,
             TypeLadder.BOOK_NAME_SP * TypeLadder.TITLE_LINE,
+            scale,
         ),
         titleSmall = interStyle(
             FontWeight.Medium,
@@ -829,8 +829,18 @@ private fun banglaStyle(
  * double size, not the small-text cut stretched over it.
  */
 @Composable
-fun literataAt(sizeSp: Float): FontFamily {
-    val drawn = sizeSp * LocalDensity.current.fontScale
+fun literataAt(sizeSp: Float): FontFamily =
+    literataFamily(sizeSp, LocalDensity.current.fontScale)
+
+/**
+ * The same cut, for a caller that already holds the type scale.
+ *
+ * The ladder is built as a value and remembered against the scale (owner
+ * decision, 19.8), so it cannot ask the composition for the density while it
+ * is being built: the number is handed in instead.
+ */
+private fun literataFamily(sizeSp: Float, fontScale: Float): FontFamily {
+    val drawn = sizeSp * fontScale
     return literataCuts.getOrPut(drawn.toBits()) {
         FontFamily(
             literataCut(drawn, FontWeight.Normal, FontStyle.Normal),

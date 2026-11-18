@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.reader
 
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -36,8 +37,28 @@ import kotlinx.coroutines.launch
  */
 internal class ReaderBarState {
 
-    var shown by mutableFloatStateOf(1f)
-        private set
+    /**
+     * The bar's place on its travel, as the state Compose watches.
+     *
+     * It is a state rather than a field because the bar moves on every scroll
+     * delta and on every frame of its own 200ms settle. The reading hands
+     * [shownFraction] down and never reads it in its own body: the page that
+     * owns the bar is not rebuilt because the bar moved, the bar's band is
+     * re-laid out and nothing above it is touched (owner decision, 19.8).
+     * A reader with a 120 Hz phone gave the old read 8 ms a frame to rebuild
+     * a whole surah in, which is what the scroll felt like.
+     */
+    private val shownState = mutableFloatStateOf(1f)
+
+    /** The bar's own place: 1 fully standing, 0 with only the status band left. */
+    var shown: Float
+        get() = shownState.floatValue
+        private set(value) {
+            shownState.floatValue = value
+        }
+
+    /** [shown] as state, for the bar alone; the reading passes it and never reads it. */
+    val shownFraction: State<Float> get() = shownState
 
     /** The row and its air, without the status bar the phone owns. */
     var ownHeightPx by mutableIntStateOf(0)

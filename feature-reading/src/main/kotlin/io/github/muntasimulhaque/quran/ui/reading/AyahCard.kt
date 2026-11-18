@@ -10,13 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -24,9 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -42,7 +36,6 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
-import io.github.muntasimulhaque.quran.ui.kit.ReadingSelection
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
@@ -134,10 +127,6 @@ fun AyahCard(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
-    // The card's selectable passage registers here, and any touch on the card
-    // clears it, so the platform menu goes when the reader touches anywhere
-    // outside it (owner decision, 13.7).
-    val selectionClearer = remember { SelectionClearer() }
     // The pack a search hit named, when there is one: the hit already chose
     // the commentary, so its door stands open and its passage under it. With
     // no hit, no door opens of itself, and one pack has no door at all.
@@ -223,14 +212,6 @@ fun AyahCard(
                 .fillMaxWidth()
                 .align(Alignment.CenterHorizontally)
                 .imePadding()
-                .pointerInput(selectionClearer) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Initial)
-                            if (event.type == PointerEventType.Press) selectionClearer.clear()
-                        }
-                    }
-                }
                 // The gate rides with the scroll: a long tafsir scrolled down
                 // and then scrolled back up is the reader reading, never a
                 // pull that closes the card under them.
@@ -292,7 +273,6 @@ fun AyahCard(
                         // is never a second copy of the name.
                         opening = null,
                         settings = settings,
-                        selectionClearer = selectionClearer,
                     )
                 } else {
                     // A source that ends in a passage leaves one more
@@ -329,7 +309,6 @@ fun AyahCard(
                                     packName,
                                 ),
                                 settings = settings,
-                                selectionClearer = selectionClearer,
                             )
                         }
                     }
@@ -410,7 +389,6 @@ private fun PassageArea(
     done: Boolean,
     opening: String?,
     settings: AppSettings,
-    selectionClearer: SelectionClearer,
 ) {
     Box(
         modifier = Modifier
@@ -419,7 +397,7 @@ private fun PassageArea(
         contentAlignment = Alignment.Center,
     ) {
         when {
-            view != null -> TafsirPanel(view, settings, selectionClearer)
+            view != null -> TafsirPanel(view, settings)
             done -> Text(
                 text = stringResource(R.string.card_tafsir_missing),
                 style = MaterialTheme.typography.bodyMedium,
@@ -453,14 +431,8 @@ private fun PassageArea(
 private fun TafsirPanel(
     view: TafsirView,
     settings: AppSettings,
-    selectionClearer: SelectionClearer,
 ) {
     val voice = LocalReadingVoice.current
-    val selection = remember(view) { SelectionState() }
-    DisposableEffect(selection, selectionClearer) {
-        selectionClearer.register(selection)
-        onDispose { selectionClearer.unregister(selection) }
-    }
     val titleSp = TypeLadder.articleTitleSp(settings.tafsirSp)
     Column(
         modifier = Modifier
@@ -479,23 +451,17 @@ private fun TafsirPanel(
                 .semantics { heading() }
                 .padding(bottom = Space.Block),
         )
-        // A commentary is the reader's to keep a sentence of: the passage is
-        // selectable, so a long press copies from it with the platform's own
-        // menu instead of sending the reader through Share for a picture
-        // (owner decision, 13.5). The heading above it stays outside
-        // the selection: a reference is the card's, not the commentary's. The
-        // passage registers with the card's clearer, so a touch anywhere on
-        // the card puts the menu away.
-        ReadingSelection {
-            SelectionContainer(selection) {
-                RichBlocks(
-                    blocks = view.blocks,
-                    sizeSp = settings.tafsirSp,
-                    lineSp = settings.tafsirLineSp,
-                    arabicSp = settings.arabicInlineSp,
-                )
-            }
-        }
+        // A commentary is read, not selected. The passage carried the
+        // platform's selection machinery while the card stood, for a long
+        // press that copied a sentence of the commentary; the Share action
+        // hands out the verse, and the reading keeps no selection anywhere
+        // (owner decision, 19.8).
+        RichBlocks(
+            blocks = view.blocks,
+            sizeSp = settings.tafsirSp,
+            lineSp = settings.tafsirLineSp,
+            arabicSp = settings.arabicInlineSp,
+        )
     }
 }
 

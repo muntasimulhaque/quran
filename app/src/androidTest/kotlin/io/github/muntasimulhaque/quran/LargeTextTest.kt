@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
@@ -72,7 +74,10 @@ class LargeTextTest {
                     ReaderTopBar(
                         title = "Al-Baqarah",
                         detail = "Juz 3",
-                        shown = 1f,
+                        // The bar's place is state the bar alone reads, so the
+                        // page that owns it is never rebuilt for it (owner
+                        // decision, 19.8).
+                        shown = remember { mutableFloatStateOf(1f) },
                         titleAction = "Back to the top of the surah",
                         onTitle = {},
                         onBrowse = {},

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 19.7 (versionCode 199)
+Version: 19.8 (versionCode 200)
 
 ## Listing
 
@@ -220,6 +220,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (19.8, 447 characters)
+19.8 makes the reading lighter under the finger: the page no longer rebuilds itself while you scroll, and each verse paints its tajweed colors from work already done instead of measuring every character again on each redraw. Long-press selection is gone from the translation and the tafsir passage; the verse still leaves the app through Share. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (19.7, 493 characters)
 19.7 makes search find the words you actually type, including prayer, Satan, the Quran, and Abraham; exact matches still come first. Downloaded recitations keep every surah, so a second download no longer deletes the first. The daily reminder card stays away once the reminder is set, and Not now never turns it off. English surah names are corrected, the surah introductions' references open on a tap, and download sizes read in decimal MB. Content is 1.8.1. No ads, no trackers, no accounts.

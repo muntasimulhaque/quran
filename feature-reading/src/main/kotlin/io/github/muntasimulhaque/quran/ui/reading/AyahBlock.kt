@@ -14,13 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -68,12 +65,12 @@ import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.feature.reading.R
-import io.github.muntasimulhaque.quran.ui.kit.ReadingSelection
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.translationIsNamed
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
-import io.github.muntasimulhaque.quran.ui.rich.drawTajweedColors
+import io.github.muntasimulhaque.quran.ui.rich.TajweedPainter
+import io.github.muntasimulhaque.quran.ui.rich.drawTajweed
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -83,8 +80,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 internal fun AyahBlock(
     row: ReadingRow,
     hafs: FontFamily,
-    /** The surface's selection clearer, so one touch puts the menu away. */
-    selectionClearer: SelectionClearer,
     metrics: ReadingMetrics,
     isSelected: Boolean,
     playingAyah: Int?,
@@ -256,13 +251,18 @@ internal fun AyahBlock(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned {
+                    // The block's place is read only when its door opens, but
+                    // the callback runs on every layout that moves it, which
+                    // is every frame of a scroll. It is written only when it
+                    // has changed (owner decision, 19.8).
                     val box = it.boundsInWindow()
-                    blockBounds.value = IntRect(
+                    val next = IntRect(
                         box.left.toInt(),
                         box.top.toInt(),
                         box.right.toInt(),
                         box.top.toInt() + 1,
                     )
+                    if (next != blockBounds.value) blockBounds.value = next
                 }
                 .testTag("ayah-${row.ayah.verseKey}")
                 .clip(Radii.Card)
@@ -355,6 +355,10 @@ internal fun AyahBlock(
             // reader's place never moves when the colors do (owner decision,
             // the QPC rendering audit).
             val tajweed = row.ayah.tajweed
+            // The line's color geometry, kept between draws: the wash moves
+            // while the reciter reads and the block redraws for its own
+            // reasons, and neither changes the boxes (owner decision, 19.8).
+            val tajweedPainter = remember { TajweedPainter() }
             // A screen reader hears the portable form, not the print's
             // encoding: the same words, with the dotless base and the small
             // letters folded to what a speech engine can pronounce (owner
@@ -412,12 +416,13 @@ internal fun AyahBlock(
                         .weight(1f)
                         .onGloballyPositioned {
                             val box = it.boundsInWindow()
-                            textBounds.value = IntRect(
+                            val next = IntRect(
                                 box.left.toInt(),
                                 box.top.toInt(),
                                 box.right.toInt(),
                                 box.bottom.toInt(),
                             )
+                            if (next != textBounds.value) textBounds.value = next
                         }
                         // In an Arabic-only reading there is no reference line, so
                         // the verse's own printed medallion closes it and is the
@@ -520,7 +525,20 @@ internal fun AyahBlock(
                                 }
                             }
                             drawContent()
-                            drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
+                            // The colors are painted from the geometry the
+                            // block already has in hand, not from a fresh
+                            // walk of every character: the wash above moves
+                            // while the reciter reads, and each of those
+                            // redraws used to rebuild the whole line's boxes
+                            // (owner decision, 19.8).
+                            if (metrics.tajweed) {
+                                val paint = tajweedPainter.paint(
+                                    layout,
+                                    tajweed,
+                                    palette.tajweed,
+                                )
+                                if (paint != null) drawTajweed(layout, paint)
+                            }
                         },
                 )
             }
@@ -557,36 +575,30 @@ internal fun AyahBlock(
                             modifier = Modifier.padding(top = Space.Block),
                         )
                     }
-                    // The translation is the reader's to copy: a line of
-                    // Saheeh International can leave the app as words, not
-                    // only as a picture of the page. The Quran above it stays
-                    // outside the selection, because the page's own touch
-                    // belongs to the verse and the verse is not a paragraph
-                    // (owner decision, 13.7). The line registers its
-                    // state with the surface's clearer, so the reader's next
-                    // touch anywhere puts the platform menu away.
-                    val selection = remember(line) { SelectionState() }
-                    DisposableEffect(selection, selectionClearer) {
-                        selectionClearer.register(selection)
-                        onDispose { selectionClearer.unregister(selection) }
-                    }
-                    ReadingSelection {
-                        SelectionContainer(selection) {
-                            TranslationBody(
-                                runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                                modifier = Modifier.padding(
-                                    top = if (row.translations.size > 1) Space.Tight else Space.Block,
-                                ),
-                                sizeSp = metrics.translationSp,
-                                lineSp = metrics.translationLineSp,
-                                arabicSp = metrics.arabicInlineSp,
-                                onFootnote = { number -> onFootnote(line, number) },
-                                footnoteNumbers = remember(line.text.footnotes) {
-                                    line.text.footnotes.map { it.number }.toSet()
-                                },
-                            )
-                        }
-                    }
+                    // The translation is read, not selected: the line
+                    // is drawn as type and nothing else. Every line of
+                    // every ayah on the glass used to carry the platform's
+                    // own selection machinery, created as the ayah arrived
+                    // and thrown away as it left, with a finger watcher of
+                    // its own for the long press that opened it. The Quran
+                    // above it was never selectable, so the feature copied
+                    // the English or the Bangla sentence and never the
+                    // verse; the Share action is the one door that leaves
+                    // the app with the whole verse, Arabic included
+                    // (owner decision, 19.8).
+                    TranslationBody(
+                        runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
+                        modifier = Modifier.padding(
+                            top = if (row.translations.size > 1) Space.Tight else Space.Block,
+                        ),
+                        sizeSp = metrics.translationSp,
+                        lineSp = metrics.translationLineSp,
+                        arabicSp = metrics.arabicInlineSp,
+                        onFootnote = { number -> onFootnote(line, number) },
+                        footnoteNumbers = remember(line.text.footnotes) {
+                            line.text.footnotes.map { it.number }.toSet()
+                        },
+                    )
                 }
             }
         }
@@ -660,7 +672,7 @@ private data class ArabicLine(
  * color span would re-shape the line the reading has already settled.
  *
  * The tajweed colors are not spans either. The line is shaped once and
- * [drawTajweedColors] paints over that one layout, because a color span would
+ * [drawTajweed] paints over that one layout, because a color span would
  * re-shape the run and put a mark at the bottom of its letter (owner decision,
  * the QPC rendering audit).
  *

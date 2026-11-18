@@ -170,13 +170,18 @@ internal fun AyahDoor(
     Box(
         modifier = Modifier
             .onGloballyPositioned {
+                // The door's place is read only when it is tapped, and this
+                // callback runs on every layout that moves it, which is every
+                // frame of a scroll. It is written only when it has changed
+                // (owner decision, 19.8).
                 val box = it.boundsInWindow()
-                bounds.value = IntRect(
+                val next = IntRect(
                     box.left.toInt(),
                     box.top.toInt(),
                     box.right.toInt(),
                     box.bottom.toInt(),
                 )
+                if (next != bounds.value) bounds.value = next
             }
             .testTag("door-$key")
             .clickable(

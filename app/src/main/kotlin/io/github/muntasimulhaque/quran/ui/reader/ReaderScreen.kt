@@ -70,7 +70,6 @@ import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
 import io.github.muntasimulhaque.quran.ui.reading.ReadingListActions
 import io.github.muntasimulhaque.quran.ui.reading.ReadingListState
-import io.github.muntasimulhaque.quran.ui.reading.SelectionClearer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -181,10 +180,6 @@ fun ReaderScreen(
     // time, never across a rotation: a popup is a moment and not a place
     // (owner decision, 13.3).
     var menu by remember { mutableStateOf<AyahMenuRequest?>(null) }
-    // The reading's text selection is a moment, not a place: it is cleared by
-    // the next touch anywhere on the page or the bar, and it is never saved
-    // across a rotation (owner decision, 13.7).
-    val selectionClearer = remember { SelectionClearer() }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
     // The tafsir pack a search hit opened the card for; null for the normal
     // Tafsir pill, where the single enabled pack (or the door list) decides.
@@ -315,7 +310,6 @@ fun ReaderScreen(
         if (sheet == target) return
         returnTo = null
         menu = null
-        selectionClearer.clear()
         sheetStates.removeState(target.name)
         settingsPage = page
         sheet = target
@@ -644,7 +638,6 @@ fun ReaderScreen(
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         if (event.changes.any { it.pressed && !it.previousPressed }) {
-                            selectionClearer.clear()
                             touch++
                             keepAwake = true
                             reveal = null
@@ -667,7 +660,10 @@ fun ReaderScreen(
             ReaderTopBar(
                 title = surahName(viewModel, settings.ayah),
                 detail = stringResource(R.string.juz_label, viewModel.juz),
-                shown = bar.shown,
+                // The bar's travel is state the bar reads, so a scroll
+                // delta re-lays the band out and never rebuilds the page
+                // (owner decision, 19.8).
+                shown = bar.shownFraction,
                 // A tap on the surah's name is the way back to its top, the
                 // way a reader flips to the beginning of a surah in a printed
                 // copy. The arrival is the surah's head, so the bar stands
@@ -689,9 +685,29 @@ fun ReaderScreen(
                 val revealForSurah = reveal?.takeIf {
                     viewModel.surahOf(it.ayah)?.number == surah.number
                 }
+                // Four answers the reading asks for, each of which walks a
+                // list to say one boolean or one set: whether a translation
+                // is on, whether the word list is on the device, the next
+                // surah's name, and the ayahs the reader wrote a note on.
+                // They are remembered against what they are made of, so a
+                // rebuild for any other reason does not walk the reader's
+                // saves and the pack list again (owner decision, 19.8).
+                val hasTranslation = remember(settings.translationPacks, viewModel.packs) {
+                    viewModel.enabledTranslationPacks.isNotEmpty()
+                }
+                val wordsInstalled = remember(content, viewModel.readingLanguage) {
+                    content.installedPack(
+                        ContentDatabase.wordsPackId(viewModel.readingLanguage),
+                    )
+                }
+                val nextSurahName = remember(viewModel.surahs, surah.number) {
+                    viewModel.surahs.firstOrNull { it.number == surah.number + 1 }?.nameSimple
+                }
+                val notedAyahs = remember(saved) {
+                    saved.filter { !it.note.isNullOrBlank() }.map { it.ayahNumber }.toSet()
+                }
                 ReadingList(
                     content = content,
-                    selectionClearer = selectionClearer,
                     state = ReadingListState(
                         surah = surah,
                         wordVoice = viewModel.wordVoice,
@@ -699,24 +715,18 @@ fun ReaderScreen(
                         metrics = settings.readingMetrics(),
                         reveal = revealForSurah,
                         place = settings.ayah,
-                        hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
+                        hasTranslation = hasTranslation,
                         // The word meanings are the reading's one undiscoverable
                         // aid: a Settings row and nothing else. The door stands at
                         // the surah's arrival while the list is not on the device,
                         // and the tap lands on the page that has the pack (owner
                         // decision, 19.1).
-                        wordsInstalled = content.installedPack(
-                            ContentDatabase.wordsPackId(viewModel.readingLanguage),
-                        ),
+                        wordsInstalled = wordsInstalled,
                         contentLanguage = viewModel.readingLanguage,
-                        nextSurahName = viewModel.surahs
-                            .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
+                        nextSurahName = nextSurahName,
                         selectedAyah = washedAyah,
                         menuAyah = menuAyah,
-                        notedAyahs = saved
-                            .filter { !it.note.isNullOrBlank() }
-                            .map { it.ayahNumber }
-                            .toSet(),
+                        notedAyahs = notedAyahs,
                         savedAyahs = savedAyahs,
                         playingAyah = playback.ayahNumber,
                         // The word whose own voice is sounding, when the sound is
