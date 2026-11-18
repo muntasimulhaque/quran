@@ -167,7 +167,8 @@ change, never left as a dead letter.
 
 | Thing | Home |
 | --- | --- |
-| Status, version, release notes | `README.md` |
+| Status, version, and the release just shipped | `README.md` |
+| Every earlier release's notes | `RELEASES.md` |
 | Store copy, the version line, the eight frames | `play-store/listing.md` |
 | Every dataset's source, version, checksum, license | `content/manifest.json` |
 | Every settled design decision and the road not taken | the KDoc tagged `owner decision` |
@@ -259,7 +260,8 @@ A release is three steps and no more.
    on `main` are the gate. Nothing else gates a release.
 2. **Version and record.** `versionCode` by 1, `versionName` up one tenth
    within the major line (never 0.10, never two digits). Write the release
-   notes and the README status; the hand-off record follows the run.
+   notes and the README status, and move the release before this one into
+   `RELEASES.md`; the hand-off record follows the run.
 3. **Push and hand over.** The push to `main` lets `build.yml` produce the
    signed bundle. From the newest green run on `main`, download
    `quran-signed-aab` into `play-store/aab/` with its `.sha256`, and give the
