@@ -27,8 +27,8 @@ read and committed. The full app and data suites were not rerun. Content is
 `pack-core-d7797f77` (version 6); the word packs `pack-words-en-e1fa6684` and
 `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1`
 (QUL 2); the word pronunciation pack is 1.0 (352 MB, tag
-`word-audio-alafasy`). The hand-off copy waits in `play-store/aab/` and is
-deleted once Play has it; the run's artifact is retained for 14 days.
+`word-audio-alafasy`). Play received the bundle on 18 November 2026 and the
+hand-off copy was deleted then; the run's artifact is retained for 14 days.
 
 **In 19.8.** The reading does less work while it moves. The bar's travel was a
 number the whole screen read, so every scroll delta rebuilt the page and every
