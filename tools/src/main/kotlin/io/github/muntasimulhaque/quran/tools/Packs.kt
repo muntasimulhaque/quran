@@ -76,7 +76,10 @@ class Packs(private val root: File) {
             // Version 6 carries the recall column and its index, so a
             // reader's modern spelling finds a verse the exact index cannot
             // name (owner decision, 19.7).
-            version = "6",
+            // Version 7 carries the recitation map, so any voice's audio
+            // folder is readable without attaching that voice's timing pack
+            // (owner decision, 20.0).
+            version = "7",
             shipped = true,
             ayahs = 6236,
         ),
@@ -496,6 +499,14 @@ class Packs(private val root: File) {
                 when (pack.type) {
                     "script" -> {
                         statement.execute("CREATE TABLE meta AS SELECT * FROM src.meta")
+                        // The recitation map, four rows naming every voice's
+                        // audio folder, so the app can name any voice's files
+                        // without attaching that voice's timing pack. SQLite
+                        // allows ten attached databases and four voices are
+                        // four packs, so the map is what keeps a library of
+                        // both tafsirs and both word lists open while a
+                        // fourth voice stands ready (owner decision, 20.0).
+                        statement.execute("CREATE TABLE recitation AS SELECT * FROM src.recitation")
                         statement.execute("CREATE TABLE surah AS SELECT * FROM src.surah")
                         statement.execute("CREATE TABLE ayah AS SELECT * FROM src.ayah")
                         statement.execute(

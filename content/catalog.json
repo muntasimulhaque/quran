@@ -11,13 +11,13 @@
             "creditBn": "QPC হাফস, শব্দে শব্দে, তাজবীদসহ; QUL-এর QPC লেখার সাথে যাচাইকৃত",
             "license": "QPC Hafs text and tajweed annotation, distributed via QUL; free for Islamic use · KFGQPC fonts: use, copy and distribute unmodified · Quran metadata via QUL; QUL lists no license. · Names compiled and reviewed for this app from the published Bangla index; no verse text is copied",
             "licenseBn": "QPC হাফস লেখা ও তাজবীদ নির্দেশনা, QUL-এর মাধ্যমে বিতরণ; ইসলামী ব্যবহারের জন্য অবাধ · KFGQPC ফন্ট: অপরিবর্তিত অবস্থায় ব্যবহার, কপি ও বিতরণ · QUL-এর কুরআন মেটাডেটা; QUL কোনো লাইসেন্স উল্লেখ করেনি। · প্রকাশিত বাংলা সূচি থেকে এই অ্যাপের জন্য নাম সংকলিত ও পুনর্বিবেচিত; কোনো আয়াতের লেখা নকল করা হয়নি",
-            "version": "6",
+            "version": "7",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 11530240,
-            "sha256": "724f2297d49f32e17afef54e5a23d0ea2f94b4d46a34cf68553cad382249ba21",
-            "tag": "pack-core-724f2297",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-724f2297/core.db"
+            "bytes": 11534336,
+            "sha256": "45b53fe72d06ebcd7382b7ba522d5d7334e16afc409bc662c7e6499f289ea205",
+            "tag": "pack-core-45b53fe7",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-45b53fe7/core.db"
         },
         {
             "id": "translation-saheeh-en",

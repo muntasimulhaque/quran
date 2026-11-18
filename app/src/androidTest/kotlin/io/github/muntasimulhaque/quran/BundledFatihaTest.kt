@@ -31,6 +31,8 @@ import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -120,21 +122,20 @@ class BundledFatihaTest {
         try {
             library.open()
             withTimeout(90_000) { opened.await() }
+            // Every timing pack installs from the app's own assets on the
+            // first open, and the voice the reader chose is the one whose
+            // pack is attached: the device's truth and the library's truth
+            // are both read, because a voice that is not chosen is still on
+            // the phone with its files.
+            for (id in listOf("reciter-minshawi", "reciter-husary", "reciter-alafasy", "reciter-abdulbasit")) {
+                assertTrue(
+                    "the $id timing pack must install from the first open",
+                    library.pack(id)?.installed == true,
+                )
+            }
             assertTrue(
-                "the Minshawi timing pack must install from the first open",
-                library.isInstalled("reciter-minshawi"),
-            )
-            assertTrue(
-                "the Husary timing pack must install from the first open",
+                "the chosen voice's timings are attached",
                 library.isInstalled("reciter-husary"),
-            )
-            assertTrue(
-                "the Alafasy timing pack must install from the first open",
-                library.isInstalled("reciter-alafasy"),
-            )
-            assertTrue(
-                "the Abdul Basit timing pack must install from the first open",
-                library.isInstalled("reciter-abdulbasit"),
             )
             assertTrue(
                 "Minshawi's whole Al-Fatiha must be playable",
@@ -215,32 +216,76 @@ class BundledFatihaTest {
         assertTrue("the build must carry the Husary pack", packStore.install("reciter-husary"))
         assertTrue("the build must carry the Alafasy pack", packStore.install("reciter-alafasy"))
         assertTrue("the build must carry the Abdul Basit pack", packStore.install("reciter-abdulbasit"))
-        val database = ContentDatabase.open(
-            context,
-            PackCatalog.load(context),
-            packStore.installed() + PackCatalog.CORE_ID,
-        )
         val session = mainValue { ExoPlayer.Builder(context).build() }
         try {
             for (reciter in listOf("minshawi", "husary", "alafasy", "abdulbasit")) {
-                for (ayahNumber in listOf(1, 4, 7)) {
-                    val audio = database.recitationAyah(reciter, ayahNumber)
-                        ?: throw AssertionError("$reciter $ayahNumber has no timing row")
-                    val uri = recitationStore.uri(audio.audioPath)
-                        ?: throw AssertionError("$reciter $ayahNumber has no bundled audio")
-                    assertEquals("$reciter $ayahNumber must play from assets", "asset", uri.scheme)
-                    val words = playOne(session, uri, audio.segments)
-                    assertTrue(
-                        "$reciter $ayahNumber must wash more than one word across its " +
-                            "quarter, middle, and three-quarter points, got $words",
-                        words.size >= 2,
-                    )
+                // The chosen voice is the one whose timings are attached, so
+                // each voice's wash is proven on a library opened over it.
+                val database = ContentDatabase.open(
+                    context,
+                    PackCatalog.load(context),
+                    packStore.installed() + PackCatalog.CORE_ID,
+                    reciter,
+                )
+                try {
+                    for (ayahNumber in listOf(1, 4, 7)) {
+                        val audio = database.recitationAyah(reciter, ayahNumber)
+                            ?: throw AssertionError("$reciter $ayahNumber has no timing row")
+                        val uri = recitationStore.uri(audio.audioPath)
+                            ?: throw AssertionError("$reciter $ayahNumber has no bundled audio")
+                        assertEquals("$reciter $ayahNumber must play from assets", "asset", uri.scheme)
+                        val words = playOne(session, uri, audio.segments)
+                        assertTrue(
+                            "$reciter $ayahNumber must wash more than one word across its " +
+                                "quarter, middle, and three-quarter points, got $words",
+                            words.size >= 2,
+                        )
+                    }
+                } finally {
+                    database.close()
                 }
             }
         } finally {
             mainSync { session.release() }
-            database.close()
             PlaybackPositionStore(context).clear()
+        }
+    }
+
+    @Test
+    fun theChosenVoiceIsTheOnlyOneWhoseTimingsAreAttached() = runBlocking {
+        for (id in listOf("reciter-minshawi", "reciter-husary", "reciter-alafasy", "reciter-abdulbasit")) {
+            assertTrue("the build must carry $id", packStore.install(id))
+        }
+        val database = ContentDatabase.open(
+            context,
+            PackCatalog.load(context),
+            packStore.installed() + PackCatalog.CORE_ID,
+            "husary",
+        )
+        try {
+            assertNotNull(
+                "the chosen voice's timings are attached",
+                database.recitationAyah("husary", 1),
+            )
+            assertNull(
+                "a voice the reader did not choose keeps its files without its schema",
+                database.recitationAyah("alafasy", 1),
+            )
+            assertEquals(
+                "an unattached voice still names its bundled surah from the map",
+                listOf(
+                    "alafasy/001001.mp3",
+                    "alafasy/001002.mp3",
+                    "alafasy/001003.mp3",
+                    "alafasy/001004.mp3",
+                    "alafasy/001005.mp3",
+                    "alafasy/001006.mp3",
+                    "alafasy/001007.mp3",
+                ),
+                database.recitationAudioPaths("alafasy", 1),
+            )
+        } finally {
+            database.close()
         }
     }
 

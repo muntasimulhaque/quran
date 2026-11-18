@@ -245,7 +245,7 @@ class ContentLibrary(
             val installedAfter = store.installed()
             val catalogAfter = catalogNow.withInstalled(installedAfter)
             val opened = runCatching {
-                ContentDatabase.open(application, catalogAfter, installedAfter)
+                ContentDatabase.open(application, catalogAfter, installedAfter, repaired.recitation)
             }
             OpenedLibrary(installedAfter, catalogAfter, opened, repaired)
         }
@@ -408,7 +408,9 @@ class ContentLibrary(
         installed = withContext(Dispatchers.IO) { store.installed() }
         catalog = catalog.withInstalled(installed)
         val fresh = runCatching {
-            withContext(Dispatchers.IO) { ContentDatabase.open(application, catalog, installed) }
+            withContext(Dispatchers.IO) {
+                ContentDatabase.open(application, catalog, installed, settings().recitation)
+            }
         }.getOrElse { failure ->
             // A library that cannot be reopened leaves the reader on the one
             // they already have rather than taking the process down: the pack
@@ -606,8 +608,7 @@ class ContentLibrary(
             withContext(Dispatchers.IO) {
                 store.remove(id)
                 if (pack.type == PackType.Recitation) {
-                    val folder = database?.recitationAyah(reciter, 1)?.audioPath
-                        ?.let(SafePaths::folderOf)
+                    val folder = database?.recitationFolder(reciter)
                     if (folder != null) recitationStore.removeAll(folder)
                 }
             }
@@ -732,8 +733,7 @@ class ContentLibrary(
         recitationStore.removeSurah(folder, surah) > 0
     }
 
-    private fun reciterFolder(recitation: String): String? =
-        database?.recitationAyah(recitation, 1)?.audioPath?.let(SafePaths::folderOf)
+    private fun reciterFolder(recitation: String): String? = database?.recitationFolder(recitation)
 
     /**
      * The process is going away; the connection is let go without waiting on

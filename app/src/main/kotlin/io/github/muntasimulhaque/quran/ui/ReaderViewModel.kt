@@ -969,7 +969,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // reads the rows again, so a word sheet's speaker is never drawn for
         // a voice that has nothing to play (owner decision, 17.7).
         clearRowCache()
-        playback.state.value.ayahNumber?.let { playAyah(it) }
+        // The chosen voice's timing pack is the one schema attached beside
+        // the core, so the choice is what reopens the library over it, and
+        // the ayah that is playing is asked for again once the new voice's
+        // rows are attached (owner decision, 20.0).
+        viewModelScope.launch {
+            library.refresh()
+            playback.state.value.ayahNumber?.let { playAyah(it) }
+        }
     }
 
     /**

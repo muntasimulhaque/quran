@@ -23,10 +23,15 @@ import java.util.concurrent.locks.ReentrantLock
 /**
  * The read-only content database.
  *
- * The main file is the core pack: the Quran text and its words. Every other pack (a translation, a tafsir, a word list, a reciter's
+ * The main file is the core pack: the Quran text and its words. Every other
+ * pack (a translation, a tafsir, a word list, the chosen reciter's
  * timings) is attached beside it as its own schema, so a reader's library is
  * exactly the packs on the device and nothing else. A pack that is not
- * installed is not attached, and a query for it never runs.
+ * installed is not attached, and a query for it never runs. A reciter whose
+ * pack is installed but is not the voice the reader chose keeps its files
+ * and its listing without its schema: SQLite allows ten attached databases,
+ * and four voices are four packs, so only the chosen one is attached
+ * (owner decision, 20.0).
  */
 class ContentDatabase private constructor(
     private val database: SQLiteDatabase,
@@ -660,23 +665,57 @@ class ContentDatabase private constructor(
 
     /**
      * The audio paths of one surah, in ayah order, for the whole-surah check
-     * the listening offer makes. Empty when the reciter's timing pack is not
-     * attached, so a pack that is not on the device cannot make audio look
-     * present.
+     * the listening offer makes. The chosen voice's attached pack answers
+     * from its own rows; a voice whose pack is installed but not attached
+     * names its files from the core pack's recitation map, the same names its
+     * rows carry, so every voice's surahs list and its offer stay honest
+     * without spending one of SQLite's ten attached schemas on a voice that
+     * is not being heard. The store's own file check still decides whether
+     * the audio is on the device, so a voice with nothing here reads as
+     * nothing here.
      */
     fun recitationAudioPaths(recitation: String, surah: Int): List<String> {
         val pack = reciterPack(recitation)
-        if (!installedPack(pack)) return emptyList()
-        return query(
-            "SELECT ra.audio_path FROM ${schema(pack)}.recitation_ayah ra " +
-                "JOIN ayah a ON a.number = ra.ayah_number " +
-                "WHERE a.surah = ? ORDER BY a.ayah",
-            arrayOf(surah.toString()),
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) add(cursor.getString(0) ?: "")
+        if (installedPack(pack)) {
+            return query(
+                "SELECT ra.audio_path FROM ${schema(pack)}.recitation_ayah ra " +
+                    "JOIN ayah a ON a.number = ra.ayah_number " +
+                    "WHERE a.surah = ? ORDER BY a.ayah",
+                arrayOf(surah.toString()),
+            ).use { cursor ->
+                buildList(cursor.count) {
+                    while (cursor.moveToNext()) add(cursor.getString(0) ?: "")
+                }
             }
         }
+        val count = ayahCount(surah)
+        if (count <= 0) return emptyList()
+        val folder = recitationFolder(recitation) ?: return emptyList()
+        // The names are the print's own coordinates, the same bytes the
+        // pack's rows carry, and the digits are the file system's own: a
+        // Bangla or Arabic locale must not write its numerals into a name.
+        return (1..count).map { ayah ->
+            "$folder/" + String.format(java.util.Locale.ROOT, "%03d%03d.mp3", surah, ayah)
+        }
+    }
+
+    /**
+     * The folder a voice's audio lives under, read from the recitation map the
+     * core pack carries, so any voice's files can be named without attaching
+     * that voice's timing pack. Null when the core pack predates the map or
+     * the voice is not in it.
+     */
+    fun recitationFolder(recitation: String): String? {
+        if (!hasTable(null, "recitation")) return null
+        val base = query(
+            "SELECT base_path FROM recitation WHERE id = ?",
+            arrayOf(recitation),
+        ).use { cursor ->
+            if (cursor.moveToFirst()) cursor.getString(0) ?: "" else ""
+        }
+        // The map's row is a bare folder name; the rule that guards an audio
+        // path guards it, asked of a path that names one.
+        return SafePaths.folderOf("$base/001001.mp3")
     }
 
     private fun segments(json: String?): List<WordSegment> {
@@ -1587,6 +1626,8 @@ class ContentDatabase private constructor(
             context: Context,
             catalog: PackCatalog,
             installed: Set<String>,
+            /** The reciter whose timing pack is attached, or null for every installed voice. */
+            recitation: String? = null,
         ): ContentDatabase = withContext(Dispatchers.IO) {
             val store = PackStore(context)
             val core = catalog.get(PackCatalog.CORE_ID)
@@ -1606,6 +1647,24 @@ class ContentDatabase private constructor(
             for (id in installed) {
                 if (id == PackCatalog.CORE_ID) continue
                 val pack = catalog.get(id) ?: continue
+                // A recitation's timings are one voice's own schema, and the
+                // voice the reader chose is the one attached. Four voices on
+                // one device are four packs, and SQLite's ceiling is ten
+                // attached databases: a reader who holds both tafsirs, both
+                // word lists, and the root could not have held a fourth
+                // voice too without the last pack falling to the limit and
+                // reading as not installed, which is what the capture leg
+                // met as the word list (owner report, 20.0). The voices the
+                // reader did not choose keep their files and their listing;
+                // only their segment rows wait for their turn. A null
+                // [recitation] keeps the older shape, every installed voice
+                // attached, which the tests hold.
+                if (recitation != null &&
+                    pack.type == PackType.Recitation &&
+                    id != reciterPack(recitation)
+                ) {
+                    continue
+                }
                 val file = store.fileFor(id)
                 if (!file.exists()) continue
                 if (!SafePaths.validId(id)) continue
@@ -1662,7 +1721,16 @@ class ContentDatabase private constructor(
             // the attached set, not the raw files: a broken pack reads as not
             // installed, its Add opens a repair, and the store still sees the
             // file.
-            ContentDatabase(database, catalog.withInstalled(attached), attached)
+            // The catalog says installed for the attached packs and for
+            // every reciter's pack on the device, attached or not: a voice the
+            // reader did not choose is still on the phone, still lists its
+            // bundled and downloaded surahs, and is attached by the one tap
+            // that chooses it. The query guard stays the attached set, so an
+            // unchosen voice's segments read as absent until their turn.
+            val marked = attached + installed.filter { id ->
+                catalog.get(id)?.type == PackType.Recitation
+            }
+            ContentDatabase(database, catalog.withInstalled(marked), attached)
         }
 
         private fun openCore(store: PackStore, core: ContentPack): SQLiteDatabase? = runCatching {
