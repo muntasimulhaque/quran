@@ -197,7 +197,7 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**19.9 (versionCode 201).** Handed to Google Play on 18 November 2026 from
+**19.9 (versionCode 201).** Play received the bundle on 18 November 2026 from
 `build` run 44305146426, the newest green run on `main`: the unit tests, lint,
 and `assembleDebug` passed, and the signed bundle
 `quran-19.9-vc201.aab` has SHA-256
@@ -207,7 +207,7 @@ and `assembleDebug` passed, and the signed bundle
 The same suite is green on this machine. The instrumented suites were skipped:
 this release changes when the screen sleeps and when the page draws, not a
 surface a test drives. The three store sets stand, because no visible surface
-changed.
+changed. The hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 19.9.** The screen stops holding itself on when nobody is
 reading. A sheet, an ayah card, a note, or a confirm used to keep the phone lit
