@@ -65,6 +65,27 @@ class RecitationSegmentsTest {
         assertEquals(listOf(0, 1), wordFroms(correction.json))
     }
 
+    @Test
+    fun `an export that stops one word short washes the last word on the measured tail`() {
+        val json = "[[49,50,78800,79160]]"
+        val extended = RecitationSegments.extendTail("abdulbasit", 5126, json, wordCount = 51)
+        assertEquals("[[49,50,78800,79160],[50,51,79160,81140]]", extended)
+    }
+
+    @Test
+    fun `an export that covers the last word is not rewritten`() {
+        val json = "[[0,1,0,1000],[1,2,1000,2000]]"
+        assertEquals(json, RecitationSegments.extendTail("minshawi", 1, json, wordCount = 2))
+    }
+
+    @Test
+    fun `an export that stops short with no measured tail is an error`() {
+        val failure = runCatching {
+            RecitationSegments.extendTail("minshawi", 2, "[[0,1,0,1000]]", wordCount = 2)
+        }
+        assertTrue("a region that cannot be measured is never invented", failure.isFailure)
+    }
+
     private fun correct(json: String, words: Int): RecitationSegments.Correction {
         val regions = requireNotNull(RecitationSegments.parse(json))
         return RecitationSegments.correct(json, regions, words)

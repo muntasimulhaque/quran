@@ -15,9 +15,9 @@
             "shipped": true,
             "ayahs": 6236,
             "bytes": 11530240,
-            "sha256": "d7797f77ad3c97c0b43f1ca8ca8b962bd4669f662ce24a40cccfb76ab6c7ba3b",
-            "tag": "pack-core-d7797f77",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-d7797f77/core.db"
+            "sha256": "724f2297d49f32e17afef54e5a23d0ea2f94b4d46a34cf68553cad382249ba21",
+            "tag": "pack-core-724f2297",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-724f2297/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -120,6 +120,40 @@
             "sha256": "9b09e6cb1b1656e488b8446aa9ce3d79425ddae663a45f7cc73e3ec128b73b84",
             "tag": "pack-reciter-husary-9b09e6cb",
             "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-husary-9b09e6cb/reciter-husary.db"
+        },
+        {
+            "id": "reciter-alafasy",
+            "type": "recitation",
+            "name": "Alafasy",
+            "language": "ar",
+            "credit": "Mishari Rashid al-Afasy, via the Quranic Universal Library",
+            "creditBn": "মিশারি রশীদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
+            "license": "QUL lists no license for this recording; the reciter's and publisher's rights are unverified.",
+            "licenseBn": "QUL এই আবৃত্তির কোনো লাইসেন্স উল্লেখ করেনি; আবৃত্তিকার ও প্রকাশকের স্বত্ব যাচাই করা হয়নি।",
+            "version": "QUL",
+            "shipped": true,
+            "ayahs": 6236,
+            "bytes": 1708032,
+            "sha256": "0cc69f8b0fbbd576e70d2fce59c924c0b2b55c1a5eb60c8dd35229a8a806e5da",
+            "tag": "pack-reciter-alafasy-0cc69f8b",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-alafasy-0cc69f8b/reciter-alafasy.db"
+        },
+        {
+            "id": "reciter-abdulbasit",
+            "type": "recitation",
+            "name": "Abdul Basit",
+            "language": "ar",
+            "credit": "Abdul Basit Abdul Samad, via the Quranic Universal Library",
+            "creditBn": "আব্দুল বাসিত আব্দুস সামাদ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
+            "license": "QUL lists no license for this recording; the reciter's and publisher's rights are unverified.",
+            "licenseBn": "QUL এই আবৃত্তির কোনো লাইসেন্স উল্লেখ করেনি; আবৃত্তিকার ও প্রকাশকের স্বত্ব যাচাই করা হয়নি।",
+            "version": "QUL",
+            "shipped": true,
+            "ayahs": 6236,
+            "bytes": 1794048,
+            "sha256": "e25ca01795a64be533d6e59c84b4c5d0384d09b67d5f0c7913f0c1c83e6d2b6e",
+            "tag": "pack-reciter-abdulbasit-e25ca017",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-abdulbasit-e25ca017/reciter-abdulbasit.db"
         },
         {
             "id": "words-en",

@@ -1270,7 +1270,15 @@ class Build(private val root: File) {
                                 if (correction.shifted) recitationSegmentsShifted += 1
                                 recitationSegmentsClamped += correction.clamped
                                 recitationSegmentsMapped += correction.mapped
-                                insertAyah.setString(4, correction.json)
+                                insertAyah.setString(
+                                    4,
+                                    RecitationSegments.extendTail(
+                                        dataset.id.removePrefix("recitation-"),
+                                        number,
+                                        correction.json,
+                                        wordCounts[number] ?: 0,
+                                    ),
+                                )
                             }
                             insertAyah.addBatch()
                             inserted += 1

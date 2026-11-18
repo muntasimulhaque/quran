@@ -30,6 +30,70 @@ object RecitationSegments {
     /** The fragment QUL sometimes opens an ayah with. */
     private const val LEADING_FRAGMENT_MS = 90L
 
+    /**
+     * The one recording whose export stops short of an ayah's last drawn
+     * word, with the last voiced millisecond of that ayah's own file,
+     * measured from the published audio the reader gets.
+     *
+     * QUL's aligner segmented Al-Mujadila 22 into fifty words where the print
+     * draws fifty-one, so the Abdul Basit export's last region ends at word
+     * 50 and the closing word, al-muflihun, has no region to wash (owner
+     * report, 20.0: checkdb's segment gate named the one ayah). The other
+     * voices carry the same tail through QUL's number-marker region, which
+     * the build clamps onto the last drawn word; this export has no region
+     * past word 50 at all. The erratum gives the word the span between the
+     * export's own last region and this measurement, and the app's
+     * voice-edge table holds the same 81,140 ms, so the wash still stops
+     * with the voice. `AudioEdgeTableTest` pins the agreement so the
+     * recorded number can never drift from the audio it was measured from.
+     */
+    val TAIL_VOICE_EDGES: Map<Pair<String, Int>, Long> = mapOf(
+        ("abdulbasit" to 5126) to 81_140L,
+    )
+
+    /**
+     * Extends a corrected segment list onto the ayah's last drawn word when
+     * the export stopped at the word before it. A list that already covers
+     * the last word is returned as it stands, so only a measured row ever
+     * changes. A list short of more than the last word, or a short list with
+     * no measurement on record, is an error the build stops on: a region
+     * that cannot be measured is never invented.
+     */
+    fun extendTail(recitation: String, ayahNumber: Int, json: String, wordCount: Int): String {
+        if (wordCount <= 0) return json
+        val regions = parse(json) ?: return json
+        if (regions.isEmpty()) return json
+        val covered = regions.maxOf { it.wordTo }
+        if (covered >= wordCount) return json
+        if (covered != wordCount - 1) {
+            error("recitation $recitation ayah $ayahNumber covers only word $covered of $wordCount")
+        }
+        val measured = TAIL_VOICE_EDGES[recitation to ayahNumber]
+            ?: error("recitation $recitation ayah $ayahNumber ends a word short with no measured tail")
+        val start = regions.maxOf { it.endMs }
+        val extended = buildJsonArray {
+            for (region in regions) {
+                add(
+                    buildJsonArray {
+                        add(JsonPrimitive(region.wordFrom))
+                        add(JsonPrimitive(region.wordTo))
+                        add(JsonPrimitive(region.startMs))
+                        add(JsonPrimitive(region.endMs))
+                    },
+                )
+            }
+            add(
+                buildJsonArray {
+                    add(JsonPrimitive(wordCount - 1))
+                    add(JsonPrimitive(wordCount))
+                    add(JsonPrimitive(start))
+                    add(JsonPrimitive(measured))
+                },
+            )
+        }
+        return extended.toString()
+    }
+
     data class Region(
         val wordFrom: Int,
         val wordTo: Int,

@@ -47,7 +47,22 @@ class AudioEdgeTableTest {
         }
         val keys = edges.map { it.reciter to it.ayah }.toSet()
         assertEquals("the table and the recitation rows name different ayahs", rows, keys)
-        assertEquals("the table must be one line per recitation and ayah", 12_472, edges.size)
+        assertEquals("the table must be one line per recitation and ayah", 24_944, edges.size)
+    }
+
+    @Test
+    fun `the tail erratum agrees with the measured voice edge`() {
+        val table = File(root, "content/audio-edges.txt")
+        assertTrue("content/audio-edges.txt is missing; run tools audio edges", table.isFile)
+        val line = table.readLines()
+            .filter { it.isNotBlank() && !it.startsWith("#") }
+            .single { it.startsWith("abdulbasit 5126 ") }
+        val last = line.split(' ', '\t').filter { it.isNotEmpty() }[3].toLong()
+        assertEquals(
+            "the recorded tail is not the voice the audio holds",
+            RecitationSegments.TAIL_VOICE_EDGES.getValue("abdulbasit" to 5126),
+            last,
+        )
     }
 
     private data class Edge(
