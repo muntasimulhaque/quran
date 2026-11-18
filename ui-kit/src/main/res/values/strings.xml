@@ -10,6 +10,8 @@
 <resources>
     <string name="reciter_minshawi">Minshawi</string>
     <string name="reciter_husary">Husary</string>
+    <string name="reciter_alafasy">Alafasy</string>
+    <string name="reciter_abdulbasit">Abdul Basit</string>
     <string name="pack_name_quran_text">Quran text</string>
     <string name="pack_name_saheeh_international">Saheeh International</string>
     <string name="pack_name_al_bayan">Al-Bayan Simple Translation</string>

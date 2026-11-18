@@ -132,6 +132,12 @@
     <string name="credit_husary">Husary</string>
     <string name="credit_husary_by">Mahmoud Khalil Al-Husary, via the Quranic Universal Library</string>
     <string name="credit_husary_use">Murattal</string>
+    <string name="credit_alafasy">Alafasy</string>
+    <string name="credit_alafasy_by">Mishari Rashid al-Afasy, via the Quranic Universal Library</string>
+    <string name="credit_alafasy_use">Murattal</string>
+    <string name="credit_abdulbasit">Abdul Basit</string>
+    <string name="credit_abdulbasit_by">Abdul Basit Abdul Samad, via the Quranic Universal Library</string>
+    <string name="credit_abdulbasit_use">Murattal</string>
 
     <string name="settings_title_appearance">Theme</string>
     <string name="settings_title_text">Font size</string>

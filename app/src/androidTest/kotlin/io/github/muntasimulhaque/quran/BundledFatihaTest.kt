@@ -38,12 +38,12 @@ import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Al-Fatiha is the one surah the app carries in both reciters' voices, so the
+ * Al-Fatiha is the one surah the app carries in every reciter's voice, so the
  * first Play on 1:1 has to work with no network and no offer. This class pins
- * the three parts of that promise: the two timing packs install from assets on
+ * the three parts of that promise: the four timing packs install from assets on
  * the first open, every ayah of the surah answers with a bundled asset, and
  * the word wash moves through the same ExoPlayer engine the app's service uses
- * for both reciters.
+ * for every reciter.
  *
  * The whole-surah rule is pinned by asking about 2:1: the debug sample carries
  * that one ayah, but surah 2 is not whole, so it must still be a download.
@@ -99,8 +99,12 @@ class BundledFatihaTest {
         // A fresh install has neither timing pack and no downloaded audio.
         packStore.remove("reciter-minshawi")
         packStore.remove("reciter-husary")
+        packStore.remove("reciter-alafasy")
+        packStore.remove("reciter-abdulbasit")
         recitationStore.removeAll(MINSHAWI_FOLDER)
         recitationStore.removeAll(HUSARY_FOLDER)
+        recitationStore.removeAll(ALAFASY_FOLDER)
+        recitationStore.removeAll(ABDULBASIT_FOLDER)
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         val opened = CompletableDeferred<ContentLibrary.Opening>()
         val library = ContentLibrary(
@@ -125,6 +129,14 @@ class BundledFatihaTest {
                 library.isInstalled("reciter-husary"),
             )
             assertTrue(
+                "the Alafasy timing pack must install from the first open",
+                library.isInstalled("reciter-alafasy"),
+            )
+            assertTrue(
+                "the Abdul Basit timing pack must install from the first open",
+                library.isInstalled("reciter-abdulbasit"),
+            )
+            assertTrue(
                 "Minshawi's whole Al-Fatiha must be playable",
                 library.hasSurahAudio("minshawi", 1),
             )
@@ -132,14 +144,22 @@ class BundledFatihaTest {
                 "Husary's whole Al-Fatiha must be playable",
                 library.hasSurahAudio("husary", 1),
             )
+            assertTrue(
+                "Alafasy's whole Al-Fatiha must be playable",
+                library.hasSurahAudio("alafasy", 1),
+            )
+            assertTrue(
+                "Abdul Basit's whole Al-Fatiha must be playable",
+                library.hasSurahAudio("abdulbasit", 1),
+            )
             assertFalse(
                 "2:1 is a sample, not a whole surah",
                 library.hasSurahAudio("minshawi", 2),
             )
             // The settings page answers what the reader can play offline, so
-            // the bundled Fatiha is on its list in both voices, marked as
+            // the bundled Fatiha is on its list in every voice, marked as
             // bundled because the app's own asset cannot be removed.
-            for (reciter in listOf("minshawi", "husary")) {
+            for (reciter in listOf("minshawi", "husary", "alafasy", "abdulbasit")) {
                 val rows = library.downloadedSurahs(reciter)
                 assertEquals(
                     "$reciter must list the bundled Al-Fatiha",
@@ -155,12 +175,16 @@ class BundledFatihaTest {
                     rows.single().bytes > 0,
                 )
             }
-            assertEquals(
-                "both reciters carry one playable surah",
-                1,
-                library.downloadedTotals()["husary"]?.first,
-            )
-            for (path in fatihaPaths(MINSHAWI_FOLDER) + fatihaPaths(HUSARY_FOLDER)) {
+            for (reciter in listOf("minshawi", "husary", "alafasy", "abdulbasit")) {
+                assertEquals(
+                    "$reciter carries one playable surah",
+                    1,
+                    library.downloadedTotals()[reciter]?.first,
+                )
+            }
+            for (path in fatihaPaths(MINSHAWI_FOLDER) + fatihaPaths(HUSARY_FOLDER) +
+                fatihaPaths(ALAFASY_FOLDER) + fatihaPaths(ABDULBASIT_FOLDER)
+            ) {
                 assertEquals(
                     "$path must come from the app's own assets",
                     "asset",
@@ -186,9 +210,11 @@ class BundledFatihaTest {
     }
 
     @Test
-    fun theWordWashMovesOnTheFirstMiddleAndLastAyahForBothReciters() = runBlocking {
+    fun theWordWashMovesOnTheFirstMiddleAndLastAyahForEveryReciter() = runBlocking {
         assertTrue("the build must carry the Minshawi pack", packStore.install("reciter-minshawi"))
         assertTrue("the build must carry the Husary pack", packStore.install("reciter-husary"))
+        assertTrue("the build must carry the Alafasy pack", packStore.install("reciter-alafasy"))
+        assertTrue("the build must carry the Abdul Basit pack", packStore.install("reciter-abdulbasit"))
         val database = ContentDatabase.open(
             context,
             PackCatalog.load(context),
@@ -196,7 +222,7 @@ class BundledFatihaTest {
         )
         val session = mainValue { ExoPlayer.Builder(context).build() }
         try {
-            for (reciter in listOf("minshawi", "husary")) {
+            for (reciter in listOf("minshawi", "husary", "alafasy", "abdulbasit")) {
                 for (ayahNumber in listOf(1, 4, 7)) {
                     val audio = database.recitationAyah(reciter, ayahNumber)
                         ?: throw AssertionError("$reciter $ayahNumber has no timing row")
@@ -289,5 +315,7 @@ class BundledFatihaTest {
     private companion object {
         const val MINSHAWI_FOLDER = "minshawyMurattal"
         const val HUSARY_FOLDER = "husary"
+        const val ALAFASY_FOLDER = "alafasy"
+        const val ABDULBASIT_FOLDER = "abdulBasitMurattal"
     }
 }

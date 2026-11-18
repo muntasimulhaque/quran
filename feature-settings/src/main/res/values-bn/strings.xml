@@ -109,6 +109,12 @@
     <string name="credit_husary">হুসারি</string>
     <string name="credit_husary_by">মাহমুদ খলিল আল-হুসারি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে</string>
     <string name="credit_husary_use">মুরাত্তাল</string>
+    <string name="credit_alafasy">আফাসি</string>
+    <string name="credit_alafasy_by">মিশারি রশীদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে</string>
+    <string name="credit_alafasy_use">মুরাত্তাল</string>
+    <string name="credit_abdulbasit">আব্দুল বাসিত</string>
+    <string name="credit_abdulbasit_by">আব্দুল বাসিত আব্দুস সামাদ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে</string>
+    <string name="credit_abdulbasit_use">মুরাত্তাল</string>
 
     <string name="settings_title_appearance">থিম</string>
     <string name="settings_title_text">ফন্ট সাইজ</string>

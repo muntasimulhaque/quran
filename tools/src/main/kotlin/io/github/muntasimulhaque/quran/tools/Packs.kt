@@ -21,9 +21,9 @@ import java.sql.Connection
  *
  * A pack is one unit of content a reader can have, or not have: the core
  * text and layout, a translation, a tafsir, a word list, a script. The app
- * ships the core pack, the two translations, and the two reciter timing
+ * ships the core pack, the two translations, and the four reciter timing
  * packs; the recitation audio itself is downloaded per surah on the reader's
- * word, except Al-Fatiha, whose fourteen ayahs the app carries as assets
+ * word, except Al-Fatiha, whose twenty-eight ayahs the app carries as assets
  * (owner decision, 15.8).
  *
  * The pack files are derived from the audited database, so there is exactly
@@ -142,6 +142,28 @@ class Packs(private val root: File) {
             language = "ar",
             credit = "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
             creditBn = "\u09ae\u09be\u09b9\u09ae\u09c1\u09a6 \u0996\u09b2\u09bf\u09b2 \u0986\u09b2-\u09b9\u09c1\u09b8\u09be\u09b0\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
+            version = "QUL",
+            shipped = true,
+            ayahs = 6236,
+        ),
+        Pack(
+            id = "reciter-alafasy",
+            type = "recitation",
+            name = "Alafasy",
+            language = "ar",
+            credit = "Mishari Rashid al-Afasy, via the Quranic Universal Library",
+            creditBn = "মিশারি রশীদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
+            version = "QUL",
+            shipped = true,
+            ayahs = 6236,
+        ),
+        Pack(
+            id = "reciter-abdulbasit",
+            type = "recitation",
+            name = "Abdul Basit",
+            language = "ar",
+            credit = "Abdul Basit Abdul Samad, via the Quranic Universal Library",
+            creditBn = "আব্দুল বাসিত আব্দুস সামাদ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
             version = "QUL",
             shipped = true,
             ayahs = 6236,

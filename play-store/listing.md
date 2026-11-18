@@ -45,12 +45,13 @@ on the page brings the bar, with the surah and juz, and a scroll puts it away.
 There is no bottom tab bar to learn. More than one translation may be on at
 once, and each one draws in its own place under the ayah.
 
-Recitation plays Minshawi or Husary, with the page following the reciter
-and the word being recited marked. Al-Fatiha is bundled for both voices, so
-the first Play on 1:1 needs no network and asks for nothing. Every other
+Recitation plays Minshawi, Husary, Alafasy, or Abdul Basit, with the page
+following the reciter and the word being recited marked. Al-Fatiha is bundled
+for every voice, so the first Play on 1:1 needs no network and asks for
+nothing. Every other
 surah is not streamed: when you tap Play, the app tells you its size and
 downloads that one surah from the project's own release page. The word
-timings for both reciters ship inside the app. If you turn on Continue to
+timings for all four reciters ship inside the app. If you turn on Continue to
 the next surah in the player's listening menu, the following surahs download
 as the recitation reaches them, each with its own name and size on the
 player. Everything you download works offline forever after.

@@ -97,9 +97,9 @@ class RecitationStore(private val context: Context) {
      *
      * An asset has no file length on disk that a reader can read without
      * opening it, so a stored file's descriptor length is the size and a
-     * compressed file's available bytes are. The bundled set is the fourteen
-     * Al-Fatiha files, so this runs once per reciter when the settings page
-     * opens, not on the reading's path.
+     * compressed file's available bytes are. The bundled set is the
+     * twenty-eight Al-Fatiha files, so this runs once per reciter when the
+     * settings page opens, not on the reading's path.
      */
     fun bundledBytes(paths: List<String>): Long {
         if (paths.isEmpty()) return 0

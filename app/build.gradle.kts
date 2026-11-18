@@ -99,15 +99,17 @@ val screenshotPacks = setOf(
 // in the reader's language, offline, with no download and no language screen;
 // the tafsir and the word lists stay downloads (owner decision, this session).
 //
-// The two reciter timing packs ride with them: a downloaded surah is then
+// The four reciter timing packs ride with them: a downloaded surah is then
 // audio on its own, and Al-Fatiha's audio is already in the assets, so the
-// first Play on 1:1 needs neither an offer nor a network (owner decision,
-// this session).
+// first Play on 1:1 needs neither an offer nor a network, whichever voice the
+// reader chose (owner decision, 20.0, extending 15.8 to the voices after it).
 val shippedPacks = setOf(
     "translation-saheeh-en.db",
     "translation-al-bayan-bn.db",
     "reciter-minshawi.db",
     "reciter-husary.db",
+    "reciter-alafasy.db",
+    "reciter-abdulbasit.db",
 )
 
 /**
@@ -131,7 +133,7 @@ abstract class PrepareContentAssets : DefaultTask() {
     @get:Input
     abstract val shippedPackNames: SetProperty<String>
 
-    /** The Fatiha audio both reciters carry, copied to `recitation/`. */
+    /** The Fatiha audio every reciter carries, copied to `recitation/`. */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val bundledAudioDir: DirectoryProperty
@@ -200,7 +202,7 @@ abstract class PrepareContentAssets : DefaultTask() {
             }
             source.copyTo(File(shippedOut, name), overwrite = true)
         }
-        // The fourteen Al-Fatiha files are read from the app's own assets,
+        // The twenty-eight Al-Fatiha files are read from the app's own assets,
         // under the one prefix RecitationStore already searches. They are
         // checked as a set here so a half-copied source cannot ship a surah
         // that only plays some of its ayahs.
@@ -209,8 +211,8 @@ abstract class PrepareContentAssets : DefaultTask() {
             throw GradleException("the bundled Al-Fatiha audio is missing; run ./gradlew :tools:run --args=\"audio bundle\"")
         }
         val bundledFiles = bundledAudio.walkTopDown().filter { it.isFile && it.extension == "mp3" }.toList()
-        if (bundledFiles.size != 14) {
-            throw GradleException("the bundled Al-Fatiha audio has ${bundledFiles.size} mp3 file(s), expected 14")
+        if (bundledFiles.size != 28) {
+            throw GradleException("the bundled Al-Fatiha audio has ${bundledFiles.size} mp3 file(s), expected 28")
         }
         bundledAudio.copyRecursively(File(out, "recitation"), overwrite = true)
         // The word pronunciation pack: the manifest names one ZIP per surah,

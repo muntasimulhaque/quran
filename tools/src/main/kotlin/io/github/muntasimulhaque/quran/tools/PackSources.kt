@@ -43,6 +43,8 @@ object PackSources {
         "word-root" to listOf("word-root"),
         "reciter-minshawi" to listOf("recitation-minshawi"),
         "reciter-husary" to listOf("recitation-husary"),
+        "reciter-alafasy" to listOf("recitation-alafasy"),
+        "reciter-abdulbasit" to listOf("recitation-abdulbasit"),
         // The word pronunciation pack is cut from QUL Alafasy ayah audio at
         // quran-align boundaries. Both are credited; the app ships only the
         // word clips.

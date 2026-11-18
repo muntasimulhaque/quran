@@ -48,7 +48,7 @@ class ListenOfferDismissTest {
      * A reading with no translation, on 2:1, whose audio is not bundled and
      * not downloaded, so Play raises the offer rather than starting a
      * download the test did not ask for. Al-Fatiha cannot raise it any more:
-     * both reciters' first surah travels in the app's assets
+     * every reciter's first surah travels in the app's assets
      * (owner decision, 15.8).
      */
     private val library = object : ExternalResource() {

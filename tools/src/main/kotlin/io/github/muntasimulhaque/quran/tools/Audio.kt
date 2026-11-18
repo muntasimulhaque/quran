@@ -31,7 +31,7 @@ import java.util.zip.ZipOutputStream
  * hash matches, so a bad download or a tampered file can never play.
  *
  * The first surah is also carried inside the app: `audio bundle` writes the
- * seven Al-Fatiha ayahs of both reciters into `content/bundled/audio`, taken
+ * seven Al-Fatiha ayahs of every reciter into `content/bundled/audio`, taken
  * byte for byte from the published surah 1 packages and checked against the
  * source pins. The app's own assets then answer the first Play with no
  * network (owner decision, 15.8).
@@ -49,6 +49,8 @@ class Audio(private val root: File) {
     private val reciterTags = mapOf(
         "minshawi" to "recitation-minshawi",
         "husary" to "recitation-husary",
+        "alafasy" to "recitation-alafasy",
+        "abdulbasit" to "recitation-abdulbasit",
     )
 
     private val githubBase = "https://github.com/muntasimulhaque/quran/releases/download"
@@ -138,8 +140,8 @@ class Audio(private val root: File) {
     // ------------------------------------------------------------------ bundle
 
     /**
-     * Writes the fourteen Al-Fatiha ayah files the app carries, both reciters,
-     * from the published surah 1 packages.
+     * Writes the twenty-eight Al-Fatiha ayah files the app carries, all four
+     * reciters, from the published surah 1 packages.
      *
      * The files are not re-encoded and not downloaded into the app at run
      * time. Each package is verified against `recitation-manifest.json` before
