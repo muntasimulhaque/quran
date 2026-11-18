@@ -197,11 +197,17 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**19.9 (versionCode 201).** The bundle is with `build.yml` on `main`. The
-unit tests, lint, and `assembleDebug` passed here, and the same suite runs in
-the workflow. The instrumented suites were skipped: this release changes when
-the screen sleeps and when the page draws, not a surface a test drives. The
-three store sets stand, because no visible surface changed.
+**19.9 (versionCode 201).** Handed to Google Play on 18 November 2026 from
+`build` run 44305146426, the newest green run on `main`: the unit tests, lint,
+and `assembleDebug` passed, and the signed bundle
+`quran-19.9-vc201.aab` has SHA-256
+`a0e9cb0e3d7497bcd7e83271944ec9c62c5412f2e46e527d7e8814533b9c339e`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. The instrumented suites were skipped:
+this release changes when the screen sleeps and when the page draws, not a
+surface a test drives. The three store sets stand, because no visible surface
+changed.
 
 **What changed in 19.9.** The screen stops holding itself on when nobody is
 reading. A sheet, an ayah card, a note, or a confirm used to keep the phone lit
