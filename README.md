@@ -4,7 +4,31 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 19.7 (versionCode 199) was handed over for Play from commit `277aaab7`, taken from `build` run 44123930426, the newest green run on `main`, whose gates and signed-bundle jobs both passed, in 5m06s and 4m37s. The signed bundle `quran-19.7-vc199.aab` has SHA-256 `de52b8e0ae6360c44242b8c5414fd89f9cdc515491f4e768720b334045cec379`; the workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509 `CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`, the upload key 17.6 through 19.7 were signed with. The release gates are the CI unit tests, lint, and `assembleDebug`, all green; the same suite ran here on this machine, green in 1m15s, with lint reporting no issues. The instrumented suites are an audit, not a gate: this session ran `ContentSearchTest` on `quran_phone`, 24 tests, green after both packages were uninstalled first; the three store capture legs ran 5 tests each on `quran_phone`, `quran_tablet7`, and `quran_tablet10`, green, and the eight frames of each were read and committed. The full app and data suites were not rerun. Content is 1.8.1: database `content-db-1f7c5339`; the core pack `pack-core-d7797f77` (version 6); the word packs `pack-words-en-e1fa6684` and `pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1` (QUL 2); the word pronunciation pack is 1.0 (352 MB, tag `word-audio-alafasy`) downloaded one surah at a time and Al-Fatiha's 29 words in the app. The new content database and core pack are published; the other packs are unchanged. The hand-off copy was deleted after Play received it; the run's artifact is retained for 14 days. A post-release tools cleanup, `ae80c189`, removed two dead source checks; its `build` run 44129139362 is green, and the app and the submitted bundle are unchanged.
+**Status:** 19.8 (versionCode 200) was handed over for Play from commit
+`b17de0ce`, taken from `build` run 44262671689, the newest green run on `main`,
+whose gates and signed-bundle jobs both passed, in 4m47s and 5m28s. The signed
+bundle `quran-19.8-vc200.aab` has SHA-256
+`20d79a432a0521b687cf0486275ead2a9407efe280f8d30737ea0c4fb757d936`; the
+workflow's `jarsigner` reads `jar verified.`, and `keytool` reads X.509
+`CN=Count & Play Admin, OU=Engineering, O=Count & Play, C=US` and SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`,
+the upload key 17.6 through 19.8 were signed with. The bundle carries the four
+shipped packs, the core database, the catalog, and the voice edges, and no
+development pack. The release gates are the CI unit tests, lint, and
+`assembleDebug`, all green; the same suite ran here on this machine, green in
+3m59s. The instrumented suites are an audit, not a gate: this session ran 12
+classes and 32 tests on `quran_phone`, 31 green, and the two red legs are red at
+the parent commit as well (`AyahDoorShapeTest`'s centering on this AVD, and
+`AccessibilityTest`'s wait for Browse after Back), so neither is this change;
+the three store capture legs ran 5 tests each on `quran_phone`,
+`quran_tablet7`, and `quran_tablet10`, green, and the eight frames of each were
+read and committed. The full app and data suites were not rerun. Content is
+1.8.1 and unchanged: database `content-db-1f7c5339`; the core pack
+`pack-core-d7797f77` (version 6); the word packs `pack-words-en-e1fa6684` and
+`pack-words-bn-6e620b10` (QUL 3); the root pack `pack-word-root-f15b9ef1`
+(QUL 2); the word pronunciation pack is 1.0 (352 MB, tag
+`word-audio-alafasy`). The hand-off copy waits in `play-store/aab/` and is
+deleted once Play has it; the run's artifact is retained for 14 days.
 
 **In 19.8.** The reading does less work while it moves. The bar's travel was a
 number the whole screen read, so every scroll delta rebuilt the page and every
