@@ -199,12 +199,12 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 ## Status
 
 **20.4 (versionCode 206).** The signed bundle comes from `build` run
-PENDING_RUN, the newest green run on `main`: the unit tests, lint, and
+44563390464, the newest green run on `main`: the unit tests, lint, and
 `assembleDebug` passed, and the signed bundle `quran-20.4-vc206.aab` has
 SHA-256
-`PENDING_SHA`.
+`096b3c40e6ba2e8cc8795519e5204462fc42bcca1ca87045e05ffcfdc99dddcf`.
 `jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`PENDING_CERT`.
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
 The same suite is green on this machine. No committed store frame carries the
 listening panel's voice rows, so the three committed store sets stand and no
 store capture leg ran; the app classes this release touches, and the attach
