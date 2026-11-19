@@ -21,3 +21,23 @@ kotlin {
 dependencies {
     testImplementation(libs.junit)
 }
+
+/**
+ * The pack-id gate in this module's tests reads every shipping module's
+ * `main` sources, which Gradle does not know are its inputs: without this,
+ * the task is called up to date after a change in another module, and a rule
+ * broken there would wait for CI to be seen (owner decision, 20.2).
+ */
+tasks.withType<Test>().configureEach {
+    inputs.files(
+        rootProject.fileTree("app/src/main") { include("**/*.kt") },
+        rootProject.fileTree("data/src/main") { include("**/*.kt") },
+        rootProject.fileTree("ui-kit/src/main") { include("**/*.kt") },
+        rootProject.fileTree("content-assets/src/main") { include("**/*.kt") },
+        rootProject.fileTree("feature-reading/src/main") { include("**/*.kt") },
+        rootProject.fileTree("feature-search/src/main") { include("**/*.kt") },
+        rootProject.fileTree("feature-browse/src/main") { include("**/*.kt") },
+        rootProject.fileTree("feature-playback/src/main") { include("**/*.kt") },
+        rootProject.fileTree("feature-settings/src/main") { include("**/*.kt") },
+    ).withPropertyName("gateSources")
+}

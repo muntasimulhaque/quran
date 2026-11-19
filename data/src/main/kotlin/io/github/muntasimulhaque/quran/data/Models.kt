@@ -210,8 +210,13 @@ data class SearchRequest(
     val tafsirPacks: List<String> = emptyList(),
     val packNames: Map<String, String> = emptyMap(),
     val packLanguages: Map<String, String> = emptyMap(),
-    /** The word list to read meanings from; English when the reader has none of their language. */
-    val wordsPack: String = "words-en",
+    /**
+     * The word list to read meanings from; English when the reader has none
+     * of their language. The default is the companion's own convention for
+     * English, so no pack is named by a literal outside the one place that
+     * spells ids (owner decision, 20.2).
+     */
+    val wordsPack: String = ContentDatabase.wordsPackId("en"),
     /** The sources the reader has not filtered out. */
     val sources: SearchSources = SearchSources.ALL,
     /**

@@ -59,9 +59,13 @@ class ContentDatabase private constructor(
     /** The schema of one installed pack, quoted for SQL. */
     private fun schema(id: String): String = SafePaths.sqlIdentifier(id)
 
-    /** The word list that speaks a language, when the reader has it. */
+    /**
+     * The word list that speaks a language, when the reader has it. The id
+     * itself is the companion's own convention, so the language's shape is
+     * written once (owner decision, 20.2).
+     */
     private fun wordsPack(language: String): String =
-        if (SafePaths.validLanguage(language)) "words-$language" else "words-__invalid__"
+        if (SafePaths.validLanguage(language)) wordsPackId(language) else "words-__invalid__"
 
     private fun has(id: String): Boolean = id in installedPacks && id != PackCatalog.CORE_ID
 
