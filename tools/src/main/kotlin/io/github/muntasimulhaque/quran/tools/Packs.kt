@@ -36,27 +36,6 @@ class Packs(private val root: File) {
     private val directory = File(content, "packs")
     private val catalog = File(content, "catalog.json")
 
-    private data class Pack(
-        val id: String,
-        val type: String,
-        val name: String,
-        /**
-         * The name in Bangla, the way a Bangla interface draws it. It rides in
-         * the catalog beside the English name, so a pack is named by its own
-         * entry and never by a table in the app: a pack added to this list is
-         * named everywhere without one line of app code
-         * (owner decision, 20.2).
-         */
-        val nameBn: String = "",
-        val language: String,
-        val credit: String,
-        /** The pack's credit in Bangla, read beside the English one by a Bangla interface. */
-        val creditBn: String,
-        val version: String,
-        val shipped: Boolean,
-        val ayahs: Int,
-    )
-
     /** The licenses the pack's own datasets carry, as the manifest records them. */
     private fun licenseOf(manifest: Manifest, id: String): String =
         PackSources.licenses(manifest, id).joinToString(SEPARATOR).ifEmpty { NO_LICENSE }
@@ -65,239 +44,6 @@ class Packs(private val root: File) {
     private fun licenseOfBn(manifest: Manifest, id: String): String =
         PackSources.licenses(manifest, id, bangla = true).joinToString(SEPARATOR).ifEmpty { NO_LICENSE }
 
-    private val packs = listOf(
-        Pack(
-            id = "core",
-            type = "script",
-            name = "Quran text",
-            nameBn = "কুরআনের লেখা",
-            language = "ar",
-            credit = "QPC Hafs, word by word, with tajweed; audited against the QUL QPC text",
-            creditBn = "QPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u09a4\u09be\u099c\u09ac\u09c0\u09a6\u09b8\u09b9; QUL-\u098f\u09b0 QPC \u09b2\u09c7\u0996\u09be\u09b0 \u09b8\u09be\u09a5\u09c7 \u09af\u09be\u099a\u09be\u0987\u0995\u09c3\u09a4",
-            // The QPC switch replaced the core's content; the version moves
-            // so a held core is replaced rather than kept (owner decision,
-            // 10.4). Version 3 carries the four word merges and the works-
-            // with-the-word-list positions. Version 4 drops the print's page
-            // signs from the search index, so the first word under the rub el
-            // hizb is found by a reader typing it (owner report, 10.7).
-            // Version 5 carries the surah introductions, so every reader has
-            // them without a word list.
-            // Version 6 carries the recall column and its index, so a
-            // reader's modern spelling finds a verse the exact index cannot
-            // name (owner decision, 19.7).
-            // Version 7 carries the recitation map, so any voice's audio
-            // folder is readable without attaching that voice's timing pack
-            // (owner decision, 20.0).
-            version = "7",
-            shipped = true,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "translation-saheeh-en",
-            type = "translation",
-            name = "Saheeh International",
-            nameBn = "সহীহ ইন্টারন্যাশনাল",
-            language = "en",
-            credit = "Noor International Center, via QuranEnc; 3:32 corrected to the published reading",
-            creditBn = "Noor International Center, QuranEnc-এর মাধ্যমে; ৩:৩২ প্রকাশিত পাঠ অনুযায়ী সংশোধিত",
-            version = "1.1.2+2",
-            shipped = true,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "tafsir-ibn-kathir-en",
-            type = "tafsir",
-            name = "Ibn Kathir",
-            nameBn = "ইবনে কাসীর",
-            language = "en",
-            credit = "Tafsir Ibn Kathir, via the Quranic Universal Library",
-            creditBn = "\u09a4\u09be\u09ab\u09b8\u09c0\u09b0 \u0987\u09ac\u09a8\u09c7 \u0995\u09be\u09b8\u09c0\u09b0, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            version = "QUL",
-            shipped = false,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "translation-al-bayan-bn",
-            type = "translation",
-            name = "Al-Bayan Simple Translation",
-            nameBn = "আল-বায়ান সরল অর্থানুবাদ",
-            language = "bn",
-            credit = "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library and IslamHouse.com",
-            creditBn = "আল-বায়ান ফাউন্ডেশন বাংলাদেশ, কুরআনিক ইউনিভার্সাল লাইব্রেরি ও ইসলামহাউস থেকে",
-            version = "1.0.1",
-            shipped = true,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "tafsir-ibn-kathir-bn",
-            type = "tafsir",
-            name = "Ibn Kathir",
-            nameBn = "ইবনে কাসীর",
-            language = "bn",
-            credit = "Tafsir Ibn Kathir (Bangla), via the Quranic Universal Library",
-            creditBn = "\u09a4\u09be\u09ab\u09b8\u09c0\u09b0 \u0987\u09ac\u09a8\u09c7 \u0995\u09be\u09b8\u09c0\u09b0 (\u09ac\u09be\u0982\u09b2\u09be), \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            version = "QUL",
-            shipped = false,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "reciter-minshawi",
-            type = "recitation",
-            name = "Minshawi",
-            nameBn = "মিনশাবি",
-            language = "ar",
-            credit = "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library",
-            creditBn = "\u09ae\u09c1\u09b9\u09be\u09ae\u09cd\u09ae\u09a6 \u09b8\u09bf\u09a6\u09cd\u09a6\u09bf\u0995 \u0986\u09b2-\u09ae\u09bf\u09a8\u09b6\u09be\u09ac\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            version = "QUL",
-            shipped = true,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "reciter-husary",
-            type = "recitation",
-            name = "Husary",
-            nameBn = "হুসারি",
-            language = "ar",
-            credit = "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
-            creditBn = "\u09ae\u09be\u09b9\u09ae\u09c1\u09a6 \u0996\u09b2\u09bf\u09b2 \u0986\u09b2-\u09b9\u09c1\u09b8\u09be\u09b0\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            version = "QUL",
-            shipped = true,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "reciter-alafasy",
-            type = "recitation",
-            name = "Alafasy",
-            nameBn = "আফাসি",
-            language = "ar",
-            credit = "Mishari Rashid al-Afasy, via the Quranic Universal Library",
-            creditBn = "মিশারি রশীদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
-            version = "QUL",
-            shipped = true,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "reciter-abdulbasit",
-            type = "recitation",
-            name = "Abdul Basit",
-            nameBn = "আব্দুল বাসিত",
-            language = "ar",
-            credit = "Abdul Basit Abdul Samad, via the Quranic Universal Library",
-            creditBn = "আব্দুল বাসিত আব্দুস সামাদ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
-            version = "QUL",
-            shipped = true,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "words-en",
-            type = "words",
-            name = "Word meanings",
-            nameBn = "শব্দের অর্থ",
-            language = "en",
-            credit = "Quran.com word by word, via the Quranic Universal Library; grammar from the Quranic Arabic Corpus (Dr. Kais Dukes)",
-            creditBn = "Quran.com শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
-            // Version 2 carries every word's grammar and lemma, beside its
-            // meaning: the sheet's study lines arrive with the word list the
-            // reader already turned on. Version 3 carries the lemma index the
-            // places page reads, so a dictionary form's places are one lookup
-            // rather than a pass over the whole list
-            // (owner decision, 18.9).
-            version = "QUL 3",
-            shipped = false,
-            ayahs = 6236,
-        ),
-        Pack(
-            id = "words-bn",
-            type = "words",
-            name = "Word meanings",
-            nameBn = "শব্দের অর্থ",
-            language = "bn",
-            credit = "Bangla word by word, via the Quranic Universal Library; grammar from the Quranic Arabic Corpus (Dr. Kais Dukes)",
-            creditBn = "বাংলা শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
-            // Version 2 carries every word's grammar and lemma, beside its
-            // meaning: the sheet's study lines arrive with the word list the
-            // reader already turned on. Version 3 carries the lemma index the
-            // places page reads (owner decision, 18.9).
-            version = "QUL 3",
-            shipped = false,
-            ayahs = 6236,
-        ),
-        // The root is one small table for the whole Book and no language of
-        // its own: the letters are Arabic and the Latin beside them is the
-        // letters' names (owner decision, 17.7).
-        Pack(
-            id = "word-root",
-            type = "word-root",
-            name = "Word roots",
-            language = "ar",
-            credit = "Quranic morphology, via the Quranic Universal Library",
-            creditBn = "\u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u09ae\u09b0\u09ab\u09cb\u09b2\u099c\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
-            // Version 2 writes every root's count from its own rows, so the
-            // count the sheet names is the list the door opens, and adds the
-            // root index the places page reads. The source's own count
-            // disagreed for fourteen roots; the pack's rows are the app's
-            // truth (owner decision, 18.9).
-            version = "QUL 2",
-            shipped = false,
-            ayahs = 6236,
-        ),
-    )
-
-    /**
-     * The word pronunciation pack. It has no database of its own: its
-     * manifest names one ZIP per surah, and the Al-Fatiha files ride in the
-     * app's assets. The catalog entry is what the About page reads for the
-     * voice, the source, and the CC BY 4.0 timing credit.
-     */
-    private val wordAudioPack = Pack(
-        id = "word-pronunciation-alafasy",
-        type = "word-audio",
-        name = "Word pronunciation",
-        language = "ar",
-        credit = "Mishari Rashid al-Afasy, via the Quranic Universal Library; word timings by quran-align",
-        creditBn = "মিশারি রশিদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরির মাধ্যমে; শব্দের সময় quran-align",
-        version = "1.0",
-        shipped = false,
-        ayahs = 6236,
-    )
-
-    /**
-     * One interface language's own reading, as the catalog's `defaults`
-     * block records it.
-     */
-    private data class LanguageDefault(
-        val tag: String,
-        val translation: String,
-        val tafsir: String,
-        val words: String,
-    )
-
-    /**
-     * What each interface language reads, written into the catalog's
-     * `defaults` block.
-     *
-     * A language's own translation, tafsir, and word list are content: a
-     * second English, or a translation in a language the app carries no
-     * interface for yet, is a pack and a row here, never a constant in the
-     * app. The app's interface languages are its `values-xx` folders, so a
-     * new *interface* language is still a translation pass and a folder; a
-     * new *content* language is a row in this table (owner decision, 20.2).
-     */
-    private val languageDefaults = listOf(
-        LanguageDefault(
-            tag = "en",
-            translation = "translation-saheeh-en",
-            tafsir = "tafsir-ibn-kathir-en",
-            words = "words-en",
-        ),
-        LanguageDefault(
-            tag = "bn",
-            translation = "translation-al-bayan-bn",
-            tafsir = "tafsir-ibn-kathir-bn",
-            words = "words-bn",
-        ),
-    )
-
     /**
      * The catalog's `defaults` block, with every id checked against the packs
      * this run writes. A default that names no pack is a typo that would
@@ -305,7 +51,7 @@ class Packs(private val root: File) {
      * build here rather than reaching a reader (owner decision, 20.2).
      */
     private fun defaultsJson(ids: Set<String>): JsonObject = buildJsonObject {
-        for (row in languageDefaults) {
+        for (row in PackSources.languageDefaults) {
             for (id in listOf(row.translation, row.tafsir, row.words)) {
                 check(id in ids) { "packs: the ${row.tag} defaults name $id, which is not a pack" }
             }
@@ -329,7 +75,7 @@ class Packs(private val root: File) {
         directory.mkdirs()
         val entries = mutableListOf<JsonObject>()
         openSqlite(database).use { source ->
-            for (pack in packs) {
+            for (pack in PackSources.packs) {
                 val file = File(directory, "${pack.id}.db")
                 if (file.exists()) file.delete()
                 buildPack(source, file, pack)
@@ -347,12 +93,12 @@ class Packs(private val root: File) {
         }
         wordAudioEntry(manifest)?.let { entry ->
             entries += entry
-            println("packs: ${wordAudioPack.id} ${entry["bytes"]} bytes, tag $WORD_AUDIO_TAG")
+            println("packs: ${PackSources.wordAudio.id} ${entry["bytes"]} bytes, tag $WORD_AUDIO_TAG")
         }
         val json = buildJsonObject {
             put("version", 1)
             put("baseUrl", "https://github.com/muntasimulhaque/quran/releases/download")
-            put("defaults", defaultsJson(packs.map { it.id }.toSet() + wordAudioPack.id))
+            put("defaults", defaultsJson(PackSources.all.map { it.id }.toSet()))
             put("packs", JsonArray(entries))
         }
         catalog.writeText(
@@ -563,7 +309,7 @@ class Packs(private val root: File) {
         }
     }
 
-    private fun buildPack(source: Connection, file: File, pack: Pack) {
+    private fun buildPack(source: Connection, file: File, pack: PackSources.Pack) {
         openSqlite(file).use { target ->
             target.createStatement().use { statement ->
                 statement.execute("PRAGMA journal_mode=OFF")
@@ -748,7 +494,12 @@ class Packs(private val root: File) {
         )
     }
 
-    private fun catalogEntry(pack: Pack, file: File, license: String, licenseBn: String): JsonObject {
+    private fun catalogEntry(
+        pack: PackSources.Pack,
+        file: File,
+        license: String,
+        licenseBn: String,
+    ): JsonObject {
         val hash = sha256(file)
         val tag = "pack-${pack.id}-${hash.substring(0, 8)}"
         return buildJsonObject {
@@ -779,17 +530,17 @@ class Packs(private val root: File) {
         val total = header["totalBytes"]?.jsonPrimitive?.longOrNull ?: 0L
         val hash = sha256(file)
         return buildJsonObject {
-            put("id", wordAudioPack.id)
-            put("type", wordAudioPack.type)
-            put("name", wordAudioPack.name)
-            put("language", wordAudioPack.language)
-            put("credit", wordAudioPack.credit)
-            put("creditBn", wordAudioPack.creditBn)
-            put("license", licenseOf(manifest, wordAudioPack.id))
-            put("licenseBn", licenseOfBn(manifest, wordAudioPack.id))
-            put("version", wordAudioPack.version)
-            put("shipped", wordAudioPack.shipped)
-            put("ayahs", wordAudioPack.ayahs)
+            put("id", PackSources.wordAudio.id)
+            put("type", PackSources.wordAudio.type)
+            put("name", PackSources.wordAudio.name)
+            put("language", PackSources.wordAudio.language)
+            put("credit", PackSources.wordAudio.credit)
+            put("creditBn", PackSources.wordAudio.creditBn)
+            put("license", licenseOf(manifest, PackSources.wordAudio.id))
+            put("licenseBn", licenseOfBn(manifest, PackSources.wordAudio.id))
+            put("version", PackSources.wordAudio.version)
+            put("shipped", PackSources.wordAudio.shipped)
+            put("ayahs", PackSources.wordAudio.ayahs)
             put("bytes", total)
             put("sha256", hash)
             put("tag", WORD_AUDIO_TAG)

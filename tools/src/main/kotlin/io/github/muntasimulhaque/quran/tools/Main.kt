@@ -32,6 +32,7 @@ fun main(args: Array<String>) {
         println("       tools audio [sample|bundle|packs|publish|edges]")
         println("       tools audio edges [resume]")
         println("       tools word-audio [plan|build [surahs]|publish]")
+            Runbook.print()
             0
         }
         else -> {
