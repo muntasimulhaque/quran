@@ -210,7 +210,7 @@ either label this release changes, so the three committed store sets stand
 and no capture leg ran; the instrumented work was skipped. No content
 changed, so every pack and the content database are as they were and no
 catalog hash or tag moved, and no permission or dependency moved. The
-hand-off copy in `play-store/aab/` is deleted once Play has it.
+hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 20.5.** A failure says Retry, a download says Downloading,
 and every decision in the code names the release that made it. "Try again"
