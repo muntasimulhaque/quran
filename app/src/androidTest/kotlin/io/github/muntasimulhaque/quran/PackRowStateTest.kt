@@ -60,9 +60,9 @@ class PackRowStateTest {
     @Test
     fun aChosenPackThatIsNotHereStillReadsChosen() {
         val absent = absentBayan()
-        val title = context.getString(
-            io.github.muntasimulhaque.quran.uikit.R.string.pack_name_al_bayan,
-        )
+        // The row draws the pack's own catalog name, so the fake pack's own
+        // name is the sentence to look for (owner decision, 20.2).
+        val title = absent.name
         val chosenMissing = context.getString(
             io.github.muntasimulhaque.quran.feature.settings.R.string.settings_pack_chosen_missing,
         )

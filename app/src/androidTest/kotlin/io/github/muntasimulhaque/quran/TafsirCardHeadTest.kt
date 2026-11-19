@@ -26,7 +26,7 @@ import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
-import io.github.muntasimulhaque.quran.uikit.R as KitR
+import io.github.muntasimulhaque.quran.data.PackCatalog
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -91,7 +91,9 @@ class TafsirCardHeadTest {
             compose.onAllNodesWithTag(PANEL).fetchSemanticsNodes().isNotEmpty()
         }
 
-        val pack = compose.activity.getString(KitR.string.pack_name_ibn_kathir)
+        // The card draws the catalog's own name for the pack, so the
+        // expectation is read from the same catalog (owner decision, 20.2).
+        val pack = PackCatalog.load(compose.activity).get(PACK_ID)?.name.orEmpty()
         val reference = compose.activity.getString(
             ReadingR.string.card_tafsir_reference,
             SURAH,

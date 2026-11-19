@@ -256,7 +256,7 @@ fun AyahCard(
                     // ink; the name keeps the row name's 15, so one source
                     // line does not change size with the number of packs on
                     // the device (owner decision, 14.1).
-                    val packName = contentPackName(single.id, single.name)
+                    val packName = contentPackName(single)
                     PackNames(
                         language = languageName(single.language),
                         name = packName,
@@ -291,7 +291,7 @@ fun AyahCard(
                         val open = door?.id == pack.id
                         // The tafsir's own name, in the reader's language,
                         // under the language it is in.
-                        val packName = contentPackName(pack.id, pack.name)
+                        val packName = contentPackName(pack)
                         DoorRow(
                             eyebrow = languageName(pack.language),
                             title = packName,
@@ -499,7 +499,7 @@ private fun TafsirOffer(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = contentPackName(pack.id, pack.name),
+            text = contentPackName(pack),
             // The same pack name the card and the settings list draw: a row's
             // name, not a page's Book line (owner decision, the consistency
             // audit).

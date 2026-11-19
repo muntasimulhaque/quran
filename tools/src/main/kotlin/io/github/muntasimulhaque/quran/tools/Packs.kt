@@ -40,6 +40,14 @@ class Packs(private val root: File) {
         val id: String,
         val type: String,
         val name: String,
+        /**
+         * The name in Bangla, the way a Bangla interface draws it. It rides in
+         * the catalog beside the English name, so a pack is named by its own
+         * entry and never by a table in the app: a pack added to this list is
+         * named everywhere without one line of app code
+         * (owner decision, 20.2).
+         */
+        val nameBn: String = "",
         val language: String,
         val credit: String,
         /** The pack's credit in Bangla, read beside the English one by a Bangla interface. */
@@ -62,6 +70,7 @@ class Packs(private val root: File) {
             id = "core",
             type = "script",
             name = "Quran text",
+            nameBn = "কুরআনের লেখা",
             language = "ar",
             credit = "QPC Hafs, word by word, with tajweed; audited against the QUL QPC text",
             creditBn = "QPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u09a4\u09be\u099c\u09ac\u09c0\u09a6\u09b8\u09b9; QUL-\u098f\u09b0 QPC \u09b2\u09c7\u0996\u09be\u09b0 \u09b8\u09be\u09a5\u09c7 \u09af\u09be\u099a\u09be\u0987\u0995\u09c3\u09a4",
@@ -87,6 +96,7 @@ class Packs(private val root: File) {
             id = "translation-saheeh-en",
             type = "translation",
             name = "Saheeh International",
+            nameBn = "সহীহ ইন্টারন্যাশনাল",
             language = "en",
             credit = "Noor International Center, via QuranEnc; 3:32 corrected to the published reading",
             creditBn = "Noor International Center, QuranEnc-এর মাধ্যমে; ৩:৩২ প্রকাশিত পাঠ অনুযায়ী সংশোধিত",
@@ -98,6 +108,7 @@ class Packs(private val root: File) {
             id = "tafsir-ibn-kathir-en",
             type = "tafsir",
             name = "Ibn Kathir",
+            nameBn = "ইবনে কাসীর",
             language = "en",
             credit = "Tafsir Ibn Kathir, via the Quranic Universal Library",
             creditBn = "\u09a4\u09be\u09ab\u09b8\u09c0\u09b0 \u0987\u09ac\u09a8\u09c7 \u0995\u09be\u09b8\u09c0\u09b0, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
@@ -109,6 +120,7 @@ class Packs(private val root: File) {
             id = "translation-al-bayan-bn",
             type = "translation",
             name = "Al-Bayan Simple Translation",
+            nameBn = "আল-বায়ান সরল অর্থানুবাদ",
             language = "bn",
             credit = "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library and IslamHouse.com",
             creditBn = "আল-বায়ান ফাউন্ডেশন বাংলাদেশ, কুরআনিক ইউনিভার্সাল লাইব্রেরি ও ইসলামহাউস থেকে",
@@ -120,6 +132,7 @@ class Packs(private val root: File) {
             id = "tafsir-ibn-kathir-bn",
             type = "tafsir",
             name = "Ibn Kathir",
+            nameBn = "ইবনে কাসীর",
             language = "bn",
             credit = "Tafsir Ibn Kathir (Bangla), via the Quranic Universal Library",
             creditBn = "\u09a4\u09be\u09ab\u09b8\u09c0\u09b0 \u0987\u09ac\u09a8\u09c7 \u0995\u09be\u09b8\u09c0\u09b0 (\u09ac\u09be\u0982\u09b2\u09be), \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
@@ -131,6 +144,7 @@ class Packs(private val root: File) {
             id = "reciter-minshawi",
             type = "recitation",
             name = "Minshawi",
+            nameBn = "মিনশাবি",
             language = "ar",
             credit = "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library",
             creditBn = "\u09ae\u09c1\u09b9\u09be\u09ae\u09cd\u09ae\u09a6 \u09b8\u09bf\u09a6\u09cd\u09a6\u09bf\u0995 \u0986\u09b2-\u09ae\u09bf\u09a8\u09b6\u09be\u09ac\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
@@ -142,6 +156,7 @@ class Packs(private val root: File) {
             id = "reciter-husary",
             type = "recitation",
             name = "Husary",
+            nameBn = "হুসারি",
             language = "ar",
             credit = "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
             creditBn = "\u09ae\u09be\u09b9\u09ae\u09c1\u09a6 \u0996\u09b2\u09bf\u09b2 \u0986\u09b2-\u09b9\u09c1\u09b8\u09be\u09b0\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
@@ -153,6 +168,7 @@ class Packs(private val root: File) {
             id = "reciter-alafasy",
             type = "recitation",
             name = "Alafasy",
+            nameBn = "আফাসি",
             language = "ar",
             credit = "Mishari Rashid al-Afasy, via the Quranic Universal Library",
             creditBn = "মিশারি রশীদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
@@ -164,6 +180,7 @@ class Packs(private val root: File) {
             id = "reciter-abdulbasit",
             type = "recitation",
             name = "Abdul Basit",
+            nameBn = "আব্দুল বাসিত",
             language = "ar",
             credit = "Abdul Basit Abdul Samad, via the Quranic Universal Library",
             creditBn = "আব্দুল বাসিত আব্দুস সামাদ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
@@ -174,7 +191,8 @@ class Packs(private val root: File) {
         Pack(
             id = "words-en",
             type = "words",
-            name = "Word by word",
+            name = "Word meanings",
+            nameBn = "শব্দের অর্থ",
             language = "en",
             credit = "Quran.com word by word, via the Quranic Universal Library; grammar from the Quranic Arabic Corpus (Dr. Kais Dukes)",
             creditBn = "Quran.com শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
@@ -191,7 +209,8 @@ class Packs(private val root: File) {
         Pack(
             id = "words-bn",
             type = "words",
-            name = "Word by word",
+            name = "Word meanings",
+            nameBn = "শব্দের অর্থ",
             language = "bn",
             credit = "Bangla word by word, via the Quranic Universal Library; grammar from the Quranic Arabic Corpus (Dr. Kais Dukes)",
             creditBn = "বাংলা শব্দে শব্দে, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে; ব্যাকরণ কুরআনিক আরবিক কর্পাস (ড. কায়েস ডিউকস) থেকে",
@@ -676,6 +695,7 @@ class Packs(private val root: File) {
             put("id", pack.id)
             put("type", pack.type)
             put("name", pack.name)
+            if (pack.nameBn.isNotBlank()) put("nameBn", pack.nameBn)
             put("language", pack.language)
             put("credit", pack.credit)
             if (pack.creditBn.isNotBlank()) put("creditBn", pack.creditBn)

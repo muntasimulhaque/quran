@@ -61,7 +61,7 @@ import io.github.muntasimulhaque.quran.ui.kit.putAwaySentence
 import io.github.muntasimulhaque.quran.ui.kit.rememberSentence
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
-import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.ui.kit.reciterName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.ReadingReveal
@@ -970,7 +970,8 @@ fun ReaderScreen(
             onHeight = { bottomStackHeight = it },
             onReciter = { viewModel.choosePillReciter(it) },
             reciterId = settings.recitation,
-            reciterName = reciterShortName(
+            reciterName = reciterName(
+                viewModel.packs,
                 settings.recitation,
                 viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
             ),

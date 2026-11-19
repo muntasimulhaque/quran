@@ -27,6 +27,7 @@ import io.github.muntasimulhaque.quran.core.surahEnding
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PlaybackPosition
 import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.data.RecitationAyah
@@ -36,9 +37,9 @@ import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.WordAudioStore
 import io.github.muntasimulhaque.quran.data.WordSegment
+import io.github.muntasimulhaque.quran.data.displayName
 import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
-import io.github.muntasimulhaque.quran.ui.kit.reciterName
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.CoroutineScope
@@ -1034,11 +1035,7 @@ class PlaybackController(
         val spoken = spokenContext()
         val surahName = database.surah(surah)?.nameSimple.orEmpty()
         if (surahName.isNotBlank()) placeNames[surah] = surahName
-        val artist = reciterName(
-            spoken,
-            recitation,
-            database.recitations().firstOrNull { it.id == recitation }?.name.orEmpty(),
-        )
+        val artist = recitationName(recitation, database.recitations().firstOrNull { it.id == recitation }?.name.orEmpty())
         val ayahs = database.ayahsOfSurah(surah)
         val segmentsForSurah = HashMap<Int, List<WordSegment>>(ayahs.size)
         val items = ayahs.mapNotNull { ayah ->
@@ -1113,6 +1110,25 @@ class PlaybackController(
      * the reader is reading in, whatever the phone's own language is (owner
      * decision, 8.8).
      */
+    /**
+     * The catalog as this service found it, read once: a name is content, and
+     * the notice is the one surface with no composition to take the reader's
+     * language from (owner decision, 20.2).
+     */
+    private val catalog: PackCatalog by lazy { PackCatalog.load(context) }
+
+    /**
+     * The voice's name in the reader's own language: the catalog's own pair,
+     * read by the tag the reader chose, with the name the content carries as
+     * the answer when the catalog holds no pack for this voice. The service's
+     * notice wears the reader's language rather than the phone's, the same way
+     * [spokenContext] does (owner decision, 20.2).
+     */
+    private fun recitationName(voice: String, fallback: String): String {
+        val pack = catalog.get(ContentDatabase.reciterPack(voice)) ?: return fallback
+        return pack.displayName(LanguagePreference(context).tag() ?: "en")
+    }
+
     private fun spokenContext(): Context {
         val locale = Locale.forLanguageTag(LanguagePreference(context).tag() ?: "en")
         val configuration = Configuration(context.resources.configuration).apply {

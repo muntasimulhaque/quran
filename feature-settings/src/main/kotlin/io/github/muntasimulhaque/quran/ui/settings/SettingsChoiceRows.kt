@@ -110,7 +110,7 @@ fun PackChoiceRow(
         // and the tap that checks it also brings the file
         // (owner report, 14.9).
         ChoiceRow(
-            title = contentPackName(pack.id, pack.name),
+            title = contentPackName(pack),
             subtitle = value,
             selected = false,
             radio = false,
@@ -140,7 +140,7 @@ fun PackChoiceRow(
         return
     }
     ChoiceRow(
-        title = contentPackName(pack.id, pack.name),
+        title = contentPackName(pack),
         subtitle = value,
         selected = selected,
         radio = radio,
@@ -203,7 +203,7 @@ private fun PackActionRow(
         ) {
             ChoiceMark(selected = chosen, radio = false)
             RowName(
-                title = contentPackName(pack.id, pack.name),
+                title = contentPackName(pack),
                 value = value,
                 modifier = Modifier
                     .weight(1f)

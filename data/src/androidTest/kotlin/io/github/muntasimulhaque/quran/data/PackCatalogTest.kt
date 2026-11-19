@@ -108,4 +108,41 @@ class PackCatalogTest {
         assertEquals("", core.creditBn)
         assertEquals("", core.licenseBn)
     }
+
+    /**
+     * A pack's Bangla name, when the catalog carries it, is read beside the
+     * English one: the interface draws it and no table in the app names a
+     * pack (owner decision, 20.2).
+     */
+    @Test
+    fun aPacksBanglaNameIsRead() {
+        val parsed = PackCatalog.parse(
+            """
+            {"packs":[{"id":"reciter-minshawi","type":"recitation","name":"Minshawi","language":"ar",
+              "sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "nameBn":"\u09ae\u09bf\u09a8\u09b6\u09be\u09ac\u09bf"}]}
+            """.trimIndent(),
+        )
+        val pack = parsed.get("reciter-minshawi")!!
+        assertEquals("Minshawi", pack.name)
+        assertEquals("\u09ae\u09bf\u09a8\u09b6\u09be\u09ac\u09bf", pack.nameBn)
+        assertEquals("\u09ae\u09bf\u09a8\u09b6\u09be\u09ac\u09bf", pack.displayName("bn"))
+    }
+
+    /** A pack whose entry carries no Bangla name is named in English, not blank. */
+    @Test
+    fun aCatalogWithoutABanglaNameNamesThePackInEnglish() {
+        val core = PackCatalog.parse(json).get(PackCatalog.CORE_ID)!!
+        assertEquals("", core.nameBn)
+        assertEquals("Quran", core.displayName("bn"))
+    }
+
+    /** A blank Bangla name is not a name: the English one stands for it. */
+    @Test
+    fun aBlankBanglaNameFallsBackToTheEnglishOne() {
+        val parsed = PackCatalog.parse(
+            """{"packs":[{"id":"words-en","type":"words","name":"Word meanings","nameBn":"  ","language":"en","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]}""",
+        )
+        assertEquals("Word meanings", parsed.get("words-en")!!.displayName("bn"))
+    }
 }

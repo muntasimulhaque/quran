@@ -1199,6 +1199,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         ListenOffer(
             reciter = recitation,
             reciterName = library.recitations.firstOrNull { it.id == recitation }?.name ?: recitation,
+            reciterNameBn = library.pack(ContentDatabase.reciterPack(recitation))?.nameBn.orEmpty(),
             surah = ayah.surah,
             surahName = library.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
                 ?: getApplication<Application>().getString(R.string.surah_fallback_name, ayah.surah),
@@ -1232,6 +1233,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 reciter = reciter.id,
                 name = reciter.name,
                 bytes = listenBytes(reciter.id, surah),
+                nameBn = library.pack(ContentDatabase.reciterPack(reciter.id))?.nameBn.orEmpty(),
             )
         }
 

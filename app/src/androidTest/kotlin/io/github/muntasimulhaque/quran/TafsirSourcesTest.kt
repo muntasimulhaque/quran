@@ -16,7 +16,7 @@ import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
-import io.github.muntasimulhaque.quran.uikit.R as KitR
+import io.github.muntasimulhaque.quran.data.PackCatalog
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -74,7 +74,9 @@ class TafsirSourcesTest {
     fun thePassageLeavesTheBlockBreakBeforeTheNextSource() {
         waitForReading()
         openTheCard()
-        val name = compose.activity.getString(KitR.string.pack_name_ibn_kathir)
+        // The doors draw the catalog's own names, so the expectation is read
+        // from the same catalog (owner decision, 20.2).
+        val name = PackCatalog.load(compose.activity).get(ENGLISH)?.name.orEmpty()
         // The reader's language leads, so the first door is the English pack
         // and the second is the Bangla one.
         compose.waitUntil(timeoutMillis = 30_000) {

@@ -43,7 +43,7 @@ internal fun translationName(settings: AppSettings, packs: List<ContentPack>): S
     val chosen = packs.filter { it.id in settings.translationPacks && it.installed }
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
-        chosen.size == 1 -> contentPackName(chosen.first().id, chosen.first().name)
+        chosen.size == 1 -> contentPackName(chosen.first())
         else -> pluralStringResource(
             R.plurals.settings_translation_count,
             chosen.size,
@@ -58,7 +58,7 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
     val chosen = packs.filter { it.type == PackType.Tafsir && it.installed && it.id in settings.tafsirPacks }
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
-        chosen.size == 1 -> contentPackName(chosen.first().id, chosen.first().name)
+        chosen.size == 1 -> contentPackName(chosen.first())
         else -> pluralStringResource(R.plurals.settings_tafsir_count, chosen.size, chosen.size)
     }
 }
@@ -179,7 +179,7 @@ internal fun LanguageGroups(
             // the order is the reader's own alphabet and not the catalog's
             // English one.
             group
-                .map { pack -> pack to contentPackName(pack.id, pack.name) }
+                .map { pack -> pack to contentPackName(pack) }
                 .sortedBy { (_, name) -> name.lowercase() }
                 .forEach { (pack, _) -> row(pack) }
         }

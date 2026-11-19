@@ -339,7 +339,7 @@ private fun WordListRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             RowName(
-                title = contentPackName(pack.id, pack.name),
+                title = contentPackName(pack),
                 value = subtitle,
                 modifier = Modifier.weight(1f).padding(end = Space.Row),
             )

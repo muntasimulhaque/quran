@@ -150,7 +150,7 @@ internal fun ReaderSheets(
             packSetup = viewModel.packSetup?.let { setup ->
                 PackSetupState(
                     packId = setup.pack.id,
-                    name = contentPackName(setup.pack.id, setup.pack.name),
+                    name = contentPackName(setup.pack),
                     bytes = setup.pack.bytes,
                     progress = setup.progress,
                     failure = setup.failure,

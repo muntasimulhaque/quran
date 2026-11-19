@@ -7,7 +7,7 @@ import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.ui.kit.PopupMeasure
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
-import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 
 /**
  * The reciters, as the list the playing pill carries.
@@ -38,7 +38,7 @@ internal fun ReciterChoices(
 ) {
     options.forEach { option ->
         ChoiceRow(
-            title = reciterShortName(option.reciter, option.name),
+            title = contentPackName(option.name, option.nameBn),
             subtitle = if (option.bytes > 0L) {
                 formatBytes(option.bytes)
             } else {

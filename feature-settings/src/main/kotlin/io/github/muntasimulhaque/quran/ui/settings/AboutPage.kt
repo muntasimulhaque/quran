@@ -120,7 +120,7 @@ fun AboutPage(
                 AboutCredit(
                     title = stringResource(
                         R.string.about_pack_title,
-                        contentPackName(pack.id, pack.name),
+                        contentPackName(pack),
                         packKind(pack),
                     ),
                     line = listOfNotNull(maker, versionLine).joinToString(SEPARATOR),

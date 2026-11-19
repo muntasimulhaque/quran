@@ -10,6 +10,14 @@ data class ListenOption(
     val reciter: String,
     val name: String,
     val bytes: Long,
+    /**
+     * The same voice's Bangla name, from the catalog; empty when it has none.
+     * It rides beside the English name because the pill and the offer are
+     * built away from the catalog, and the list picks at draw time so a
+     * language change is answered without rebuilding the pill
+     * (owner decision, 20.2).
+     */
+    val nameBn: String = "",
 )
 
 /**
@@ -23,6 +31,14 @@ data class ListenOption(
 data class ListenOffer(
     val reciter: String,
     val reciterName: String,
+    /**
+     * The same voice's Bangla name, read from the catalog when the offer is
+     * built. The pill and the offer are built away from the catalog and
+     * survive a language change, so the pair travels and the surface picks,
+     * rather than a name frozen in the language that made the offer
+     * (owner decision, 20.2).
+     */
+    val reciterNameBn: String = "",
     val surah: Int,
     val surahName: String,
     val ayah: Int,

@@ -575,7 +575,7 @@ internal fun AyahBlock(
                         )
                     ) {
                         Text(
-                            text = contentPackName(line.pack, line.packName),
+                            text = contentPackName(line.packName, line.packNameBn),
                             style = MaterialTheme.typography.bodySmall,
                             // The pack's name is read, so it keeps the theme's
                             // own secondary tone. The 0.75 alpha it wore

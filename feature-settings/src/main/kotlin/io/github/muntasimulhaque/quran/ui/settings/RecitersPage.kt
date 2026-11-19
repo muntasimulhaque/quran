@@ -31,7 +31,7 @@ import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
-import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
@@ -67,7 +67,7 @@ fun RecitersPage(
             // by the reader's own alphabet and not the catalog's English one
             // (owner decision, 8.8).
             .map { pack ->
-                pack to reciterShortName(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX), pack.name)
+                pack to contentPackName(pack)
             }
             .sortedBy { (_, name) -> name.lowercase() }
             .forEach { (pack, name) ->

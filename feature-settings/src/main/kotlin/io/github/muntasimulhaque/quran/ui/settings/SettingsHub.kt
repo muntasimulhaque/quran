@@ -20,7 +20,7 @@ import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
-import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.ui.kit.reciterName
 import io.github.muntasimulhaque.quran.ui.theme.Literata
 
 /** The pages the settings hub opens, one at a time. */
@@ -140,7 +140,7 @@ fun SettingsHub(
         ) { onOpen(SettingsPage.Tafsirs) }
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
-            summary = reciterName(settings, recitations),
+            summary = reciterRowName(settings, packs, recitations),
         ) { onOpen(SettingsPage.Reciters) }
         // The daily ayah: one ayah a day, at the reader's own moment. The time
         // is the row's value, and the page behind it is where the reminder is
@@ -179,13 +179,18 @@ private fun FontSizeSample(settings: AppSettings) {
 
 /**
  * The reader's reciter, in the reader's own language: the hub row used to
- * draw the catalog's English name beside a Bangla interface
- * (owner decision, 8.3).
+ * draw the catalog's English name beside a Bangla interface, and the name is
+ * now the catalog's own pair, read where the row is drawn
+ * (owner decision, 8.3, 20.2).
  */
 @Composable
-private fun reciterName(settings: AppSettings, recitations: List<Recitation>): String {
+private fun reciterRowName(
+    settings: AppSettings,
+    packs: List<ContentPack>,
+    recitations: List<Recitation>,
+): String {
     val chosen = recitations.firstOrNull { it.id == settings.recitation }
-    return chosen?.let { reciterShortName(it.id, it.name) }
+    return chosen?.let { reciterName(packs, it.id, it.name) }
         ?: stringResource(R.string.settings_none_yet)
 }
 

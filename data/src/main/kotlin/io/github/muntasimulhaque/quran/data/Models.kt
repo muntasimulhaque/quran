@@ -51,6 +51,12 @@ data class TranslationLine(
     val packName: String,
     val language: String,
     val text: TranslationText,
+    /**
+     * The pack's Bangla name, the catalog's own second name, so a line drawn
+     * under a Bangla interface is announced in Bangla. Empty when the catalog
+     * carries none, and the English name stands (owner decision, 20.2).
+     */
+    val packNameBn: String = "",
 )
 
 data class WordMeaning(
@@ -258,6 +264,13 @@ data class ContentPack(
     val id: String,
     val type: PackType,
     val name: String,
+    /**
+     * The name in Bangla, written by the content build beside the English
+     * one. A Bangla interface draws it, and an empty one means the pack has
+     * no Bangla name and the English one stands, so a pack added later is
+     * never nameless (owner decision, 20.2).
+     */
+    val nameBn: String = "",
     val language: String,
     val credit: String,
     val license: String,

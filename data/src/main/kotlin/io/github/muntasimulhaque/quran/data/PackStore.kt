@@ -62,6 +62,7 @@ class PackCatalog private constructor(private val packs: Map<String, ContentPack
                     id = id,
                     type = type,
                     name = pack.optString("name"),
+                    nameBn = pack.optString("nameBn"),
                     language = pack.optString("language"),
                     credit = pack.optString("credit"),
                     license = pack.optString("license"),

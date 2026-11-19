@@ -128,6 +128,10 @@ change, never left as a dead letter.
   sentence two modules need is written in each of them, and `CopyParityTest`
   holds the copies to one Bangla: the same English word read two ways in one
   language is the drift that gate exists for.
+- **Content metadata is not a string resource**: a pack's or a reciter's
+  display name, credit, and license are content, English in the catalog's
+  `name` and Bangla in its `nameBn`, so a pack added to the catalog is named
+  in both languages without a line of app code (owner decision, 20.2).
 - **Small pieces, plain names.** Split early, and a name that says the idea beats
   a name that says the screen.
 - **A test's name is a sentence.** In a JVM suite it is spaced, in backticks,

@@ -226,7 +226,7 @@ internal class ReadingRowsCache(
             val found = open.translations(numbers, pack.id)
             for ((number, text) in found) {
                 out.getOrPut(number) { mutableListOf() }
-                    .add(TranslationLine(pack.id, pack.name, pack.language, text))
+                    .add(TranslationLine(pack.id, pack.name, pack.language, text, pack.nameBn))
             }
         }
         return out

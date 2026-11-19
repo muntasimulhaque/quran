@@ -29,7 +29,7 @@ import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
-import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
@@ -146,7 +146,7 @@ internal fun ListenOfferBar(
             ) {
                 PlayingWordsBlock(
                     placeName = failure ?: offer.surahName,
-                    reciter = reciterShortName(offer.reciter, offer.reciterName),
+                    reciter = contentPackName(offer.reciterName, offer.reciterNameBn),
                     reference = "",
                     speed = 1f,
                     price = price,
@@ -200,7 +200,7 @@ internal fun ListenOfferBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TransferWordsBlock(
-                        name = reciterShortName(offer.reciter, offer.reciterName),
+                        name = contentPackName(offer.reciterName, offer.reciterNameBn),
                         title = stringResource(
                             R.string.playback_downloading,
                             (progress * 100).toInt(),

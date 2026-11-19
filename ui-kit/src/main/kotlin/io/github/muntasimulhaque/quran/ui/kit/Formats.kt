@@ -7,6 +7,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.core.localizedDigits as coreLocalizedDigits
+import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.displayName
+import io.github.muntasimulhaque.quran.data.packName
 import io.github.muntasimulhaque.quran.uikit.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -61,54 +65,50 @@ fun formatBytes(bytes: Long): String {
 }
 
 /**
- * The reciters, by the names readers use for them, in the reader's own
- * language. It is a composable because the name is a string resource: the
- * pill, the offer, and the settings list draw the reciter, and a Bangla
- * reader used to meet the Latin name in the pill (owner decision, the theme
- * and consistency session).
+ * A pack's name in the interface's own language, read where it is drawn.
  *
- * [reciterName] is the same rule for the one caller with no composition, the
- * playback service's own notification, which takes a context wearing the
- * reader's locale (owner decision, 8.8).
+ * The names are content: the catalog carries each pack's English name and its
+ * Bangla one, and [packName] is the one rule that picks between them. The
+ * reciters are packs too, so the pill, the offer, the settings list, the
+ * About page, and the reading's footnote line all name a pack through here
+ * and a pack added later is named without a line of app code. A composable
+ * because the language is the composition's, and the pure rule is tested
+ * without a window, the way [speedText] is (owner decision, 20.2).
  */
-fun reciterName(context: Context, id: String, fallback: String): String = when (id) {
-    "minshawi" -> context.getString(R.string.reciter_minshawi)
-    "husary" -> context.getString(R.string.reciter_husary)
-    "alafasy" -> context.getString(R.string.reciter_alafasy)
-    "abdulbasit" -> context.getString(R.string.reciter_abdulbasit)
-    else -> fallback
-}
-
-/** [reciterName] in the composition's own language, read where it is drawn. */
 @Composable
-fun reciterShortName(id: String, fallback: String): String {
-    val context = LocalContext.current
-    return remember(id, fallback, context) { reciterName(context, id, fallback) }
+fun contentPackName(pack: ContentPack): String = contentPackName(pack.name, pack.nameBn)
+
+/**
+ * [contentPackName] for the two names a surface holds rather than the pack
+ * itself: the playback models carry the catalog's pair, because the pill and
+ * the offer are built away from the catalog and must still wear the
+ * reader's own language (owner decision, 20.2).
+ */
+@Composable
+fun contentPackName(name: String, nameBn: String): String {
+    val language = LocalConfiguration.current.locales[0].language
+    return remember(name, nameBn, language) { packName(name, nameBn, language) }
 }
 
 /**
- * The names readers use for the app's own packs, in the reader's own language.
- * The catalog is content, and its names are English; the display name is the
- * interface's, so a Bangla reader meets "সহীহ ইন্টারন্যাশনাল", "আল-বায়ান
- * সরল অর্থানুবাদ", and "ইবনে কাসীর" where an English one meets the Latin names. The
- * core text and the reciters are named here too, because the About page
- * credits them from the same catalog and a Bangla reader should not meet
- * "Quran text" or "Husary" on it (owner decision, 8.8). A pack the
- * app does not know keeps its own catalog name, so a pack added later is
- * never nameless.
+ * One reciter's pack, the one the catalog ids `reciter-<voice>`. The voice
+ * list, the pill, and the settings row all hold a voice id while the catalog
+ * holds the pack, so the lookup stands here once and no surface spells the
+ * id's shape itself (owner decision, 20.2).
+ */
+fun List<ContentPack>.reciterPack(voice: String): ContentPack? =
+    firstOrNull { it.id == ContentDatabase.reciterPack(voice) }
+
+/**
+ * [contentPackName] for a voice a surface knows by id alone, with the name
+ * the content carries as the answer when the catalog has no such pack: a
+ * voice whose catalog entry is missing is still named rather than blank
+ * (owner decision, 20.2).
  */
 @Composable
-fun contentPackName(id: String, fallback: String): String = when (id) {
-    "core" -> stringResource(R.string.pack_name_quran_text)
-    "translation-saheeh-en" -> stringResource(R.string.pack_name_saheeh_international)
-    "translation-al-bayan-bn" -> stringResource(R.string.pack_name_al_bayan)
-    "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> stringResource(R.string.pack_name_ibn_kathir)
-    "words-en", "words-bn" -> stringResource(R.string.pack_name_word_by_word)
-    "reciter-minshawi" -> stringResource(R.string.reciter_minshawi)
-    "reciter-husary" -> stringResource(R.string.reciter_husary)
-    "reciter-alafasy" -> stringResource(R.string.reciter_alafasy)
-    "reciter-abdulbasit" -> stringResource(R.string.reciter_abdulbasit)
-    else -> fallback
+fun reciterName(packs: List<ContentPack>, voice: String, fallback: String): String {
+    val pack = packs.reciterPack(voice)
+    return if (pack == null) fallback else contentPackName(pack)
 }
 
 /**

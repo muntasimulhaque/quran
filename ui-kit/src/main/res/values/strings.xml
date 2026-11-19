@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     The reciters, named the way a reader says them, the app's own packs, and
-     the size units a download prints. The names live here because the pill,
-     the offer, the settings lists, the ayah card, and the search results all
-     draw them, and a Bangla reader must not meet a Latin name in one place
-     and a Bengali one in another, nor an English unit beside a Bengali
-     number.
+     The size units a download prints. A name is content, not a label: the
+     catalog carries every pack's English and Bangla names, and the interface
+     draws them from there, so this file holds no pack or reciter name at all
+     (owner decision, 20.2).
 -->
 <resources>
-    <string name="reciter_minshawi">Minshawi</string>
-    <string name="reciter_husary">Husary</string>
-    <string name="reciter_alafasy">Alafasy</string>
-    <string name="reciter_abdulbasit">Abdul Basit</string>
-    <string name="pack_name_quran_text">Quran text</string>
-    <string name="pack_name_saheeh_international">Saheeh International</string>
-    <string name="pack_name_al_bayan">Al-Bayan Simple Translation</string>
-    <string name="pack_name_ibn_kathir">Ibn Kathir</string>
-    <string name="pack_name_word_by_word">Word meanings</string>
     <!-- The size units a reader meets beside a download or a pack. The digits
          beside them already follow the interface's own language, and the unit
          is a word of that language too (owner decision, this session). -->
