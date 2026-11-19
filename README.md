@@ -198,7 +198,18 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.2 (versionCode 204).**
+**20.2 (versionCode 204).** The signed bundle comes from `build` run
+44478002741, the newest green run on `main`: the unit tests, lint, and
+`assembleDebug` passed, and the signed bundle `quran-20.2-vc204.aab` has
+SHA-256
+`b2df9015d143cd2c7a3896d311f9822b16bff71d3c52def530bc28649a0d6d0f`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. Nothing the reader sees changed, so
+the three committed store sets stand and no capture leg ran; no runtime
+behavior changed, so no instrumented class was run. Every pack database
+rebuilt byte for byte and every catalog hash is unchanged. The hand-off copy
+is in `play-store/aab/`.
 
 **What changed in 20.2.** The app's content is a pack, and it now treats it
 that way everywhere. Every pack's display name, in English and in Bangla, and
