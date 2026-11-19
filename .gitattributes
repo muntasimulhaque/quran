@@ -10,5 +10,5 @@ content/audio-edges.txt -text
 # recorded in both content/manifest.json and content/catalog.json, so a
 # checkout must hand it over as the pipeline wrote it: a CRLF ending would
 # change its byte count and its checksum without changing one word of it
-# (owner decision, this session).
+# (owner decision, 19.0).
 content/word-audio/manifest.json -text

@@ -27,6 +27,11 @@ import java.io.File
  * that already reads `owner decision, 19.6` and happens to mention a session
  * further along in the sentence is not an offender. The tag's own kind may
  * sit on the next line, which is how the editor wrapped a dozen of them.
+ *
+ * The attributes file is read too, because it carries decisions of its own.
+ * The line that pins a checked-out file's bytes was added with a decision and
+ * was still dated by its session when the sweep passed, since the sweep read
+ * Kotlin and XML and this file is neither.
  */
 class DecisionDatingTest {
 
@@ -52,11 +57,13 @@ class DecisionDatingTest {
     }
 
     /**
-     * The source files the rule governs, and the one prose file whose tags a
+     * The source files the rule governs, and the two prose files whose tags a
      * later reader is owed a version for. A release note is not scanned.
      */
     private fun isScanned(file: File): Boolean =
-        file.extension.lowercase() in SOURCE_EXTENSIONS || file.name == "AGENTS.md"
+        file.extension.lowercase() in SOURCE_EXTENSIONS ||
+            file.name == "AGENTS.md" ||
+            file.name == ".gitattributes"
 
     /** The module this test runs in sits one level under the repository root. */
     private fun repositoryRoot(): File {
