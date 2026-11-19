@@ -629,7 +629,7 @@ internal fun AyahBlock(
  * The page has no head: the verse's printed medallion is its number and its
  * door, so a note has nothing to sit in. It used to sit in a 48 dp row above
  * the verse, the height the door's finger needs, which made a noted verse
- * stand 48 dp apart from its neighbours on a page whose whole rhythm is
+ * stand 48 dp apart from its neighbors on a page whose whole rhythm is
  * [Space.Tight] on each side of the wash. The mark rides the verse's first
  * line in a rail the width of the mark and its gap, reserved on every verse
  * so a note never rewraps the Arabic, and the block keeps the verse's own

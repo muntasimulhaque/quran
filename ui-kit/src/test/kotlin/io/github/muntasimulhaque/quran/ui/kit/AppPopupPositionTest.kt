@@ -44,7 +44,7 @@ class AppPopupPositionTest {
     private val edge = 48
 
     @Test
-    fun aCentredPopupTakesTheAnchorsMiddle() {
+    fun aCenteredPopupTakesTheAnchorsMiddle() {
         // A phone's capsule: the pill is 992 px wide inside a 1080 px window,
         // and the anchor is the popup's own measure in the middle of it.
         val anchor = IntRect(left = 144, top = 1_800, right = 936, bottom = 1_803)

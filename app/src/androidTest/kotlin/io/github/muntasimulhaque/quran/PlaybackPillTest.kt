@@ -87,7 +87,7 @@ import java.util.Locale
  * 5. The playing words are one block, one door, and a lockup: the voice and
  *    its pace over the place and its key, with the chevron at the end of the
  *    place's line. The one-row voices lead with the reciter's name beside the
- *    state's sentence. Nothing in the pill touches a neighbour or the capsule:
+ *    state's sentence. Nothing in the pill touches a neighbor or the capsule:
  *    the playing words keep the shoulder's air at the leading end, the
  *    one-row voices keep it at their words' end, the words' shape and the
  *    answer's circle keep the app's shape air, and the circle keeps its inset
@@ -395,7 +395,7 @@ class PlaybackPillTest {
      * they were 10 dp from one side and 28 from the other.
      */
     @Test
-    fun thePaceStandsCentredInTheListeningMenu() {
+    fun thePaceStandsCenteredInTheListeningMenu() {
         showPill()
         compose.onNodeWithTag("playback-words").performClick()
         compose.onNodeWithText("Playback speed").assertExists()
@@ -843,7 +843,7 @@ class PlaybackPillTest {
      * The playing pill wears one row (owner decision, 17.0): a 64 dp
      * capsule whose words are a 48 dp door at the leading end and whose answer
      * closes it, with the circle 4 dp inside its target. Nothing in it touches
-     * a neighbour or the capsule's edge.
+     * a neighbor or the capsule's edge.
      */
     @Test
     fun thePlayingPillWearsItsOwnShape() {
@@ -1543,15 +1543,15 @@ class PlaybackPillTest {
      * anywhere.
      */
     @Test
-    fun thePopupsHangFromThePillsOwnCentre() {
+    fun thePopupsHangFromThePillsOwnCenter() {
         showPill()
-        assertTheAnchorStandsOnThePillCentre()
+        assertTheAnchorStandsOnThePillCenter()
     }
 
     @Test
-    fun thePopupsHangFromTheWidePillsCentreToo() {
+    fun thePopupsHangFromTheWidePillsCenterToo() {
         showPill(measureWidth = 840.dp)
-        assertTheAnchorStandsOnThePillCentre()
+        assertTheAnchorStandsOnThePillCenter()
     }
 
     /**
@@ -1565,7 +1565,7 @@ class PlaybackPillTest {
         .config
         .getOrElseNullable(SemanticsProperties.StateDescription) { null }
 
-    private fun assertTheAnchorStandsOnThePillCentre() {
+    private fun assertTheAnchorStandsOnThePillCenter() {
         val pill = compose.onNodeWithTag("playback-bar").fetchSemanticsNode().boundsInWindow
         val anchor = compose.onNodeWithTag("pill-menu-anchor").fetchSemanticsNode().boundsInWindow
         assertTrue(

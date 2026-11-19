@@ -44,8 +44,9 @@ fun shouldShowWordMeaning(hit: SearchHit.AyahHit): Boolean =
  *
  * Anything else draws no Arabic at all, and a row the translation already
  * washed is in that group on purpose: the word line would be the same match
- * said twice, which is the very thing this rule's neighbour exists to stop
- *. Dropping the rest is a legibility decision, not a simplification:
+ * said twice, which is the very thing this rule's neighbor exists to stop.
+ *
+ * Dropping the rest is a legibility decision, not a simplification:
  * four lines of Arabic that never matched is the tallest thing on the row and
  * the least informative.
  */

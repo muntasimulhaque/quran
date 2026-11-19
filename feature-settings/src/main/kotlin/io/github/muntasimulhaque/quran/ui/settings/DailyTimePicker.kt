@@ -142,7 +142,7 @@ private val FooterRoom = ControlMetrics.Target + Space.Block + Space.Gutter
  * the app's grammar instead. The question is a small page's name at 16; the
  * moment is the subject, set in the interface's tabular digits; and each part
  * of it is a tape the reader scrolls, with the chosen number in the accent
- * under a thin tick and its neighbours quiet on either side
+ * under a thin tick and its neighbors quiet on either side
  * (owner decision, 13.9).
  *
  * The tapes keep every minute of the day, which is what the clock bought and

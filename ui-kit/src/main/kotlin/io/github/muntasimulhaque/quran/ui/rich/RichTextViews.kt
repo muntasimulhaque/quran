@@ -440,7 +440,7 @@ private fun annotated(
                 // It reads a little low against capital letters, and that is
                 // the glyph, not the layout: measured on the 19.0 store frame
                 // at 1080 x 1920, the line carrying it is 42 px tall against
-                // 41 and 39 for its neighbours in the same paragraph, its
+                // 41 and 39 for its neighbors in the same paragraph, its
                 // baseline is the same row as theirs, and the only ink under
                 // that baseline is 7 to 16 px of descender, which is what a "p"
                 // or a "y" puts there on every other line. U+FDFA is a stacked

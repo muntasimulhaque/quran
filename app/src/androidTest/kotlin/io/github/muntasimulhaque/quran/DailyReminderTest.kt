@@ -338,7 +338,7 @@ class DailyReminderTest {
             .filter { it.trimStart().startsWith("tag=") && it.contains(ALARM_TAG) }
             .map { line ->
                 // The window and the reason sit on the lines under the
-                // record, so the record is read with its two neighbours.
+                // record, so the record is read with its two neighbors.
                 alarmDump().lineSequence().dropWhile { it != line }.take(4).joinToString(" ")
             }
             .firstOrNull()

@@ -136,7 +136,7 @@ fun DailyPage(
                     },
                 ),
                 // A sentence about the phone's own settings is prose, not a
-                // caption: it reads at the meta line's neighbours, not a point
+                // caption: it reads at the meta line's neighbors, not a point
                 // under them (owner decision, 13.3).
                 style = MaterialTheme.typography.bodyMedium,
                 // The same ink as the exact-time line below: both are state

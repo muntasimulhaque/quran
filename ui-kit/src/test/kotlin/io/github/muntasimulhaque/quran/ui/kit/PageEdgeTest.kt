@@ -82,7 +82,7 @@ class PageEdgeTest {
     fun theMarginMeetsTheGutterWithNoSeam() {
         // At exactly a page plus two gutters the two halves of the rule meet
         // on the one number, so no window is handed a wider page than its
-        // neighbour.
+        // neighbor.
         assertEquals(Space.Gutter, pageMargin(sheetOfAPage))
         assertEquals(Space.Gutter, pageMargin(sheetOfAPage - 1.dp))
         assertEquals(Space.Gutter + 1.dp, pageMargin(sheetOfAPage + 2.dp))

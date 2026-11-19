@@ -108,7 +108,7 @@ class WordAudioStoreTest {
             assertEquals("one file leaves the surah", 1, store.remove(3))
             val after = store.onDevice()
             assertTrue("the named surah is gone", after.rows.none { it.surah == 3 })
-            assertTrue("its neighbour stays", after.rows.any { it.surah == 4 })
+            assertTrue("its neighbor stays", after.rows.any { it.surah == 4 })
         } finally {
             three.deleteRecursively()
             four.deleteRecursively()

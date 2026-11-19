@@ -115,7 +115,7 @@ class ReadingVerseGapTest {
      * rhythm with or without one (owner decision, 16.9). The mark used
      * to sit in a 48 dp head, the door's finger target on a page that has no
      * door, which stood a noted verse six times the page's air from its
-     * neighbours. The rail is reserved on every verse, so it must keep its
+     * neighbors. The rail is reserved on every verse, so it must keep its
      * measure and its place now that the save draws nothing in it (owner
      * decision, 17.7).
      */

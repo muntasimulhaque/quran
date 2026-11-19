@@ -38,10 +38,10 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  *
  * [GlyphPress] inside [GlyphTarget] is Material's own icon button, a 40 dp
  * container in a 48 dp target, and it is what makes a cluster possible: two
- * neighbouring targets stand edge to edge, where a finger never falls into a
+ * neighboring targets stand edge to edge, where a finger never falls into a
  * dead pixel between them, while the circles they light keep the app's own
  * [io.github.muntasimulhaque.quran.ui.theme.Space.Line] of air. A target that
- * overlapped its neighbour would be a 40 dp target wearing a 48 dp name, so
+ * overlapped its neighbor would be a 40 dp target wearing a 48 dp name, so
  * edge to edge is the floor, and the air is measured between the shapes the
  * reader sees, never between the invisible targets.
  *
@@ -67,7 +67,7 @@ val GlyphPress = ControlMetrics.Press
  * took two sizes were one job with two answers (owner decision, 11.5).
  *
  * The circle carries a test tag, because it is the shape a test reads to prove
- * that two neighbours keep their air while their targets touch.
+ * that two neighbors keep their air while their targets touch.
  */
 @Composable
 fun GlyphButton(

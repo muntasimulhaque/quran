@@ -6,7 +6,7 @@ import org.junit.Test
 /**
  * The wash scale is an order, not four numbers: a door is the quietest fill, a
  * button above it, and a control's chosen step above that. A session that moves
- * one value past its neighbour changes what a reader sees without touching a
+ * one value past its neighbor changes what a reader sees without touching a
  * screen, and this is where that is caught.
  *
  * The two grounds are not on the scale: the chosen thing wears
