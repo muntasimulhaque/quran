@@ -210,7 +210,7 @@ instrumented class was run; the color change is held by `ContrastTest`,
 `SwitchContrastTest`, `WashTest`, `TajweedPaletteTest`, and
 `TajweedColorVisionTest`, all green. The three store sets were recaptured on
 the three AVDs and committed. The Bangla leg was skipped, because no Bangla
-string changed. The hand-off copy in `play-store/aab/` goes once Play has it.
+string changed. The hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 20.1.** The colors were audited end to end and no tone
 moved: the warm day page, the lifted night ground, the seven tajweed
