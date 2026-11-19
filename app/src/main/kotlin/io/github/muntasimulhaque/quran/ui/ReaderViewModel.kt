@@ -1195,11 +1195,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         return bytes.takeIf { it > 0 }
     }
 
-    private suspend fun offerFor(recitation: String, ayah: Ayah, bytes: Long): ListenOffer =
-        ListenOffer(
+    private suspend fun offerFor(recitation: String, ayah: Ayah, bytes: Long): ListenOffer {
+        // The name is the catalog's, not the timing pack's own row: the
+        // content names the voice in full ("Mishari Rashid al-Afasy,
+        // murattal"), and the reader has always been offered the short name
+        // the catalog carries. The row's name is the answer only when the
+        // catalog has no pack for this voice (owner decision, 20.2).
+        val pack = library.pack(ContentDatabase.reciterPack(recitation))
+        return ListenOffer(
             reciter = recitation,
-            reciterName = library.recitations.firstOrNull { it.id == recitation }?.name ?: recitation,
-            reciterNameBn = library.pack(ContentDatabase.reciterPack(recitation))?.nameBn.orEmpty(),
+            reciterName = pack?.name
+                ?: library.recitations.firstOrNull { it.id == recitation }?.name
+                ?: recitation,
+            reciterNameBn = pack?.nameBn.orEmpty(),
             surah = ayah.surah,
             surahName = library.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
                 ?: getApplication<Application>().getString(R.string.surah_fallback_name, ayah.surah),
@@ -1213,6 +1221,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // decision, 16.2).
             options = listenOptions(ayah.surah),
         )
+    }
 
     /** What one reciter would still need for one surah, in bytes. */
     private suspend fun listenBytes(recitation: String, surah: Int): Long {
@@ -1229,11 +1238,15 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /** Every reciter, with what it would still need for one surah. */
     private suspend fun listenOptions(surah: Int): List<ListenOption> =
         library.recitations.map { reciter ->
+            // The catalog's short name, with the timing pack's own full one
+            // as the answer when the catalog has no pack for this voice; the
+            // Bangla name is the catalog's second name (owner decision, 20.2).
+            val pack = library.pack(ContentDatabase.reciterPack(reciter.id))
             ListenOption(
                 reciter = reciter.id,
-                name = reciter.name,
+                name = pack?.name ?: reciter.name,
                 bytes = listenBytes(reciter.id, surah),
-                nameBn = library.pack(ContentDatabase.reciterPack(reciter.id))?.nameBn.orEmpty(),
+                nameBn = pack?.nameBn.orEmpty(),
             )
         }
 
