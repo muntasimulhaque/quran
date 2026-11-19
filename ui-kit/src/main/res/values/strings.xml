@@ -8,7 +8,7 @@
 <resources>
     <!-- The size units a reader meets beside a download or a pack. The digits
          beside them already follow the interface's own language, and the unit
-         is a word of that language too (owner decision, this session). -->
+         is a word of that language too (owner decision, 8.7). -->
     <string name="unit_kb">KB</string>
     <string name="unit_mb">MB</string>
     <!-- The one word a removal's Snackbar offers back. It lives here because

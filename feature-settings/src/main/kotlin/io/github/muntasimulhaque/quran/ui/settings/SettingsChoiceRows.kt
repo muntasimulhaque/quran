@@ -64,7 +64,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * the row does not change its grammar with its file. It used to be a bare word
  * at the sheet's edge, well outside the page's word line, while Remove sat on
  * the choice row's rail; the eye read two kinds of action in one list (owner
- * report, an earlier session). Remove still deletes the pack and
+ * report, 17.6). Remove still deletes the pack and
  * clears the reader's choice: the row then draws the off ring, not a blank
  * column, and the page's switch says there is no translation. A chosen pack
  * whose file disappears outside the app keeps its check, because the choice is

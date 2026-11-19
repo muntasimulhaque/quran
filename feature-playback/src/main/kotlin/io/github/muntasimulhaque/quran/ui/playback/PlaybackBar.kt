@@ -68,16 +68,16 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * **The playing words are one block, one door, and two lines.** The voice and
  * its pace stand over the place and its key, in the transfer's own lockup: a
  * name over a state, at the transfer's 2 dp inset. One line cannot hold the
- * four facts at the top step in either language, and the lockup pays nothing for the
- * second line because the block is as wide as its wider line, not the sum of
- * both: one line of the four facts is 247 dp in Bangla at the default type,
- * where 236 are there. The panel it opens is one panel: the voices, the pace,
- * and what happens at the end of the audio. The order is the offer's own grammar, who
- * is reading before where, and now it is the reading order of a lockup too.
- * The voices that are not a recitation keep one line, the name beside the
- * state's sentence, and their name opens the voice list alone, because the
- * pace and the end answer a recitation that is not there
- * (owner decision, 17.0).
+ * four facts at the top step in either language, and the lockup pays nothing
+ * for the second line because the block is as wide as its wider line, not the
+ * sum of both: one line of the four facts is 247 dp in Bangla at the default
+ * type, where 236 are there. The panel it opens is one panel: the voices, the
+ * pace, and what happens at the end of the audio. The order is the offer's own
+ * grammar, who is reading before where, and now it is the reading order of a
+ * lockup too. The voices that are not a recitation keep one line, the name
+ * beside the state's sentence, and their name opens the voice list alone,
+ * because the pace and the end answer a recitation that is not there (owner
+ * decision, 17.0).
  *
  * **The capsule is one measure, and it never changes it** (owner decision,
  * 9.7). Its width used to follow its words: about 285 dp at the
@@ -111,14 +111,14 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * also says what happens at the end.
  *
  * **Nothing touches.** The playing words keep [PillEndAir] at the leading end,
- * because a capsule's end is a sphere, and the transport keeps [PillAir] at the
- * trailing end; between them, the words' block takes its own room and the
+ * because a capsule's end is a sphere, and the transport keeps [PillAir] at
+ * the trailing end; between them, the words' block takes its own room and the
  * answer's circle keeps [GlyphLead] of target air, which is [WordsGap] between
- * the shapes the reader sees. On the one-row
- * voices the words keep [PillEndAir] at their own end, the answer keeps
- * [PillAir] at its end, and [WordsGap] stands between the two. On the
- * unavailable pill, which is words alone, both ends keep [PillEndAir], so
- * the sentence is held as the name is (owner decision, 17.0).
+ * the shapes the reader sees. On the one-row voices the words keep
+ * [PillEndAir] at their own end, the answer keeps [PillAir] at its end, and
+ * [WordsGap] stands between the two. On the unavailable pill, which is words
+ * alone, both ends keep [PillEndAir], so the sentence is held as the name is
+ * (owner decision, 17.0).
  *
  * The pill is also where its popup hangs. A menu takes the shape of the anchor
  * it is given, and an anchor on the word the reader touched stood the reciter
@@ -155,7 +155,7 @@ fun PlaybackBar(
     /**
      * The reader's own way out of a recitation. It has no shape on the glass:
      * it is the action TalkBack offers on Play or pause, where the close used
-     * to stand (owner decision, an earlier session).
+     * to stand (owner decision, 19.6).
      */
     onStop: () -> Unit,
     /** The one X the app keeps: abort a package on its way. */
@@ -348,8 +348,7 @@ fun PlaybackBar(
                             // The first circle keeps [WordsGap] from the words'
                             // own shape: a glyph answer draws its circle
                             // [TransportInset] inside its target, so its lead
-                            // gives that inset back
-                            // (owner decision, 17.0).
+                            // gives that inset back (owner decision, 17.0).
                             Spacer(Modifier.width(GlyphLead))
                             PillControls(controls)
                         }

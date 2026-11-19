@@ -218,7 +218,7 @@ private fun PlaceRow(
                     // A place's name is the row's name, and every other
                     // row's name is the theme's own ink; the accent here
                     // read as a link or a selection the row does not have
-                    // (owner decision, the theme and consistency session).
+                    // (owner decision, 7.6).
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

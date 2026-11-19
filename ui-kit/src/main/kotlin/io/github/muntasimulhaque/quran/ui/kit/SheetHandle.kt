@@ -28,8 +28,7 @@ import androidx.compose.ui.unit.dp
  * out. A screen reader therefore hears the sheet's pane title and its first
  * row, not a "Drag handle" that answers nothing. The drawing is cleared from
  * the accessibility tree, while the touch target still drags because
- * Material's draggable belongs to the whole sheet (owner decision, this
- * session).
+ * Material's draggable belongs to the whole sheet (owner decision, 13.8).
  */
 @Composable
 fun SheetHandle(modifier: Modifier = Modifier) {

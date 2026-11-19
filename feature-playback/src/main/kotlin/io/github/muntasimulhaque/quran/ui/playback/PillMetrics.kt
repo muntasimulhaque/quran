@@ -108,7 +108,7 @@ internal val PillEndAir = Space.Block + Space.Tight
  * [GlyphLead] because its first answer is a circle inside its target.
  *
  * They are two standalone shapes rather than one cluster, so this is the
- * app's `Space.Row` (owner decision, the theme and consistency session).
+ * app's `Space.Row` (owner decision, 9.5).
  *
  * It is measured between the shapes the reader sees, never between the
  * invisible targets, which is the app's own rule for a side-by-side gap. A
@@ -133,8 +133,8 @@ internal val TransportSize = GlyphTarget
  *
  * The glyph inside the circle is the control's own mark, 24 dp, so the press
  * is not the mark and the mark is not the press: a mark that filled its target
- * would flash a dot inside the button the finger hit (owner report, an earlier
- * session), and a circle the size of the target cannot stand beside another
+ * would flash a dot inside the button the finger hit (owner report, 11.5), and
+ * a circle the size of the target cannot stand beside another
  * circle without touching it. 40 dp inside 48 dp is the app's answer to both,
  * and it is Material's own icon button (owner decision, 11.5).
  */

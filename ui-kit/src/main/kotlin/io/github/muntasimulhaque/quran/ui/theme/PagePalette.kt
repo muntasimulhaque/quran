@@ -12,8 +12,7 @@ import androidx.compose.ui.graphics.Color
  * ground over a long read, and on paper the interface's near black is the tone
  * a label wants while a page read for an hour wants ink. The day page carries
  * [PaperReadingInk] at 12.1:1 and the night [NightInk] at 12.1:1, each one a
- * step under the word its buttons and labels wear (owner decision, the long
- * read session).
+ * step under the word its buttons and labels wear (owner decision, 17.1).
  *
  * [highlight] is the word mark on the reading's line: the word the reciter
  * is saying and the word a search arrived on. Each theme sets its own,

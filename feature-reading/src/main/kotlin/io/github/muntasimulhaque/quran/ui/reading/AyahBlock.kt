@@ -72,6 +72,7 @@ import io.github.muntasimulhaque.quran.ui.kit.translationIsNamed
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.rich.TajweedPainter
 import io.github.muntasimulhaque.quran.ui.rich.drawTajweed
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -127,7 +128,7 @@ internal fun AyahBlock(
     // ornament gold, closing the verse it belongs to. The face draws the
     // print's medallion around a run of Arabic-Indic digits, so the reading
     // appends the number alone and the medallion comes with the face (owner
-    // decision, an earlier session). Every verse closes this way now, on the
+    // decision, 19.5). Every verse closes this way now, on the
     // page that carries a translation as well as on the one that draws the
     // Quran alone: the same verse ended two ways depending on a setting, and
     // the difference was the print's own roundel (owner decision, 19.5). On
@@ -340,7 +341,7 @@ internal fun AyahBlock(
             // line: the verse's printed medallion is its number and its door,
             // and the reader's note rides the verse's first line in a rail at
             // its leading edge, so nothing stands above the verse and the
-            // page keeps its rhythm (owner decision, an earlier session).
+            // page keeps its rhythm (owner decision, 19.5).
             if (!arabicOnly) {
                 AyahDoor(
                     reference = reference,
@@ -351,18 +352,16 @@ internal fun AyahBlock(
                 )
             }
             // The roundel's own span is a key as well as the words: the
-            // reader's size change and a change of ground both reach the
-            // line only through it, and a remembered line that missed it
-            // kept the old size and the old gold
-            // (owner report, 6.6).
-            // The word the reciter is on is not a key here. Only the wash
-            // over it changes, and the wash is read in the draw below, so a
-            // word boundary redraws the line instead of rebuilding its
-            // AnnotatedString (owner decision, 19.9).
-            // The code is read by the painter, not by the layout: the line's
-            // letters are the same whether the switch is on or off, so the
-            // reader's place never moves when the colors do (owner decision,
-            // the QPC rendering audit).
+            // reader's size change and a change of ground both reach the line
+            // only through it, and a remembered line that missed it kept the
+            // old size and the old gold (owner report, 6.6). The word the
+            // reciter is on is not a key here. Only the wash over it changes,
+            // and the wash is read in the draw below, so a word boundary
+            // redraws the line instead of rebuilding its AnnotatedString
+            // (owner decision, 19.9). The code is read by the painter, not by
+            // the layout: the line's letters are the same whether the switch
+            // is on or off, so the reader's place never moves when the colors
+            // do (owner decision, the QPC rendering audit).
             val tajweed = row.ayah.tajweed
             // The line's color geometry, kept between draws: the wash moves
             // while the reciter reads and the block redraws for its own
@@ -371,7 +370,7 @@ internal fun AyahBlock(
             // A screen reader hears the portable form, not the print's
             // encoding: the same words, with the dotless base and the small
             // letters folded to what a speech engine can pronounce (owner
-            // decision, the palette session). The visible line is untouched.
+            // decision, 10.6). The visible line is untouched.
             val arabicLine = remember(
                 row.ayah.number,
                 row.ayah.ayah,
@@ -478,6 +477,15 @@ internal fun AyahBlock(
                                                 val word = row.meanings.getOrNull(index)
                                                 val meaning = word?.meaning
                                                 if (word != null && !meaning.isNullOrBlank()) {
+                                                    // The app's one haptic, on
+                                                    // purpose (owner decision,
+                                                    // 20.5): a word's sheet
+                                                    // arrives under the
+                                                    // finger, and that arrival
+                                                    // is the one touch the app
+                                                    // does not draw.
+                                                    // Everything else stays
+                                                    // silent.
                                                     haptics.performHapticFeedback(
                                                         HapticFeedbackType.LongPress,
                                                     )
@@ -519,12 +527,12 @@ internal fun AyahBlock(
                                 return@drawWithContent
                             }
                             // The page has one word wash: the word a search
-                            // arrived on and the word the reciter is saying are
-                            // both a place on the Quran's own line, and the seven
-                            // rule colors have to stay readable on it. The
-                            // selected ayah is a ground of its own, so the word
-                            // wash is not laid over it
-                            // (owner decision, 15.9).
+                            // arrived on and the word the reciter is saying
+                            // are both a place on the Quran's own line, and
+                            // the seven rule colors have to stay readable on
+                            // it. The selected ayah is a ground of its own, so
+                            // the word wash is not laid over it (owner
+                            // decision, 15.9).
                             if (!isSelected) {
                                 arabicLine.matchRanges.forEach { range ->
                                     drawWordWash(layout, range, palette.highlight)
@@ -538,11 +546,11 @@ internal fun AyahBlock(
                             }
                             drawContent()
                             // The colors are painted from the geometry the
-                            // block already has in hand, not from a fresh
-                            // walk of every character: the wash above moves
-                            // while the reciter reads, and each of those
-                            // redraws used to rebuild the whole line's boxes
-                            // (owner decision, 19.8).
+                            // block already has in hand, not from a fresh walk
+                            // of every character: the wash above moves while
+                            // the reciter reads, and each of those redraws
+                            // used to rebuild the whole line's boxes (owner
+                            // decision, 19.8).
                             if (metrics.tajweed) {
                                 val paint = tajweedPainter.paint(
                                     layout,
@@ -565,8 +573,7 @@ internal fun AyahBlock(
                     // The name is read when more than one translation is drawn,
                     // and whenever the column is not in the reader's own
                     // language: a line of another language never stands
-                    // unannounced under the ayah
-                    // (owner decision, 15.3).
+                    // unannounced under the ayah (owner decision, 15.3).
                     if (
                         translationIsNamed(
                             row.translations.size,
@@ -580,9 +587,8 @@ internal fun AyahBlock(
                             // The pack's name is read, so it keeps the theme's
                             // own secondary tone. The 0.75 alpha it wore
                             // measured 3.3:1, under the 4.5:1 rule the search
-                            // and the ayah card already closed this same
-                            // label with (owner decision, the theme and
-                            // consistency session).
+                            // and the ayah card already closed this same label
+                            // with (owner decision, 7.6).
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = Space.Block),
                         )
@@ -596,8 +602,8 @@ internal fun AyahBlock(
                     // above it was never selectable, so the feature copied
                     // the English or the Bangla sentence and never the
                     // verse; the Share action is the one door that leaves
-                    // the app with the whole verse, Arabic included
-                    // (owner decision, 19.8).
+                    // the app with the whole verse, Arabic included (owner
+                    // decision, 19.8).
                     TranslationBody(
                         runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
                         modifier = Modifier.padding(
@@ -729,7 +735,7 @@ private fun arabic(
         withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
         // The medallion's own span, handed up so the reading can make it the
         // ayah's door on a page that carries no reference line (owner
-        // decision, an earlier session).
+        // decision, 19.5).
         ornamentRange = start until length
     }
     return ArabicLine(
@@ -793,7 +799,7 @@ private fun PointerInputScope.ornamentTarget(
     range: IntRange,
 ): Rect {
     val box = ornamentBox(layout, range)
-    val side = 48.dp.toPx()
+    val side = ControlMetrics.Target.toPx()
     val padX = ((side - box.width) / 2f).coerceAtLeast(0f)
     val padY = ((side - box.height) / 2f).coerceAtLeast(0f)
     return Rect(

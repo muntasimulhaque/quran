@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
  *
  * The reminder's whole purpose is to bring the reader to the words, so the
  * jump lands on the day's ayah, where the translation and the meanings are
- * open around it (owner decision, thirty-first session).
+ * open around it (owner decision, 5.4).
  */
 @RunWith(AndroidJUnit4::class)
 class DailyAyahJumpTest {

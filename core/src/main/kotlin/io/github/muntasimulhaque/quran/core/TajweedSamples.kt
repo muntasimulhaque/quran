@@ -3,7 +3,7 @@ package io.github.muntasimulhaque.quran.core
 /**
  * One word for each family, cut out of an ayah that carries all seven, so the
  * settings legend can show a color on a real word at the reading's own size
- * instead of on a dot (owner decision, the legend session).
+ * instead of on a dot (owner decision, 10.9).
  *
  * The word keeps its own characters and its own code, so the reading's own
  * painter draws the sample exactly the way it draws the page: the rule's

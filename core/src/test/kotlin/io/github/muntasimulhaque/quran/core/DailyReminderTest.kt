@@ -14,8 +14,7 @@ import java.util.TimeZone
  * windowed one instead: the trigger is the reader's minute to the second, and
  * the window is a minute. The JVM suite pins both halves here, where a test
  * can be exact, because the alternative was a reader being told they had set
- * an hour and the shade answering two minutes later (owner report, 37th
- * session).
+ * an hour and the shade answering two minutes later (owner report, 2.9).
  */
 class DailyReminderTest {
 

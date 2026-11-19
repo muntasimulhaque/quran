@@ -85,8 +85,7 @@ class SurahSearchTest {
                     .fetchSemanticsNodes().isNotEmpty()
             }
             // The meta line is the part the crash took down: the place first,
-            // the count second, as the row draws it (owner decision, the theme
-            // and consistency session).
+            // the count second, as the row draws it (owner decision, 8.6).
             rule.waitUntil(timeoutMillis = 60_000) {
                 rule.onAllNodesWithText("110", substring = true)
                     .fetchSemanticsNodes().isNotEmpty()

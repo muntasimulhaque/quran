@@ -87,8 +87,7 @@ internal data class DailyAyahContent(
                     // The reminder is drawn by the system's notification font,
                     // never the Hafs face, so it takes the portable form: the
                     // print's kashida and small letters would be drawn by a
-                    // face that was not set for them (owner decision, the
-                    // palette session).
+                    // face that was not set for them (owner decision, 10.6).
                     arabic = Arabic.portableText(ayah.text),
                     translation = firstTranslation(
                         database = database,

@@ -35,8 +35,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  * answers for the app, and a channel the reader turned off in the phone's own
  * page answers nothing to it: the app-level switch stays on while the one
  * notification the app ever posts never appears. A reader who did that was
- * told nothing, and the reminder looked broken (owner report, 37th
- * session), so the channel's own importance is read too and a channel that
+ * told nothing, and the reminder looked broken (owner report, 4.0), so the
+ * channel's own importance is read too and a channel that
  * does not exist yet is not a block, since the app creates it at its first
  * launch.
  *

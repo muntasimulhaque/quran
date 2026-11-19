@@ -54,8 +54,7 @@ object RecitationPlaylist {
      * automatic advance at every ayah boundary. The one advance that ends a
      * surah is the one that arrives in another surah: reading the advance
      * alone made every ayah's end look like the surah's end, which restarted
-     * the surah at ayah 1 and then looped that ayah forever (owner report, an
-     * earlier session).
+     * the surah at ayah 1 and then looped that ayah forever (owner report, 11.9).
      *
      * This answers only whether the boundary was crossed. What the boundary
      * then does is the reader's own answer, [EndOfAudio.surahEnding], read at

@@ -201,8 +201,7 @@ class AppPopupPositionTest {
         // A door in the middle of a landscape phone: the menu is taller than
         // either side's ground. It stands beside the door on the side with the
         // room, centered on the door, and every row stays on the glass, so the
-        // number the reader tapped is never covered (owner decision, this
-        // session).
+        // number the reader tapped is never covered (owner decision, 13.9).
         val anchor = IntRect(left = 84, top = 440, right = 260, bottom = 546)
         val window = 960
         val status = 72

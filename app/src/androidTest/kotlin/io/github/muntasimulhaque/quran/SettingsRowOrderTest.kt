@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
  * arrived after the other three and landed between the meanings and the
  * translation, so the group broke in the middle and the one row that draws
  * the Quran's own line was filed with the two that add prose under it (owner
- * decision, the reading switches session). The order is measured here so a
+ * decision, 11.4). The order is measured here so a
  * later row edit cannot quietly split the group again.
  *
  * Three of the four are switches and the last is a list, since the tafsir is

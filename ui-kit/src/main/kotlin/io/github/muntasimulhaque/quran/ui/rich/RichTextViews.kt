@@ -74,8 +74,7 @@ fun TranslationBody(
     /**
      * The ink of the words. The reading's own ink is the default; a surface
      * drawn on a ground of its own, such as the share card's paper, passes
-     * the ink of that ground instead (owner report, the audio and type audit
-     * session).
+     * the ink of that ground instead (owner report, 5.9).
      */
     color: Color = LocalPagePalette.current.ink,
 ) {
@@ -163,8 +162,8 @@ private const val MarkerShare = 11f / 16f
 /**
  * The floor under a footnote marker's size. The marker is set at a share of
  * the body it annotates, so at the smallest translation step the share is
- * about 9 sp: a figure too small to read and too thin to tap (owner
- * decision, forty-seventh session). Ten is the smallest that still reads
+ * about 9 sp: a figure too small to read and too thin to tap (owner decision,
+ * 14.0). Ten is the smallest that still reads
  * as a number, holds its own above the line, and gives the finger room.
  */
 private const val MarkerFloor = 10f
@@ -334,7 +333,7 @@ private fun annotated(
     // color, the same ink the reciter's name, the chevrons, and the note's
     // own sheet title wear: at a share of the body's size and in the body's
     // own tone it read as a smaller word and not as something to touch
-    // (owner decision, forty-seventh session). The accent clears the 4.5:1
+    // (owner decision, 4.3). The accent clears the 4.5:1
     // the small figure needs on every ground: 8.1:1 on paper and
     // 8.5:1 on night.
     val markerColor = MaterialTheme.colorScheme.primary
@@ -350,9 +349,9 @@ private fun annotated(
                 val style = SpanStyle(
                     // The marker is a door to the note; it wears the action
                     // color rather than the 0.75 alpha that measured 3.7:1 on
-                    // paper, and rather than the reading's own
-                    // secondary tone, which the sentence around it wears
-                    // (owner decision, forty-seventh session).
+                    // paper, and rather than the reading's own secondary tone,
+                    // which the sentence around it wears (owner decision,
+                    // 4.3).
                     color = markerColor,
                     fontWeight = FontWeight.Medium,
                     fontSize = markerSize,

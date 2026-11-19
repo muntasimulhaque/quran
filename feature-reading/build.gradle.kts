@@ -40,7 +40,7 @@ dependencies {
     implementation(libs.androidx.material3)
     // The sheet's places page steps back to the word on the phone's own Back.
     // The sheet is its own window, so the handler has to live inside it, as
-    // the settings sheet's page does (owner decision, this session).
+    // the settings sheet's page does (owner decision, 18.9).
     implementation(libs.androidx.activity.compose)
 }
 

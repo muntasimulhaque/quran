@@ -33,7 +33,7 @@ private val AyahMenuMeasure = 216.dp
  * row's rail to the dp (owner decision, 13.6).
  *
  * The order is the reader's intent, not the control's kind (owner decision,
- * forty-sixth session). The two reasons to open an ayah's actions lead: hear
+ * 13.2). The two reasons to open an ayah's actions lead: hear
  * it (Play) and understand it (Tafsir), the deep door this reading is built
  * around. Then the two that keep the ayah, Save before Note, because the keep
  * is the lighter tap and the note is the writing. Share stands last: it is

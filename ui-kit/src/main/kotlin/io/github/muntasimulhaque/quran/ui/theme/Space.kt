@@ -82,7 +82,7 @@ object Space {
      * seven inch tablet standing up, so a line runs as far as its paper
      * allows. A glass wider than a page keeps this much air inside the page
      * and puts the rest of its width outside it, and that half of the rule
-     * belongs to [Measure] (owner decision, an earlier session).
+     * belongs to [Measure] (owner decision, 17.6).
      *
      * It was 28, and 28 was a page's own air rather than the app's: the
      * platform's own compact margin is 16, so every phone ran 12 dp inside

@@ -8,8 +8,8 @@ import io.github.muntasimulhaque.quran.core.RecitationPlaylist
  * The media id carries the ayah's running number, which is the content
  * database's key and the reading's place, and the pill draws the verse's own
  * "16:28" instead. Those are two different fields: 16:28 is running 1929, and
- * a pill that printed the running number read 16:1929 (owner report, this
- * session). The ayah's own number is passed in from the item's ayah and the
+ * a pill that printed the running number read 16:1929 (owner report, 19.2). The
+ * ayah's own number is passed in from the item's ayah and the
  * key is built here, where one JVM test holds it.
  */
 internal data class PlayingPlace(

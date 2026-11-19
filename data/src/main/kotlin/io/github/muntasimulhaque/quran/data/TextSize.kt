@@ -123,7 +123,7 @@ object TextSize {
      * 0.8 of the
      * Arabic in the translation and 1.5 of the tafsir prose in the tafsir,
      * which landed on the same number at the default and hid the fact that
-     * they were two (owner decision, the theme and consistency session).
+     * they were two (owner decision, 14.0).
      */
     fun inlineArabic(step: Float): Float = sp(TypeRole.Arabic, step) * INLINE_ARABIC_RATIO
 
@@ -160,8 +160,7 @@ object TextSize {
         // 2.0, the Quran Foundation's own leading for the QPC Hafs face in its
         // font guide. At 31.2 the app carried 1.9, measured against the marks;
         // with the base at 26 the official 2.0 gives the marks their room and
-        // matches the field the app was compared with
-        // (owner decision, 13.3).
+        // matches the field the app was compared with (owner decision, 13.3).
         TypeRole.Arabic -> 2f
         else -> LATIN_PROSE_RATIO
     }

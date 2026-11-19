@@ -18,7 +18,7 @@ import io.github.muntasimulhaque.quran.ui.kit.contentPackName
  * the pill and the page draw the same control and a screen reader hears the
  * chosen row as the chosen one; every other row says what that reciter would
  * still need for the surah at hand, so the choice is made with the price in
- * view rather than by trying it (owner decision, forty-eighth session).
+ * view rather than by trying it (owner decision, 16.1).
  *
  * The download offer carries this list too, in its own popup: its line is a
  * 48 dp door, and a reader who is about to spend a megabyte can choose the

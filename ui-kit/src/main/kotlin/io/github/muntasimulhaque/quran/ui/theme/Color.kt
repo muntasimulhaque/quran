@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 // (#F8F1E3) without their density. The page keeps the light it had, and the
 // reading's own ink steps under the interface's word below, so the pair that
 // carries an hour of reading is a 95 percent page and a 12:1 ink rather than
-// the 14.3:1 a label needs (owner decision, the long read session).
+// the 14.3:1 a label needs (owner decision, 17.1).
 val PaperBackground = Color(0xFFFBF9F4)
 val PaperSurface = Color(0xFFFFFFFF)
 /** The hairline and the tint of a control that floats over the reading. */
@@ -30,9 +30,8 @@ val PaperInk = Color(0xFF2A2620)
  * it is made for glare, since the same 14.3:1 against a 95 percent ground is
  * the harshest pair the app owns. At 12.1:1 on the page, 12.7:1 on a sheet,
  * and 9.8:1 on the word mark, the page reads as ink rather than as a laser and
- * the rule colors keep every floor they owe (owner decision, the long read
- * session). A label, a value, a button, and a sheet's own word keep
- * [PaperInk].
+ * the rule colors keep every floor they owe (owner decision, 17.1). A label, a
+ * value, a button, and a sheet's own word keep [PaperInk].
  */
 val PaperReadingInk = Color(0xFF37322A)
 val PaperMuted = Color(0xFF5E594F)
@@ -87,15 +86,14 @@ val LapisLight = Color(0xFF95C0EA)
 // drawn on: 6.0:1 on the day page and 8.4:1 on the night page. The night gold
 // is the light honey this page needs: the first #C09A50 measured APCA -50 on
 // the night ground, the one ornament tone under the small-text floor the rest
-// of the night voice already held (owner decision, the theme and consistency
-// session).
+// of the night voice already held (owner decision, 16.4).
 val Gold = Color(0xFF7A5A12)
 
 // The one shadow the app casts, black at ten percent, where the platform's
 // own cast from a theme is a nineteen percent spot and a four percent
 // ambient. The floating tone is the lift and the shadow only anchors it, so
 // a Quran line under a control keeps its contrast and no edge of the screen
-// wears a darker cast than another (owner decision, forty-ninth session).
+// wears a darker cast than another (owner decision, 4.7).
 val FloatingShadow = Color(0x1A000000)
 
 // The switch's own two tones that are not already a word's tone: the ground a
@@ -110,7 +108,7 @@ val FloatingShadow = Color(0x1A000000)
 // something else: the off knob was `outline`, which is the hairline every
 // divider in the app wears, and on the night ground it measured 1.03:1
 // against its own track, so an off switch had no knob in it at all (owner
-// report, forty-sixth session). See `Switch.kt` for the whole control.
+// report, 4.0). See `Switch.kt` for the whole control.
 //
 // [PaperControl] is the switch's track, and it is measured against the sheet
 // the switch stands on: 4.8 L* and 1.13:1 from [PaperSurface]. It stays the

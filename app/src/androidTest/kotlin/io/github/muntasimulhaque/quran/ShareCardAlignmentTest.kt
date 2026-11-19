@@ -24,8 +24,7 @@ import org.junit.runner.RunWith
  * is what the reading itself does: the ayah stands at the right, because
  * Arabic is read from the right; its translation begins at the start, because
  * English and Bangla are read from the left; and the card's labels, which
- * belong to neither body, stand on the center (owner decision, this
- * session).
+ * belong to neither body, stand on the center (owner decision, 12.5).
  *
  * The test reads the laid-out lines, not the source, so a change of alignment
  * in the card or in the paragraph it hands its runs fails here.

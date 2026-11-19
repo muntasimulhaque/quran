@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
  * "Arabic 25, translation 14"), and a row with a switch printed the same gray
  * line under its name ("Saheeh International", "Ibn Kathir"), so one list
  * read as two grammars and the eye had to change its reading half way down
- * (owner report, the forty-fourth session).
+ * (owner report, 3.4).
  *
  * Below is where it belongs, for reasons that are about the reading and not
  * about taste:
@@ -56,8 +56,8 @@ internal fun RowName(
             text = title,
             // A row's name: the interface's own voice at Medium, one weight
             // above the value under it and the same size as the body, so a
-            // list reads as names with facts under them
-            // (owner decision, 13.3).
+            // list reads as names with facts under them (owner decision,
+            // 13.3).
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 2,

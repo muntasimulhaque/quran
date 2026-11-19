@@ -13,7 +13,7 @@
       on the page the reader last chose. There is no per-reader starting
       window on Android: postSplashScreenTheme is a static manifest theme
       too, and windowDisablePreview would trade this for a black flash for
-      every reader (owner decision, this session).
+      every reader (owner decision, 5.6).
 
       The base carries every item the app draws with, and the qualified
       copies under values-v29 and values-night-v29 add the one attribute the

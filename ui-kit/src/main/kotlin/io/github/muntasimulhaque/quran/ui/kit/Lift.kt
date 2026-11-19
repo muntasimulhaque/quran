@@ -29,7 +29,7 @@ import io.github.muntasimulhaque.quran.ui.theme.FloatingShadow
  * line under the pill keeps its contrast and the page keeps its quiet. Ten
  * dp of blur with two dp of drop is the softest edge that still reads as a
  * lift at ten percent black, about a third of the black the platform's own
- * edge carried (owner decision, forty-ninth session).
+ * edge carried (owner decision, 4.7).
  *
  * The blur stays inside the 8 dp a popup's own window sets aside for a
  * child's shadow (Compose's `PopupLayout.maxSupportedElevation`), so a menu

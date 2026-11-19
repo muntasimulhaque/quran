@@ -235,7 +235,7 @@ object Arabic {
      * the madda, the superscript alef, and the hamzas, because those are the
      * pronunciation. This is not an edit of the text: the reading's bytes
      * are untouched, and every drop is a format or annotation character,
-     * never a letter or a vowel (owner decision, the palette session).
+     * never a letter or a vowel (owner decision, 10.6).
      */
     fun portableText(input: String): String {
         val nfc = Normalizer.normalize(input, Normalizer.Form.NFC)

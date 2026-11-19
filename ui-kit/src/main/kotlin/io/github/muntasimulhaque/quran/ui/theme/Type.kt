@@ -576,10 +576,9 @@ internal fun quranTypography(scale: Float): Typography {
             tabular = true,
             trackingSp = 0.4f,
         ),
-        // The value: a row's own line under its name, 13 at Regular, the
-        // same size as a source line. A name and its value are told apart by
-        // weight and tone, not by a footnote's size
-        // (owner decision, 13.3).
+        // The value: a row's own line under its name, 13 at Regular, the same
+        // size as a source line. A name and its value are told apart by weight
+        // and tone, not by a footnote's size (owner decision, 13.3).
         //
         // The M3 slot names are read by job here, not by M3's baseline sizes:
         // this app's value is 13 and its group label is 12, so a stock
@@ -603,9 +602,8 @@ internal fun quranTypography(scale: Float): Typography {
  * The size comes from `titleMedium`, the Book's named style, so the family
  * and the script's line ratio follow the reader's language: Literata on a
  * 1.3 line, Noto Serif Bengali on its 1.6. The one point off the page's
- * Book name is the difference between a row and a page, and the face is
- * what still says the name belongs to the Book
- * (owner decision, 13.9).
+ * Book name is the difference between a row and a page, and the face is what
+ * still says the name belongs to the Book (owner decision, 13.9).
  */
 @Composable
 fun bookRowName(): TextStyle {
@@ -623,7 +621,7 @@ fun bookRowName(): TextStyle {
  *
  * A note is the reader's own words, so a list draws it in the reading's
  * voice at the size the reader reads at, and it follows them down as far as
- * they go (owner decision, an earlier session). It does not follow them up
+ * they go (owner decision, 18.5). It does not follow them up
  * past the default. A row's name is 15, and the top two steps reach 17.6 and
  * 19.2: the row's title would become its smallest line, and the place the
  * reader is looking for would read as a caption under the note (owner

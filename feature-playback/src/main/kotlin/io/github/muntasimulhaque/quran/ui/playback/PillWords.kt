@@ -272,8 +272,7 @@ internal fun PlayingWordsBlock(
                         text = price,
                         // The offer's size is the voice's own value, drawn
                         // after the name and its dot, so the voice gives way
-                        // and the size never does
-                        // (owner report, 18.5).
+                        // and the size never does (owner report, 18.5).
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -423,13 +422,12 @@ internal fun PlaybackWordsLine(
  * being heard (owner report).
  *
  * The door carries the app's 48 dp target around its own line, so the thin
- * strip of type and its chevron are not the whole of what a finger has to
- * hit, while the pill the eye sees is the line plus the app's own chip inset
- * and never the target (owner decision, the theme and consistency session:
- * with the clip outside the target, the press highlight read as a 48 dp
- * capsule over a 16 dp word). The transport is what carries a second row, so
- * there is no seam here for a smaller flash to carry, and the flash is the
- * shape the finger hits.
+ * strip of type and its chevron are not the whole of what a finger has to hit,
+ * while the pill the eye sees is the line plus the app's own chip inset and
+ * never the target (owner decision, 9.5: with the clip outside the target, the
+ * press highlight read as a 48 dp capsule over a 16 dp word). The transport is
+ * what carries a second row, so there is no seam here for a smaller flash to
+ * carry, and the flash is the shape the finger hits.
  *
  * Null where the voice cannot be chosen now, which is while a package is on
  * its way: the chevron is gone rather than a door that does nothing.

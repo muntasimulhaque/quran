@@ -140,9 +140,9 @@ fun DailyPage(
                 // under them (owner decision, 13.3).
                 style = MaterialTheme.typography.bodyMedium,
                 // The same ink as the exact-time line below: both are state
-                // lines of the same shape, and the one the page calls the
-                // same shape of truth must not be the loud one (owner
-                // decision, the theme and consistency session).
+                // lines of the same shape, and the one the page calls the same
+                // shape of truth must not be the loud one (owner decision,
+                // 7.6).
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )

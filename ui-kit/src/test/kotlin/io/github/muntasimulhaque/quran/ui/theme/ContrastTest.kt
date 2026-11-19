@@ -20,7 +20,7 @@ import org.junit.Test
  * The search result's matched line is the one ground the families are not
  * measured on: that line is drawn in the reading's ink and not in the rule
  * colors, because a result list is a scan surface and the match wash is not
- * a reading ground (owner decision, the palette session). The ink's own
+ * a reading ground (owner decision, 10.6). The ink's own
  * pair on that wash is measured here, so the decision stays written.
  */
 class ContrastTest {
@@ -32,7 +32,7 @@ class ContrastTest {
         // The reading's own ink, one step under the interface's word on the
         // day page as the night's is under its own: the verse, the
         // translation, and the tafsir are read for an hour, and a label is
-        // not (owner decision, the long read session).
+        // not (owner decision, 17.1).
         assertReadable(LightPage.ink, PaperBackground)
         assertReadable(LightPage.ink, PaperSurface)
         assertReadable(LightPage.ink, PaperSelected)
@@ -49,9 +49,8 @@ class ContrastTest {
         // decision, 13.8).
         assertReadable(LightScheme.onSecondaryContainer, LightScheme.secondaryContainer)
         assertReadable(LightScheme.onTertiaryContainer, LightScheme.tertiaryContainer)
-        // The error roles are the quiet voice, so a Material control that
-        // asks for one can never paint a stock red
-        // (owner decision, 13.5).
+        // The error roles are the quiet voice, so a Material control that asks
+        // for one can never paint a stock red (owner decision, 13.5).
         assertReadable(LightScheme.onError, LightScheme.error)
         assertReadable(LightScheme.onErrorContainer, LightScheme.errorContainer)
         assertReadable(PaperTajweed.silent, PaperBackground)
@@ -94,8 +93,7 @@ class ContrastTest {
         assertReadable(PaperMuted, blend(PaperInk, PaperSurface, Wash.Door))
         // A chosen search source wears the ayah door's open state: the
         // accent's ink on the accent's own tint, where the full-strength fill
-        // read as a pressed button times seven
-        // (owner decision, 15.0).
+        // read as a pressed button times seven (owner decision, 15.0).
         assertReadable(Lapis, blend(Lapis, PaperSurface, Wash.Control))
         // The two text tones outside the scheme, measured the way they are drawn:
         // the opened surah introduction at 0.78 of the reading ink, and the
@@ -108,7 +106,7 @@ class ContrastTest {
         assertReadable(blend(LightPage.mastheadInk, PaperBackground, LightPage.mastheadInk.alpha), PaperBackground)
         // The reading's copy selection, which is the page's own word mark and
         // not Material's forty percent accent: every family and the reading's
-        // ink are read on it (owner decision, the long read session).
+        // ink are read on it (owner decision, 17.1).
         val lightSelection = readingSelectionColors(LightScheme.primary, LightPage.highlight)
         assertTrue(
             "the reading selects in the page's word mark",
@@ -141,7 +139,7 @@ class ContrastTest {
      * contrast on paper, so the lightest read as the only colored words and
      * the darkest read as emphasis on the ink. The band is the decision the
      * long read session made, and it is pinned here so a later tone cannot
-     * quietly walk out of it (owner decision, the long read session).
+     * quietly walk out of it (owner decision, 17.1).
      */
     @Test
     fun readingWeightsHoldOneBand() {
@@ -260,7 +258,7 @@ class ContrastTest {
         )
         assertReadable(blend(DarkPage.mastheadInk, NightBackground, DarkPage.mastheadInk.alpha), NightBackground)
         // The night reading's copy selection, the same word mark the reciter's
-        // word wears on that ground (owner decision, the long read session).
+        // word wears on that ground (owner decision, 17.1).
         val darkSelection = readingSelectionColors(DarkScheme.primary, DarkPage.highlight)
         assertTrue(
             "the night reading selects in the page's word mark",

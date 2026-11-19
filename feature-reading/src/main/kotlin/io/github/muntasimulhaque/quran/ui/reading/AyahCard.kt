@@ -225,18 +225,17 @@ fun AyahCard(
                 // a still frame does (owner report).
                 .testTag("ayah-card"),
         ) {
-            // The card is the tafsir it was opened for: the reader tapped
-            // the ayah pill's Tafsir mark, or arrived from a tafsir hit that
-            // named the pack, so there is nothing here to hide behind a
-            // switch. The packs are the choice, and the mark that opens
-            // this card exists exactly while one of them is on the device
-            // (owner decision, 12.5).
-            // The card opens on the pack. The reader came from the ayah's
-            // Tafsir mark, so a drawn `Tafsir` head and an `Ayah 2:255` line
-            // repeated what they already knew and what the passage's title
-            // says below; the source line is the first thing the card has to
-            // say, and the passage's own title follows it
-            // (owner decision, 13.8).
+            // The card is the tafsir it was opened for: the reader tapped the
+            // ayah pill's Tafsir mark, or arrived from a tafsir hit that named
+            // the pack, so there is nothing here to hide behind a switch. The
+            // packs are the choice, and the mark that opens this card exists
+            // exactly while one of them is on the device (owner decision,
+            // 12.5). The card opens on the pack. The reader came from the
+            // ayah's Tafsir mark, so a drawn `Tafsir` head and an `Ayah 2:255`
+            // line repeated what they already knew and what the passage's
+            // title says below; the source line is the first thing the card
+            // has to say, and the passage's own title follows it (owner
+            // decision, 13.8).
             if (tafsirPacks.isEmpty()) {
                 TafsirOffer(
                     pack = tafsirOffer,
@@ -358,8 +357,7 @@ private fun DoorRow(
     ) {
         // The value is under its name, the way every row in every sheet
         // reads: it stood in a right-hand column, the one grammar the card
-        // still kept from the hub's old shape (owner decision, the theme
-        // and consistency session).
+        // still kept from the hub's old shape (owner decision, 7.6).
         Column(Modifier.weight(1f)) {
             PackNames(language = eyebrow, name = title)
             if (subtitle.isNotBlank()) {
@@ -418,14 +416,13 @@ private fun PassageArea(
  * The reference is the passage's, read from the pack that returned it, so two
  * tafsirs of one ayah can name the same span or different ones without the
  * sheet ever promising what only one of them keeps (owner decision, 13.3). It
- * is the passage's title: [TypeLadder.articleTitleSp], which is
- * 17 at the default 16 body and moves from 13.8 to 19.5 across the reader's
- * steps, capped at 19.5, so it stands above the document's own heads at every
- * step without becoming a page title on a phone. Its line is the script's
- * title leading, not the
- * face's prose box, because a one-line title is not a paragraph. It is a
- * heading to a screen reader, so a reader who cannot see the page can jump to
- * the passage instead of hearing the whole card.
+ * is the passage's title: [TypeLadder.articleTitleSp], which is 17 at the
+ * default 16 body and moves from 13.8 to 19.5 across the reader's steps,
+ * capped at 19.5, so it stands above the document's own heads at every step
+ * without becoming a page title on a phone. Its line is the script's title
+ * leading, not the face's prose box, because a one-line title is not a
+ * paragraph. It is a heading to a screen reader, so a reader who cannot see
+ * the page can jump to the passage instead of hearing the whole card.
  */
 @Composable
 private fun TafsirPanel(

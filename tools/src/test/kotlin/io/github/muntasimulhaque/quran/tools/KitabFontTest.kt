@@ -9,12 +9,12 @@ import org.junit.Test
  * The tafsir's Arabic face is a prose face, not the Quran's Hafs face.
  *
  * Hafs is the right face for the Book itself, but its cmap sends U+060C,
- * U+061B, U+061F, U+066A to U+066C, and U+06D4 to the Arabic footnote
- * marker, so a comma drew as a dotted circle (owner report, the audio and
- * type audit session). Kitab is the body Naskh the tafsir reads in now, and
- * these are the marks a tafsir cannot lose: the prose punctuation, the
- * honorific, the ornate parentheses, and the alef with madda. A future font
- * swap that drops one of them fails here before it can reach a reader.
+ * U+061B, U+061F, U+066A to U+066C, and U+06D4 to the Arabic footnote marker,
+ * so a comma drew as a dotted circle (owner report, 14.4). Kitab is the body
+ * Naskh the tafsir reads in now, and these are the marks a tafsir cannot lose:
+ * the prose punctuation, the honorific, the ornate parentheses, and the alef
+ * with madda. A future font swap that drops one of them fails here before it
+ * can reach a reader.
  */
 class KitabFontTest {
 

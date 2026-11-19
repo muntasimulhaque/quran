@@ -13,10 +13,10 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
  * file carries the numbers [io.github.muntasimulhaque.quran.ui.glyph.Glyphs]
  * draws, on the same 24 unit square, and this table is where that is said, in
  * the app's own code rather than only in a test. The two shapes had already
- * drifted once, and nothing could see it (owner report, an earlier session).
+ * drifted once, and nothing could see it (owner report, 17.1).
  *
- * **The two skips live here and not on the pill** (owner decision, this
- * session). The pill became one row of 64 dp with one mark, because three 48 dp
+ * **The two skips live here and not on the pill** (owner decision, 17.1). The
+ * pill became one row of 64 dp with one mark, because three 48 dp
  * targets cut the place the pill never cuts, so next and previous left the
  * glass and are the actions play or pause offers to a screen reader. They are
  * still the app's own drawings, still what the notification shows, and still
@@ -42,7 +42,7 @@ internal enum class NotificationMark(
          * The mark a library command button asks for, or null when the button
          * is not one of the four transports. The mapping is the library's own
          * icon vocabulary, so a button the app does not know keeps its own
-         * drawing and its own command (owner decision, an earlier session).
+         * drawing and its own command (owner decision, 17.1).
          */
         fun of(commandIcon: Int): NotificationMark? = when (commandIcon) {
             CommandButton.ICON_PLAY -> Play

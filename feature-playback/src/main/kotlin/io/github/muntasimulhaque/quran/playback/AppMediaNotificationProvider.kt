@@ -32,7 +32,7 @@ open class AppMediaNotificationProvider(context: Context) :
 
     init {
         // The same silhouette the daily reminder wears in the status bar.
-        setSmallIcon(UiKitR.drawable.ic_daily)
+        setSmallIcon(UiKitR.drawable.ic_book_mark)
     }
 
     override fun getMediaButtons(

@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.ui.kit.AppChevron
 import io.github.muntasimulhaque.quran.ui.kit.ChevronRole
 import io.github.muntasimulhaque.quran.ui.kit.PageHead
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -114,7 +115,7 @@ internal fun RowTail(chevron: Boolean) {
     if (!chevron) return
     Box(
         modifier = Modifier
-            .width(48.dp)
+            .width(ControlMetrics.Target)
             // The slot, not the mark: a mark is centered in its slot, so the
             // slot's edges are what a row's alignment is about. The tag is on
             // a row that draws a chevron only, so a count of them is a count

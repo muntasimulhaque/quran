@@ -22,6 +22,7 @@ import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -43,7 +44,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * The size is under its name, the way every row in the sheet reads: it stood
  * in a right-hand column, the last row in the sheet that still answered a name
- * with a value beside it (owner decision, the theme and consistency session). A
+ * with a value beside it (owner decision, 18.8). A
  * size is the row's value, so it wears the caption, not a source line (owner
  * decision, 18.8).
  */
@@ -89,7 +90,7 @@ internal fun DownloadedSurahRow(
             Box(
                 modifier = Modifier
                     .padding(start = Space.Row)
-                    .height(48.dp),
+                    .height(ControlMetrics.Target),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(

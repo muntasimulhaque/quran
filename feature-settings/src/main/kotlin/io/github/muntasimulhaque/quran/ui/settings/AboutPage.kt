@@ -65,10 +65,9 @@ private const val SEPARATOR = " · "
  * tap is never dead.
  *
  * Content is verified when it is written, trusted by its length and moment
- * afterwards, and re-hashed when the library opens; a damaged pack is
- * repaired from its own row. There is no daily pass and no row for it here,
- * because a reader should never have to know the word for it (owner
- * decision, earlier session).
+ * afterwards, and re-hashed when the library opens; a damaged pack is repaired
+ * from its own row. There is no daily pass and no row for it here, because a
+ * reader should never have to know the word for it (owner decision, 13.8).
  */
 @Composable
 fun AboutPage(
@@ -95,19 +94,17 @@ fun AboutPage(
         // What is on the device is what the page names: every license is
         // honored where the reader already meets the content it covers, and
         // a catalog of packs nobody installed is a list of other people's
-        // books (owner decision, an earlier session).
+        // books (owner decision, 12.6).
         //
         // The reciters are the one kind left to their own group below, where
         // they are named and credited in the reader's own language: naming
         // them here as well printed the same two voices twice, once as raw
-        // catalog rows and once as the app's own credits (owner decision, an
-        // earlier session).
+        // catalog rows and once as the app's own credits (owner decision, 12.6).
         //
-        // The word pronunciation pack is named from the first page even
-        // before it is downloaded, because the app carries Al-Fatiha's 29
-        // words in its own assets: the voice is already on the device, and
-        // the reader who hears it is owed whose it is
-        // (owner decision, 18.6).
+        // The word pronunciation pack is named from the first page even before
+        // it is downloaded, because the app carries Al-Fatiha's 29 words in
+        // its own assets: the voice is already on the device, and the reader
+        // who hears it is owed whose it is (owner decision, 18.6).
         packs.filter {
             (it.shipped || it.installed || it.type == PackType.WordAudio) &&
                 it.type != PackType.Recitation
@@ -248,7 +245,7 @@ fun AboutPage(
  * A pack's own line in the reader's language: the catalog's Bangla line when
  * the interface is Bangla and the catalog carries one, and the English line
  * otherwise, so no pack is ever credited in a language nobody wrote for it
- * (owner decision, an earlier session).
+ * (owner decision, 12.6).
  */
 @Composable
 private fun packLine(english: String, bangla: String): String {

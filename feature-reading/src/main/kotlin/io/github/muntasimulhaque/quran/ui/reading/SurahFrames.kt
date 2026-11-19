@@ -159,8 +159,7 @@ internal fun SurahOpening(
             // Quran's own face and at the reader's own Arabic size, the same
             // as every verse below it. It wore 26 sp Amiri, a fixed hand
             // outside the reader's choice, and the opening read as two
-            // different texts stacked (owner decision, the theme and
-            // consistency session).
+            // different texts stacked (owner decision, 7.6).
             TajweedText(
                 text = AnnotatedString(line.text),
                 code = line.tajweed,
@@ -352,8 +351,7 @@ internal fun SurahEnd(
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
                     // A card that opens a surah is a door, and every door says
                     // so to TalkBack; this one answered a tap with the words
-                    // alone (owner decision, the theme and consistency
-                    // session).
+                    // alone (owner decision, 7.6).
                     .semantics { role = Role.Button }
                     .focusRing(nextPress, Radii.Tile)
                     .clickable(
@@ -391,8 +389,7 @@ internal fun SurahEnd(
                 text = stringResource(R.string.reading_end_of_quran),
                 style = MaterialTheme.typography.titleMedium,
                 // The end of the Book is a statement, not an action: the
-                // accent belongs to what answers a tap
-                // (owner decision, 13.3).
+                // accent belongs to what answers a tap (owner decision, 13.3).
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = 10.dp),
             )

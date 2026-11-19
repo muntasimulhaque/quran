@@ -196,8 +196,7 @@ class MainActivity : ComponentActivity() {
      * A reader who turned off this one reminder in the phone's own settings is
      * sent to that reminder's own page rather than to the app's, because the
      * app's page is a list they have already looked at and found on, and the
-     * reminder is the one switch in it that is off (owner report, 37th
-     * session).
+     * reminder is the one switch in it that is off (owner report, 2.9).
      */
     private fun openNotificationSettings() {
         val page = when {

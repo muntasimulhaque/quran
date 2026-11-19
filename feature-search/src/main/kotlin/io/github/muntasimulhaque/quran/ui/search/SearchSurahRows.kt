@@ -107,7 +107,7 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
             Text(
                 // The place first, the count second: the order Browse and
                 // the reading use, so one surah reads one way everywhere
-                // (owner decision, the theme and consistency session).
+                // (owner decision, 10.0).
                 text = stringResource(
                     R.string.search_surah_meta,
                     placeName(surah.revelationPlace),

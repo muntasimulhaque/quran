@@ -112,8 +112,7 @@ fun BrowseSheet(
     // The list the reader saw before the database answered the removal. The
     // sheet owns the Undo because the reading's Snackbar is behind this
     // window; a row that leaves the list while the sheet is up is one the
-    // reader can bring back without leaving it
-    // (owner decision, 14.7).
+    // reader can bring back without leaving it (owner decision, 14.7).
     var previousSaved by remember { mutableStateOf(saved) }
     LaunchedEffect(saved) {
         val old = previousSaved
@@ -286,8 +285,8 @@ fun BrowseSheet(
                 .fillMaxSize()
                 // A touch anywhere but on the sentence puts it away, and the
                 // touch still reaches the row it landed on: the reading
-                // answers its own sentence the same way
-                // (owner decision, 19.3).
+                // answers its own sentence the same way (owner decision,
+                // 19.3).
                 .putAwaySentence(sentence),
         ) {
         Column(
@@ -338,8 +337,7 @@ fun BrowseSheet(
                         .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Block),
                     // The tabs are centered where the search filters start at
                     // the left: tabs are the sheet's own navigation, and
-                    // filters apply to a list below them (owner decision,
-                    // the theme and consistency session).
+                    // filters apply to a list below them (owner decision, 7.6).
                     horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
                     verticalArrangement = Arrangement.spacedBy(chip.rowGap),
                 ) {

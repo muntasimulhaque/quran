@@ -31,8 +31,7 @@ import io.github.muntasimulhaque.quran.core.TajweedRule
  * protanopia, deuteranopia, and tritanopia (the 0.02 floor in
  * [TajweedColorVisionTest]). And the seven sit inside one narrow band of
  * contrast on the page, so a page of the Quran reads as one text in seven inks
- * rather than as a text with some words lit up (owner decision, the long read
- * session).
+ * rather than as a text with some words lit up (owner decision, 17.1).
  *
  * The earlier palette passed contrast, normal separation, and color vision
  * and still read unevenly: paper ran from 5.6:1 (ghunnah and idgham) to 9.9:1
@@ -68,7 +67,7 @@ import io.github.muntasimulhaque.quran.core.TajweedRule
  * drawn on, and holds the weight band, and all three tests keep it there. A
  * later quiet edit that collapses a pair, sinks a tone, or re-scatters the
  * weights fails on the machine rather than on a reader's eyes (owner decision,
- * the long read session).
+ * 17.1).
  */
 data class TajweedColors(
     val silent: Color,
@@ -105,10 +104,10 @@ val PaperTajweed = TajweedColors(
 
 /**
  * The night ground's seven, the same hues and the same order, on the lighter
- * tones a dark page needs. The gray is warm, the red is a soft coral, the
- * teal is a mint, and the green is a leaf; the lightness steps are what keep
- * the pairs apart when hue alone stops carrying the difference (owner
- * decision, the long read session).
+ * tones a dark page needs. The gray is warm, the red is a soft coral, the teal
+ * is a mint, and the green is a leaf; the lightness steps are what keep the
+ * pairs apart when hue alone stops carrying the difference (owner decision,
+ * 17.1).
  */
 val NightTajweed = TajweedColors(
     silent = Color(0xFFAEA9A0),

@@ -75,11 +75,11 @@ private const val SETTLE_MILLIS = 120L
 private data class SearchKey(val query: SearchQuery, val sources: SearchSources)
 
 /**
- * The source flags as seven booleans in the saved state: the chips survive
- * the window with the query they were applied to, so a rotation cannot
- * silently turn a source back on (owner decision, the theme and consistency
- * session). A saved state from before notes existed has six; the missing
- * seventh reads as on, which is the default it would have had.
+ * The source flags as seven booleans in the saved state: the chips survive the
+ * window with the query they were applied to, so a rotation cannot silently
+ * turn a source back on (owner decision, 14.7). A saved state from before
+ * notes existed has six; the missing seventh reads as on, which is the default
+ * it would have had.
  */
 private val SearchSourcesSaver: Saver<SearchSources, List<Boolean>> = Saver(
     save = {
@@ -168,8 +168,7 @@ fun SearchSheet(
     var attempt by remember { mutableStateOf(0) }
     // The source flags survive the window like the query does: a rotation
     // with a chip turned off must not silently turn it back on and change
-    // the results under the reader (owner decision, the theme and
-    // consistency session).
+    // the results under the reader (owner decision, 7.6).
     var sources by rememberSaveable(stateSaver = SearchSourcesSaver) {
         mutableStateOf(SearchSources.ALL)
     }
@@ -283,10 +282,10 @@ fun SearchSheet(
                         onInteraction()
                     },
                     // The field's own clear mark empties the query. The sheet
-                    // itself ends by its handle, the scrim, or Back, like every
-                    // other sheet; a Close beside the field was the only one of
-                    // its kind and took the field's own room
-                    // (owner decision, 9.0).
+                    // itself ends by its handle, the scrim, or Back, like
+                    // every other sheet; a Close beside the field was the only
+                    // one of its kind and took the field's own room (owner
+                    // decision, 9.0).
                     focus = focus,
                 )
                 FilterRow(

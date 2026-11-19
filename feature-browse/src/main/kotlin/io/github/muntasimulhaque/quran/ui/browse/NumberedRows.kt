@@ -254,12 +254,11 @@ internal fun JuzRow(
                 style = bookRowName(),
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            // A juz with no surah to name draws no line: an empty Text was
-            // one more line of the row's own rhythm with nothing in it
-            // (owner decision, the theme and consistency session). The line
-            // names the place the way a reader says it, the surah and the
-            // ayah inside it, rather than repeating the surah's number in a
-            // reference (owner decision, 7.9).
+            // A juz with no surah to name draws no line: an empty Text was one
+            // more line of the row's own rhythm with nothing in it (owner
+            // decision, 7.9). The line names the place the way a reader says
+            // it, the surah and the ayah inside it, rather than repeating the
+            // surah's number in a reference (owner decision, 7.9).
             if (surahName != null) {
                 Text(
                     text = stringResource(R.string.juz_starts_at, surahName, surahAyah),

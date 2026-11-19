@@ -8,8 +8,7 @@ package io.github.muntasimulhaque.quran.core
  * because a group is the unit a reader's eye can hold: the silent letters are
  * one family of three rules, the idgham one family of five. The family is
  * also what the settings legend samples, so the reader meets one word in a
- * color and the rules it covers under it (owner decision, the legend
- * session).
+ * color and the rules it covers under it (owner decision, 10.9).
  */
 enum class TajweedFamily {
     SILENT,

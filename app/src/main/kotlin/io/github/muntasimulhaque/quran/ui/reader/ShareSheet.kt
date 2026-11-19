@@ -65,7 +65,7 @@ import kotlin.math.roundToInt
  * (owner decision, 12.5).
  *
  * **The preview is the whole card, at the width the card chose, scaled to the
- * sheet** (owner report, an earlier session). The old preview kept the card
+ * sheet** (owner report, 14.2). The old preview kept the card
  * behind a 340 dp viewport and scrolled, so the reader saw the first lines and
  * a cut. The preview now measures the card and scales it down just enough to
  * fit the sheet's remaining height and width. The two doors stay below it, so
@@ -172,8 +172,7 @@ internal fun AyahShareSheet(
  * The picture is drawn at one fixed text scale, whatever the phone is set
  * to: a card is one artifact sent to everyone. The capture pins the scale and
  * the preview pins it too, or a reader whose phone is at 130% would approve a
- * card larger and taller than the one they send (owner report, an earlier
- * session).
+ * card larger and taller than the one they send (owner report, 14.2).
  */
 @Composable
 internal fun ShareCardPreview(card: ShareCard, width: Dp = ShareCardWidths.first()) {
@@ -213,7 +212,7 @@ internal fun ShareCardPreview(card: ShareCard, width: Dp = ShareCardWidths.first
  * The card is a picture of the ayah the reader just read, not a second
  * reading. A screen reader hears that the preview is here and moves to the
  * two doors; it does not hear the whole ayah again before it can choose
- * (owner decision, an earlier session).
+ * (owner decision, 14.2).
  */
 @Composable
 internal fun ShareCardPreviewBox(

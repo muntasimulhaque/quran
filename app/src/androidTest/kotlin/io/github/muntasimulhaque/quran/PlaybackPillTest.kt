@@ -110,8 +110,8 @@ import java.util.Locale
  *    end of the pill and the listening menu at the other (owner report).
  * 9. The panel's rows wear the app's own choice row: one leading mark, one
  *    16 dp gap, and one 48 dp target, the same the settings lists draw, so an
- *    answer cannot change its shape from one door to the other (owner
- *    decision, forty-eighth session). Its three sections wear the app's one
+ * answer cannot change its shape from one door to the other (owner decision,
+ * 4.6). Its three sections wear the app's one
  *    head over a list, which is small, accent, and a heading to a screen
  *    reader: a head at the size of the rows under it made the panel twelve
  *    lines of one voice, with no hierarchy for the air between them to lean on
@@ -391,7 +391,7 @@ class PlaybackPillTest {
     /**
      * The pace keeps the settings page's own place: the label is a bare line
      * at the menu's left inset, and the five paces stand centered under it
-     * (owner decision, forty-seventh session). Against the menu's left edge
+     * (owner decision, 4.3). Against the menu's left edge
      * they were 10 dp from one side and 28 from the other.
      */
     @Test
@@ -447,7 +447,7 @@ class PlaybackPillTest {
      * answers, seven rows, each with the same leading radio mark, the same
      * 16 dp gap, and the same 48 dp target the settings lists draw, so the same
      * answer cannot change its shape from one door to the other (owner
-     * decision, forty-eighth session; the gap is 16, the value `ChoiceRow` has
+     * decision, 9.5; the gap is 16, the value `ChoiceRow` has
      * always drawn, pinned here by the theme and consistency session).
      */
     @Test
@@ -470,7 +470,7 @@ class PlaybackPillTest {
      * The reciter chooser is a choice, not a button: the chosen reciter wears
      * the app's leading mark and its row is the one a screen reader reports as
      * selected, where the check beside a Role.Button said neither (owner
-     * decision, forty-eighth session). It leads the merged panel, the block's
+     * decision, 4.6). It leads the merged panel, the block's
      * first section.
      */
     @Test
@@ -594,8 +594,8 @@ class PlaybackPillTest {
     }
 
     /**
-     * The phone pill carries no close at all (owner decision, an earlier
-     * session). The stop it used to carry is the action TalkBack offers on
+     * The phone pill carries no close at all (owner decision, 9.5). The stop it
+     * used to carry is the action TalkBack offers on
      * Play or pause, and the pill draws no Stop mark anywhere.
      */
     @Test
@@ -1436,8 +1436,8 @@ class PlaybackPillTest {
      * The answer's press is the app's one round control: a 40 dp circle inside
      * the 48 dp target the finger gets, the same circle every icon button in
      * the app lights. It is not the 20 dp glyph, because an indication on the
-     * glyph flashed a dot inside the button the finger hit (owner report, an
-     * earlier session), and it is not the whole target, because the circle is
+     * glyph flashed a dot inside the button the finger hit (owner report,
+     * 17.0), and it is not the whole target, because the circle is
      * the shape the reader sees (owner decision, 17.0).
      */
     @Test
@@ -1515,9 +1515,8 @@ class PlaybackPillTest {
     @Test
     fun thePillReadsBackAPaceThatIsNotTheDefault() {
         // The panel is where the pace is set; the pill is where it is read
-        // back after the panel closes. The line leads with the voice, then
-        // the pace, then the place and its key
-        // (owner decision, 16.2).
+        // back after the panel closes. The line leads with the voice, then the
+        // pace, then the place and its key (owner decision, 16.2).
         showPill(speed = 0.75f)
         compose.onNodeWithText("Al-Baqarah").assertIsDisplayed()
         compose.onNodeWithText("0.75x", useUnmergedTree = true).assertExists()
@@ -1580,10 +1579,9 @@ class PlaybackPillTest {
             (anchor.left + anchor.right) / 2,
             // One pixel, which is the rounding the layout can do and not a
             // second center: the anchor is 288 dp centered in a capsule whose
-            // own width can be an odd number of pixels, so the two middles
-            // can land a pixel apart on a profile the ATD phone never drew
-            // (owner report, forty-seventh session). The promise is one
-            // center, not one integer.
+            // own width can be an odd number of pixels, so the two middles can
+            // land a pixel apart on a profile the ATD phone never drew (owner
+            // report, 4.3). The promise is one center, not one integer.
             1f,
         )
     }

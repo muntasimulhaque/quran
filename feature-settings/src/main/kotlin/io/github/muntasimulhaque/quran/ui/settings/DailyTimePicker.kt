@@ -160,7 +160,7 @@ private val FooterRoom = ControlMetrics.Target + Space.Block + Space.Gutter
  * It is still the small page's 16, not the 20 of a full sheet: the time is the
  * subject, and the question steps back.
  *
- * **The moment can be typed** (owner report, an earlier session). The big
+ * **The moment can be typed** (owner report, 14.2). The big
  * digits are a field pair: tapping or long pressing the hour or the minute
  * selects that value and raises the number keyboard, and the existing
  * keyboard mark at the leading end of the button row is the visible door to

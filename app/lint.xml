@@ -8,7 +8,7 @@
   releases that read it, draw a legacy icon inside their own white circle or
   squircle, where a paper card reads as the app's page. The drawing is
   `tools/icons/forge.py`'s, and rounding the tile would change the app's face
-  on the two releases that still read it (owner decision, this session).
+  on the two releases that still read it (owner decision, 12.9).
 
   The themed layer is one silhouette of the book on its stand, traced at the
   size the shape is read at. Its path is long because the book's own curves
@@ -30,8 +30,7 @@
          allowBackup="false" already refuses every backup and restore on
          Android 11 and below, which is the whole of what the legacy
          exclusions would say. The file that said it twice was deleted, and the
-         privacy page is the one place the reader is told (owner decision,
-         this session). -->
+         privacy page is the one place the reader is told (owner decision, 12.9). -->
     <issue id="DataExtractionRules">
         <ignore path="src/main/AndroidManifest.xml" />
     </issue>

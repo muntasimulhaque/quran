@@ -50,6 +50,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -84,12 +85,11 @@ internal fun SearchField(
                 // other, so the sheet's first line stands on the same line as
                 // every row under it. It was 18 while the rows were 28, which
                 // made the field the one line in the app that was wider than
-                // the page it stood on (owner decision, 17.6).
-                // The Close that used to stand beside it took the
-                // last 60 dp of the line and was the only visible dismissal of
-                // its kind in the app; the sheet closes by its handle, the
-                // scrim, and Back like every other sheet (owner decision, an
-                // earlier session).
+                // the page it stood on (owner decision, 17.6). The Close that
+                // used to stand beside it took the last 60 dp of the line and
+                // was the only visible dismissal of its kind in the app; the
+                // sheet closes by its handle, the scrim, and Back like every
+                // other sheet (owner decision, 17.6).
                 .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line, bottom = Space.Tight),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -98,8 +98,8 @@ internal fun SearchField(
                     .weight(1f)
                     // The field's own pill owes a finger the 48 dp floor every
                     // other control holds; at 47 it was the one control under it
-                    // (owner decision, the theme and consistency session).
-                    .defaultMinSize(minHeight = 48.dp)
+                    // (owner decision, 14.3).
+                    .defaultMinSize(minHeight = ControlMetrics.Target)
                     .clip(Radii.Pill)
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)),
                 verticalAlignment = Alignment.CenterVertically,
@@ -177,8 +177,9 @@ internal fun SearchField(
                                         // 0.55 alpha it wore measured 2.5:1, under the
                                         // theme's 4.5:1 rule.
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        // The field's own node already speaks the hint
-                                        // once; the drawn copy is not a second stop.
+                                        // The field's own node already speaks
+                                        // the hint once; the drawn copy is not
+                                        // a second stop.
                                         modifier = Modifier.clearAndSetSemantics { },
                                     )
                                 }
@@ -209,9 +210,6 @@ internal fun SearchField(
 /** The gap between the field's words and the clear mark that ends them. */
 private val ClearGap = 2.dp
 
-/** The drawn circle the clear mark's ripple fills inside its 48 dp target. */
-private val ClearRipple = 40.dp
-
 /**
  * The mark that empties the field: the standard door of a search. The sheet
  * itself ends by its handle, the scrim, or Back; this mark empties the query
@@ -227,7 +225,7 @@ private fun ClearFieldButton(onClick: () -> Unit) {
     val press = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
-            .size(48.dp)
+            .size(ControlMetrics.Target)
             .clickable(
                 interactionSource = press,
                 indication = null,
@@ -239,7 +237,7 @@ private fun ClearFieldButton(onClick: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .size(ClearRipple)
+                .size(ControlMetrics.Press)
                 .clip(CircleShape)
                 .focusRing(press, CircleShape)
                 .indication(press, ripple(color = MaterialTheme.colorScheme.onSurfaceVariant)),

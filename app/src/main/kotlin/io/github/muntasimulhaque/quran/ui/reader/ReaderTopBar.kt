@@ -61,7 +61,7 @@ import kotlin.math.roundToInt
  * sit between them: the bar holds the places the reader can go and the place
  * they are in. The text size is a setting, so it lives in Settings rather than
  * taking the room the juz needs; the bar is not the page's display panel
- * (owner decision, an earlier session: Aa left the bar, the folio left the
+ * (owner decision, 19.4: Aa left the bar, the folio left the
  * page, and the title is whole again on a phone).
  */
 

@@ -91,8 +91,7 @@ internal fun AyahRow(
         val wash = LocalPagePalette.current.match
         // The rule colors stay on the reading: a result list is a scan
         // surface, and the matched line's wash is not a reading ground. The
-        // result line is ink, on purpose (owner decision, the palette
-        // session).
+        // result line is ink, on purpose (owner decision, 10.6).
         when (val line = arabicLineFor(hit)) {
             SearchArabicLine.Ayah -> {
                 Spacer(Modifier.height(Space.Line))
@@ -117,11 +116,11 @@ internal fun AyahRow(
                 val joined = line.words.joinToString("  ")
                 TajweedText(
                     text = AnnotatedString(joined),
-                    // The matched words keep the line's own size: an
-                    // emphasis that enlarged them re-laid the line under the
-                    // reader while they searched. One size for both Arabic
-                    // lines, moved by the reader's own Arabic step (owner
-                    // decision, the theme and consistency session).
+                    // The matched words keep the line's own size: an emphasis
+                    // that enlarged them re-laid the line under the reader
+                    // while they searched. One size for both Arabic lines,
+                    // moved by the reader's own Arabic step (owner decision,
+                    // 13.1).
                     style = arabicStyle(
                         hafs,
                         arabicSize,
@@ -192,8 +191,7 @@ internal fun AyahRow(
                 text = stringResource(R.string.search_word_meaning_label),
                 style = MaterialTheme.typography.labelMedium,
                 // A label naming the evidence under it is not an action: the
-                // accent belongs to what answers a tap
-                // (owner decision, 13.3).
+                // accent belongs to what answers a tap (owner decision, 13.3).
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Space.Block),
             )
@@ -238,7 +236,7 @@ internal fun TafsirRow(
             style = MaterialTheme.typography.bodySmall,
             // The pack's name and the passage's span are a source line, not
             // an action: the meta voice and the secondary tone, where it wore
-            // the accent (owner decision, the theme and consistency session).
+            // the accent (owner decision, 13.3).
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(Space.Line))

@@ -13,8 +13,7 @@ import org.junit.Test
  * A popup's place on the glass cannot be read back through a compose test,
  * and a sentence's ground is the same kind of value, so the rule that decides
  * a touch is arithmetic here and the paper's place is measured where it is
- * drawn. The two halves meet in this one function (owner decision, this
- * session).
+ * drawn. The two halves meet in this one function (owner decision, 19.3).
  */
 class SentenceGivesWayTest {
 

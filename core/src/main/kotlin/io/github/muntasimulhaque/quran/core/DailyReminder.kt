@@ -12,8 +12,7 @@ import java.util.TimeZone
  * (`AlarmManager.set`), which the platform is free to deliver at any time
  * after the trigger, with no upper bound: a reader who asked for ten o'clock
  * was told they had it, and the shade lit up at ten past, and the app had
- * kept the promise in the only sense the platform allowed (owner report, 37th
- * session).
+ * kept the promise in the only sense the platform allowed (owner report, 2.9).
  *
  * A windowed alarm was tried as the answer and measured, and it is not one:
  * the platform has a floor for the window of ten minutes on Android 15, so

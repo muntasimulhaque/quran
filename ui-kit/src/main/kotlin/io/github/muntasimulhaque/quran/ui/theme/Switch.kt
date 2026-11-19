@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
  * is `outline` and the track is `surfaceContainerHighest`. On a night ground
  * those two can collapse to one paint, so the knob has no edge against the
  * track it sits in, and the ring that was supposed to draw its edge is the
- * same lump again (owner report, forty-sixth session). The paper ground only
+ * same lump again (owner report, 16.4). The paper ground only
  * read because its hairline happened to sit a few levels off white, which is
  * luck and not a choice, and it still measured under the 3:1 a control
  * boundary owes.

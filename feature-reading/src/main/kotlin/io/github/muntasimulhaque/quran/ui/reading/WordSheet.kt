@@ -127,24 +127,23 @@ import kotlinx.coroutines.withContext
  * speaker is quiet while the pack is on its way: nothing is sounding yet.
  *
  * **The entry is centered; the facts are not** (owner decision, 18.1). The
- * word the reader pressed and the one gloss this ayah gives it
- * are one subject, and a subject is centered as the reading centers a single
- * display line: the Quran's own 26 sp on its 2.0 line, trimmed to the line's
- * ink, the page ink and the tajweed colors the reader has, then the gloss in
- * the reader's language at the translation's 16 sp, 8 dp under it.
- * [Space.Section] opens every fact, because a fact is a block: its own head,
- * its own value, its own count. It was a Section for the first and a
- * [Space.Block] for the rest, and the owner's frame showed the failure: the
- * count of one fact and the label of the next stood apart by almost the same
- * air as a label and its own value, so the eye could not read where one fact
- * ended and the next began (owner decision, 18.3). The entry above
- * them is the block before the first. They are the app's facts about the
- * word, so they take the app's own shape: the page's left edge, the label at
- * [SectionHead]'s 12, the value 4 dp under it,
- * and a count where the pack carries one, 4 dp under the value. The sheet had
- * them as sentences, each label inline with a 24 sp Arabic run and a count, so
- * the root outshouted the gloss and at the largest text step a label could
- * orphan on its own line (owner report, 18.2).
+ * word the reader pressed and the one gloss this ayah gives it are one
+ * subject, and a subject is centered as the reading centers a single display
+ * line: the Quran's own 26 sp on its 2.0 line, trimmed to the line's ink, the
+ * page ink and the tajweed colors the reader has, then the gloss in the
+ * reader's language at the translation's 16 sp, 8 dp under it. [Space.Section]
+ * opens every fact, because a fact is a block: its own head, its own value,
+ * its own count. It was a Section for the first and a [Space.Block] for the
+ * rest, and the owner's frame showed the failure: the count of one fact and
+ * the label of the next stood apart by almost the same air as a label and its
+ * own value, so the eye could not read where one fact ended and the next began
+ * (owner decision, 18.3). The entry above them is the block before the first.
+ * They are the app's facts about the word, so they take the app's own shape:
+ * the page's left edge, the label at [SectionHead]'s 12, the value 4 dp under
+ * it, and a count where the pack carries one, 4 dp under the value. The sheet
+ * had them as sentences, each label inline with a 24 sp Arabic run and a
+ * count, so the root outshouted the gloss and at the largest text step a label
+ * could orphan on its own line (owner report, 18.2).
  *
  * **A fact's Arabic is 20 of the Quran's 26** (owner decision, 18.1).
  * The word is the reading's own size and the gloss the translation's; a fact
@@ -168,8 +167,7 @@ import kotlinx.coroutines.withContext
  *
  * The root's Latin rendering belongs to the page that is read in Latin script:
  * a Bangla reader reads the root letters or nothing, and a line of Latin on a
- * Bangla page is a third script the sheet never promised (owner decision, an
- * earlier session).
+ * Bangla page is a third script the sheet never promised (owner decision, 18.1).
  *
  * The lines stand directly under the entry and are drawn only when the word
  * pack carries them, so a pack held from before draws the sheet it always
@@ -214,8 +212,8 @@ import kotlinx.coroutines.withContext
  * reading's state ([OpenWordSheet]) because the sheet itself is disposed the
  * moment it is dismissed.
  *
- * **While the word sounds, the word is washed** (owner decision, an earlier
- * session). One word is a sample, not a session: it is one word file on its
+ * **While the word sounds, the word is washed** (owner decision, 18.1). One
+ * word is a sample, not a session: it is one word file on its
  * own player, so it raises no capsule and leaves no notification behind, and
  * the sheet gives the tap its answer where the finger is. A recitation that
  * was already playing waits at the word and is given back when the word ends,
@@ -235,7 +233,7 @@ internal data class OpenWord(
     /**
      * The word's grammar and lemma, when the word pack carries them. Null on
      * a held pack from before the study lines, which then draws the word, its
-     * meaning, and its root, as it did (owner decision, an earlier session).
+     * meaning, and its root, as it did (owner decision, 18.1).
      */
     val grammar: WordGrammar? = null,
     /** The ayah the word stands in, for the voice that says it. */
@@ -337,7 +335,7 @@ internal fun WordSheet(
     val surahName = surahNameOf(word.surah)
     val palette = LocalPagePalette.current
     // The word's shaped line, so the wash can sit on the letters rather than
-    // on the width the sheet gives it (owner decision, an earlier session).
+    // on the width the sheet gives it (owner decision, 18.1).
     var wordLayout by remember(word.word) { mutableStateOf<TextLayoutResult?>(null) }
     val ink = palette.ink
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
@@ -506,13 +504,13 @@ internal fun WordSheet(
                             },
                     )
                 }
-                // Every fact opens with a section's air: a fact is a block, and
-                // the entry above them is the block before the first.
-                // The root, when the word has one: the letters the page writes,
-                // their reading on the page that is read in Latin script, and a
-                // door to every place the root stands in. The count that used
-                // to be a bare line is the door's own label
-                // (owner decision, 18.9).
+                // Every fact opens with a section's air: a fact is a block,
+                // and the entry above them is the block before the first. The
+                // root, when the word has one: the letters the page writes,
+                // their reading on the page that is read in Latin script, and
+                // a door to every place the root stands in. The count that
+                // used to be a bare line is the door's own label (owner
+                // decision, 18.9).
                 word.root?.let { root ->
                     Fact(
                         label = stringResource(R.string.reading_word_root),
@@ -541,8 +539,8 @@ internal fun WordSheet(
                     ) {
                         // The letters wrap rather than clipping at the largest
                         // system scale, and the Latin rides their line where it
-                        // fits, under them where it does not
-                        // (owner decision, 18.1).
+                        // fits, under them where it does not (owner decision,
+                        // 18.1).
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(Space.Line),
@@ -629,8 +627,7 @@ internal fun WordSheet(
                     }
                     // What the word is, as a grammar reads it. The line is drawn
                     // only on a word pack that carries it, so an older pack is the
-                    // sheet the reader already knows (owner decision, an earlier
-                    // session).
+                    // sheet the reader already knows (owner decision, 18.9).
                     grammarPhrase(grammar)?.let { phrase ->
                         Fact(
                             label = stringResource(R.string.reading_word_grammar),
@@ -714,7 +711,7 @@ private fun CountDoor(
  * runs on a worker, and the page's head and value stand while the list is
  * still on its way. A failed read or an empty one says so in a sentence; the
  * reader's library is local and a failure is a broken pack, not a network
- * that might come back, so the failure offers one quiet Try again and the
+ * that might come back, so the failure offers one quiet Retry and the
  * empty line offers none (owner decision, 18.9).
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -883,8 +880,7 @@ private fun PlacesEntry(
 
 /**
  * A sentence where the list would stand: a failed read has one answer, and an
- * empty one has nothing to offer but the truth
- * (owner decision, 18.9).
+ * empty one has nothing to offer but the truth (owner decision, 18.9).
  */
 @Composable
 private fun PlacesNote(

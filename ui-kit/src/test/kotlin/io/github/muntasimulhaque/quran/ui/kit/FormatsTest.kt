@@ -9,8 +9,8 @@ import java.util.Locale
 /**
  * The size rule every download prints: the unit is a word of the interface's
  * own language and the digits are that language's own too, so a Bangla reader
- * never meets an English unit beside a Bengali number (owner decision, this
- * session). The rule is pure, so it is pinned here without a window.
+ * never meets an English unit beside a Bengali number (owner decision, 8.7).
+ * The rule is pure, so it is pinned here without a window.
  */
 class FormatsTest {
 

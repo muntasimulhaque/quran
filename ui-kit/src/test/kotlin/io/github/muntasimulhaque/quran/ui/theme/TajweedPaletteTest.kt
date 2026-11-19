@@ -16,10 +16,10 @@ import kotlin.math.sqrt
  * prove that two families can be told apart from each other. The first
  * palette passed contrast on every ground and still read as one muddy tone,
  * because four families sat within 0.1 of each other in OKLab and all seven
- * lived in a 0.09 lightness band (owner report, the palette session).
+ * lived in a 0.09 lightness band (owner report, 10.6).
  *
- * A pair at 0.095 is the floor this app accepts (owner decision, the palette
- * session; it was 0.085 while the palette spent its lightness on a ladder).
+ * A pair at 0.095 is the floor this app accepts (owner decision, 10.8; it was
+ * 0.085 while the palette spent its lightness on a ladder).
  * The paper palette's closest pair is the quiet gray and the teal at 0.101;
  * the night palette's closest is the warm pair, ghunnah and qalaqah, at
  * 0.106. Every family is at least 0.13 from the reading's ink (the iqlab on

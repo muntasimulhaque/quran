@@ -38,9 +38,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * that and the sheet is the glass, and on the ten inch screen the sheet is a
  * 640 dp page centered on it, with the reading's own 600 dp page behind and
  * the rest of the glass as margin. A sheet is always the page it holds and
- * never more, so a settings row's switch stays as close to the words that
- * name it on the ten inch screen as it is on the seven inch tablet (owner
- * decision, an earlier session).
+ * never more, so a settings row's switch stays as close to the words that name
+ * it on the ten inch screen as it is on the seven inch tablet (owner decision,
+ * 12.7).
  *
  * The sheet's own name is spoken when the window opens and never drawn. A
  * modal surface has to name itself before its first row, or a screen reader

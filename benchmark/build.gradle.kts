@@ -18,7 +18,7 @@ android {
         // library treats as an accuracy error. The house reads the numbers
         // against the previous run rather than against a device's absolute
         // figures, so the suppression is the development machine's own
-        // choice and the module never ships (owner decision, this session).
+        // choice and the module never ships (owner decision, 6.5).
         testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "EMULATOR"
     }
 

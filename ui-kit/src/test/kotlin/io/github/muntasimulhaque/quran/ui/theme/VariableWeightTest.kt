@@ -14,8 +14,7 @@ import java.io.File
  * family that declared Medium and SemiBold on one file and set neither, and
  * because every style also turns font synthesis off, every Bangla title, row
  * name, and bold run was drawn at Regular. Nothing failed: the family looked
- * correct in the source and the screen was quietly flat (owner report, this
- * session).
+ * correct in the source and the screen was quietly flat (owner report, 13.4).
  *
  * The families are read from the theme's own source because the drawn weight
  * is a platform property, not a value a JVM test can measure without a

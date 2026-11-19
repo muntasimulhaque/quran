@@ -9,8 +9,7 @@ import org.junit.Test
  * The rule is the browser's: the first part of a scroll is the bar's, the
  * rest is the page's; a backward scroll brings the bar back before the page
  * moves; a released bar finishes the nearer end. The reading's text is never
- * behind the bar, which is why the page waits for it (owner decision, this
- * session).
+ * behind the bar, which is why the page waits for it (owner decision, 19.4).
  */
 class ReaderBarTest {
 

@@ -18,8 +18,7 @@ import androidx.compose.ui.unit.sp
  * places: the search result's reference wore the action color, so a number the
  * reader could not tap read as a button, while the reading's door was the same
  * size in ink. One role now, and only a reference that is a passage's title
- * (the head of a tafsir) wears the title voice instead (owner decision, this
- * session).
+ * (the head of a tafsir) wears the title voice instead (owner decision, 13.3).
  *
  * The color is a parameter because a door says its state in the action color
  * while its reference is open; every quiet reference keeps the default.

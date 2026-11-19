@@ -67,7 +67,7 @@ class RecitationPlaylistTest {
     fun anAdvanceInsideTheSurahIsNotItsEnd() {
         // The player reports an automatic advance at every ayah boundary,
         // and every ayah is one media item. Only the advance that arrives in
-        // another surah is a surah's end (owner report, an earlier session).
+        // another surah is a surah's end (owner report, 11.9).
         assertNull(
             RecitationPlaylist.endedSurah(
                 playing = 1,

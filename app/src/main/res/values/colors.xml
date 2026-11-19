@@ -6,7 +6,7 @@
          the reading opens on and the ink the page's text wears, for the
          whole drawing, book and stand alike. The value mirrors the ui-kit
          theme's PaperInk, which is a Compose tone and cannot be read from a
-         drawable (owner decision, this session: at 24 to 48 dp one ink at
+         drawable (owner decision, 7.2: at 24 to 48 dp one ink at
          14.3:1 reads where a thin ornament gold would not). -->
     <color name="icon_background">@color/paper</color>
     <color name="icon_ink">#2A2620</color>

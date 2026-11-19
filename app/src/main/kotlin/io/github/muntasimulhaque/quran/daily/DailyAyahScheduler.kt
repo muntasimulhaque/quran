@@ -334,7 +334,7 @@ object DailyAyahScheduler {
                     // back the moment it goes quiet, and a reader whose process
                     // died reading the ayah must still have a reminder
                     // tomorrow. Arming after the notification was the one order
-                    // that lost a whole day (owner report, 37th session). The
+                    // that lost a whole day (owner report, 3.8). The
                     // reader's own settings are read here rather than taken
                     // from the fire, so a switch turned off while the phone
                     // slept is honored and the alarm is anchored on the
@@ -359,10 +359,10 @@ object DailyAyahScheduler {
                             // the shape in the notification color, so a ground
                             // and an outline would both be thrown away, and at
                             // the status bar's size the outline drawing's lines
-                            // would turn to dust (owner decision, 5.2).
-                            // The mark lives in ui-kit so the recitation's own
+                            // would turn to dust (owner decision, 5.2). The
+                            // mark lives in ui-kit so the recitation's own
                             // notification wears it too.
-                            .setSmallIcon(UiKitR.drawable.ic_daily)
+                            .setSmallIcon(UiKitR.drawable.ic_book_mark)
                             .setContentTitle(title)
                             .setContentText(centered(content.arabic))
                             .setStyle(

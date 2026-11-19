@@ -9,7 +9,7 @@
 #
 # emit writes: app/src/main/res/drawable/ic_launcher_foreground.xml and
 # ic_launcher_monochrome.xml, ic_shortcut_mark.xml, the five mipmap legacy
-# tiles, ic_share_mark and ic_daily at mdpi through xxxhdpi,
+# tiles, ic_share_mark and ic_book_mark at mdpi through xxxhdpi,
 # play-store/icon-512.png, and play-store/feature-graphic-1024x500.png,
 # rebuilt with the repo's own Literata and Inter over the paper field.
 # The drawing traces the owner's reference set: the pages are sail arcs
@@ -631,16 +631,16 @@ def share_png(size, out=None):
         im2.save(out)
     return im2
 
-def daily_png(size, out=None):
+def book_mark_png(size, out=None):
     im = raster_canvas(size, 4)
-    scale, xc, yc = fit_for(daily_ids(), None, span_w=size*0.916)
+    scale, xc, yc = fit_for(book_mark_ids(), None, span_w=size*0.916)
     draw_mono(im, scale, size/2*4 - (xc-AX_X)*scale*4, size/2*4, yc, 4, WHITE)
     im2 = im.resize((size, size), Image.LANCZOS)
     if out:
         im2.save(out)
     return im2
 
-def daily_ids():
+def book_mark_ids():
     return [plank(), mir_segs(plank()), wedge_arc(), mir_segs(wedge_arc()), book_silhouette()]
 
 # --------------------------------------------------------------------- banner
@@ -770,7 +770,7 @@ def preview():
         cols.paste(t, (x, 10)); x += t.size[0] + 30
     cols.save(W('mark_small.png'))
     # the silhouette, the share mark, the legacy tile, the banner
-    s3, xc3, yc3 = fit_for(daily_ids(), None, span_w=256*0.9)
+    s3, xc3, yc3 = fit_for(book_mark_ids(), None, span_w=256*0.9)
     mono = raster_canvas(256, 8)
     draw_mono(mono, s3, 128*8 - (xc3-AX_X)*s3*8, 128*8, yc3, 8, INK)
     mono.convert('RGB').resize((256, 256), Image.LANCZOS).save(W('mark_mono.png'))
@@ -814,7 +814,7 @@ def emit():
     for name, size, _ in DENS:
         legacy_png(size, os.path.join(root, f'app/src/main/res/mipmap-{name}/ic_launcher.png'))
         share_png(size // 2, os.path.join(root, f'app/src/main/res/drawable-{name}/ic_share_mark.png'))
-        daily_png(size // 2, os.path.join(root, f'ui-kit/src/main/res/drawable-{name}/ic_daily.png'))
+        book_mark_png(size // 2, os.path.join(root, f'ui-kit/src/main/res/drawable-{name}/ic_book_mark.png'))
     render_store(512, os.path.join(root, 'play-store/icon-512.png'))
     banner_png(out=os.path.join(root, 'play-store/feature-graphic-1024x500.png'), ss=2)
     print('emitted')

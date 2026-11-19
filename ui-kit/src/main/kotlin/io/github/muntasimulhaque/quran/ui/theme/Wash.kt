@@ -8,8 +8,7 @@ package io.github.muntasimulhaque.quran.ui.theme
  * own. The tint is chosen at the call site, the accent for something that acts
  * and the ink for a quiet ground. The steps are ordered by how loudly they
  * speak, and the whole app reads one scale: a door is the quietest, a button's
- * own shape is a step up, and a chosen control's another (owner decision, the
- * audio and type audit session).
+ * own shape is a step up, and a chosen control's another (owner decision, 19.1).
  *
  * The scale has no step for a *ground*, and that is a decision, not an
  * omission (owner decision, 19.1). The chosen thing and the found

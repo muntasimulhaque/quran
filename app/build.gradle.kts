@@ -97,7 +97,7 @@ val screenshotPacks = setOf(
 
 // The two translations every install carries. The first page is the Quran
 // in the reader's language, offline, with no download and no language screen;
-// the tafsir and the word lists stay downloads (owner decision, this session).
+// the tafsir and the word lists stay downloads (owner decision, 15.5).
 //
 // The four reciter timing packs ride with them: a downloaded surah is then
 // audio on its own, and Al-Fatiha's audio is already in the assets, so the
@@ -189,7 +189,7 @@ abstract class PrepareContentAssets : DefaultTask() {
         // reciter timing packs, and nothing else: the core pack, the shipped
         // packs, and the catalog of what can be downloaded. The first page
         // needs no network, and the first Play on Al-Fatiha needs none either
-        // (owner decision, this session).
+        // (owner decision, 15.8).
         val content = File(out, "content").apply { mkdirs() }
         File(packsDir.get().asFile, "core.db").copyTo(File(content, "core.db"), overwrite = true)
         catalogFile.get().asFile.copyTo(File(content, "catalog.json"), overwrite = true)
@@ -317,8 +317,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 206
-        versionName = "20.4"
+        versionCode = 207
+        versionName = "20.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -363,7 +363,7 @@ android {
     // one the app ships are one file. No screen opens it: the fonts' credits
     // stand in About, and the license text is the copy that accompanies the
     // five open font files, the way every library's LICENSE travels in
-    // META-INF (owner decision, this session). Keep the directory packaged.
+    // META-INF (owner decision, 12.5). Keep the directory packaged.
     sourceSets.getByName("main").assets.directories.add(rootProject.file("licenses").absolutePath)
     // The packs that exist only for development, on the debug variant alone.
     sourceSets.getByName("debug").assets.directories.add(devPackAssets.get().asFile.absolutePath)

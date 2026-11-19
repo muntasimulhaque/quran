@@ -30,8 +30,7 @@ import org.junit.runner.RunWith
  * `createConfigurationContext`, a snapshot taken when the window is built, and
  * nothing recomposed the page when the phone's own colors turned over
  * underneath it. So the phone in its day colors and the app on the night page
- * it was opened on, at ten in the morning, with the switch on (owner report,
- * 37th session).
+ * it was opened on, at ten in the morning, with the switch on (owner report, 2.9).
  *
  * Two halves are pinned. The manifest one is cheap and always true: the app
  * does not claim a change it does not handle. The behavioral one is what a

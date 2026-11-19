@@ -6,7 +6,7 @@ session that has not pulled has not started.
 
 A free, offline Android Quran reader. One reading with the QPC Hafs text,
 color-coded tajweed, Saheeh International, word-by-word, and Tafsir Ibn Kathir,
-with recitation by Al-Minshawi, Al-Husary, Alafasy, and Abdul Basit. No ads,
+with recitation by Minshawi, Husary, Alafasy, and Abdul Basit. No ads,
 no trackers, no accounts, and no network beyond the project's own Releases.
 Code is MIT; each content dataset keeps its own source, version, and license.
 
@@ -151,8 +151,8 @@ change, never left as a dead letter.
 | --- | --- |
 | `core/` | pure JVM Kotlin, no `android.*`: references, search normalization, rich text, models |
 | `data/` | read-only content access, the downloads that fetch a pack from the project's Releases, the saved-ayah and last-read databases, preferences |
-| `app/` | the shell: activity, view model, the screen that composes the features, the daily ayah's scheduler and notification |
-| `feature-reading/` | the reading surface |
+| `app/` | the shell: activity, view model, the reading's screen and chrome (the bar, the top bar, the sheets, the ayah menu, the share card), the screen that composes the features, the daily ayah's scheduler and notification |
+| `feature-reading/` | the reading's rows and blocks: the ayah and its door, the word sheet, the surah frames, the footnotes |
 | `feature-search/` | the search sheet |
 | `feature-browse/` | Surahs, Juz, Last Read, Saved |
 | `feature-playback/` | the pill, the listening menu, the player |
@@ -211,7 +211,7 @@ change, never left as a dead letter.
   so the leg reads as a fault in the app when it is the shape of the test. A
   test that wants the page's own touch puts the page beside the sentence and
   counts it with `pointerInput`, the way `SentenceTouchTest` does (found and
-  named from material3 1.5's bytecode, this session).
+  named from material3 1.5's bytecode, 19.3).
 - **A gate that reads content by table name is reading a contract, not a
   schema.** Change the build's shape and run every `:tools` gate.
 - **A red leg is a fact to baseline, not a verdict.** `git worktree add` the
@@ -221,8 +221,7 @@ change, never left as a dead letter.
 - **A local instrumented run starts with a clean install.** Uninstall both
   packages from the target AVD before the run: the app and the test APK. A
   `ClassNotFoundException` for a test class means a stale test APK, not a code
-  fault. Reinstall before believing a change of yours did it (owner decision,
-  this session).
+  fault. Reinstall before believing a change of yours did it (owner decision, 18.3).
 - **A capture class borrows the tour's two rules, or it costs a run.** A frame
   goes where the runner says (`screenshotOutputDirectory()`, which reads
   `additionalTestOutputDir`), never into a directory the class spells out: a

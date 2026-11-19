@@ -99,8 +99,7 @@ fun ThemeRow(
                     text = theme.name(),
                     // A swatch's name is a label, not a row's value: it wears
                     // the label's Medium at 12, where the value under a row
-                    // wears the caption's Regular
-                    // (owner decision, 13.3).
+                    // wears the caption's Regular (owner decision, 13.3).
                     style = MaterialTheme.typography.labelMedium,
                     color = if (theme == selected) {
                         MaterialTheme.colorScheme.primary
@@ -196,8 +195,7 @@ private fun ThemeSwatch(
             if (theme != AppTheme.System) {
                 // The letter is drawn in the Quran's display hand, never in
                 // the phone's default Arabic face: a swatch that names the
-                // page must wear the page's own letter
-                // (owner decision, 13.2).
+                // page must wear the page's own letter (owner decision, 13.2).
                 Text(
                     text = "\u0627",
                     style = amiriDisplay(TypeLadder.SWATCH_SP),
@@ -230,8 +228,8 @@ fun AppTheme.name(): String = stringResource(
  * alive, which took away the one thing that says which way the scale runs.
  * Over the rail, the name has the page's whole width and the rail has what is
  * left after its two marks at every text size. The pace in the listening menu
- * already draws its label over the same [ScaleRow] (owner decision, the
- * forty-seventh session), so this is one control learned once in both places,
+ * already draws its label over the same [ScaleRow] (owner decision, 18.8), so
+ * this is one control learned once in both places,
  * not a second shape.
  *
  * **The rails are one length.** Each one starts on the gutter plus its mark and
@@ -314,7 +312,7 @@ private fun SizeMark(
         text = if (role == TypeRole.Arabic) "ا" else "A",
         // The Arabic mark is drawn in the Quran's own face, the way the sample
         // above it is: the letter the reader is sizing is the letter they
-        // read (owner decision, the theme and consistency session).
+        // read (owner decision, 13.9).
         style = if (role == TypeRole.Arabic) {
             TextStyle(fontFamily = rememberHafs(), fontSize = size)
         } else {

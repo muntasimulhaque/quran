@@ -6,6 +6,28 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.5
+
+A failure says Retry, a download says Downloading, and every decision in the
+code names the release that made it.
+
+"Try again" stood on two surfaces, the content error page and the word sheet's
+places page, while every other retry in the app said Retry. One act has one
+word now. The word pronunciation transfer said "Getting" where every other
+transfer says Downloading, and it says Downloading too: a pack is added and a
+sound is downloaded, and that rule now holds without an exception.
+
+The app's own record of why it is the way it is was dated by working session
+in a hundred and fifty places: "this session", "an earlier session",
+"the theme and consistency session". A session is a fact about the person who
+wrote the line; a release is a fact about the app. Each of the hundred and
+fifty now names the version that shipped it, and a new test fails the
+build if a session date appears again. The notification's mark is named for
+what it draws, the touch floor and the press circle come from the theme at
+every call site, and the one haptic in the app now says why it is the only one.
+
+The site said Al-Fatiha shipped in two voices. It ships in all four.
+
 ## 20.4
 
 Choosing another voice on the playing pill no longer offers a download the

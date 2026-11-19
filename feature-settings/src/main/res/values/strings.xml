@@ -4,7 +4,7 @@
 
     <!-- The two words an index row stands in: what the reading draws, or
          does not. A row says On or Off and the page says the rest, so no
-         row carries a switch (owner decision, this session). -->
+         row carries a switch (owner decision, 15.2). -->
     <string name="settings_state_on">On</string>
     <string name="settings_state_off">Off</string>
 
@@ -24,7 +24,7 @@
     <string name="settings_daily_blocked_action">Notification settings</string>
     <!-- The same line on a phone with no settings screen at all: the fact is
          kept and the door is not drawn, so nothing here is a word that opens
-         nothing (owner decision, this session). -->
+         nothing (owner decision, 19.3). -->
     <string name="settings_daily_no_notification_screen">Your phone is not showing notifications for this app, and this phone has no screen to change that, so the daily ayah cannot arrive.</string>
     <string name="settings_daily_exact_blocked">Your phone has alarms and reminders off, so the ayah can arrive late.</string>
     <string name="settings_daily_exact_action">Allow alarms and reminders</string>
@@ -49,7 +49,7 @@
     <!-- The pronunciation line under the one switch: only while a transfer
          runs or after one fails, because the voices on the device have their
          own row and a word with no voice says so on its own sheet. -->
-    <string name="settings_words_pronunciation_downloading">Getting the pronunciation · %1$s of %2$s</string>
+    <string name="settings_words_pronunciation_downloading">Downloading the pronunciation · %1$s of %2$s</string>
     <string name="settings_words_pronunciation_failed">Pronunciation did not arrive. Tap the speaker on any word to try again.</string>
     <!-- The pronunciation the reader downloaded, behind the reciter page's
          own door: a surah count, and one row per surah with its own Remove. -->
@@ -68,14 +68,14 @@
     <!-- The question before a download the reader waited for is taken away. A
          file under 20 MB goes on one tap; a surah's recitation, which took
          minutes and cannot be brought back without another download, is asked
-         about (owner decision, this session). -->
+         about (owner decision, 19.1). -->
     <string name="remove_download_sheet_name">Remove download</string>
     <string name="remove_download_title">Remove %1$s?</string>
     <string name="remove_download_body">It is %1$s of audio, and removing it cannot be undone. Playing the ayah again downloads it again.</string>
     <string name="remove_download_keep">Keep</string>
 
     <!-- Add and Download are two verbs on purpose, and this is the rule they
-         keep (owner decision, this session). A pack is added: it is a lasting
+         keep (owner decision, 19.1). A pack is added: it is a lasting
          choice in a list, the thing is on this device or it is not, and the row
          that carries it has a Remove at the other end. A sound is downloaded:
          it is a transfer, with a size before it starts and a percent while it
@@ -149,7 +149,7 @@
     <string name="settings_none_yet">Not added yet</string>
     <!-- A count under a row says what it counts. "2 chosen" was a number with
          no noun, and the row above it was the only thing that said what had
-         been chosen (owner decision, this session). -->
+         been chosen (owner decision, 19.1). -->
     <plurals name="settings_translation_count">
         <item quantity="one">%1$d translation</item>
         <item quantity="other">%1$d translations</item>

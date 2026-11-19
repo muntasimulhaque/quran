@@ -6,7 +6,7 @@
     <!-- The word meanings are the one aid the reading never mentions, because
          they are a Settings row and nothing else. The door stands where the
          reading arrives, and leaves for good once the list is on the device
-         (owner decision, this session). -->
+         (owner decision, 19.1). -->
     <string name="reading_add_words">Add word meanings to read each word on its own</string>
     <string name="reading_revelation_makki">Makki</string>
     <string name="reading_revelation_madani">Madani</string>
@@ -54,10 +54,9 @@
     <!-- The speaker's answer under the gloss: the surah's voices on their
          way, the word itself when the alignment cut it no clip, and a
          transfer that did not arrive. The speaker stands on every word now,
-         so these are the four things a press can say (owner decision, this
-         session). -->
-    <string name="reading_word_voice_waiting">Getting the voices of this surah · %1$s of %2$s</string>
-    <string name="reading_word_voice_asking">Getting the voices of this surah</string>
+         so these are the four things a press can say (owner decision, 18.7). -->
+    <string name="reading_word_voice_waiting">Downloading the voices of this surah · %1$s of %2$s</string>
+    <string name="reading_word_voice_asking">Downloading the voices of this surah</string>
     <string name="reading_word_voice_missing">This word has no recording of its own.</string>
     <string name="reading_word_voice_failed">The voices for this surah did not arrive. Tap the speaker to try again.</string>
     <string name="reading_sheet_where">%1$s %2$s</string>
@@ -121,8 +120,8 @@
     <string name="reading_word_lemma">Dictionary form</string>
     <string name="reading_word_grammar">Grammar</string>
     <!-- The count is the word sheet's door to the places (owner decision,
-         this session). A count of one is a real count: a root can be one
-         word, and a dictionary form can be one word in one form. -->
+         18.9). A count of one is a real count: a root can be one word, and a
+         dictionary form can be one word in one form. -->
     <plurals name="reading_word_root_count">
         <item quantity="one">%1$s word in the Quran</item>
         <item quantity="other">%1$s words in the Quran</item>
@@ -141,7 +140,7 @@
     <string name="reading_word_places_current">Your place</string>
     <string name="reading_word_places_empty">The word list on this device does not carry the places of this word.</string>
     <string name="reading_word_places_failed">The places could not be read from the word list.</string>
-    <string name="reading_word_places_retry">Try again</string>
+    <string name="reading_word_places_retry">Retry</string>
     <plurals name="reading_word_places_count">
         <item quantity="one">%1$s place</item>
         <item quantity="other">%1$s places</item>

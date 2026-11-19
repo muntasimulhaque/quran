@@ -85,10 +85,10 @@
     <!-- The body says the one thing the title cannot: what is safe, and the
          one act that might clear a bad read. It used to open by naming no
          cause ("something on this device"), which told a reader nothing they
-         could act on (owner decision, this session). -->
+         could act on (owner decision, 19.1). -->
     <string name="content_problem_body">Nothing has been lost: your saved ayahs and settings are untouched. If it keeps happening, close the app and open it again.</string>
     <string name="content_problem_storage_body">The app needs room for its text on this phone. Free some space, then try again. Nothing has been lost: your saved ayahs and settings are untouched.</string>
-    <string name="content_problem_retry">Try again</string>
+    <string name="content_problem_retry">Retry</string>
 
     <!-- The daily reminder: a quiet invitation to read, one ayah each day. -->
     <string name="daily_channel_name">Daily ayah</string>

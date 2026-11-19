@@ -36,6 +36,7 @@ import io.github.muntasimulhaque.quran.ui.kit.AppChevron
 import io.github.muntasimulhaque.quran.ui.kit.ChevronRole
 import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -189,7 +190,10 @@ internal fun AyahDoor(
                 indication = null,
                 role = Role.Button,
             ) { onOpen(bounds.value) }
-            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+            .defaultMinSize(
+                minWidth = ControlMetrics.Target,
+                minHeight = ControlMetrics.Target,
+            )
             .semantics { contentDescription = name },
         // The content sits on the target's floor, so the room the 48 dp target
         // owns falls above the number and the head hugs the verse it names.

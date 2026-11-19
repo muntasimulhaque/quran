@@ -46,8 +46,7 @@ import org.junit.runner.RunWith
  * sat on the choice row's rail. The row now draws the off ring on a pack that
  * was never chosen, its Add wears the same pill and the same trailing rail as
  * Remove, and that off row is the checkbox it looks like. The chosen-but-missing
- * row stays a button, because its only act is Add (owner report, this
- * session).
+ * row stays a button, because its only act is Add (owner report, 14.9).
  */
 @RunWith(AndroidJUnit4::class)
 class PackRowStateTest {
@@ -121,7 +120,7 @@ class PackRowStateTest {
      * Add and Remove are the same act slot in the same list. Add used to be a
      * bare word at the sheet's edge while Remove was a pill on the choice
      * row's rail, so the eye read two kinds of action and the Add stood
-     * outside the page's word line (owner report, an earlier session).
+     * outside the page's word line (owner report, 17.6).
      * The test reads the pills themselves, not their words: a word's ink edge
      * depends on its letters, a shape's edge does not.
      */

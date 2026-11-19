@@ -102,10 +102,9 @@ internal enum class PillMenu { Reciters, Listening }
  * measurement settled it, and the shape is the transfer's own, one mark at its
  * trailing end).
  *
- * The words and the answer stand in their row with the app's air between
- * them, and the words' own end keeps the larger air the shoulder asks for, so
- * no press shape touches another or the capsule
- * (owner decision, 9.5). 
+ * The words and the answer stand in their row with the app's air between them,
+ * and the words' own end keeps the larger air the shoulder asks for, so no
+ * press shape touches another or the capsule (owner decision, 9.5).
  */
 @Composable
 internal fun pillControls(
@@ -233,8 +232,7 @@ internal enum class Transport { Play, Pause, Close }
  * The app's one drawing for each transport mark. The pill used to carry a
  * second hand-drawn set beside `IconGlyph`, so the same Play was two
  * triangles and the Close was two strokes; every mark now comes from the one
- * set the whole app draws (owner decision, the theme and consistency
- * session).
+ * set the whole app draws (owner decision, 7.6).
  */
 private val Transport.icon: Icon
     get() = when (this) {
@@ -259,7 +257,7 @@ internal fun TransportButton(
     // so three of them stand edge to edge with the app's air between the
     // circles (owner decision, 11.5). The mark is the control's size
     // and not the press's: the press must not flash a dot inside the target
-    // the finger hit (owner report, an earlier session).
+    // the finger hit (owner report, 11.5).
     GlyphButton(
         description = description,
         onClick = onClick,

@@ -171,8 +171,7 @@ internal fun ListenOfferBar(
                     ),
                     onClick = onConfirm,
                     // The bar exists for this one answer, so it is the
-                    // prominent shape on both paths (owner decision, an
-                    // earlier session).
+                    // prominent shape on both paths (owner decision, 17.2).
                     prominent = true,
                     pillTag = "offer-answer",
                     modifier = Modifier.padding(start = WordsGap),
@@ -182,7 +181,7 @@ internal fun ListenOfferBar(
             // The transfer keeps its one row: the words, the percent, and the
             // app's one X at the end. It is a state, not a question, so it
             // carries neither the ask nor its answer; the X is the one thing
-            // a stray tap must never do (owner decision, an earlier session).
+            // a stray tap must never do (owner decision, 17.2).
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(bottom = ProgressRoom),

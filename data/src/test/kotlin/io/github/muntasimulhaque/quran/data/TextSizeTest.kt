@@ -59,9 +59,9 @@ class TextSizeTest {
     @Test
     fun anUnknownValueLandsOnTheNearestStep() {
         assertEquals(1f, TextSize.step(0.95f))
-        // The 0.65 step is retired (owner decision, the audio and type audit
-        // session): a reader who stored it lands on the smallest step there
-        // is, never on a step below the platform floor.
+        // The 0.65 step is retired (owner decision, 5.9): a reader who stored
+        // it lands on the smallest step there is, never on a step below the
+        // platform floor.
         assertEquals(0.8f, TextSize.step(0.6f))
     }
 

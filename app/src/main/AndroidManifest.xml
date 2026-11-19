@@ -32,7 +32,7 @@
          every backup on Android 11 and below; from Android 12 that attribute
          alone does not stop a device-to-device transfer, so dataExtractionRules
          carries the refusal there. There is no export, no import, and no other
-         door (owner decision, this session). The back-callback attribute is
+         door (owner decision, 12.9). The back-callback attribute is
          read only from Android 13 on, and older platforms ignore it, so its
          API level warning is suppressed here rather than hidden in a baseline. -->
     <application
@@ -55,7 +55,7 @@
              own day and night turn over underneath it. So the app promised to
              follow the system dark mode and did not: at ten in the morning,
              the phone in its day colors, the app on the night page it was
-             launched with, and the switch on (owner report, 37th session).
+             launched with, and the switch on (owner report, 2.9).
              Leaving uiMode to the platform makes the change do what it does
              everywhere else, which is recreate the window and draw the other
              half of the themes. Nothing is lost in the recreation: the view

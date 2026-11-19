@@ -18,8 +18,7 @@ import java.io.File
  * a second hand: each file carries the numbers [Glyphs] draws, on the same 24
  * unit square, and this test reads the files against the set through
  * [NotificationMark], which names the pair in the app's own code. The two
- * shapes had already drifted once, and nothing could see it (owner report, an
- * earlier session).
+ * shapes had already drifted once, and nothing could see it (owner report, 17.1).
  *
  * Two of the four are the shade's alone now: the pill became one row with one
  * mark (owner decision, 17.0), and its skips are the actions that mark

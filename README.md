@@ -5,7 +5,7 @@
 A free Quran reader for Android, built to be read. It opens on the ayah you
 left, with the QPC Hafs text, color-coded tajweed, the Saheeh International and
 Al-Bayan translations, word-by-word meanings with roots and grammar, Tafsir Ibn
-Kathir, and recitation by Al-Minshawi, Al-Husary, Alafasy, and Abdul Basit. In
+Kathir, and recitation by Minshawi, Husary, Alafasy, and Abdul Basit. In
 English and বাংলা.
 
 There is one reading and no home screen. No ads, no trackers, no accounts, and
@@ -57,7 +57,7 @@ as sheets, so nothing stands between you and the text.
 | **Tafsir** | Ibn Kathir opens in the ayah card, in English or Bangla, with the Quran quotations set apart from the commentary. |
 | **Search** | Arabic is read without diacritics, and a spelling the print does not carry still finds its verse; English is read without accents. A reference like `2:255` or `kahf 10` goes straight to the ayah. Search in the Quran text, translations, word meanings, tafsirs, your notes, surah names, or references. |
 | **Saved and notes** | Keep any ayah, write your own note on it, and find both again under Browse. Last Read keeps the places you have been reading, newest first. |
-| **Recitation** | Al-Minshawi, Al-Husary, Alafasy, and Abdul Basit, with the page following the reciter and the word being recited washed as it sounds. Five speeds, repeat the ayah or the surah, stop after this ayah, or continue to the next surah. |
+| **Recitation** | Minshawi, Husary, Alafasy, and Abdul Basit, with the page following the reciter and the word being recited washed as it sounds. Five speeds, repeat the ayah or the surah, stop after this ayah, or continue to the next surah. |
 | **Share** | Send the verse as text, or as one image card in the app's own paper and type. |
 | **Daily ayah** | One ayah a day at a time you choose, dealt by the day number from a reshuffled deck of all 6,236. A notification, no streaks and no guilt. |
 | **Links** | A `quran://ayah/2:255` link opens that verse. |
@@ -198,20 +198,22 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.4 (versionCode 206).** The signed bundle comes from `build` run
-44563390464, the newest green run on `main`: the unit tests, lint, and
-`assembleDebug` passed, and the signed bundle `quran-20.4-vc206.aab` has
-SHA-256
-`096b3c40e6ba2e8cc8795519e5204462fc42bcca1ca87045e05ffcfdc99dddcf`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. No committed store frame carries the
-listening panel's voice rows, so the three committed store sets stand and no
-store capture leg ran; the app classes this release touches, and the attach
-guard's own class, ran on the phone. No content changed, so every pack
-rebuilt byte for byte and every catalog hash and tag is unchanged, and no
-permission or dependency moved. The hand-off copy in `play-store/aab/` was
-deleted once Play had it.
+**20.5 (versionCode 207).** The release is building: `build` on `main` runs
+the unit tests, lint, and `assembleDebug`, and the hand-off record below is
+written from the run that produces the signed bundle.
+
+**What changed in 20.5.** A failure says Retry, a download says Downloading,
+and every decision in the code names the release that made it. "Try again"
+stood on two surfaces, the content error page and the word sheet's places
+page, while every other retry said Retry; one act has one word now. The word
+pronunciation transfer said "Getting" where every other transfer says
+Downloading, and it says Downloading too. The hundred and fifty
+decisions dated by a working session now name the release that shipped them,
+and a new test fails the build if a session date comes back. The
+notification's mark is named for what it draws, the touch floor and the press
+circle come from the theme at every call site, the one haptic in the app says
+why it is the only one, and the site now says Al-Fatiha ships in all four
+voices.
 
 **What changed in 20.4.** Choosing another voice on the playing pill no
 longer offers a download the device already holds. All four reciters'
@@ -226,25 +228,6 @@ size alone, where a surah's audio genuinely is not on the device. Two legs
 hold it, red before the fix and green after: a voice that is not attached
 still reads as on the device, and the reader's own round ends with no offer
 on the glass.
-
-**What changed in 20.3.** The Bangla interface was read word by word and now
-says what it means. A note is নোট and only a translation's footnote is টীকা,
-so the ayah door no longer calls the reader's own writing a commentary, the
-one place that drift had survived. Two instructions that named a Play button
-the app does not have now name the শুনুন the reader sees, and the tap they ask
-for is the চাপুন used everywhere else, so প্লে and ট্যাপ have left the app. The
-recovery message says কিছুই হারিয়ে যায়নি rather than হারায়নি, and "the daily
-ayah cannot arrive" is আসবে না in all four places that say it. Search had two
-words for one act, অনুসন্ধান on the door and খোঁজা inside the sheet, and now has
-one: খুঁজুন, খোঁজা হচ্ছে, যেখানে খুঁজবেন, with the parity gate's one allowed
-exception deleted. Smaller corrections: নির্ধারণ করুন for the Set button,
-লেখার আকার for the Font size row, the tafsir offer's depth, three grammar
-labels spelled the way the corpus declares them, and one house spelling each
-for এখনও, যেকোনো, and -গুলো. In the catalog, the word roots pack gained its
-Bangla name, শব্দের মূল, and the pronunciation credit says লাইব্রেরি থেকে like
-the other eight packs; both moved through the pipeline, so every pack hash and
-tag is unchanged. English is untouched: same sentences, same frames, same store
-copy.
 
 ## Corrections and contributions
 

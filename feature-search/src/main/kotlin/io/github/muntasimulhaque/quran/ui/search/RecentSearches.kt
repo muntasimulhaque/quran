@@ -44,6 +44,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SectionHead
 import io.github.muntasimulhaque.quran.ui.kit.ChipMeasure
 import io.github.muntasimulhaque.quran.ui.kit.chipMeasure
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -184,12 +185,12 @@ private fun RecentChip(
             .height(measure.target)
             .testTag("recent-chip"),
     ) {
-        // The X's 48 dp comes out of the room before the word is measured,
-        // so a long query ellipsizes instead of pushing the removal off the
+        // The X's 48 dp comes out of the room before the word is measured, so
+        // a long query ellipsizes instead of pushing the removal off the
         // glass, and the word takes only what it needs of what is left: the
-        // chip's width is the word's, not the row's
-        // (owner decision, 14.8).
-        val textMax = (maxWidth - 48.dp).coerceAtLeast(48.dp)
+        // chip's width is the word's, not the row's (owner decision, 14.8).
+        val textMax = (maxWidth - ControlMetrics.Target)
+            .coerceAtLeast(ControlMetrics.Target)
         // The capsule the reader sees: the label's line plus 8 dp above and
         // below, centered in the target. matchParentSize does not influence
         // the chip's width; the Row below is what decides it.
@@ -227,7 +228,7 @@ private fun RecentChip(
                         // query still owes the finger a target, so the word's
                         // pill stops at 48 and grows with the word above it
                         // (owner decision, 14.8).
-                        .defaultMinSize(minWidth = 48.dp)
+                        .defaultMinSize(minWidth = ControlMetrics.Target)
                         .height(measure.pill)
                         .clip(leftHalf)
                         .focusRing(queryPress, leftHalf)
@@ -246,7 +247,7 @@ private fun RecentChip(
             }
             Box(
                 modifier = Modifier
-                    .width(48.dp)
+                    .width(ControlMetrics.Target)
                     .fillMaxHeight()
                     .clickable(
                         interactionSource = removePress,

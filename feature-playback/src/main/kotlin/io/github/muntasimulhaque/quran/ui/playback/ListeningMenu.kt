@@ -42,25 +42,23 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * and what that voice would still need for the surah at hand, so a reciter is
  * chosen with its price in view.
  *
- * **Every answer puts the panel away** (owner decision, 9.7). The
- * voice list has always closed on its choice, and the pace and the ending
- * follow it. One panel asked one question, and the tap answered it, so the
- * reader is back on the reading rather than in a panel they have to dismiss.
- * The cost is that a reader changing two things opens the door twice, and
- * that the ending has no read-back on the pill, which by a settled rule does
- * not write the ending down; the row's own mark was on screen when the tap
- * landed.
- * **The place is the pill's, not the panel's** (owner decision, 16.9).
- * The panel used to head itself with the whole place in the same words and
- * type the capsule under it already wears, ten dp apart: the sentence was
- * said twice, and the popup was the one panel in the app that drew a title
- * (`AppPopup`'s name is spoken and never drawn). The place still reaches a
- * screen reader as the popup's pane title, and the panel opens on its first
- * question. The voices lead, because the block that opens the panel leads
- * with the reciter's name; the pace and the answers follow, in the order the
- * listening menu has always kept. One panel rather than two menus (owner
- * decision, 16.9: the block is one door, and the three questions are
- * one subject).
+ * **Every answer puts the panel away** (owner decision, 9.7). The voice list
+ * has always closed on its choice, and the pace and the ending follow it. One
+ * panel asked one question, and the tap answered it, so the reader is back on
+ * the reading rather than in a panel they have to dismiss. The cost is that a
+ * reader changing two things opens the door twice, and that the ending has no
+ * read-back on the pill, which by a settled rule does not write the ending
+ * down; the row's own mark was on screen when the tap landed. **The place is
+ * the pill's, not the panel's** (owner decision, 16.9). The panel used to head
+ * itself with the whole place in the same words and type the capsule under it
+ * already wears, ten dp apart: the sentence was said twice, and the popup was
+ * the one panel in the app that drew a title (`AppPopup`'s name is spoken and
+ * never drawn). The place still reaches a screen reader as the popup's pane
+ * title, and the panel opens on its first question. The voices lead, because
+ * the block that opens the panel leads with the reciter's name; the pace and
+ * the answers follow, in the order the listening menu has always kept. One
+ * panel rather than two menus (owner decision, 16.9: the block is one door,
+ * and the three questions are one subject).
  */
 @Composable
 internal fun ColumnScope.ListeningPanel(
@@ -119,7 +117,7 @@ private fun MenuLabel(text: String) {
  *
  * The pace keeps the app's own step row: the label is a bare line at the
  * menu's left inset and the five paces stand centered under it, as the text
- * sizes do on their own page (owner decision, forty-seventh session). The
+ * sizes do on their own page (owner decision, 7.1). The
  * row itself is [ScaleRow], the app's one step row, so one control is learned
  * once (owner decision, 7.1: the menu had carried a second copy and
  * the two had drifted).
@@ -131,7 +129,7 @@ private fun MenuLabel(text: String) {
  * off end of another. The order is the reader's own: what happens when the
  * ayah ends, then what happens when the surah ends. The five keep one gap and
  * the same leading mark the settings lists draw, so the same answer wears one
- * shape whichever door opened its list (owner decision, forty-eighth session).
+ * shape whichever door opened its list (owner decision, 4.6).
  */
 @Composable
 internal fun ColumnScope.ListeningMenu(
@@ -149,7 +147,7 @@ internal fun ColumnScope.ListeningMenu(
     // same the text sizes wear, so one control is learned once. It stands
     // centered on the menu rather than against its left edge, where it left
     // 10 dp of ground on one side and 28 on the other and read as a row that
-    // had slipped (owner decision, forty-seventh session). The row itself
+    // had slipped (owner decision, 7.1). The row itself
     // came from the settings page's old copy and the two had drifted, one
     // filling its whole cell and this one hugging its text (owner decision,
     // 16.0: one ScaleRow, one shape).
@@ -190,7 +188,7 @@ internal fun ColumnScope.ListeningMenu(
     // When the surah ends: the same two answers one unit larger. The next
     // surah is fetched with the reciter being heard and plays on. The five
     // stand in one list with one gap; the words carry the difference between
-    // the contexts, not the spacing (owner decision, forty-eighth session).
+    // the contexts, not the spacing (owner decision, 4.6).
     EndChoice(
         label = stringResource(R.string.playback_continue_surah),
         choice = EndOfAudio.CONTINUE_SURAH,

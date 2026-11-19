@@ -122,8 +122,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The reader's library, in its own file: the open content database, the
      * packs on the device, and the downloads that put them there. The reader's
      * choices are the view model's, and the library tells it when a pack
-     * arrives or leaves through the callbacks below
-     * (owner decision, 6.6). 
+     * arrives or leaves through the callbacks below (owner decision, 6.6).
      */
     private val library = ContentLibrary(
         application = application,
@@ -467,8 +466,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (fallbackReciter != null) {
             settings = settings.copy(recitation = fallbackReciter)
             // The voice the page was measured under is gone, so the rows are
-            // read again under the one that replaced it
-            // (owner decision, 17.7).
+            // read again under the one that replaced it (owner decision,
+            // 17.7).
             clearRowCache()
             viewModelScope.launch { settingsStore.setRecitation(fallbackReciter) }
         }
@@ -570,7 +569,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * shape and the direction mark are `core/ShareText`, where the reason for
      * the mark lives and its test pins it. The Arabic is the portable form:
      * the message leaves the app for another font, which cannot be assumed to
-     * draw the print's encoding (owner decision, the palette session). The
+     * draw the print's encoding (owner decision, 10.6). The
      * share card's image still draws the print itself.
      */
     suspend fun ayahShareText(ayah: Ayah): String {
@@ -845,11 +844,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val wanted = wantedWordsPack()
         val pack = library.pack(wanted) ?: return
         // The root travels with the meanings: the sheet names it under the
-        // gloss, and a reader who asked for the words asked for what the
-        // words are. It is asked for before the list's own check, because a
-        // list downloaded before this build has no root beside it and the
-        // switch is the one door that fetches the pair
-        // (owner report, 17.8).
+        // gloss, and a reader who asked for the words asked for what the words
+        // are. It is asked for before the list's own check, because a list
+        // downloaded before this build has no root beside it and the switch is
+        // the one door that fetches the pair (owner report, 17.8).
         library.installIfMissing(ContentDatabase.WORD_ROOT_PACK, select = false)
         if (library.isInstalled(wanted)) {
             settings = settings.copy(wordByWord = true)
@@ -1016,11 +1014,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The ayah the Tajweed legend samples, An-Nisa 4:11: its words carry
      * all seven families, so the legend shows a real word for each of them.
      *
-     * The reader never sees the ayah as a page, only seven of its words in
-     * the settings, each in its family color. It is read from the same
-     * content the reading draws, so the sample is audited text and audited
-     * code, and a word typed into the app can never stand in for it (owner
-     * decision, the legend session).
+     * The reader never sees the ayah as a page, only seven of its words in the
+     * settings, each in its family color. It is read from the same content the
+     * reading draws, so the sample is audited text and audited code, and a
+     * word typed into the app can never stand in for it (owner decision,
+     * 10.9).
      */
     suspend fun tajweedSampleAyah(): Ayah? = withContext(Dispatchers.IO) {
         library.database?.ayah(TAJWEED_SAMPLE_AYAH)

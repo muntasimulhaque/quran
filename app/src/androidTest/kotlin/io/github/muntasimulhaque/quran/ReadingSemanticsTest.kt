@@ -31,8 +31,8 @@ import org.junit.runner.RunWith
  * every ayah inside it stays its own stop with its own two actions, so a
  * reader who cannot see the page can walk it one verse at a time.
  *
- * This is the automated half of the TalkBack pass (owner decision, this
- * session): TalkBack itself needs a real screen-reader run, but the tree it
+ * This is the automated half of the TalkBack pass (owner decision, 6.6):
+ * TalkBack itself needs a real screen-reader run, but the tree it
  * walks is pinned here, so a change that swallows the ayahs into one node,
  * or takes an ayah's actions away, fails a leg instead of reaching a reader.
  */

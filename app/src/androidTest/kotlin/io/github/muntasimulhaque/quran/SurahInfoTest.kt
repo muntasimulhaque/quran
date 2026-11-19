@@ -21,8 +21,8 @@ import org.junit.runner.RunWith
  * The surah introductions are carried by the word list of the language, and
  * only the English list carries any today. The introduction is the one
  * deliberate exception to the no-fallback rule: a Bangla reader is shown the
- * English introduction rather than no door at all (owner decision, this
- * session). The word meanings keep the strict rule and never fall back, and
+ * English introduction rather than no door at all (owner decision, 6.6). The
+ * word meanings keep the strict rule and never fall back, and
  * that is pinned here too.
  */
 @RunWith(AndroidJUnit4::class)

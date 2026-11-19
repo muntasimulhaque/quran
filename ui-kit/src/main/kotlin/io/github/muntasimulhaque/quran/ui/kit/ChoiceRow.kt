@@ -68,8 +68,7 @@ val ChoiceRowNameInset = RowGutter + 12.dp + ChoiceMarkSize + 16.dp
  * A pill that ends here stands on the page's [Space.Gutter] with its word
  * inside it, where a bare mark may reach further out. A choice row's Remove
  * and the Add that takes its place on a pack row end on this one line, so a
- * pack does not change its right edge with its file (owner decision, an
- * earlier session).
+ * pack does not change its right edge with its file (owner decision, 17.6).
  */
 val ChoiceRowTrailingInset = RowGutter + Space.Row
 
@@ -94,24 +93,22 @@ val ChoiceRowTrailingInset = RowGutter + Space.Row
  *   never changes shape and an off row is never read as an off radio.
  *
  * The measurements are the app's one rhythm, so a list in the settings sheet
- * and the same list in the playback pill's menu cannot drift: a 22 dp mark,
- * 16 dp from it to the name, an 8 dp inset inside the capsule the reader
- * presses, and the 48 dp minimum target every row owes a finger. The capsule
- * keeps 8 dp from the row's own edge and 6 dp over and under itself, so the
- * ring's outer edge lands on the page's gutter, stacked rows read as a list,
- * and the first and last capsules never meet the sheet they stand on (owner
- * report, an earlier session: the capsule had carried the row's own room and
- * met the popup's edge).
- * [bottomPadding] closes the foot of a row that has a block under it. The
- * ripple is drawn on the capsule inside that target, so a row that answers a
- * tap wears the same shape the chips and the doors wear, wherever it stands
- * (owner decision, 7.4: the row's press was a rectangle while the
- * app's other controls were capsules). The action slot is drawn
- * only where a row has an action, so a row that is only a mark and a name
- * keeps its whole width for the name. An unselected ring is a control
- * boundary, so it holds the 3:1 a control owes: 0.6 of the accent was
- * measured at 3.0:1 and up on all four grounds, where a lighter ring read as
- * nothing.
+ * and the same list in the playback pill's menu cannot drift: a 22 dp mark, 16
+ * dp from it to the name, an 8 dp inset inside the capsule the reader presses,
+ * and the 48 dp minimum target every row owes a finger. The capsule keeps 8 dp
+ * from the row's own edge and 6 dp over and under itself, so the ring's outer
+ * edge lands on the page's gutter, stacked rows read as a list, and the first
+ * and last capsules never meet the sheet they stand on (owner report, 17.6: the
+ * capsule had carried the row's own room and met the
+ * popup's edge). [bottomPadding] closes the foot of a row that has a block
+ * under it. The ripple is drawn on the capsule inside that target, so a row
+ * that answers a tap wears the same shape the chips and the doors wear,
+ * wherever it stands (owner decision, 7.4: the row's press was a rectangle
+ * while the app's other controls were capsules). The action slot is drawn only
+ * where a row has an action, so a row that is only a mark and a name keeps its
+ * whole width for the name. An unselected ring is a control boundary, so it
+ * holds the 3:1 a control owes: 0.6 of the accent was measured at 3.0:1 and up
+ * on all four grounds, where a lighter ring read as nothing.
  *
  * The mark carries a test tag, because it is the anchor a test reads to prove
  * that the mark still leads the name on both surfaces.
@@ -143,10 +140,9 @@ fun ChoiceRow(
             // 48 dp the minimum holds and not the text's own shorter box.
             .minimumInteractiveComponentSize()
             // The gutter the capsule keeps from the row's own edge: the click
-            // target still owns the whole row, and only the shape the eye
-            // sees is inset, so stacked rows read as a list and the first and
-            // last capsules stay clear of the sheet
-            // (owner report, 7.4). 
+            // target still owns the whole row, and only the shape the eye sees
+            // is inset, so stacked rows read as a list and the first and last
+            // capsules stay clear of the sheet (owner report, 7.4).
             .padding(
                 start = RowGutter,
                 end = RowGutter,
@@ -176,8 +172,8 @@ fun ChoiceRow(
             Text(
                 text = title,
                 // A choice's name wears the row-name voice, so a settings
-                // list and the pill's menus read as one hand
-                // (owner decision, 13.3).
+                // list and the pill's menus read as one hand (owner decision,
+                // 13.3).
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )

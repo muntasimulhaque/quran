@@ -19,8 +19,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The frozen masthead: the name and its line, drawn once for the boot frame,
  * the language screen, and the reminder screen. It had three copies with two
  * sizes, two alphas, and two gaps, so the title visibly moved between the
- * first frame and the screen that replaced it (owner decision, the theme and
- * consistency session).
+ * first frame and the screen that replaced it (owner decision, 7.6).
  */
 @Composable
 fun Masthead(modifier: Modifier = Modifier) {

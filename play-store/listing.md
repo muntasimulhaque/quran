@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 20.4 (versionCode 206)
+Version: 20.5 (versionCode 207)
 
 ## Listing
 
