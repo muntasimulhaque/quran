@@ -37,7 +37,8 @@ import org.junit.runner.RunWith
  *
  * The pronunciation is the reciter page's shape: a door that says how many
  * surahs are on the device, and one row per surah with its own Remove (owner
- * decision, 18.8).
+ * decision, 18.8). A voice past 20 MB is asked about before it goes, by the
+ * same rule a recitation keeps (owner decision, 19.1).
  *
  * The page is composed on its own, so the legs need no device reading and no
  * network: the pack's state is handed in.
@@ -149,10 +150,18 @@ class WordsSwitchTest {
         }
         compose.onNodeWithText("Downloaded pronunciation (2)").assertExists().performClick()
         compose.onNodeWithText("Al-Baqarah").assertExists()
-        compose.onNodeWithText("38 MB").assertExists()
+        // Decimal units, the rule every size follows: 39,845,888 bytes
+        // rounds to 40 MB (owner decision, 19.7).
+        compose.onNodeWithText("40 MB").assertExists()
         compose.onNodeWithContentDescription("Remove the pronunciation of Al-Baqarah")
             .performClick()
-        assertEquals("the row says which surah it takes", 2, removed)
+        // A voice past 20 MB is asked about before it goes: 39,845,888 bytes
+        // is the question, and the row's Remove only raises it
+        // (owner decision, 19.1).
+        assertEquals("the row's Remove asks first", -1, removed)
+        compose.onNodeWithText("Remove Al-Baqarah?").assertExists()
+        compose.onNodeWithTag("remove-download-confirm").performClick()
+        assertEquals("the confirm says which surah it takes", 2, removed)
         compose.waitForIdle()
         compose.onAllNodesWithText("Al-Baqarah").assertCountEquals(0)
     }

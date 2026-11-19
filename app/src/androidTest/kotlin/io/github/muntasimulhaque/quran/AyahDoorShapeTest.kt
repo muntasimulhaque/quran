@@ -101,10 +101,12 @@ class AyahDoorShapeTest {
             (flash.left - door.left).value,
             1f,
         )
+        // The content sits on the target's floor, so the room the 48 dp
+        // target owns all falls above the number (owner decision, 19.1).
         assertEquals(
-            "the flash is centered in the target",
+            "the flash sits on the target's floor",
+            0f,
             (door.bottom - flash.bottom).value,
-            (flash.top - door.top).value,
             1f,
         )
         assertEquals(
