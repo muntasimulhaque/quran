@@ -198,7 +198,21 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.3 (versionCode 205).**
+**20.3 (versionCode 205).** The signed bundle comes from `build` run
+44493304725, the newest green run on `main`: the unit tests, lint, and
+`assembleDebug` passed, and the signed bundle `quran-20.3-vc205.aab` has
+SHA-256
+`c47efb04ac4fb274f1db07a0075beb974105ff24bc8fcb38950398bdc815a377`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. Nothing the reader sees in English
+changed, so the three committed store sets stand and no store capture leg
+ran. The Bangla interface did change, so `BanglaCaptureTest` photographed it
+on the phone, and `DailyAyahToggleTest` ran there too, because the Set
+button's word is the one string that grew and its own class is the one that
+opens the picker. Every pack database rebuilt byte for byte and every catalog
+hash and tag is unchanged. The store kit's version line was two releases
+behind and now reads this release.
 
 **What changed in 20.3.** The Bangla interface was read word by word and now
 says what it means. A note is নোট and only a translation's footnote is টীকা,
