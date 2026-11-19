@@ -14,7 +14,7 @@
     <string name="juz_title">পারা %1$d</string>
     <string name="juz_starts_at">%1$s, আয়াত %2$d থেকে শুরু</string>
 
-    <string name="last_read_empty_title">এখনো কোথাও পড়া হয়নি</string>
+    <string name="last_read_empty_title">এখনও কোথাও পড়া হয়নি</string>
     <string name="last_read_empty_body">আপনি যেসব আয়াত পড়েছেন সেগুলো এখানে রাখা হয়, নতুনটি আগে, যাতে ছেড়ে আসা স্থানে ফিরে যেতে পারেন।</string>
     <string name="last_read_detail">%1$s পড়া</string>
     <string name="last_read_ayah_label">আয়াত %1$d</string>
@@ -33,7 +33,7 @@
     </plurals>
 
     <string name="saved_empty_title">এখনও কিছু সংরক্ষিত হয়নি</string>
-    <string name="saved_empty_body">পড়ার সময় যে-কোনো আয়াতের নম্বরে চাপ দিন, তারপর সংরক্ষণ করুন। আপনার সংরক্ষিত আয়াতগুলো এবং সেগুলোতে লেখা নোট এখানে দেখা যাবে, নতুনটি আগে।</string>
+    <string name="saved_empty_body">পড়ার সময় যেকোনো আয়াতের নম্বরে চাপ দিন, তারপর সংরক্ষণ করুন। আপনার সংরক্ষিত আয়াতগুলো এবং সেগুলোতে লেখা নোট এখানে দেখা যাবে, নতুনটি আগে।</string>
     <string name="notes_detail">নোট লেখা %1$s</string>
     <string name="saved_detail">সংরক্ষণ করা %1$s</string>
     <string name="browse_saved_removed">সংরক্ষিত আয়াত মুছে ফেলা হয়েছে</string>

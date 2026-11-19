@@ -20,7 +20,7 @@
 
     <string name="card_tafsir_label">তাফসীর</string>
     <string name="card_tafsir_reference">%1$s %2$s</string>
-    <string name="card_add_tafsir">আয়াতটি ভালোভাবে বোঝার জন্য একটি তাফসীর যোগ করুন</string>
+    <string name="card_add_tafsir">আয়াতটি আরও গভীরভাবে বোঝার জন্য একটি তাফসীর যোগ করুন</string>
     <string name="card_opening_pack">%1$s খোলা হচ্ছে…</string>
     <string name="card_tafsir_missing">এই আয়াতের জন্য এই তাফসীরে কোনো অংশ নেই।</string>
     <string name="card_tafsir_offer_body">এই ভাষার তাফসীর। এটি %1$s, একবার ডাউনলোড করলে পরে অফলাইনে কাজ করবে।</string>
@@ -54,7 +54,7 @@
     <string name="reading_word_voice_missing">এই শব্দের আলাদা কোনো রেকর্ডিং নেই।</string>
     <string name="reading_word_voice_failed">এই সূরার উচ্চারণ আসেনি। আবার চেষ্টা করতে স্পিকার চাপুন।</string>
     <string name="reading_sheet_where">%1$s %2$s</string>
-    <string name="reading_door_noted">টীকা আছে</string>
+    <string name="reading_door_noted">নোট আছে</string>
     <string name="reading_grammar_pos_noun">ইসম (বিশেষ্য)</string>
     <string name="reading_grammar_pos_past_verb">মাদি (অতীতকালীন ক্রিয়া)</string>
     <string name="reading_grammar_pos_present_verb">মুদারি (বর্তমান ও ভবিষ্যৎকালীন ক্রিয়া)</string>
@@ -75,9 +75,9 @@
     <string name="reading_grammar_pos_explanation_particle">তাফসির (ব্যাখ্যাসূচক অব্যয়)</string>
     <string name="reading_grammar_pos_future_particle">ইস্তিকবাল (ভবিষ্যৎসূচক অব্যয়)</string>
     <string name="reading_grammar_pos_urging_particle">তাহদিদ (উৎসাহসূচক অব্যয়)</string>
-    <string name="reading_grammar_pos_surprise_particle">ফুজাআ (আকস্মিকতাসূচক অব্যয়)</string>
+    <string name="reading_grammar_pos_surprise_particle">ফাজাআ (আকস্মিকতাসূচক অব্যয়)</string>
     <string name="reading_grammar_pos_attention_particle">তানবিহ (সতর্কতাসূচক অব্যয়)</string>
-    <string name="reading_grammar_pos_deterrence_particle">রাদ (নিরস্তসূচক অব্যয়)</string>
+    <string name="reading_grammar_pos_deterrence_particle">রদ (নিবারণসূচক অব্যয়)</string>
     <string name="reading_grammar_pos_connective_particle">সিলা (সংযোগসূচক অব্যয়)</string>
     <string name="reading_grammar_pos_invocation_particle">দুআ (প্রার্থনাসূচক অব্যয়)</string>
     <string name="reading_grammar_pos_relative_noun">মাওসুল (সম্পর্কবাচক ইসম)</string>
@@ -94,7 +94,7 @@
     <string name="reading_grammar_pos_passive_participle">ইসমে মাফউল (কর্মবাচক বিশেষ্য)</string>
     <string name="reading_grammar_pos_interrogative_particle">ইস্তিফহাম (প্রশ্নবাচক অব্যয়)</string>
     <string name="reading_grammar_pos_disjoint_letters">হুরুফে মুকাত্তাআত</string>
-    <string name="reading_grammar_pos_verb_noun">ইসমে ফে\'ল</string>
+    <string name="reading_grammar_pos_verb_noun">ইসমে ফিল</string>
     <string name="reading_grammar_pos_exception_particle">ইস্তিসনা (ব্যতিক্রমসূচক অব্যয়)</string>
     <string name="reading_grammar_case_nominative">মারফু</string>
     <string name="reading_grammar_case_accusative">মানসুব</string>
@@ -128,8 +128,8 @@
     <string name="reading_word_lemma_count">%1$s, %2$s</string>
     <string name="reading_word_places_back">শব্দে ফিরুন</string>
     <string name="reading_word_places_current">আপনার স্থান</string>
-    <string name="reading_word_places_empty">এই ডিভাইসের শব্দ তালিকায় এই শব্দের স্থানগুলি নেই।</string>
-    <string name="reading_word_places_failed">শব্দ তালিকা থেকে স্থানগুলি পড়া যায়নি।</string>
+    <string name="reading_word_places_empty">এই ডিভাইসের শব্দ তালিকায় এই শব্দের স্থানগুলো নেই।</string>
+    <string name="reading_word_places_failed">শব্দ তালিকা থেকে স্থানগুলো পড়া যায়নি।</string>
     <string name="reading_word_places_retry">আবার চেষ্টা করুন</string>
     <plurals name="reading_word_places_count">
         <item quantity="one">%1$sটি স্থান</item>

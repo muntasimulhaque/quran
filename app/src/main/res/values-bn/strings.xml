@@ -13,7 +13,7 @@
     <string name="first_paint_preparing">লেখা প্রস্তুত হচ্ছে…</string>
 
     <string name="action_browse">কুরআন ব্রাউজ করুন</string>
-    <string name="action_search">অনুসন্ধান</string>
+    <string name="action_search">খুঁজুন</string>
     <string name="action_settings">সেটিংস</string>
     <string name="action_surah_top">সূরার শুরুতে ফিরে যান</string>
     <string name="action_save">সংরক্ষণ</string>
@@ -50,7 +50,7 @@
     <!-- The question before a save that carries a note is removed: the note
          is the reader's own writing, so it is asked about, never taken by
          one tap. -->
-    <string name="remove_saved_sheet_name">সংরক্ষিত আয়াত মোছা</string>
+    <string name="remove_saved_sheet_name">সংরক্ষিত আয়াত মুছুন</string>
 
     <string name="remove_saved_title">সংরক্ষিত আয়াতটি মুছবেন?</string>
     <string name="remove_saved_body">এতে লেখা নোটটিও মুছে যাবে।</string>
@@ -64,8 +64,8 @@
 
     <string name="content_problem_title">কুরআনের লেখা খোলা যায়নি</string>
     <string name="content_problem_storage_title">কুরআনের লেখা খোলার জায়গা নেই</string>
-    <string name="content_problem_body">কিছুই হারায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে। বারবার এমন হলে অ্যাপটি বন্ধ করে আবার খুলুন।</string>
-    <string name="content_problem_storage_body">এই ফোনে লেখাটির জন্য জায়গা দরকার। কিছু জায়গা খালি করে আবার চেষ্টা করুন। কিছুই হারায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে।</string>
+    <string name="content_problem_body">কিছুই হারিয়ে যায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে। বারবার এমন হলে অ্যাপটি বন্ধ করে আবার খুলুন।</string>
+    <string name="content_problem_storage_body">এই ফোনে লেখাটির জন্য জায়গা দরকার। কিছু জায়গা খালি করে আবার চেষ্টা করুন। কিছুই হারিয়ে যায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে।</string>
     <string name="content_problem_retry">আবার চেষ্টা করুন</string>
 
     <!-- The daily reminder: a quiet invitation to read, one ayah each day. -->
@@ -74,13 +74,13 @@
     <string name="daily_notification_title">%1$s, আয়াত %2$d</string>
     <string name="notification_settings_unavailable">এই ফোনে নোটিফিকেশন সেটিংস নেই।</string>
     <string name="exact_alarm_settings_unavailable">আলার্ম ও রিমাইন্ডারের অনুমতি নেওয়ার কোনো পর্দা এই ফোনে নেই।</string>
-    <string name="permission_notifications_denied">নোটিফিকেশন বন্ধ আছে, তাই প্রতিদিনের আয়াত পৌঁছাতে পারবে না।</string>
+    <string name="permission_notifications_denied">নোটিফিকেশন বন্ধ আছে, তাই প্রতিদিনের আয়াত আসবে না।</string>
     <string name="permission_notice_settings">সেটিংস</string>
 
     <string name="shortcut_continue_short">পড়া চালিয়ে যান</string>
     <string name="shortcut_continue_long">যেখানে ছেড়েছিলেন সেখানে ফিরুন</string>
-    <string name="shortcut_search_short">অনুসন্ধান</string>
-    <string name="shortcut_search_long">কুরআন অনুসন্ধান করুন</string>
+    <string name="shortcut_search_short">খুঁজুন</string>
+    <string name="shortcut_search_long">কুরআনে খুঁজুন</string>
     <string name="shortcut_daily_short">প্রতিদিনের আয়াত</string>
     <string name="shortcut_daily_long">আজকের আয়াত পড়ুন</string>
 </resources>

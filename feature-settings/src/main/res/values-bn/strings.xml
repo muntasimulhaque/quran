@@ -28,7 +28,7 @@
     <string name="settings_daily_picker_minute">মিনিট</string>
     <string name="settings_daily_picker_type">সময় লিখুন</string>
     <string name="settings_cancel">বাতিল</string>
-    <string name="settings_set">ঠিক করুন</string>
+    <string name="settings_set">নির্ধারণ করুন</string>
     <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
     <string name="settings_row_translation">অনুবাদ</string>
     <string name="settings_show_translation_title">অনুবাদ দেখান</string>
@@ -51,13 +51,13 @@
 
     <string name="settings_downloaded_label">এই ডিভাইসে থাকা সূরা (%1$d)</string>
     <string name="settings_downloaded_label_counting">এই ডিভাইসে থাকা সূরা</string>
-    <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এই ডিভাইসে এখনও কোনো সূরা নেই। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
+    <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এই ডিভাইসে এখনও কোনো সূরা নেই। যোগ করতে যেকোনো আয়াতে শুনুন চাপুন।</string>
     <string name="settings_downloaded_bundled">অ্যাপে অন্তর্ভুক্ত</string>
     <string name="settings_downloaded_remove">%1$s মুছুন</string>
 
     <string name="remove_download_sheet_name">ডাউনলোড মুছুন</string>
     <string name="remove_download_title">%1$s মুছে ফেলবেন?</string>
-    <string name="remove_download_body">এটি %1$s অডিও, আর মুছে ফেললে ফেরানো যাবে না। আবার প্লে করলে আবার ডাউনলোড হয়ে যাবে।</string>
+    <string name="remove_download_body">এটি %1$s অডিও, আর মুছে ফেললে ফেরানো যাবে না। আয়াতটি আবার শুনলে সেটি আবার ডাউনলোড হয়ে যাবে।</string>
     <string name="remove_download_keep">রাখুন</string>
 
     <string name="pack_action_add">যোগ করুন</string>
@@ -117,7 +117,7 @@
     <string name="credit_abdulbasit_use">মুরাত্তাল</string>
 
     <string name="settings_title_appearance">থিম</string>
-    <string name="settings_title_text">ফন্ট সাইজ</string>
+    <string name="settings_title_text">লেখার আকার</string>
     <string name="settings_title_reciters">তিলাওয়াতকারী</string>
     <string name="settings_title_translations">অনুবাদ</string>
     <string name="settings_title_tafsirs">তাফসীর</string>

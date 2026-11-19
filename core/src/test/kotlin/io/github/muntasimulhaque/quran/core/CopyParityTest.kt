@@ -16,18 +16,11 @@ import java.io.File
  * as two different Bangladeshi words: the note on a saved ayah was `নোট` in the
  * reading and `টীকা` in search, which is the word for a commentary (owner
  * decision, 19.6). The gate reads every module's two files and holds them to
- * one answer.
+ * one answer, and no exception stands: the one phrase that used to be allowed
+ * apart now reads the same in both modules, so the list of differences the
+ * app may say twice on purpose is empty.
  */
 class CopyParityTest {
-
-    /**
-     * The literals two modules may say differently in Bangla, by name, with the
-     * reason. The list is empty of anything the app says twice on purpose; the
-     * one entry is a shared English phrase and not a shared sentence.
-     */
-    private val allowedApart = mapOf(
-        "Search the Quran" to setOf("app:shortcut_search_long", "feature-search:search_hint"),
-    )
 
     @Test
     fun everyTranslatableStringHasItsBangla() {
@@ -79,7 +72,6 @@ class CopyParityTest {
         val offenders = mutableListOf<String>()
         for ((literal, byName) in readings) {
             if (byName.values.distinct().size <= 1) continue
-            if (byName.keys == allowedApart[literal]) continue
             offenders += literal + " -> " + byName.entries.joinToString(" | ") { it.key + " = " + it.value }
         }
         assertTrue(
