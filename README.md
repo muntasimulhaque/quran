@@ -198,18 +198,19 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.0 (versionCode 202).** The signed bundle comes from `build` run
-44403521765, the newest green run on `main`: the unit tests, lint, and
-`assembleDebug` passed, and the signed bundle `quran-20.0-vc202.aab` has
+**20.1 (versionCode 203).** The signed bundle comes from `build` run
+44468381517, the newest green run on `main`: the unit tests, lint, and
+`assembleDebug` passed, and the signed bundle `quran-20.1-vc203.aab` has
 SHA-256
-`e50b1646939e913d02c01f1c6cb62e33a0b5a33d315fdaea97137536ea3d3097`.
+`a6abfbeb2bcdd2c4a406aaf54e3880b7137bd130aa86b876b2e3ee6fca06ff2c`.
 `jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. A change that touches the player ran
-the affected classes on the phone, green: `BundledFatihaTest`, `FatihaPlayTest`,
-and `PlaybackServiceTest`. The three store sets were recaptured on the three
-AVDs and committed, and the Bangla leg photographed the Bangla reading and
-settings. The hand-off copy in `play-store/aab/` was deleted once Play had it.
+The same suite is green on this machine. No runtime behavior changed, so no
+instrumented class was run; the color change is held by `ContrastTest`,
+`SwitchContrastTest`, `WashTest`, `TajweedPaletteTest`, and
+`TajweedColorVisionTest`, all green. The three store sets were recaptured on
+the three AVDs and committed. The Bangla leg was skipped, because no Bangla
+string changed. The hand-off copy in `play-store/aab/` goes once Play has it.
 
 **What changed in 20.1.** The colors were audited end to end and no tone
 moved: the warm day page, the lifted night ground, the seven tajweed
