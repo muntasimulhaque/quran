@@ -198,9 +198,19 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.5 (versionCode 207).** The release is building: `build` on `main` runs
-the unit tests, lint, and `assembleDebug`, and the hand-off record below is
-written from the run that produces the signed bundle.
+**20.5 (versionCode 207).** The signed bundle comes from `build` run
+44580717804, the newest green run on `main` at the hand-off: the unit tests,
+lint, and `assembleDebug` passed, and the signed bundle `quran-20.5-vc207.aab`
+has SHA-256
+`1333353695f0e47d794abd530e180e668cd46741aa12ec397eb151ee95f1ee4b`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. No committed store frame carries
+either label this release changes, so the three committed store sets stand
+and no capture leg ran; the instrumented work was skipped. No content
+changed, so every pack and the content database are as they were and no
+catalog hash or tag moved, and no permission or dependency moved. The
+hand-off copy in `play-store/aab/` is deleted once Play has it.
 
 **What changed in 20.5.** A failure says Retry, a download says Downloading,
 and every decision in the code names the release that made it. "Try again"
