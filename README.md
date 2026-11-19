@@ -198,20 +198,20 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.1 (versionCode 203).** The signed bundle comes from `build` run
-44468381517, the newest green run on `main`: the unit tests, lint, and
-`assembleDebug` passed, and the signed bundle `quran-20.1-vc203.aab` has
-SHA-256
-`a6abfbeb2bcdd2c4a406aaf54e3880b7137bd130aa86b876b2e3ee6fca06ff2c`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. No runtime behavior changed, so no
-instrumented class was run; the color change is held by `ContrastTest`,
-`SwitchContrastTest`, `WashTest`, `TajweedPaletteTest`, and
-`TajweedColorVisionTest`, all green. The three store sets were recaptured on
-the three AVDs and committed. The Bangla leg was skipped, because no Bangla
-string changed. The hand-off copy in `play-store/aab/` was deleted once Play had it.
+**20.2 (versionCode 204).**
 
+**What changed in 20.2.** The app's content is a pack, and it now treats it
+that way everywhere. Every pack's display name, in English and in Bangla, and
+the translation, the tafsir, and the word list each interface language reads,
+come from `content/catalog.json` instead of from tables inside the app, so
+adding, replacing, or retiring a translation, a tafsir, a reciter, a word list,
+or a word pronunciation set is a row in the content pipeline's registry, a
+build step, and a release. Nothing on the glass moved: the same names in the
+same places, the reciters under the short names the pill always drew, and the
+word lists' catalog name now reads "Word meanings", the sentence the settings
+rows already showed. A new gate, `NoPackIdLiteralsTest`, fails the build if a
+pack id is written outside the content layer, and `tools help` prints the
+runbook for each pack type so the order to follow is written down.
 **What changed in 20.1.** The colors were audited end to end and no tone
 moved: the warm day page, the lifted night ground, the seven tajweed
 families, the one lapis accent, and the gold that never answers a tap all
@@ -223,26 +223,6 @@ deleted, so a surah closes with its completion line and the next one's card
 alone. The tajweed note now says what the print actually agrees on: the
 grouping is shared, the anchors are the subcontinent's, and the two
 divergences are the ones the palette's tests force.
-**What changed in 20.0.** Two more voices join the recitation, Mishari Rashid
-al-Afasy and Abdul Basit Abdul Samad, both murattal, so the reader chooses
-from four. Their word timings ship in the app, Al-Fatiha's audio is bundled in
-every voice, and every other surah still downloads one voice's package at a
-time from the project's own Releases. The voice the reader chose is the one
-whose timing pack is attached beside the core, because SQLite allows ten
-attached databases and four voices are four packs: the core pack now carries a
-recitation map, four rows naming every voice's audio folder, so any voice's
-files can be named without attaching that voice's pack. The core pack moves to
-version 7 for the map, and choosing a voice reopens the library over it. The
-one recording QUL numbered a word short, Abdul Basit's Al-Mujadila 22, gets its
-closing word from the measured tail, pinned to the voice edge table by a test.
-
-Content is 1.9.0: database `content-db-9f808fdf`, core pack
-`pack-core-45b53fe7` (version 7), reciter packs `pack-reciter-minshawi-af264024`,
-`pack-reciter-husary-9b09e6cb`, `pack-reciter-alafasy-0cc69f8b`, and
-`pack-reciter-abdulbasit-e25ca017`; word packs, root, and word pronunciation
-unchanged from 19.9.
-
-Every earlier release, from 15.2 to 20.0, is in [RELEASES.md](RELEASES.md).
 
 ## Corrections and contributions
 

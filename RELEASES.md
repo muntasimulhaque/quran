@@ -6,6 +6,39 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.2
+
+The app's content is a pack, and it now treats it that way everywhere. Every
+pack's display name, in English and in Bangla, and the translation, the tafsir,
+and the word list each interface language reads, come from
+`content/catalog.json` instead of from tables inside the app. Adding,
+replacing, or retiring a translation, a tafsir, a reciter, a word list, or a
+word pronunciation set is now a row in the content pipeline's registry, a
+build step, and a release: no app code names a pack.
+
+Nothing on the glass moved. The English and Bangla names are the same
+sentences in the same places, the reciters are still named by the short names
+the pill always drew, and the catalog's name for the word lists now reads "Word
+meanings", the sentence the settings rows already showed.
+
+A new gate keeps it that way. `NoPackIdLiteralsTest` fails the build when a
+pack id is written outside the content layer, so the next feature cannot
+quietly reach for one translation by name. That layer's own vocabulary is the
+core pack's constant, the convention builders for a reciter's and a word
+list's id, and the wire names a pack type round-trips through.
+
+The pipeline has one door. `tools/PackSources.kt` is the single registry of
+packs, holding each pack's datasets, its two names, its credit, its version,
+and whether the app ships it; the catalog, the credits page, and the released
+files all read it, and the language defaults are a table beside it whose ids
+the build checks. `tools help` prints the runbook for each pack type, so a new
+voice or a new translation has an order to follow rather than a hunt.
+
+The gates are the unit tests, lint, and `assembleDebug`, green here and in
+`build.yml`. Nothing the reader sees changed, so no instrumented class ran and
+no capture leg did, and the three store sets Play has stand. Every pack
+database rebuilt byte for byte and every catalog hash is unchanged.
+
 ## 20.1
 
 The app's colors were audited end to end, and the audit moved no tone. Every
