@@ -198,22 +198,34 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.3 (versionCode 205).** The signed bundle comes from `build` run
-44493304725, the newest green run on `main`: the unit tests, lint, and
-`assembleDebug` passed, and the signed bundle `quran-20.3-vc205.aab` has
+**20.4 (versionCode 206).** The signed bundle comes from `build` run
+PENDING_RUN, the newest green run on `main`: the unit tests, lint, and
+`assembleDebug` passed, and the signed bundle `quran-20.4-vc206.aab` has
 SHA-256
-`c47efb04ac4fb274f1db07a0075beb974105ff24bc8fcb38950398bdc815a377`.
+`PENDING_SHA`.
 `jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. Nothing the reader sees in English
-changed, so the three committed store sets stand and no store capture leg
-ran. The Bangla interface did change, so `BanglaCaptureTest` photographed it
-on the phone, and `DailyAyahToggleTest` ran there too, because the Set
-button's word is the one string that grew and its own class is the one that
-opens the picker. Every pack database rebuilt byte for byte and every catalog
-hash and tag is unchanged. The store kit's version line was two releases
-behind and now reads this release. The hand-off copy in `play-store/aab/` was
-deleted once Play had it.
+`PENDING_CERT`.
+The same suite is green on this machine. No committed store frame carries the
+listening panel's voice rows, so the three committed store sets stand and no
+store capture leg ran; the app classes this release touches, and the attach
+guard's own class, ran on the phone. No content changed, so every pack
+rebuilt byte for byte and every catalog hash and tag is unchanged, and no
+permission or dependency moved. The hand-off copy in `play-store/aab/` is
+deleted once Play has it.
+
+**What changed in 20.4.** Choosing another voice on the playing pill no
+longer offers a download the device already holds. All four reciters'
+timing packs ship inside the app and Al-Fatiha's audio travels in its assets
+for all four, so on that surah there was nothing to fetch for any voice, yet
+every switch offered a package and the tap played at once. The price was read
+from the library's attached packs, and only the chosen voice's timings are
+attached. The price now asks the device, and the pill's chooser reopens the
+library over the voice it has just chosen, so a switch to a voice already
+here plays with no offer at all. An offer still stands, naming the audio's
+size alone, where a surah's audio genuinely is not on the device. Two legs
+hold it, red before the fix and green after: a voice that is not attached
+still reads as on the device, and the reader's own round ends with no offer
+on the glass.
 
 **What changed in 20.3.** The Bangla interface was read word by word and now
 says what it means. A note is নোট and only a translation's footnote is টীকা,
@@ -233,19 +245,6 @@ Bangla name, শব্দের মূল, and the pronunciation credit says ল
 the other eight packs; both moved through the pipeline, so every pack hash and
 tag is unchanged. English is untouched: same sentences, same frames, same store
 copy.
-
-**What changed in 20.2.** The app's content is a pack, and it now treats it
-that way everywhere. Every pack's display name, in English and in Bangla, and
-the translation, the tafsir, and the word list each interface language reads,
-come from `content/catalog.json` instead of from tables inside the app, so
-adding, replacing, or retiring a translation, a tafsir, a reciter, a word list,
-or a word pronunciation set is a row in the content pipeline's registry, a
-build step, and a release. Nothing on the glass moved: the same names in the
-same places, the reciters under the short names the pill always drew, and the
-word lists' catalog name now reads "Word meanings", the sentence the settings
-rows already showed. A new gate, `NoPackIdLiteralsTest`, fails the build if a
-pack id is written outside the content layer, and `tools help` prints the
-runbook for each pack type so the order to follow is written down.
 
 ## Corrections and contributions
 

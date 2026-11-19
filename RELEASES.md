@@ -6,6 +6,45 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.4
+
+Choosing another voice on the playing pill no longer offers a download the
+device already holds.
+
+On Al-Fatiha the fault was plain: all four reciters' timing packs ship inside
+the app, and the surah's audio travels in its assets for all four, so there
+was nothing to fetch for any voice. Yet every switch offered a package, and
+the tap that answered it played at once, because the download was a file that
+was already there. It came back on every repeat, and for every voice,
+including the one that had just been left.
+
+The price a voice is offered at was read from the library's attached packs,
+and since 20.0 only the chosen voice's timings are attached, for the one
+connection's sake: a voice that is not being heard keeps its rows on disk and
+its schema out of the library. That rule is right and the price was wrong, so
+the price now asks the device. `packOnDevice` answers what is here, the
+listening offer reads it, and the attach guard is untouched: every query still
+runs only on a schema that exists.
+
+The pill's own chooser never reopened the library over the voice it had just
+chosen, so it priced against the previous voice's rows. It now takes the same
+door the settings page takes, which also makes the switch itself honest: with
+the timings already here, choosing a voice plays at once with no offer at all.
+An offer still stands where a surah's audio genuinely is not on the device,
+and it now names the audio's size alone.
+
+Two legs hold it: a voice that is not attached still reads as a pack on the
+device, and the reader's own round, an ayah playing in Husary while another
+voice is chosen on the pill, ends with no offer on the glass. Both were red
+before the fix and green after it. The unit tests, lint, and the debug build
+are green on this machine, and the two legs ran on the phone with the attach
+guard's own class beside them.
+
+No committed store frame carries the listening panel's voice rows, so the
+three store sets stand and no capture leg ran. No content changed, so every
+pack rebuilt byte for byte and every catalog hash and tag is unchanged, and no
+permission or dependency moved.
+
 ## 20.3
 
 The Bangla interface was read word by word, against the English that sits
