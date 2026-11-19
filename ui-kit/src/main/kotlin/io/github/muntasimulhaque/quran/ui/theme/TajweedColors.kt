@@ -11,8 +11,18 @@ import io.github.muntasimulhaque.quran.core.TajweedRule
  * hue of its own: the silent letters are quiet, the ghunnah is warm, the
  * qalqalah is red, the ikhafa is purple, the iqlab is teal, the idgham is
  * green, and the madda is blue. A group is the unit a reader's eye can hold;
- * the rules page names every rule inside its group. The hues are the print's,
- * so a reader who learned a color coded mushaf is not relearning the page.
+ * the rules page names every rule inside its group. The grouping is the
+ * print's, and the anchors follow the subcontinent's thirteen-line
+ * convention, the one this app's own readers learned: the silent letters
+ * gray, the qalaqah red, the idgham green. No mapping is universal across
+ * publishers, and the two deliberate divergences are held by the three
+ * tests below: the ikhfa wears purple rather than the subcontinent's blue
+ * because the madda owns the blue and the iqlab owns the teal, and a
+ * third blue would collapse two families under deuteranopia, which the
+ * 0.02 floor forbids; the ghunnah is warm because the print's green is the
+ * idgham's. What a reader who learned a color coded mushaf carries over is
+ * the grouping and its anchors, and the page keeps them (owner decision,
+ * 20.1).
  *
  * The palette has three rules, and all three are measured. Every tone clears
  * 4.5:1 on the page, the sheet, the floating control, the selected ayah's

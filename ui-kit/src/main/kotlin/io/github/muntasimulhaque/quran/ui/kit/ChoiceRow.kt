@@ -223,6 +223,7 @@ fun ChoiceRow(
 @Composable
 fun ChoiceMark(selected: Boolean, radio: Boolean) {
     val accent = MaterialTheme.colorScheme.primary
+    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
     Box(
         modifier = Modifier
             .size(ChoiceMarkSize)
@@ -235,8 +236,13 @@ fun ChoiceMark(selected: Boolean, radio: Boolean) {
             // measure.
             val unit = size.width / GlyphGrid.Size
             val weight = GlyphGrid.strokeFor(size.width / density)
+            // The unanswered ring wears the ground's muted voice, the same
+            // tone the switch's off knob wears, so every unanswered control
+            // in the app is one color and the chosen one differs by hue and
+            // lightness rather than by a share of the accent (owner decision,
+            // 20.1).
             drawCircle(
-                color = if (selected) accent else accent.copy(alpha = 0.6f),
+                color = if (selected) accent else quiet,
                 radius = 10f * unit,
                 style = Stroke(width = weight * unit),
             )

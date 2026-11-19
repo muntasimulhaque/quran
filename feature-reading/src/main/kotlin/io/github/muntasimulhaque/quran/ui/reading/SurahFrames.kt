@@ -304,6 +304,13 @@ internal fun ReadingReminderOffer(
  * The turn of a page then reads as a shorter breath than the arrival, which
  * is the order the reader meets them in, never as a card left on the edge of
  * the glass (owner decision, 12.2).
+ *
+ * The surah closes with the completion line alone. The short gray rule
+ * that stood over it was a hairline at a share no scale names, too faint
+ * to read as a mark and too quiet to close anything the line does not
+ * say. A gold closing mark in the ornament's voice was weighed and set
+ * aside: the turn stays the quieter breath, plain type and one card
+ * (owner decision, 20.1).
  */
 /** The turn of a page: the lesser breath, argued against the arrival in
  * [SurahEnd]'s own KDoc. */
@@ -326,12 +333,6 @@ internal fun SurahEnd(
             .padding(top = EndTop, bottom = EndBottom),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            Modifier
-                .fillMaxWidth(0.22f)
-                .height(1.dp)
-                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)),
-        )
         Text(
             text = stringResource(R.string.reading_surah_complete, surah.nameSimple),
             style = MaterialTheme.typography.bodySmall,
