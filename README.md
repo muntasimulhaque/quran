@@ -198,18 +198,26 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.2 (versionCode 204).** The signed bundle comes from `build` run
-44478002741, the newest green run on `main`: the unit tests, lint, and
-`assembleDebug` passed, and the signed bundle `quran-20.2-vc204.aab` has
-SHA-256
-`b2df9015d143cd2c7a3896d311f9822b16bff71d3c52def530bc28649a0d6d0f`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. Nothing the reader sees changed, so
-the three committed store sets stand and no capture leg ran; no runtime
-behavior changed, so no instrumented class was run. Every pack database
-rebuilt byte for byte and every catalog hash is unchanged. The hand-off copy
-in `play-store/aab/` was deleted once Play had it.
+**20.3 (versionCode 205).**
+
+**What changed in 20.3.** The Bangla interface was read word by word and now
+says what it means. A note is নোট and only a translation's footnote is টীকা,
+so the ayah door no longer calls the reader's own writing a commentary, the
+one place that drift had survived. Two instructions that named a Play button
+the app does not have now name the শুনুন the reader sees, and the tap they ask
+for is the চাপুন used everywhere else, so প্লে and ট্যাপ have left the app. The
+recovery message says কিছুই হারিয়ে যায়নি rather than হারায়নি, and "the daily
+ayah cannot arrive" is আসবে না in all four places that say it. Search had two
+words for one act, অনুসন্ধান on the door and খোঁজা inside the sheet, and now has
+one: খুঁজুন, খোঁজা হচ্ছে, যেখানে খুঁজবেন, with the parity gate's one allowed
+exception deleted. Smaller corrections: নির্ধারণ করুন for the Set button,
+লেখার আকার for the Font size row, the tafsir offer's depth, three grammar
+labels spelled the way the corpus declares them, and one house spelling each
+for এখনও, যেকোনো, and -গুলো. In the catalog, the word roots pack gained its
+Bangla name, শব্দের মূল, and the pronunciation credit says লাইব্রেরি থেকে like
+the other eight packs; both moved through the pipeline, so every pack hash and
+tag is unchanged. English is untouched: same sentences, same frames, same store
+copy.
 
 **What changed in 20.2.** The app's content is a pack, and it now treats it
 that way everywhere. Every pack's display name, in English and in Bangla, and
@@ -223,17 +231,6 @@ word lists' catalog name now reads "Word meanings", the sentence the settings
 rows already showed. A new gate, `NoPackIdLiteralsTest`, fails the build if a
 pack id is written outside the content layer, and `tools help` prints the
 runbook for each pack type so the order to follow is written down.
-**What changed in 20.1.** The colors were audited end to end and no tone
-moved: the warm day page, the lifted night ground, the seven tajweed
-families, the one lapis accent, and the gold that never answers a tap all
-stand as measured, and every one of them is still held by its own test. Two
-strays were shares no scale names, and both are gone: the empty choice ring
-now wears the quiet voice the off switch's knob wears, so every unanswered
-control is one color, and the faint gray rule over the end of a surah is
-deleted, so a surah closes with its completion line and the next one's card
-alone. The tajweed note now says what the print actually agrees on: the
-grouping is shared, the anchors are the subcontinent's, and the two
-divergences are the ones the palette's tests force.
 
 ## Corrections and contributions
 

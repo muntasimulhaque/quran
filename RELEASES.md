@@ -6,6 +6,50 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.3
+
+The Bangla interface was read word by word, against the English that sits
+beside it in each module's `values-bn`, and it now says what it means.
+
+A note is নোট and only a translation's footnote is টীকা, so the ayah door no
+longer calls the reader's own writing a commentary, which is the drift a gate
+was added to stop and the one place it had survived. Two instructions named a
+Play button the app does not have; they now name the শুনুন the reader sees, and
+the tap they ask for is the চাপুন used everywhere else, so প্লে and ট্যাপ have
+left the app. The recovery message says কিছুই হারিয়ে যায়নি rather than
+হারায়নি, which put "nothing" in the losing seat of the sentence. And "the
+daily ayah cannot arrive" is আসবে না in all four places that say it, the three
+settings sentences having already chosen that word.
+
+Search had two words for one act, অনুসন্ধান on the door and hint and খোঁজা inside
+the sheet, and now has one: খুঁজুন, খোঁজা হচ্ছে, যেখানে খুঁজবেন. The parity gate
+allowed exactly one phrase to be read two ways across modules, that hint and the
+long search shortcut, and with the app saying one word the exception is deleted:
+a literal two modules share must now read the same in Bangla with no list of
+exceptions beside it.
+
+Smaller corrections, each one word: the Set button says নির্ধারণ করুন, because
+ঠিক করুন reads as repair; the Font size row is লেখার আকার, since সাইজ was the
+one hybrid in a page whose rows are all লেখা; the tafsir offer carries the
+English's depth; and three grammar labels spell their Arabic the way the corpus
+declares it (রদ for حرف ردع, ফাজাআ for حرف فجاءة, ইসমে ফিল for اسم فعل). House
+spellings were settled where the app contradicted itself: এখনও, যেকোনো, and the
+plural suffix -গুলো.
+
+In the catalog, the word roots pack has the Bangla name it lacked, শব্দের মূল,
+so a Bangla reader who adds roots no longer meets an English title on the About
+page, and the pronunciation pack's credit says লাইব্রেরি থেকে like the other
+eight packs that render the same English "via the Quranic Universal Library".
+Both moved through the pipeline's registry rather than the catalog file: the
+packs rebuilt byte for byte and every hash and tag is unchanged, so the only
+edit in `content/catalog.json` is those two Bangla fields.
+
+The English interface was not touched, so no English frame moved and the three
+store sets Play has stand. The unit tests and lint are green, the Bangla capture
+leg photographed the reading and the settings hub on the phone, and the class
+that owns the time picker ran there too, since a button's word is the one thing
+in this release that grew.
+
 ## 20.2
 
 The app's content is a pack, and it now treats it that way everywhere. Every
