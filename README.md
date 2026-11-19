@@ -209,7 +209,7 @@ The same suite is green on this machine. A change that touches the player ran
 the affected classes on the phone, green: `BundledFatihaTest`, `FatihaPlayTest`,
 and `PlaybackServiceTest`. The three store sets were recaptured on the three
 AVDs and committed, and the Bangla leg photographed the Bangla reading and
-settings. The hand-off copy stands in `play-store/aab/` until Play has it.
+settings. The hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 20.0.** Two more voices join the recitation, Mishari Rashid
 al-Afasy and Abdul Basit Abdul Samad, both murattal, so the reader chooses
