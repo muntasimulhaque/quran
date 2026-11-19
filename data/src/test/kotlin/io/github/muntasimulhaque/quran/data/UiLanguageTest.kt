@@ -22,7 +22,7 @@ class UiLanguageTest {
                 tafsir = "tafsir-ibn-kathir-en",
                 words = "words-en",
             ),
-            UiLanguage.English.content,
+            catalog().of(UiLanguage.English),
         )
         assertEquals(
             LanguageContent(
@@ -30,8 +30,19 @@ class UiLanguageTest {
                 tafsir = "tafsir-ibn-kathir-bn",
                 words = "words-bn",
             ),
-            UiLanguage.Bangla.content,
+            catalog().of(UiLanguage.Bangla),
         )
+    }
+
+    @Test
+    fun aLanguageTheCatalogReadsNothingForChoosesNothing() {
+        // An empty catalog names no pack, and a language choice must not put
+        // an empty id into the reader's settings where no catalog names it.
+        val chosen = AppSettings().withLanguage(UiLanguage.Bangla, CatalogContent())
+        assertEquals("bn", chosen.uiLanguage)
+        assertTrue(chosen.translationPacks.isEmpty())
+        assertTrue(chosen.tafsirPacks.isEmpty())
+        assertTrue(pendingAfterLanguage(null, UiLanguage.Bangla, setOf("kept"), CatalogContent()) == setOf("kept"))
     }
 
     @Test
@@ -72,22 +83,50 @@ class UiLanguageTest {
         assertTrue(packs.forLanguage("ar").isEmpty())
     }
 
-    private fun pack(id: String, language: String) = ContentPack(
+    private fun pack(
+        id: String,
+        language: String,
+        shipped: Boolean = false,
+    ) = ContentPack(
         id = id,
-        type = if (id.startsWith("tafsir")) PackType.Tafsir else PackType.Translation,
+        type = when {
+            id.startsWith("tafsir") -> PackType.Tafsir
+            id.startsWith("words") -> PackType.Words
+            else -> PackType.Translation
+        },
         name = id,
         language = language,
         credit = "test",
         license = "test",
         version = "1",
-        shipped = false,
+        shipped = shipped,
         ayahs = 6236,
         bytes = 1,
     )
 
+    /**
+     * The catalog as the content build writes it: every pack the app carries,
+     * and the `defaults` block that names what each interface language reads
+     * (owner decision, 20.2).
+     */
+    internal fun catalog(): CatalogContent = CatalogContent(
+        packs = listOf(
+            pack("translation-saheeh-en", "en", shipped = true),
+            pack("translation-al-bayan-bn", "bn", shipped = true),
+            pack("tafsir-ibn-kathir-en", "en"),
+            pack("tafsir-ibn-kathir-bn", "bn"),
+            pack("words-en", "en"),
+            pack("words-bn", "bn"),
+        ),
+        defaults = mapOf(
+            "en" to LanguageContent("translation-saheeh-en", "tafsir-ibn-kathir-en", "words-en"),
+            "bn" to LanguageContent("translation-al-bayan-bn", "tafsir-ibn-kathir-bn", "words-bn"),
+        ),
+    )
+
     @Test
     fun aFreshInstallStartsAtAlFatihaWithThePhonesLanguage() {
-        val fresh = AppSettings().bootstrapFor(UiLanguage.Bangla)
+        val fresh = AppSettings().bootstrapFor(UiLanguage.Bangla, catalog())
         assertEquals("bn", fresh.uiLanguage)
         assertEquals(1, fresh.ayah)
         assertEquals(setOf("translation-al-bayan-bn"), fresh.translationPacks)
@@ -98,7 +137,7 @@ class UiLanguageTest {
 
     @Test
     fun aFreshChoiceSelectsTheLanguagesOwnPacks() {
-        val chosen = AppSettings().withLanguage(UiLanguage.Bangla)
+        val chosen = AppSettings().withLanguage(UiLanguage.Bangla, catalog())
         assertEquals("bn", chosen.uiLanguage)
         assertEquals(setOf("translation-al-bayan-bn"), chosen.translationPacks)
         assertEquals(setOf("tafsir-ibn-kathir-bn"), chosen.tafsirPacks)
@@ -106,8 +145,8 @@ class UiLanguageTest {
 
     @Test
     fun movingLanguageSwapsTheDefaults() {
-        val english = AppSettings().withLanguage(UiLanguage.English)
-        val bangla = english.withLanguage(UiLanguage.Bangla)
+        val english = AppSettings().withLanguage(UiLanguage.English, catalog())
+        val bangla = english.withLanguage(UiLanguage.Bangla, catalog())
         assertEquals(setOf("translation-al-bayan-bn"), bangla.translationPacks)
         assertEquals(setOf("tafsir-ibn-kathir-bn"), bangla.tafsirPacks)
     }
@@ -118,6 +157,7 @@ class UiLanguageTest {
             language = "bn",
             selected = setOf("translation-retired-bn"),
             offered = setOf("translation-al-bayan-bn", "translation-saheeh-en"),
+            content = catalog(),
         )
         assertEquals(setOf("translation-al-bayan-bn"), kept)
     }
@@ -128,6 +168,7 @@ class UiLanguageTest {
             language = "bn",
             selected = setOf("translation-retired-bn", "translation-saheeh-en"),
             offered = setOf("translation-al-bayan-bn", "translation-saheeh-en"),
+            content = catalog(),
         )
         assertEquals(setOf("translation-saheeh-en", "translation-al-bayan-bn"), kept)
     }
@@ -138,6 +179,7 @@ class UiLanguageTest {
             language = "bn",
             selected = setOf("translation-saheeh-en"),
             offered = setOf("translation-al-bayan-bn", "translation-saheeh-en"),
+            content = catalog(),
         )
         assertEquals(setOf("translation-saheeh-en"), kept)
     }
@@ -154,7 +196,7 @@ class UiLanguageTest {
             translationPacks = setOf("translation-saheeh-en"),
             tafsirPacks = setOf("tafsir-ibn-kathir-en", "tafsir-added-by-hand"),
         )
-        val after = before.withLanguage(UiLanguage.Bangla)
+        val after = before.withLanguage(UiLanguage.Bangla, catalog())
         assertTrue("the added tafsir must stay", "tafsir-added-by-hand" in after.tafsirPacks)
         assertTrue("the Bangla tafsir joins it", "tafsir-ibn-kathir-bn" in after.tafsirPacks)
         assertTrue("the English default steps aside", "tafsir-ibn-kathir-en" !in after.tafsirPacks)
@@ -171,6 +213,7 @@ class UiLanguageTest {
             previous = UiLanguage.English,
             next = UiLanguage.Bangla,
             pending = setOf("translation-saheeh-en", "tafsir-ibn-kathir-en", "words-en"),
+            content = catalog(),
         )
         assertEquals(
             setOf("translation-al-bayan-bn", "tafsir-ibn-kathir-bn", "words-en"),
@@ -184,6 +227,7 @@ class UiLanguageTest {
             previous = UiLanguage.English,
             next = UiLanguage.Bangla,
             pending = setOf("translation-added-by-hand"),
+            content = catalog(),
         )
         assertEquals(
             setOf("translation-added-by-hand", "translation-al-bayan-bn", "tafsir-ibn-kathir-bn"),
@@ -197,6 +241,7 @@ class UiLanguageTest {
             previous = null,
             next = UiLanguage.English,
             pending = emptySet(),
+            content = catalog(),
         )
         assertEquals(setOf("translation-saheeh-en", "tafsir-ibn-kathir-en"), after)
     }

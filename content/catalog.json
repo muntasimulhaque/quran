@@ -1,6 +1,18 @@
 {
     "version": 1,
     "baseUrl": "https://github.com/muntasimulhaque/quran/releases/download",
+    "defaults": {
+        "en": {
+            "translation": "translation-saheeh-en",
+            "tafsir": "tafsir-ibn-kathir-en",
+            "words": "words-en"
+        },
+        "bn": {
+            "translation": "translation-al-bayan-bn",
+            "tafsir": "tafsir-ibn-kathir-bn",
+            "words": "words-bn"
+        }
+    },
     "packs": [
         {
             "id": "core",

@@ -261,6 +261,65 @@ class Packs(private val root: File) {
         ayahs = 6236,
     )
 
+    /**
+     * One interface language's own reading, as the catalog's `defaults`
+     * block records it.
+     */
+    private data class LanguageDefault(
+        val tag: String,
+        val translation: String,
+        val tafsir: String,
+        val words: String,
+    )
+
+    /**
+     * What each interface language reads, written into the catalog's
+     * `defaults` block.
+     *
+     * A language's own translation, tafsir, and word list are content: a
+     * second English, or a translation in a language the app carries no
+     * interface for yet, is a pack and a row here, never a constant in the
+     * app. The app's interface languages are its `values-xx` folders, so a
+     * new *interface* language is still a translation pass and a folder; a
+     * new *content* language is a row in this table (owner decision, 20.2).
+     */
+    private val languageDefaults = listOf(
+        LanguageDefault(
+            tag = "en",
+            translation = "translation-saheeh-en",
+            tafsir = "tafsir-ibn-kathir-en",
+            words = "words-en",
+        ),
+        LanguageDefault(
+            tag = "bn",
+            translation = "translation-al-bayan-bn",
+            tafsir = "tafsir-ibn-kathir-bn",
+            words = "words-bn",
+        ),
+    )
+
+    /**
+     * The catalog's `defaults` block, with every id checked against the packs
+     * this run writes. A default that names no pack is a typo that would
+     * leave a language reading the wrong content or none, so it stops the
+     * build here rather than reaching a reader (owner decision, 20.2).
+     */
+    private fun defaultsJson(ids: Set<String>): JsonObject = buildJsonObject {
+        for (row in languageDefaults) {
+            for (id in listOf(row.translation, row.tafsir, row.words)) {
+                check(id in ids) { "packs: the ${row.tag} defaults name $id, which is not a pack" }
+            }
+            put(
+                row.tag,
+                buildJsonObject {
+                    put("translation", row.translation)
+                    put("tafsir", row.tafsir)
+                    put("words", row.words)
+                },
+            )
+        }
+    }
+
     fun run(): Int {
         if (!database.exists()) {
             println("packs: content/quran.db is missing; run tools build first")
@@ -293,6 +352,7 @@ class Packs(private val root: File) {
         val json = buildJsonObject {
             put("version", 1)
             put("baseUrl", "https://github.com/muntasimulhaque/quran/releases/download")
+            put("defaults", defaultsJson(packs.map { it.id }.toSet() + wordAudioPack.id))
             put("packs", JsonArray(entries))
         }
         catalog.writeText(

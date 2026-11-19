@@ -145,4 +145,34 @@ class PackCatalogTest {
         )
         assertEquals("Word meanings", parsed.get("words-en")!!.displayName("bn"))
     }
+
+    /**
+     * The `defaults` block names what each interface language reads, and a
+     * slot it names that the catalog does not carry resolves through the
+     * packs instead of breaking the language (owner decision, 20.2).
+     */
+    @Test
+    fun theCatalogCarriesWhatEachLanguageReads() {
+        val parsed = PackCatalog.parse(
+            """
+            {"defaults":{"en":{"translation":"translation-saheeh-en","tafsir":"tafsir-ibn-kathir-en","words":"words-en"}},
+             "packs":[
+               {"id":"translation-saheeh-en","type":"translation","name":"Saheeh International","language":"en","shipped":true,"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+               {"id":"tafsir-ibn-kathir-en","type":"tafsir","name":"Ibn Kathir","language":"en","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+             ]}
+            """.trimIndent(),
+        )
+        val content = parsed.content().of(UiLanguage.English)
+        assertEquals("translation-saheeh-en", content.translation)
+        assertEquals("tafsir-ibn-kathir-en", content.tafsir)
+        assertEquals("", content.words)
+    }
+
+    /** A catalog with no `defaults` at all still names what a language reads. */
+    @Test
+    fun aCatalogWithoutDefaultsStillResolvesALanguagesPacks() {
+        val content = PackCatalog.parse(json).content().of(UiLanguage.English)
+        assertEquals("translation-saheeh-en", content.translation)
+        assertEquals("", content.tafsir)
+    }
 }

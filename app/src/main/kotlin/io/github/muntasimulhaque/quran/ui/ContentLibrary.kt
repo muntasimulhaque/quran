@@ -27,6 +27,7 @@ import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.CatalogContent
 import io.github.muntasimulhaque.quran.data.bootstrapFor
 import io.github.muntasimulhaque.quran.data.translationSelectionAfterRemoval
 import io.github.muntasimulhaque.quran.R
@@ -137,6 +138,9 @@ class ContentLibrary(
         private set
 
     private var catalog: PackCatalog = PackCatalog.parse("{}")
+
+    /** The catalog as the language rules read it: what a language choice reads. */
+    val catalogContent: CatalogContent get() = catalog.content()
     private var installed: Set<String> = emptySet()
     private var draining = false
 
@@ -220,7 +224,7 @@ class ContentLibrary(
             // language's own translation, before the library is opened.
             var storedNow = settingsStore.settings.first()
             val offeredNow = PackCatalog.load(application)
-            storedNow = bootstrapLanguage(storedNow)
+            storedNow = bootstrapLanguage(storedNow, offeredNow)
             installShipped(offeredNow)
             val installedNow = store.installed()
             // The catalog is marked with what this device has, so a pack
@@ -328,6 +332,7 @@ class ContentLibrary(
             language = stored.uiLanguage,
             selected = stored.translationPacks,
             offered = offered,
+            content = catalog.content(),
         )
         // Every pack folder the catalog does not name is a pack this build
         // no longer offers. Removing it is the one place a retired pack's
@@ -355,10 +360,10 @@ class ContentLibrary(
      * unanswered, so the first page is the Quran and the reminder is offered
      * later, after the reader has read (owner decision, 15.5).
      */
-    private suspend fun bootstrapLanguage(stored: AppSettings): AppSettings {
+    private suspend fun bootstrapLanguage(stored: AppSettings, catalog: PackCatalog): AppSettings {
         if (stored.uiLanguage != null) return stored
         val language = UiLanguage.ofSystem()
-        val next = stored.bootstrapFor(language)
+        val next = stored.bootstrapFor(language, catalog.content())
         settingsStore.bootstrapLanguage(
             language = language,
             translationPacks = next.translationPacks,

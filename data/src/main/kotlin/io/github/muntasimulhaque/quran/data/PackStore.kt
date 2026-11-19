@@ -18,7 +18,15 @@ import java.security.MessageDigest
  * `filesDir/packs/<id>/<id>.db`. Removing it deletes that file. The core pack
  * (the Quran text) and the two translations are shipped inside the app.
  */
-class PackCatalog private constructor(private val packs: Map<String, ContentPack>) {
+class PackCatalog private constructor(
+    private val packs: Map<String, ContentPack>,
+    /**
+     * The catalog's `defaults` block: what each interface language reads.
+     * It is content, so a language's own packs are named by the catalog and
+     * not by a constant in the app (owner decision, 20.2).
+     */
+    private val defaults: Map<String, LanguageContent> = emptyMap(),
+) {
 
     fun all(): List<ContentPack> = packs.values.sortedWith(
         compareBy({ if (it.shipped) 0 else 1 }, { it.type.ordinal }, { it.name.lowercase() }),
@@ -28,9 +36,12 @@ class PackCatalog private constructor(private val packs: Map<String, ContentPack
 
     fun ofType(type: PackType): List<ContentPack> = all().filter { it.type == type }
 
+    /** The catalog as the language rules read it. */
+    fun content(): CatalogContent = CatalogContent(all(), defaults)
+
     /** The same catalog, marked with what this device already has. */
     fun withInstalled(installed: Set<String>): PackCatalog =
-        PackCatalog(packs.mapValues { (id, pack) -> pack.copy(installed = id in installed) })
+        PackCatalog(packs.mapValues { (id, pack) -> pack.copy(installed = id in installed) }, defaults)
 
     companion object {
         const val CORE_ID = "core"
@@ -76,7 +87,28 @@ class PackCatalog private constructor(private val packs: Map<String, ContentPack
                     url = url,
                 )
             }
-            return PackCatalog(out)
+            return PackCatalog(out, defaults(root))
+        }
+
+        /**
+         * The catalog's `defaults` block, one row per interface language.
+         * A language the block does not name, or a row with a missing slot,
+         * resolves through the packs themselves, so an older catalog shape
+         * leaves a language reading something real (owner decision, 20.2).
+         */
+        private fun defaults(root: JSONObject): Map<String, LanguageContent> {
+            val block = root.optJSONObject("defaults") ?: return emptyMap()
+            val out = HashMap<String, LanguageContent>()
+            for (tag in block.keys()) {
+                if (!SafePaths.validLanguage(tag)) continue
+                val row = block.optJSONObject(tag) ?: continue
+                out[tag] = LanguageContent(
+                    translation = row.optString("translation"),
+                    tafsir = row.optString("tafsir"),
+                    words = row.optString("words"),
+                )
+            }
+            return out
         }
     }
 }

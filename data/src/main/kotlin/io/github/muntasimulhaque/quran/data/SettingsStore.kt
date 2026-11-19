@@ -562,9 +562,18 @@ class SettingsStore(private val context: Context) {
      * own. A pack the reader added by hand is not a language's default and is
      * left exactly where it was (owner decision, 14.8).
      */
-    suspend fun setPendingForLanguage(previous: UiLanguage?, next: UiLanguage) {
+    suspend fun setPendingForLanguage(
+        previous: UiLanguage?,
+        next: UiLanguage,
+        content: CatalogContent,
+    ) {
         context.settingsStore.edit {
-            it[PENDING_PACKS] = pendingAfterLanguage(previous, next, it[PENDING_PACKS].orEmpty())
+            it[PENDING_PACKS] = pendingAfterLanguage(
+                previous = previous,
+                next = next,
+                pending = it[PENDING_PACKS].orEmpty(),
+                content = content,
+            )
         }
     }
 

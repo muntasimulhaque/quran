@@ -892,7 +892,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun chooseLanguage(language: UiLanguage) {
         val previous = UiLanguage.of(settings.uiLanguage)
-        val next = settings.withLanguage(language)
+        val next = settings.withLanguage(language, library.catalogContent)
         settings = next
         clearRowCache()
         // The boot-time mirror lands before anything else, so the Activity
@@ -912,7 +912,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // the reader left takes its packs with it, so a former language's
             // translation can never come back when an update detaches it
             // (owner decision, 14.8).
-            settingsStore.setPendingForLanguage(previous, language)
+            settingsStore.setPendingForLanguage(previous, language, library.catalogContent)
             library.drainPending()
         }
         // A reader who already reads with word meanings is given the word

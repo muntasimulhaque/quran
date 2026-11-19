@@ -1,13 +1,14 @@
 package io.github.muntasimulhaque.quran.data
 
 /**
- * The languages the interface is written in, and the content each one reads.
+ * The languages the interface is written in.
  *
  * The choice is one: a reader who picks Bangla gets a Bangla interface, the
  * Bangla translation, the Bangla tafsir, and the Bangla word list. The
- * interface strings live in `values-bn`; this enum is the code side of the
- * same decision, and it is the only place that maps a language to its packs,
- * so no screen has to know which translation belongs to which language.
+ * interface strings live in `values-bn`; which packs a language reads is the
+ * catalog's `defaults` block, so a new translation in any language is a
+ * content operation and a second English never touches this file
+ * (owner decision, 20.2).
  *
  * The tag is the BCP 47 tag Android uses for a resource folder and a locale,
  * and it is what is stored in the reader's settings.
@@ -15,21 +16,6 @@ package io.github.muntasimulhaque.quran.data
 enum class UiLanguage(val tag: String) {
     English("en"),
     Bangla("bn");
-
-    /** The packs this language reads by default. */
-    val content: LanguageContent
-        get() = when (this) {
-            English -> LanguageContent(
-                translation = TRANSLATION_EN,
-                tafsir = TAFSIR_EN,
-                words = ContentDatabase.wordsPackId("en"),
-            )
-            Bangla -> LanguageContent(
-                translation = TRANSLATION_BN,
-                tafsir = TAFSIR_BN,
-                words = ContentDatabase.wordsPackId("bn"),
-            )
-        }
 
     companion object {
         /** The language a stored tag names, or null when it names none. */
@@ -43,18 +29,6 @@ enum class UiLanguage(val tag: String) {
          */
         fun ofSystem(languageTag: String? = java.util.Locale.getDefault().language): UiLanguage =
             of(languageTag) ?: English
-
-        /** The id of the Saheeh International translation pack. */
-        const val TRANSLATION_EN = "translation-saheeh-en"
-
-        /** The id of the Al-Bayan Simple Translation pack. */
-        const val TRANSLATION_BN = "translation-al-bayan-bn"
-
-        /** The id of the English Ibn Kathir pack. */
-        const val TAFSIR_EN = "tafsir-ibn-kathir-en"
-
-        /** The id of the Bangla Ibn Kathir pack. */
-        const val TAFSIR_BN = "tafsir-ibn-kathir-bn"
     }
 }
 
@@ -70,7 +44,64 @@ data class LanguageContent(
      * The word list is not here, because it is the reader's own switch and
      * not a language's default (owner decision, 14.8).
      */
-    val asked: Set<String> get() = setOf(translation, tafsir)
+    val asked: Set<String> get() = setOf(translation, tafsir).filterTo(LinkedHashSet()) { it.isNotBlank() }
+}
+
+/**
+ * The catalog as the language rules read it: every pack it carries, in the
+ * catalog's own order, and the `defaults` block that names what each
+ * interface language reads.
+ *
+ * It is a value, not a lookup, so every rule built on it is a pure function
+ * that a test can pin without a device, and no screen has to know which
+ * pack belongs to which language (owner decision, 20.2).
+ */
+data class CatalogContent(
+    val packs: List<ContentPack> = emptyList(),
+    val defaults: Map<String, LanguageContent> = emptyMap(),
+) {
+    /** What [language] reads. */
+    fun of(language: UiLanguage): LanguageContent =
+        resolveLanguageContent(language, packs, defaults)
+}
+
+/**
+ * What one interface language reads, from the catalog's `defaults` block.
+ *
+ * The rule (owner decision, 20.2). A slot the block names for this language
+ * is the answer when the catalog carries that pack. Otherwise the language
+ * reads the first pack of the slot's type in its language, a bundled one
+ * before a downloaded one and the catalog's own order inside each group, so
+ * a language whose default nobody wrote still reads something real rather
+ * than nothing. Otherwise the slot is empty, and the language reads no pack
+ * of that type; a translation that arrives later in that language is then a
+ * content update and a language default away, never a code edit.
+ *
+ * A named id the catalog does not carry is ignored and the same resolution
+ * continues, so one typo in the catalog can never select a pack that does
+ * not exist and can never take anything down.
+ */
+fun resolveLanguageContent(
+    language: UiLanguage,
+    packs: List<ContentPack>,
+    defaults: Map<String, LanguageContent>,
+): LanguageContent {
+    val named = defaults[language.tag] ?: LanguageContent("", "", "")
+
+    fun resolve(id: String, type: PackType): String {
+        if (id.isNotBlank() && packs.any { it.id == id }) return id
+        return packs
+            .filter { it.type == type && it.language == language.tag }
+            .minByOrNull { if (it.shipped) 0 else 1 }
+            ?.id
+            .orEmpty()
+    }
+
+    return LanguageContent(
+        translation = resolve(named.translation, PackType.Translation),
+        tafsir = resolve(named.tafsir, PackType.Tafsir),
+        words = resolve(named.words, PackType.Words),
+    )
 }
 
 /**
@@ -81,8 +112,8 @@ data class LanguageContent(
  * behalf, and it makes only the ones the phone already answered (owner
  * decision, 15.5).
  */
-fun AppSettings.bootstrapFor(language: UiLanguage): AppSettings =
-    withLanguage(language).copy(
+fun AppSettings.bootstrapFor(language: UiLanguage, content: CatalogContent): AppSettings =
+    withLanguage(language, content).copy(
         ayah = 1,
         // The tafsir is a download the reader asks for, not a pack the first
         // open selects behind their back. The Tafsir action offers it when
@@ -100,19 +131,27 @@ fun AppSettings.bootstrapFor(language: UiLanguage): AppSettings =
  * fighting. A pack that is not a language default is left exactly where it
  * was.
  */
-fun AppSettings.withLanguage(language: UiLanguage): AppSettings {
-    val content = language.content
+fun AppSettings.withLanguage(language: UiLanguage, content: CatalogContent): AppSettings {
+    val mine = content.of(language)
     val previous = UiLanguage.of(uiLanguage)
     return copy(
         uiLanguage = language.tag,
         translationPacks = translationPacks
-            .minus(previous?.content?.translation.orEmpty())
-            .plus(content.translation),
+            .minus(previous?.let { content.of(it) }?.translation.orEmpty())
+            .plusPack(mine.translation),
         tafsirPacks = tafsirPacks
-            .minus(previous?.content?.tafsir.orEmpty())
-            .plus(content.tafsir),
+            .minus(previous?.let { content.of(it) }?.tafsir.orEmpty())
+            .plusPack(mine.tafsir),
     )
 }
+
+/**
+ * The set with one pack id added, and nothing added for a language that
+ * reads no pack of that type: an empty slot must never put an empty id into
+ * the reader's settings, where it would be a pack no catalog names
+ * (owner decision, 20.2).
+ */
+private fun Set<String>.plusPack(id: String): Set<String> = if (id.isBlank()) this else this + id
 
 /**
  * The translations a reader keeps after a pack leaves the build.
@@ -128,11 +167,12 @@ fun translationSelectionAfterRemoval(
     language: String?,
     selected: Set<String>,
     offered: Set<String>,
+    content: CatalogContent,
 ): Set<String> {
     val kept = selected.filterTo(LinkedHashSet()) { it in offered }
     val removed = selected.any { it !in offered }
     if (!removed) return kept
-    val fallback = UiLanguage.of(language)?.content?.translation
+    val fallback = UiLanguage.of(language)?.let { content.of(it) }?.translation
     if (fallback != null && fallback in offered) kept += fallback
     return kept
 }
@@ -154,7 +194,8 @@ fun pendingAfterLanguage(
     previous: UiLanguage?,
     next: UiLanguage,
     pending: Set<String>,
-): Set<String> = pending - previous?.content?.asked.orEmpty() + next.content.asked
+    content: CatalogContent,
+): Set<String> = pending - previous?.let { content.of(it) }?.asked.orEmpty() + content.of(next).asked
 
 /**
  * The packs that speak [language]: what search reads when the reader's chosen
