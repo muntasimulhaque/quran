@@ -212,7 +212,8 @@ on the phone, and `DailyAyahToggleTest` ran there too, because the Set
 button's word is the one string that grew and its own class is the one that
 opens the picker. Every pack database rebuilt byte for byte and every catalog
 hash and tag is unchanged. The store kit's version line was two releases
-behind and now reads this release.
+behind and now reads this release. The hand-off copy in `play-store/aab/` was
+deleted once Play had it.
 
 **What changed in 20.3.** The Bangla interface was read word by word and now
 says what it means. A note is নোট and only a translation's footnote is টীকা,
