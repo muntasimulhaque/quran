@@ -209,7 +209,7 @@ The same suite is green on this machine. Nothing the reader sees changed, so
 the three committed store sets stand and no capture leg ran; no runtime
 behavior changed, so no instrumented class was run. Every pack database
 rebuilt byte for byte and every catalog hash is unchanged. The hand-off copy
-is in `play-store/aab/`.
+in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 20.2.** The app's content is a pack, and it now treats it
 that way everywhere. Every pack's display name, in English and in Bangla, and
