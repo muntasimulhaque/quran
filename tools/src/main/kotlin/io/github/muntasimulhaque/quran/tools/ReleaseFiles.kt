@@ -26,7 +26,8 @@ object ReleaseFiles {
             if (!allowed(current)) {
                 throw IllegalStateException("the download URL is not the project's release host")
             }
-            val connection = URL(current).openConnection() as HttpURLConnection
+            val connection = URL(current).openConnection() as? HttpURLConnection
+                ?: throw IllegalStateException("the download URL is not an HTTP connection")
             connection.instanceFollowRedirects = false
             connection.connectTimeout = 20_000
             connection.readTimeout = 120_000

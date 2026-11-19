@@ -191,6 +191,15 @@ class Build(private val root: File) {
         sourceDir(id).firstWithExtension(".db", ".sqlite")
             ?: error("no database for $id; run verify first")
 
+    /**
+     * A dataset's JSON, or a failure that names the dataset and the step that
+     * restores it. The same shape as [sourceDb]: a missing source is reported
+     * as the file that is missing, never as a bare null.
+     */
+    private fun sourceJson(id: String): File =
+        sourceDir(id).firstWithExtension(".json")
+            ?: error("no JSON for $id; run verify first")
+
     private fun readWords(): List<Word> {
         // The Book's own text, word by word, straight from the QPC Hafs
         // source: the reading is drawn from these words and from nothing
@@ -646,14 +655,14 @@ class Build(private val root: File) {
 
     private fun readSurahs(): List<Surah> {
         val json = Json.parseToJsonElement(
-            sourceDir("metadata-surah-names").firstWithExtension(".json")!!.readText(),
+            sourceJson("metadata-surah-names").readText(),
         ).jsonObject
         // The Bangla names are a dataset of their own, compiled and reviewed
         // for this app. Every surah must carry one: the Bangla interface
         // reads its names from here and never falls back to the Latin line
         // (owner decision, 8.2).
         val bangla = Json.parseToJsonElement(
-            sourceDir("surah-names-bn").firstWithExtension(".json")!!.readText(),
+            sourceJson("surah-names-bn").readText(),
         ).jsonObject
         val out = ArrayList<Surah>(114)
         for (number in 1..114) {
@@ -696,7 +705,7 @@ class Build(private val root: File) {
         val nav = Navigation()
         fun assign(file: String, field: (Navigation) -> IntArray, valueOf: (JsonObject) -> Int) {
             val json = Json.parseToJsonElement(
-                sourceDir(file).firstWithExtension(".json")!!.readText(),
+                sourceJson(file).readText(),
             ).jsonObject
             for (entry in json.values) {
                 val o = entry.jsonObject
@@ -720,7 +729,7 @@ class Build(private val root: File) {
         assign("metadata-manzil", Navigation::manzil) { it["manzil_number"]?.jsonPrimitive?.intOrNull ?: 0 }
         assign("metadata-ruku", Navigation::ruku) { it["ruku_number"]?.jsonPrimitive?.intOrNull ?: 0 }
         val sajda = Json.parseToJsonElement(
-            sourceDir("metadata-sajda").firstWithExtension(".json")!!.readText(),
+            sourceJson("metadata-sajda").readText(),
         ).jsonObject
         for (entry in sajda.values) {
             val o = entry.jsonObject
