@@ -59,6 +59,10 @@ jobs:
   gates:
     name: Gates and debug build
     runs-on: ubuntu-latest
+    # A green run takes about ten minutes; the cap is what stops a step that
+    # hangs from holding a runner for the platform's six hour default. The
+    # signing job beside this one has carried its own since it was written.
+    timeout-minutes: 45
     env:
       # Lets the fetch tool fall back to the GitHub CLI if the release CDN
       # host is unreachable.
