@@ -210,8 +210,8 @@ listening panel's voice rows, so the three committed store sets stand and no
 store capture leg ran; the app classes this release touches, and the attach
 guard's own class, ran on the phone. No content changed, so every pack
 rebuilt byte for byte and every catalog hash and tag is unchanged, and no
-permission or dependency moved. The hand-off copy in `play-store/aab/` is
-deleted once Play has it.
+permission or dependency moved. The hand-off copy in `play-store/aab/` was
+deleted once Play had it.
 
 **What changed in 20.4.** Choosing another voice on the playing pill no
 longer offers a download the device already holds. All four reciters'
