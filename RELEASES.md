@@ -6,6 +6,40 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.1
+
+The app's colors were audited end to end, and the audit moved no tone. Every
+ground, ink, hairline, ornament, accent, wash, and tajweed family was read
+against the research and against its own measured floors, and each one stands:
+the warm day page, the lifted night ground, the mint and coral and honey of the
+rule colors, the one lapis accent, and the gold that never answers a tap. Two
+strays were not tones at all but shares no scale names, and both are gone.
+
+The unanswered choice ring, the empty circle on a row that has not been kept,
+wore sixty percent of the accent, a number declared nowhere and measured only by
+accident. It now wears the ground's quiet voice, the same tone the off switch's
+knob wears, so every unanswered control in the app is one color and the chosen
+one differs by hue and lightness rather than by a share of the accent. Both
+grounds already hold that pair, and the contrast test keeps it.
+
+The end of a surah closes in its own words. The faint gray rule that stood over
+the completion line was a hairline at seventy percent, too faint to read as a
+mark and too quiet to close anything the line does not say, and a gold closing
+mark was weighed and set aside: the turn stays the quieter breath, the
+completion line and the next surah's card alone. Surah 114 now ends as every
+other one does, with nothing left open.
+
+The tajweed group's own note told a wider story than the print does. No mapping
+is universal across publishers, and the app's anchors follow the subcontinent's
+thirteen-line convention that its own readers learned; the two places the page
+differs are held by the tests that forced them, and the note now says so, so a
+later session cannot quietly walk the hues toward another house's legend.
+
+The gates are the unit tests, lint, and `assembleDebug`, green here and in
+`build.yml`. The three store capture legs ran on the three AVDs, and the eight
+frames of each were committed. The Bangla leg was skipped, because no Bangla
+string changed. Content is unchanged from 20.0 at 1.9.0, and no color value
+moved. Version 20.1 (versionCode 203).
 ## 20.0
 
 Two more voices join the recitation, Mishari Rashid al-Afasy and Abdul Basit

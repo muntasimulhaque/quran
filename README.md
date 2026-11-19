@@ -211,6 +211,17 @@ and `PlaybackServiceTest`. The three store sets were recaptured on the three
 AVDs and committed, and the Bangla leg photographed the Bangla reading and
 settings. The hand-off copy in `play-store/aab/` was deleted once Play had it.
 
+**What changed in 20.1.** The colors were audited end to end and no tone
+moved: the warm day page, the lifted night ground, the seven tajweed
+families, the one lapis accent, and the gold that never answers a tap all
+stand as measured, and every one of them is still held by its own test. Two
+strays were shares no scale names, and both are gone: the empty choice ring
+now wears the quiet voice the off switch's knob wears, so every unanswered
+control is one color, and the faint gray rule over the end of a surah is
+deleted, so a surah closes with its completion line and the next one's card
+alone. The tajweed note now says what the print actually agrees on: the
+grouping is shared, the anchors are the subcontinent's, and the two
+divergences are the ones the palette's tests force.
 **What changed in 20.0.** Two more voices join the recitation, Mishari Rashid
 al-Afasy and Abdul Basit Abdul Samad, both murattal, so the reader chooses
 from four. Their word timings ship in the app, Al-Fatiha's audio is bundled in
@@ -230,7 +241,7 @@ Content is 1.9.0: database `content-db-9f808fdf`, core pack
 `pack-reciter-abdulbasit-e25ca017`; word packs, root, and word pronunciation
 unchanged from 19.9.
 
-Every earlier release, from 15.2 to 19.9, is in [RELEASES.md](RELEASES.md).
+Every earlier release, from 15.2 to 20.0, is in [RELEASES.md](RELEASES.md).
 
 ## Corrections and contributions
 
