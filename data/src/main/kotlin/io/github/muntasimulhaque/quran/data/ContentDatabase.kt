@@ -149,6 +149,17 @@ class ContentDatabase private constructor(
 
     fun installedPack(id: String): Boolean = id == PackCatalog.CORE_ID || has(id)
 
+    /**
+     * Whether a pack's file is on the device, attached or not. The catalog
+     * this database was opened with already reports that set: the attached
+     * packs, and every reciter's pack on the device (owner decision, 20.0).
+     * The listening price reads it, so a voice whose timings are here but are
+     * not attached is never offered as a download again; [installedPack]
+     * stays the query guard, so an unchosen voice's segments still read as
+     * absent until the choice attaches them (owner decision, 20.4).
+     */
+    fun packOnDevice(id: String): Boolean = catalog.get(id)?.installed == true
+
     // ----------------------------------------------------------------- packs
 
     fun packs(): List<ContentPack> = catalog.all()

@@ -664,8 +664,14 @@ class ContentLibrary(
         return result.exceptionOrNull()?.downloadError()
     }
 
-    /** Whether a pack is attached and readable, for the listening flow's price. */
-    fun isInstalled(id: String): Boolean = database?.installedPack(id) ?: (id in installed)
+    /**
+     * Whether a pack's file is on the device, attached or not, for the
+     * listening flow's price. A voice whose timing pack is here but not
+     * attached is still ready to be chosen, so it is not offered as a
+     * download; its segment rows wait for the attach the choice makes
+     * (owner decision, 20.4).
+     */
+    fun isInstalled(id: String): Boolean = database?.packOnDevice(id) ?: (id in installed)
 
     /**
      * Whether every ayah of one surah has audio the reader can play now,

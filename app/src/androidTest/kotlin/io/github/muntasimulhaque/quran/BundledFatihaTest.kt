@@ -138,6 +138,10 @@ class BundledFatihaTest {
                 library.isInstalled("reciter-husary"),
             )
             assertTrue(
+                "an unchosen voice's timings are still on the device",
+                library.isInstalled("reciter-minshawi"),
+            )
+            assertTrue(
                 "Minshawi's whole Al-Fatiha must be playable",
                 library.hasSurahAudio("minshawi", 1),
             )

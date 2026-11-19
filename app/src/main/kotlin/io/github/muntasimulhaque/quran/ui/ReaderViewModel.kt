@@ -1334,6 +1334,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         listenTarget = target
         setRecitation(reciter)
         viewModelScope.launch {
+            // The chosen voice's timing pack is the one schema attached
+            // beside the core, so the choice is what reopens the library
+            // over it, and the price is read once the new voice's rows are
+            // attached, the same door the settings page uses (owner
+            // decision, 20.0; 20.4 gave the pill's chooser the same
+            // refresh).
+            library.refresh()
             val ayah = library.database?.ayah(target) ?: return@launch
             val bytes = listenBytes(reciter, ayah.surah)
             if (bytes <= 0L) {

@@ -14,7 +14,9 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.data.RecitationStore
@@ -111,6 +113,52 @@ class FatihaPlayTest {
         assertTrue(
             "the offer must stay away after the audio starts",
             compose.onAllNodesWithTag("listen-offer-bar").fetchSemanticsNodes().isEmpty(),
+        )
+    }
+
+    /**
+     * The reader's own round: an ayah playing in Husary, then another
+     * voice chosen on the playing pill. Every voice's timings ship in the
+     * app, and the whole of Al-Fatiha is in its assets for all four, so
+     * nothing is missing and no offer may stand between the reader and the
+     * voice they asked for (owner report, 20.4).
+     */
+    @Test
+    fun switchingVoicesMidPlayDoesNotOfferADownload() {
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
+        compose.waitUntil(timeoutMillis = 90_000) {
+            compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("door-1:1").performClick()
+        val play = compose.activity.getString(R.string.action_play)
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithText(play).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(play).performClick()
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithTag("playback-bar").fetchSemanticsNodes().isNotEmpty()
+        }
+        // The other voice, named by the catalog and not by a literal: a
+        // voice's name is content, and this leg must not carry its own copy.
+        val voice = PackCatalog.load(context)
+            .get(ContentDatabase.reciterPack("alafasy"))
+            ?.name
+            .orEmpty()
+        assertTrue("the catalog must name the second voice", voice.isNotEmpty())
+        compose.onNodeWithTag("playback-words").performClick()
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithText(voice).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithText(voice).onFirst().performClick()
+        // Give a delayed offer a chance to appear before the assertion stands.
+        Thread.sleep(1_000)
+        assertTrue(
+            "the voice's timings and Al-Fatiha are both here, so the switch must not ask for a download",
+            compose.onAllNodesWithTag("listen-offer-bar").fetchSemanticsNodes().isEmpty(),
+        )
+        assertTrue(
+            "the new voice must still be on the pill",
+            compose.onAllNodesWithTag("playback-bar").fetchSemanticsNodes().isNotEmpty(),
         )
     }
 
