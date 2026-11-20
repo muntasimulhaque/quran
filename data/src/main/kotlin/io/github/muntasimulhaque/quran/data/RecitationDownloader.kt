@@ -86,7 +86,11 @@ class RecitationDownloader(private val context: Context) {
                     IllegalStateException("the recitation is larger than the manifest says"),
                 )
             }
-            val total = if (packageToFetch.bytes > 0) packageToFetch.bytes else contentLength
+            val total = when {
+                packageToFetch.bytes > 0 -> packageToFetch.bytes
+                contentLength >= 0 -> contentLength
+                else -> 0L
+            }
             val digest = MessageDigest.getInstance("SHA-256")
             val deadline = System.nanoTime() + MAX_DOWNLOAD_MILLIS * 1_000_000L
             var read = 0L

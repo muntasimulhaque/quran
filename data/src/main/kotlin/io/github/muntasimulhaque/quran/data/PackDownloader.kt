@@ -140,7 +140,11 @@ class PackDownloader(private val context: Context) {
             if (!type.isNullOrEmpty() && type !in ALLOWED_CONTENT_TYPES) {
                 return Result.failure(IllegalStateException("the download is not an octet stream"))
             }
-            val total = if (expected > 0) expected else contentLength + from
+            val total = when {
+                expected > 0 -> expected
+                contentLength >= 0 -> contentLength + from
+                else -> 0L
+            }
             val deadline = System.nanoTime() + MAX_DOWNLOAD_MILLIS * 1_000_000L
             var read = from
             connection.inputStream.use { input ->

@@ -56,9 +56,7 @@ class RecitationManifest private constructor(
                     val asset = surah.optString("asset")
                     val bytes = surah.optLong("bytes")
                     val sha = surah.optString("sha256")
-                    if (!SafePaths.validZip(asset) || number !in 1..114 ||
-                        bytes < 0 || !SafePaths.validHash(sha)
-                    ) {
+                    if (!recitationRowIsValid(asset, number, bytes, sha)) {
                         continue
                     }
                     out[id to number] = RecitationPackage(
@@ -74,3 +72,19 @@ class RecitationManifest private constructor(
         }
     }
 }
+
+/**
+ * Whether one surah's row of the manifest names a package the app will take.
+ *
+ * A row must carry a `.zip` asset, a surah the Book has, a size the file can
+ * really have, and a SHA-256. A row with no size is refused rather than read
+ * as "size unknown": the size is the transfer's own ceiling and the progress
+ * line's denominator, so a package whose size nobody wrote down is one the
+ * app cannot hold the transfer to. It is the rule the word pronunciation
+ * manifest already keeps for its rows.
+ */
+internal fun recitationRowIsValid(asset: String, surah: Int, bytes: Long, sha: String): Boolean =
+    SafePaths.validZip(asset) &&
+        surah in 1..114 &&
+        bytes > 0 &&
+        SafePaths.validHash(sha)

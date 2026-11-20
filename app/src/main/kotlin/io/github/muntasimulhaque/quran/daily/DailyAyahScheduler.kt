@@ -151,16 +151,14 @@ object DailyAyahScheduler {
         val alarm = context.getSystemService(AlarmManager::class.java) ?: return
         val now = System.currentTimeMillis()
         if (!enabled) {
-            // Every alarm this app ever arms belongs to today or to tomorrow,
-            // because an arm always asks for the next occurrence of the
-            // reader's own minute. The day behind is cleared too: a timezone
-            // change can leave an armed alarm whose slot is no longer today
-            // or tomorrow on the reader's own clock, and a reminder that was
+            // An arm always asks for the next occurrence of the reader's own
+            // minute, which lands on today or tomorrow under the clock it was
+            // armed with. A clock or a time zone that moves afterwards
+            // translates that same alarm onto a day number the new clock does
+            // not produce, so the sweep reaches two days either side of the
+            // reader's today rather than one day behind: a reminder that was
             // turned off must not speak (owner decision, 6.5).
-            val today = localDay(now)
-            alarm.cancel(pendingIntent(context, today - 1))
-            alarm.cancel(pendingIntent(context, today))
-            alarm.cancel(pendingIntent(context, today + 1))
+            cancelAround(context, alarm, localDay(now))
             return
         }
         val plan = DailyReminder.plan(
@@ -169,7 +167,14 @@ object DailyAyahScheduler {
             now = now,
             lastMinuteOfDay = LAST_MINUTE_OF_DAY,
         )
-        val pending = pendingIntent(context, localDay(plan.triggerAtMillis))
+        val day = localDay(plan.triggerAtMillis)
+        // The sweep runs on this path too: a clock or a time zone that moved
+        // after an earlier arm leaves a slot under a day number the new clock
+        // never produces, and arming today's beside it would speak twice. It
+        // runs before the arm, so two applies that interleave still end with
+        // the later one's arm standing.
+        cancelAround(context, alarm, day)
+        val pending = pendingIntent(context, day)
         // RTC_WAKEUP, not RTC: an exact alarm that does not wake the phone
         // can be held until the reader next touches it, which is the one
         // thing a morning reminder must not do. The exact grant changes when
@@ -395,6 +400,16 @@ object DailyAyahScheduler {
                 }
             }
         }
+    }
+
+    /**
+     * Cancels every reminder slot this app could have armed around [day]: the
+     * day itself and two days either side. A slot that was never armed is a
+     * no-op, so the sweep is five cancels that can never take away a reminder
+     * it did not mean to.
+     */
+    private fun cancelAround(context: Context, alarm: AlarmManager, day: Int) {
+        for (offset in -2..2) alarm.cancel(pendingIntent(context, day + offset))
     }
 
     /**
