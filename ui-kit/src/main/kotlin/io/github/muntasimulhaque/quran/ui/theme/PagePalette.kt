@@ -33,7 +33,15 @@ import androidx.compose.ui.graphics.Color
  * family, same opaque treatment, one step louder. See [PaperMatch].
  *
  * [introInk] is the softer tone the surah's opened introduction wears: the
- * reading's ink at 0.78, a page that steps back under the wash it stands on.
+ * reading's ink at 0.85 on both grounds, a page that steps back under the
+ * wash it stands on. The base is the reading ink on the day ground as well,
+ * which it was not before 20.8: the day took 0.78 of the interface's word
+ * while the night took 0.78 of the reading's, so one alpha landed two tones
+ * and the night's introduction read weaker than the captions beside it
+ * (Lc -56.7 against -65.2). One base and one alpha puts the prose at 84.3 on
+ * the day page and -64.3 on the night, above every caption on its ground and
+ * still a clear step under the verse, 11 Lc on the day and 17 on the night
+ * (owner decision, 20.8).
  * [mastheadInk] is the first paint's display tone, the interface's word at
  * 0.9, because a 48 sp line does not need the reading's full ink. Both live
  * here so the theme owns them and the contrast test can measure them, rather

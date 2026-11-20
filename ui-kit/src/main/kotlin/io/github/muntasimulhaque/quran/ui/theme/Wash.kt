@@ -49,6 +49,17 @@ package io.github.muntasimulhaque.quran.ui.theme
  * buttons, so the chosen chip wears the door's own tint and ink and the
  * solid level stays for the one place and the one answer
  * (owner decision, 15.0).
+ *
+ * **A press is not a fill.** What is named here is the fill a control keeps;
+ * a press is a ripple, and it is the one color the app takes from Material
+ * rather than choosing. Material resolves a bare `ripple()` to the ink of the
+ * surface it stands on, which is the app's own `PaperInk` or `NightText`, and
+ * that is what every quiet row wears. A control whose own state is the accent
+ * ripples in the accent instead (the Add door, the theme swatch, whose chosen
+ * ring is the accent), and a chip ripples in its own label's color. The rule
+ * is the state's, not the gesture's: the press echoes what the control
+ * already is, which is why three tones are one language and not three
+ * (verified against material3 1.5's bytecode, 20.8).
  */
 object Wash {
 

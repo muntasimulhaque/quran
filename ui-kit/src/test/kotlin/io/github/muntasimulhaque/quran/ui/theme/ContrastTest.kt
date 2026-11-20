@@ -22,6 +22,40 @@ import org.junit.Test
  * colors, because a result list is a scan surface and the match wash is not
  * a reading ground (owner decision, 10.6). The ink's own
  * pair on that wash is measured here, so the decision stays written.
+ *
+ * The second rule here is perceptual, and it is the one WCAG 2.x cannot
+ * state: APCA-W3 0.1.9, the method the WCAG 3 draft carries, whose own
+ * documentation says the 2.x ratio "cannot be used for guidance designing
+ * dark mode" because it overstates contrast near black. Its grades are Lc 90
+ * preferred for fluent body text, Lc 75 the minimum for body text, Lc 60 the
+ * minimum for content a reader reads, and Lc 45 for a large display line.
+ * Those grades are asserted for every tone that carries words, on every
+ * ground it is drawn on, in both grounds of the app. The ratios above stay:
+ * they are the legal floor, and APCA is the perceptual one (owner decision,
+ * 20.8).
+ *
+ * Three pairs are recorded here and deliberately not asserted, because each
+ * one is a decision this app already took and lifting it would undo that
+ * decision:
+ *
+ * - **The seven rule colors on the night page.** They measure Lc -50.2
+ *   (idgham) to -59.4 (iqlab), under the content grade. Decision 17.1 pulled
+ *   them down from a 10.2 WCAG top to 8.1 to stop the bloom a pale saturated
+ *   letter makes on a charcoal page over an evening read, and the band that
+ *   decision chose keeps every family under the ink. Reaching Lc -60 needs
+ *   roughly 8.2 to 9.5 on that ground, which is the top 17.1 removed. The
+ *   day palette holds 78.7 to 84.0 across the same band, so the asymmetry is
+ *   the polarity's and not the palette's.
+ *
+ * - **The word mark's rule colors on the night page.** The worst rule color
+ *   on the reciter's mark measures -45.9, against -50.2 on the plain page:
+ *   the mark is the same 17.1 decision drawn a step louder, and the reading
+ *   ink on that mark still holds -76.7.
+ *
+ * - **The night quiet voice on the found ground.** It measures -58.5, but no
+ *   quiet word is ever drawn there: the wash is a span behind one word, and
+ *   every caption in a result row stands on the sheet. The pair is recorded
+ *   so a later session does not read the absence as an oversight.
  */
 class ContrastTest {
 
@@ -444,6 +478,230 @@ class ContrastTest {
             if (channel <= 0.04045f) channel / 12.92 else Math.pow((channel + 0.055) / 1.055, 2.4)
         return 0.2126 * linear(color.red) + 0.7152 * linear(color.green) + 0.0722 * linear(color.blue)
     }
+
+    /**
+     * The day ground's prose, at APCA's fluent grade.
+     *
+     * Lc 90 is the preferred level for fluent body text and Lc 75 its
+     * minimum; the reading ink holds 95.2 on the page and 98.8 on a sheet,
+     * and the interface's word holds 98.4. This is the grade a reader spends
+     * an hour in, so it is pinned above the minimum rather than at it.
+     */
+    @Test
+    fun dayProseHoldsApcaFluency() {
+        assertApca("the day reading ink on the page", LightPage.ink, PaperBackground, 90.0)
+        assertApca("the day reading ink on a sheet", LightPage.ink, PaperSurface, 90.0)
+        assertApca("the day interface word on the page", PaperInk, PaperBackground, 90.0)
+    }
+
+    /**
+     * The night ground's prose, at the same grade from the other polarity.
+     *
+     * The night is where WCAG 2.x stops being a guide, so it is where APCA
+     * earns its place: the reading ink measures -81.0 on the page and -79.9
+     * on a sheet, the interface's word -87.9, and the floors are the day's,
+     * negated.
+     */
+    @Test
+    fun nightProseHoldsApcaFluency() {
+        assertApca("the night reading ink on the page", NightInk, NightBackground, -75.0)
+        assertApca("the night reading ink on a sheet", NightInk, NightSurface, -75.0)
+        assertApca("the night interface word on the page", NightText, NightBackground, -75.0)
+    }
+
+    /**
+     * The quiet voice and the action color, at APCA's content grade.
+     *
+     * Lc 60 is the minimum for content a reader reads, the grade a caption, a
+     * reference, a label, and an action word owe. The quiet voice measures
+     * 80.6 on the day page and 61.7 to 72.1 across the grounds it rides; on
+     * the night page -65.2, -64.1 on a sheet, -61.7 on the floating paper.
+     * Every ground a quiet word actually stands on is listed, because a
+     * label travels with the surface it sits on.
+     */
+    @Test
+    fun quietVoicesHoldTheApcaContentFloor() {
+        listOf(
+            "the page" to PaperBackground,
+            "a sheet" to PaperSurface,
+            "the chosen block" to PaperSelected,
+            "a floating paper" to PaperFloating,
+            "the variant" to LightScheme.surfaceVariant,
+            "a container" to LightScheme.surfaceContainer,
+            "the switch's track" to PaperControl,
+        ).forEach { (where, ground) ->
+            assertApca("the day quiet voice on $where", PaperMuted, ground, 60.0)
+        }
+        listOf(
+            "the page" to NightBackground,
+            "a sheet" to NightSurface,
+            "the chosen block" to NightSelected,
+            "a floating paper" to NightFloating,
+            "the variant" to DarkScheme.surfaceVariant,
+            "a container" to DarkScheme.surfaceContainer,
+            "the switch's track" to NightControl,
+        ).forEach { (where, ground) ->
+            assertApca("the night quiet voice on $where", NightMuted, ground, -60.0)
+        }
+        assertApca("lapis on the page", Lapis, PaperBackground, 60.0)
+        assertApca("lapis on a sheet", Lapis, PaperSurface, 60.0)
+        assertApca("the night lapis on the page", LapisLight, NightBackground, -60.0)
+        assertApca("the night lapis on a floating paper", LapisLight, NightFloating, -60.0)
+        assertApca("gold on the page", Gold, PaperBackground, 60.0)
+        assertApca("gold on a sheet", Gold, PaperSurface, 60.0)
+        assertApca("the night gold on the page", NightGold, NightBackground, -60.0)
+        assertApca("the night gold on a floating paper", NightGold, NightFloating, -60.0)
+    }
+
+    /**
+     * The opened surah introduction, at the content grade on both grounds.
+     *
+     * It is prose, the longest beside the tafsir on its page (owner decision
+     * 13.3), so it owes the content grade rather than a caption's licence. It
+     * measured -56.7 at night until 20.8, when the day ground's base tone was
+     * found to differ from the night's: one base and one alpha put it at 84.3
+     * and -64.3, above every caption on its own ground (owner decision,
+     * 20.8).
+     */
+    @Test
+    fun openedIntroductionHoldsTheContentFloor() {
+        listOf(
+            "the day page" to PaperBackground,
+            "the day chosen block" to PaperSelected,
+        ).forEach { (where, ground) ->
+            assertApca(
+                "the introduction on $where",
+                blend(LightPage.introInk, ground, LightPage.introInk.alpha),
+                ground,
+                60.0,
+            )
+        }
+        listOf(
+            "the night page" to NightBackground,
+            "the night chosen block" to NightSelected,
+        ).forEach { (where, ground) ->
+            assertApca(
+                "the introduction on $where",
+                blend(DarkPage.introInk, ground, DarkPage.introInk.alpha),
+                ground,
+                -60.0,
+            )
+        }
+    }
+
+    /**
+     * The ground the reading is scanned on rather than read on, and the first
+     * paint's display line.
+     *
+     * The found ground is a scan surface by decision 10.6: the matched word
+     * is one word in a result list, and the reading ink on it measures 81.4
+     * on the day and -74.4 on the night, a hair under the body floor and far
+     * past the content floor. The floor here is stated one grade down rather
+     * than pretending it clears the body grade, because a wash that lifts a
+     * dark page can only take light text down, and 10.6's decision is what
+     * keeps the result list legible. The first paint's display line is Lc
+     * 92.2 on the day page and -75.6 at night, far past the 45 a 48 sp line
+     * owes.
+     */
+    @Test
+    fun scanGroundsAndDisplayTonesHold() {
+        assertApca("the reading ink on the day found ground", LightPage.ink, PaperMatch, 75.0)
+        assertApca("the reading ink on the night found ground", NightInk, NightMatch, -73.0)
+        assertApca(
+            "the day first paint's display line",
+            blend(LightPage.mastheadInk, PaperBackground, LightPage.mastheadInk.alpha),
+            PaperBackground,
+            60.0,
+        )
+        assertApca(
+            "the night first paint's display line",
+            blend(DarkPage.mastheadInk, NightBackground, DarkPage.mastheadInk.alpha),
+            NightBackground,
+            -60.0,
+        )
+    }
+
+    /**
+     * The APCA-W3 0.1.9 constants, the reference implementation's own.
+     *
+     * Copied from `apca-w3@0.1.9` rather than derived, so a reader can diff
+     * this object against the library. The exponent is the library's 2.4,
+     * applied plainly to each channel and not through the sRGB piecewise
+     * curve: that is what the W3 build computes, and matching it is the
+     * point.
+     */
+    private object Apca {
+        const val mainTrc = 2.4
+        const val red = 0.2126729
+        const val green = 0.7151522
+        const val blue = 0.0721750
+        const val normBg = 0.56
+        const val normTxt = 0.57
+        const val revTxt = 0.62
+        const val revBg = 0.65
+        const val blackThreshold = 0.022
+        const val blackClamp = 1.414
+        const val scaleBow = 1.14
+        const val scaleWob = 1.14
+        const val lowBowOffset = 0.027
+        const val lowWobOffset = 0.027
+        const val deltaYMin = 0.0005
+        const val lowClip = 0.1
+    }
+
+    /**
+     * A color's APCA luminance: the 2.4 channel exponent, the sRGB
+     * coefficients, and the black soft clamp that keeps a near-black ground
+     * from being read as true black.
+     */
+    private fun apcaY(color: Color): Double {
+        val y = Math.pow(color.red.toDouble(), Apca.mainTrc) * Apca.red +
+            Math.pow(color.green.toDouble(), Apca.mainTrc) * Apca.green +
+            Math.pow(color.blue.toDouble(), Apca.mainTrc) * Apca.blue
+        return if (y > Apca.blackThreshold) {
+            y
+        } else {
+            y + Math.pow(Apca.blackThreshold - y, Apca.blackClamp)
+        }
+    }
+
+    /**
+     * The APCA lightness contrast of [text] on [ground], signed by polarity:
+     * a positive Lc is dark text on a light ground, a negative Lc is light
+     * text on a dark one. The sign is the polarity and is never taken as an
+     * absolute value, which is why the callers below assert a negative floor
+     * at night.
+     */
+    private fun apca(text: Color, ground: Color): Double {
+        val txt = apcaY(text)
+        val bg = apcaY(ground)
+        if (Math.abs(bg - txt) < Apca.deltaYMin) return 0.0
+        val sapc = if (bg > txt) {
+            (Math.pow(bg, Apca.normBg) - Math.pow(txt, Apca.normTxt)) * Apca.scaleBow
+        } else {
+            (Math.pow(bg, Apca.revBg) - Math.pow(txt, Apca.revTxt)) * Apca.scaleWob
+        }
+        val weighted = if (bg > txt) {
+            if (sapc < Apca.lowClip) 0.0 else sapc - Apca.lowBowOffset
+        } else {
+            if (sapc > -Apca.lowClip) 0.0 else sapc + Apca.lowWobOffset
+        }
+        return weighted * 100
+    }
+
+    /**
+     * One APCA pair against a floor that carries its own polarity: 90 on the
+     * day ground, -75 on the night.
+     */
+    private fun assertApca(what: String, text: Color, ground: Color, floor: Double) {
+        val lc = apca(text, ground)
+        val passed = if (floor >= 0) lc >= floor else lc <= floor
+        assertTrue(
+            "$what measures Lc ${"%.1f".format(lc)}, under the ${"%.1f".format(floor)} floor",
+            passed,
+        )
+    }
+
 
     /**
      * A tone in CIELAB, in the D65 white the palette is chosen in.
