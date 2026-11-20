@@ -198,15 +198,20 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.8 (versionCode 210).** The newest green `build` run on `main` produced
-the signed bundle `quran-20.8-vc210.aab` at the hand-off. The same suite is
-green on this machine. The opened surah introduction wears one ink on both
-grounds where the day ground had taken another, so the three store sets were
-captured again on the phone, the 7 inch, and the 10 inch, each from a clean
-install: no set moved, because the introduction is not in a store frame and
-the two frames that differ do so at a text caret's blink and a status bar
-icon's repaint. The capture classes ran on all three AVDs; the full app
-instrumented suite was skipped. No content changed, so every pack and the
+**20.8 (versionCode 210).** The signed bundle comes from `build` run
+44765836813, the newest green run on `main` at the hand-off: the unit tests,
+lint, and `assembleDebug` passed, and the signed bundle `quran-20.8-vc210.aab`
+has SHA-256
+`f896d24e99bd9d5ab7c62904fb1c74d3ae103892355034f04e21c84d67ab5449`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. The opened surah introduction wears
+one ink on both grounds where the day ground had taken another, so the three
+store sets were captured again on the phone, the 7 inch, and the 10 inch, each
+from a clean install: no set moved, because the introduction is not in a store
+frame and the two frames that differ do so at a text caret's blink and a
+status bar icon's repaint. The capture classes ran on all three AVDs; the full
+app instrumented suite was skipped. No content changed, so every pack and the
 content database are as they were and no catalog hash or tag moved, and no
 permission or app dependency moved. The hand-off copy waits in
 `play-store/aab/` for Play.
