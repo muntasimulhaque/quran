@@ -51,6 +51,14 @@ import org.junit.runner.RunWith
  * decision: a test that starts real playback fails when another app holds
  * the focus, for a reason the app did not choose. The posted notification's
  * three marks are read from the shade itself.
+ *
+ * One run read a shade carrying the app's previous and play and nothing
+ * else for the whole wait, then passed on the retry that named it. The marks
+ * were the app's own, so the fault was not the drawing: the player had no
+ * next item for the shade to offer. This test now starts from a cleared
+ * shade and refuses to read the marks until the player itself holds both
+ * items, and a timeout names the marks it saw instead of their ids
+ * (owner report, 20.5).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackNotificationTest {
@@ -59,6 +67,20 @@ class PlaybackNotificationTest {
     fun thePostedNotificationWearsTheAppsOwnTransportMarks() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val manager = context.getSystemService(NotificationManager::class.java)
+        // A shade left over from an earlier class answers to the same
+        // notification id, so the read starts from no media notification at
+        // all: the service is stopped and the shade is cleared before the
+        // controller asks for a session.
+        manager.cancel(DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID)
+        context.stopService(Intent(context, PlaybackService::class.java))
+        val cleared = SystemClock.uptimeMillis() + 5_000
+        while (SystemClock.uptimeMillis() < cleared && mediaNotification(manager, context) != null) {
+            Thread.sleep(50)
+        }
+        assertTrue(
+            "an earlier media notification was still in the shade",
+            mediaNotification(manager, context) == null,
+        )
         val media = File(context.cacheDir, "notification-silence.wav")
         writeSilence(media)
 
@@ -101,6 +123,31 @@ class PlaybackNotificationTest {
                 )
                 controller.prepare()
             }
+
+            // The shade can only offer a next mark once the player holds a
+            // second item, so that is a fact to wait for and not a guess:
+            // a run that read the shade early saw previous and play alone
+            // and spent its whole wait on a state the player never reached.
+            val ready = SystemClock.uptimeMillis() + 10_000
+            var items = 0
+            var hasNext = false
+            while (SystemClock.uptimeMillis() < ready) {
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    items = controller.mediaItemCount
+                    hasNext = controller.hasNextMediaItem()
+                }
+                if (items == 2 && hasNext) break
+                Thread.sleep(50)
+            }
+            assertEquals(
+                "the player must hold both items before the shade is read",
+                2,
+                items,
+            )
+            assertTrue(
+                "the first item must have a next item for the shade to offer",
+                hasNext,
+            )
 
             // The notification is rebuilt as the player's commands settle.
             // Waiting for the play mark alone read a list that still had only
@@ -224,20 +271,47 @@ class PlaybackNotificationTest {
         wanted: (List<android.app.Notification.Action>) -> Boolean,
     ): android.service.notification.StatusBarNotification {
         val deadline = SystemClock.uptimeMillis() + 30_000
-        var last: List<Int> = emptyList()
+        var last: List<String> = emptyList()
         while (SystemClock.uptimeMillis() < deadline) {
-            val posted = manager.activeNotifications.firstOrNull {
-                it.id == DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID &&
-                    it.packageName == context.packageName
-            }
+            val posted = mediaNotification(manager, context)
             if (posted != null) {
                 val actions = posted.notification.actions.orEmpty().toList()
-                last = actions.map { it.getIcon().resId }
+                last = actions.map { markName(it.getIcon().resId) +
+                    ":" + (it.title?.toString() ?: "?") }
                 if (wanted(actions)) return posted
             }
             Thread.sleep(100)
         }
-        throw AssertionError("the media notification never carried the wanted mark: $last")
+        throw AssertionError(
+            "the media notification never carried the wanted marks; " +
+                "it last carried " + (if (last.isEmpty()) "no action at all" else last.joinToString(", ")),
+        )
+    }
+
+    /** The app's media notification in the shade, or null when there is none. */
+    private fun mediaNotification(
+        manager: NotificationManager,
+        context: Context,
+    ): android.service.notification.StatusBarNotification? =
+        manager.activeNotifications.firstOrNull {
+            it.id == DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID &&
+                it.packageName == context.packageName
+        }
+
+    /**
+     * A transport mark by name, so a red run says which hand drew the shade
+     * and which button was missing instead of printing resource numbers.
+     */
+    private fun markName(id: Int): String = when (id) {
+        PlaybackR.drawable.ic_transport_previous -> "app previous"
+        PlaybackR.drawable.ic_transport_play -> "app play"
+        PlaybackR.drawable.ic_transport_pause -> "app pause"
+        PlaybackR.drawable.ic_transport_next -> "app next"
+        androidx.media3.session.R.drawable.media3_icon_previous -> "library previous"
+        androidx.media3.session.R.drawable.media3_icon_play -> "library play"
+        androidx.media3.session.R.drawable.media3_icon_pause -> "library pause"
+        androidx.media3.session.R.drawable.media3_icon_next -> "library next"
+        else -> "unknown 0x" + Integer.toHexString(id)
     }
 
     /** A second of silence, so the player reaches READY without a device sound. */
