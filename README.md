@@ -198,9 +198,14 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.6 (versionCode 208).** The newest green `build` run on `main` produced
-the signed bundle `quran-20.6-vc208.aab` at the hand-off. The same suite is
-green on this machine. The translations page changed on the glass, so the
+**20.6 (versionCode 208).** The signed bundle comes from `build` run
+44721369619, the newest green run on `main` at the hand-off: the unit tests,
+lint, and `assembleDebug` passed, and the signed bundle `quran-20.6-vc208.aab`
+has SHA-256
+`19238d3ca9ba3274dc8bc75c657d5218a4580739f2bfa4ca2d064847814123f4`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. The translations page changed on the glass, so the
 three store sets were captured again on the phone, the 7 inch, and the
 10 inch, and the instrumented suites ran on the phone: the app's 251
 tests and the data layer's 65 passed. No content changed, so every pack
