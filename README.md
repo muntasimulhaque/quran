@@ -207,10 +207,11 @@ has SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
 The same suite is green on this machine. No visible surface changed, so the
 three committed store sets stand and no capture leg ran; no runtime behavior
-changed, so the instrumented work was skipped. No content changed, so every pack and the
-content database are as they were and no catalog hash or tag moved, and no
-permission or app dependency moved. The hand-off copy waits in
-`play-store/aab/` for Play.
+changed, so the instrumented work was skipped. No content changed, so every
+pack and the content database are as they were and no catalog hash or tag
+moved, and no permission or app dependency moved. The 20.7 bundle was
+submitted for Play review, and the hand-off copy in `play-store/aab/` was
+deleted once Play had it.
 
 **What changed in 20.7.** Every face the app draws was audited against its
 job, and none moved. The Quran's Hafs face, Amiri Quran's display lines,
