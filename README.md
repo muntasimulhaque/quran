@@ -198,15 +198,20 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.9 (versionCode 211).** The newest green `build` run on `main` produced
-the signed bundle `quran-20.9-vc211.aab` at the hand-off. The same suite is
-green on this machine, and the content gate reproduced the committed
-database's SHA-256. No visible surface changed, so the three committed store
-sets stand and no capture leg ran. The reminder's arming changed, so
-`DailyReminderTest` and `DailyAyahToggleTest` ran on the phone from a clean
-install: ten tests, zero failures. The full app instrumented suite was
-skipped. No content changed, so every pack and the content database are as
-they were and no catalog hash or tag moved, and no permission or app
+**20.9 (versionCode 211).** The signed bundle comes from `build` run
+44774926755, the newest green run on `main` at the hand-off: the unit tests,
+lint, and `assembleDebug` passed, and the signed bundle `quran-20.9-vc211.aab`
+has SHA-256
+`e19aa8695d818690a50bceb434ba3fabe51d4ab76e040762234d03a79306a8a3`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine, and the content gate reproduced the
+committed database's SHA-256. No visible surface changed, so the three
+committed store sets stand and no capture leg ran. The reminder's arming
+changed, so `DailyReminderTest` and `DailyAyahToggleTest` ran on the phone
+from a clean install: ten tests, zero failures. The full app instrumented
+suite was skipped. No content changed, so every pack and the content database
+are as they were and no catalog hash or tag moved, and no permission or app
 dependency moved. The hand-off copy waits in `play-store/aab/` for Play.
 
 **What changed in 20.9.** An audit of the app's network, storage, SQL, and
