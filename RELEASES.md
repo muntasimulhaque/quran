@@ -6,6 +6,34 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.7
+
+The type audit keeps every face, and the Bangla ladder says what its digits do.
+
+Every face the app draws was audited against its job: the KFGQPC Hafs face
+for the Quran's own words, Amiri Quran for the display lines, Kitab for the
+tafsir's Arabic prose, Literata and Inter for English, and the two Noto
+Bengali faces for Bangla. No face moved. The Quran's face is the one QUL
+distributes and the one Quran.com draws with; Amiri Quran is final at 1.003;
+Kitab is the classical naskh for long Arabic prose; Literata was commissioned
+for continuous reading on screens; Inter is the screen interface voice whose
+tabular figures the value rails were built on; and Noto Serif Bengali 3.000 is
+the 2025 Universal Thirst redesign, with Noto Sans Bengali 3.011 its interface
+pair. Inter 4.1 exists upstream with Cyrillic and symbol fixes and small
+kerning changes; the app stays on 4.001, and the next time Inter matters is
+the time to take it.
+
+One finding is now written beside the code it decided. The Bangla value styles
+ask for tabular figures, and neither Noto Bengali file carries a `tnum`
+feature. The ask stays, because the ladder asks it by job and the face decides
+what it can draw: the sans face's digits are uniform by design, so a Bangla
+count, size, or reference cannot jitter, and the serif's digits appear only in
+static text, so no number rail ever meets them. The font gate's allow-list
+also says what draws Bangla content now, the bundled Noto Serif Bengali rather
+than the platform's own face.
+
+No screen changed, so the three store sets stand, and no instrumented leg ran.
+
 ## 20.6
 
 The page reads four translations, the reminder reads one, and the library

@@ -198,21 +198,25 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.6 (versionCode 208).** The signed bundle comes from `build` run
-44721369619, the newest green run on `main` at the hand-off: the unit tests,
-lint, and `assembleDebug` passed, and the signed bundle `quran-20.6-vc208.aab`
-has SHA-256
-`19238d3ca9ba3274dc8bc75c657d5218a4580739f2bfa4ca2d064847814123f4`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. The translations page changed on the glass, so the
-three store sets were captured again on the phone, the 7 inch, and the
-10 inch, and the instrumented suites ran on the phone: the app's 251
-tests and the data layer's 65 passed. No content changed, so every pack
-and the content database are as they were and no catalog hash or tag moved,
-and no permission or app dependency moved; the build tool moved to Gradle
-9.9.2. The 20.6 bundle was submitted for Play review, and the hand-off
-copy in `play-store/aab/` was deleted once Play had it.
+**20.7 (versionCode 209).** The newest green `build` run on `main` produced
+the signed bundle `quran-20.7-vc209.aab` at the hand-off. The same suite is
+green on this machine. No visible surface changed, so the three committed
+store sets stand and no capture leg ran; no runtime behavior changed, so
+the instrumented work was skipped. No content changed, so every pack and the
+content database are as they were and no catalog hash or tag moved, and no
+permission or app dependency moved. The hand-off copy waits in
+`play-store/aab/` for Play.
+
+**What changed in 20.7.** Every face the app draws was audited against its
+job, and none moved. The Quran's Hafs face, Amiri Quran's display lines,
+Kitab's Arabic prose, Literata and Inter, and the two Noto Bengali faces
+are the apt choices for this reading; the research on long reading points
+at size, line, and spacing more than at a face's name. The Bangla value
+styles keep asking for tabular figures although neither Noto Bengali file
+carries the feature: the sans face's digits are uniform by design, and the
+serif's digits only meet static text, so no rail can jitter. The KDoc now
+says so, and the font gate's allow-list names the bundled Noto Serif
+Bengali as what draws Bangla content.
 
 **What changed in 20.6.** The library attaches the packs a screen reads,
 not every pack on the phone, and the daily reminder asks for the one
@@ -222,19 +226,6 @@ translation columns, and the fifth installed translation says on its row why
 it waits. The app's instrumented suite was put right: three legs had
 drifted from decisions the app had already made, and the notification's red
 run now names the marks it saw.
-
-**What changed in 20.5.** A failure says Retry, a download says Downloading,
-and every decision in the code names the release that made it. "Try again"
-stood on two surfaces, the content error page and the word sheet's places
-page, while every other retry said Retry; one act has one word now. The word
-pronunciation transfer said "Getting" where every other transfer says
-Downloading, and it says Downloading too. The hundred and fifty
-decisions dated by a working session now name the release that shipped them,
-and a new test fails the build if a session date comes back. The
-notification's mark is named for what it draws, the touch floor and the press
-circle come from the theme at every call site, the one haptic in the app says
-why it is the only one, and the site now says Al-Fatiha ships in all four
-voices.
 
 ## Corrections and contributions
 
