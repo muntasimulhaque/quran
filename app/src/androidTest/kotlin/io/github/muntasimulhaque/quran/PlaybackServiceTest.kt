@@ -104,7 +104,12 @@ class PlaybackServiceTest {
         store.install("reciter-husary")
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         val playback = PlaybackController(context, scope)
-        val database = ContentDatabase.open(context, PackCatalog.load(context), store.installed())
+        val database = ContentDatabase.open(
+            context,
+            PackCatalog.load(context),
+            store.installed(),
+            listOf("reciter-husary"),
+        )
         playback.attach(database)
         // A place the reader left behind before the word was asked for: the
         // sample must neither write it nor wipe it
@@ -175,7 +180,12 @@ class PlaybackServiceTest {
         store.install("reciter-husary")
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         val playback = PlaybackController(context, scope)
-        val database = ContentDatabase.open(context, PackCatalog.load(context), store.installed())
+        val database = ContentDatabase.open(
+            context,
+            PackCatalog.load(context),
+            store.installed(),
+            listOf("reciter-husary"),
+        )
         playback.attach(database)
         val (watcher, future) = connect(context)
         try {

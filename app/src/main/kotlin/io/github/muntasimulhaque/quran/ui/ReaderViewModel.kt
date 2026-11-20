@@ -935,6 +935,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             settings.translationPacks + pack
         }
         setTranslationPacks(next)
+        // The columns are what the library attaches: a pack turned on is
+        // read by the next query, and one turned off stops taking a slot
+        // (owner decision, 20.5).
+        viewModelScope.launch { library.refresh() }
     }
 
     fun toggleTafsirPack(pack: String) {
@@ -945,6 +949,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
         settings = settings.copy(tafsirPacks = next)
         viewModelScope.launch { settingsStore.setTafsirPacks(next) }
+        // The card offers the enabled tafsirs, so the enabled set is what
+        // the library attaches beside the reading (owner decision, 20.5).
+        viewModelScope.launch { library.refresh() }
     }
 
     /** The reader's tap on a pack: the library brings it in and selects it. */

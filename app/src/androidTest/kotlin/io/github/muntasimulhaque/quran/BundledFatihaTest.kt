@@ -229,6 +229,7 @@ class BundledFatihaTest {
                     context,
                     PackCatalog.load(context),
                     packStore.installed() + PackCatalog.CORE_ID,
+                    listOf("reciter-$reciter"),
                     reciter,
                 )
                 try {
@@ -264,6 +265,7 @@ class BundledFatihaTest {
             context,
             PackCatalog.load(context),
             packStore.installed() + PackCatalog.CORE_ID,
+            listOf("reciter-husary"),
             "husary",
         )
         try {

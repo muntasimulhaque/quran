@@ -6,6 +6,7 @@ import android.content.Intent
 import io.github.muntasimulhaque.quran.MainActivity
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.core.Arabic
+import io.github.muntasimulhaque.quran.core.Attachments
 import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -75,13 +76,13 @@ internal data class DailyAyahContent(
                     application,
                     catalog.withInstalled(installed),
                     installed,
-                    // The reminder reads one translation and never a timing,
-                    // so it attaches the reader's own voice and no other. The
-                    // chosen voice is what every other surface passes, and it
-                    // is what keeps the attachment count under SQLite's ten:
-                    // with four voices attached the last pack falls to the
-                    // ceiling and reads as not installed (owner decision,
-                    // 20.0, which this path had not followed).
+                    // The reminder reads one ayah and the translation it
+                    // shows. It attaches those and nothing else: not the
+                    // tafsirs, not the word list, not the other voices, so a
+                    // full shelf never decides whether the morning's
+                    // translation is the pack the ceiling drops
+                    // (owner decision, 20.5).
+                    Attachments.reminder(settings.translationPacks.filter { it in installed }),
                     recitation = settings.recitation,
                 )
             }.getOrNull() ?: return null

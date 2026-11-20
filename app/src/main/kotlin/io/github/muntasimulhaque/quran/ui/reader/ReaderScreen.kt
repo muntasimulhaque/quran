@@ -748,7 +748,7 @@ fun ReaderScreen(
                     viewModel.enabledTranslationPacks.isNotEmpty()
                 }
                 val wordsInstalled = remember(content, viewModel.readingLanguage) {
-                    content.installedPack(
+                    content.attachedPack(
                         ContentDatabase.wordsPackId(viewModel.readingLanguage),
                     )
                 }

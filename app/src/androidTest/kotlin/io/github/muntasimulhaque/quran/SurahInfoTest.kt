@@ -51,7 +51,12 @@ class SurahInfoTest {
             )
         }
         content = runBlocking {
-            ContentDatabase.open(context, catalog, setOf("words-en", "words-bn"))
+            ContentDatabase.open(
+                context,
+                catalog,
+                setOf("words-en", "words-bn"),
+                listOf("words-en", "words-bn"),
+            )
         }
     }
 

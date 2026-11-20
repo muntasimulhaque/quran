@@ -7,6 +7,7 @@ import android.net.NetworkCapabilities
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import io.github.muntasimulhaque.quran.core.Attachments
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
@@ -249,7 +250,13 @@ class ContentLibrary(
             val installedAfter = store.installed()
             val catalogAfter = catalogNow.withInstalled(installedAfter)
             val opened = runCatching {
-                ContentDatabase.open(application, catalogAfter, installedAfter, repaired.recitation)
+                ContentDatabase.open(
+                    application,
+                    catalogAfter,
+                    installedAfter,
+                    workingSet(catalogAfter, installedAfter, repaired),
+                    repaired.recitation,
+                )
             }
             OpenedLibrary(installedAfter, catalogAfter, opened, repaired)
         }
@@ -399,14 +406,47 @@ class ContentLibrary(
     }
 
     /**
-     * Reopens the library with exactly the packs on the device. Attaching a
-     * pack is instant, and the reader's place, notes, and settings are
-     * untouched. Also the way an arrival the app already knows about is
-     * published: a pack that was just copied or downloaded is attached by
-     * this call.
+     * Reopens the library over the packs the screen reads. Attaching a pack
+     * is instant, and the reader's place, notes, and settings are untouched.
+     * Also the way an arrival the app already knows about is published, and
+     * the way a pack turned on or off takes its slot or gives it back: the
+     * installed shelf is read here, but only the enabled working set is
+     * attached (owner decision, 20.5).
      */
     suspend fun refresh() = openMutex.withLock {
         refreshLibrary()
+    }
+
+    /**
+     * The packs the reading's screen reads: its translation columns, the
+     * tafsirs the ayah card offers, the word list and its root, and the voice
+     * being heard. Every one of them is the reader's own switch, never the
+     * shelf, so a library of fifty downloads still attaches what one screen
+     * shows and nothing else (owner decision, 20.5).
+     */
+    private fun workingSet(
+        catalog: PackCatalog,
+        installed: Set<String>,
+        settings: AppSettings,
+    ): List<String> {
+        val shown = catalog.all().filter { it.id in installed }
+        val translations = shown
+            .filter { it.type == PackType.Translation && it.id in settings.translationPacks }
+            .map { it.id }
+        val tafsirs = shown
+            .filter { it.type == PackType.Tafsir && it.id in settings.tafsirPacks }
+            .map { it.id }
+        // The word list is attached while it is on the device because Search
+        // offers it as a source of its own; the reading's switch decides
+        // whether the page draws it, not whether its file may be read.
+        val words = ContentDatabase.wordsPackId(settings.readingLanguage)
+            .takeIf { id -> shown.any { it.id == id } }
+        // The root is the word sheet's other half: one pack, and the sheet is
+        // one tap from the page.
+        val root = ContentDatabase.WORD_ROOT_PACK.takeIf { id -> shown.any { it.id == id } }
+        val voice = ContentDatabase.reciterPack(settings.recitation)
+            .takeIf { id -> shown.any { it.id == id } }
+        return Attachments.screen(translations, tafsirs, words, root, voice)
     }
 
     private suspend fun refreshLibrary() {
@@ -414,7 +454,14 @@ class ContentLibrary(
         catalog = catalog.withInstalled(installed)
         val fresh = runCatching {
             withContext(Dispatchers.IO) {
-                ContentDatabase.open(application, catalog, installed, settings().recitation)
+                val settingsNow = settings()
+                ContentDatabase.open(
+                    application,
+                    catalog,
+                    installed,
+                    workingSet(catalog, installed, settingsNow),
+                    settingsNow.recitation,
+                )
             }
         }.getOrElse { failure ->
             // A library that cannot be reopened leaves the reader on the one
@@ -455,7 +502,7 @@ class ContentLibrary(
     fun install(id: String, select: Boolean) {
         scope.launch {
             val pack = catalog.get(id) ?: return@launch
-            if (database?.installedPack(id) == true) {
+            if (database?.packOnDevice(id) == true) {
                 onInstalled(pack, select)
                 settingsStore.removePendingPacks(setOf(id))
                 return@launch
@@ -470,7 +517,7 @@ class ContentLibrary(
     /** A pack the reader's language asks for, fetched when it is not here. */
     fun installIfMissing(id: String, select: Boolean) {
         val pack = catalog.get(id) ?: return
-        if (database?.installedPack(id) == true) return
+        if (database?.packOnDevice(id) == true) return
         install(pack.id, select)
     }
 
@@ -482,7 +529,7 @@ class ContentLibrary(
      */
     private suspend fun installNow(id: String): Boolean = installGate.withLock {
         val pack = catalog.get(id) ?: return@withLock false
-        if (database?.installedPack(id) == true) return@withLock true
+        if (database?.packOnDevice(id) == true) return@withLock true
         // A pack already on its way is not asked for twice; a failed one is,
         // because the second attempt is the retry.
         if (packSetup?.let { it.pack.id == id && !it.failed } == true) return@withLock false
@@ -563,13 +610,13 @@ class ContentLibrary(
             // (owner report, 14.8).
             settingsStore.removePendingPacks(
                 settingsStore.pendingPacks().filter { id ->
-                    database?.installedPack(id) == true
+                    database?.packOnDevice(id) == true
                 }.toSet(),
             )
             while (true) {
                 val next = settingsStore.pendingPacks().firstOrNull { id ->
                     val pack = catalog.get(id) ?: return@firstOrNull false
-                    database?.installedPack(id) != true &&
+                    database?.packOnDevice(id) != true &&
                         (pack.type != PackType.Tafsir && pack.type != PackType.WordRoot ||
                             packUpdater.canRefresh() || store.hasAsset(pack.id))
                 } ?: break

@@ -126,7 +126,7 @@ internal fun ReaderSheets(
             // back to another: a reader who chose Bangla must not meet
             // English meanings in the results.
             wordsPack = wordsPack,
-            wordsInstalled = content.installedPack(wordsPack),
+            wordsInstalled = content.attachedPack(wordsPack),
             // The reader's own Arabic step, so a reader who enlarged the
             // Quran's text reads the results at the same preference.
             arabicStep = settings.arabicSize,

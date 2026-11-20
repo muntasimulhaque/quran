@@ -50,7 +50,19 @@ class ContentSearchTest {
         )) {
             store.install(id)
         }
-        content = runBlocking { ContentDatabase.open(context, catalog, store.installed()) }
+        content = runBlocking {
+            ContentDatabase.open(
+                context,
+                catalog,
+                store.installed(),
+                listOf(
+                    "translation-saheeh-en",
+                    "tafsir-ibn-kathir-en",
+                    "words-en",
+                    "translation-al-bayan-bn",
+                ),
+            )
+        }
     }
 
     @After

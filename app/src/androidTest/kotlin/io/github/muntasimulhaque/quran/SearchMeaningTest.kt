@@ -43,7 +43,14 @@ class SearchMeaningTest {
         for (id in listOf("translation-saheeh-en", "words-en")) {
             store.install(id)
         }
-        content = runBlocking { ContentDatabase.open(context, catalog, store.installed()) }
+        content = runBlocking {
+            ContentDatabase.open(
+                context,
+                catalog,
+                store.installed(),
+                listOf("translation-saheeh-en", "words-en"),
+            )
+        }
     }
 
     @After

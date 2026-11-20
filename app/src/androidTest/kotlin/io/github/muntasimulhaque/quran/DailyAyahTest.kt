@@ -193,13 +193,16 @@ class DailyAyahTest {
         // The reader's own voice, as the reminder passes it: the library
         // attaches one voice and not four, so no test can be decided by
         // SQLite's attachment ceiling (owner decision, 20.0).
-        val recitation = io.github.muntasimulhaque.quran.data.SettingsStore(context)
-            .settings.first().recitation
+        val settings = io.github.muntasimulhaque.quran.data.SettingsStore(context).settings.first()
+        // The reminder reads one translation and no other pack: the same set
+        // production asks for (owner decision, 20.5).
+        val translations = settings.translationPacks.filter { it in installed }
         return io.github.muntasimulhaque.quran.data.ContentDatabase.open(
             context,
             catalog.withInstalled(installed),
             installed,
-            recitation = recitation,
+            io.github.muntasimulhaque.quran.core.Attachments.reminder(translations),
+            settings.recitation,
         )
     }
 

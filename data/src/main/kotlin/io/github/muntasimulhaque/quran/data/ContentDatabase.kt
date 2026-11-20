@@ -24,19 +24,26 @@ import java.util.concurrent.locks.ReentrantLock
  * The read-only content database.
  *
  * The main file is the core pack: the Quran text and its words. Every other
- * pack (a translation, a tafsir, a word list, the chosen reciter's
- * timings) is attached beside it as its own schema, so a reader's library is
- * exactly the packs on the device and nothing else. A pack that is not
- * installed is not attached, and a query for it never runs. A reciter whose
- * pack is installed but is not the voice the reader chose keeps its files
- * and its listing without its schema: SQLite allows ten attached databases,
- * and four voices are four packs, so only the chosen one is attached
- * (owner decision, 20.0).
+ * pack (a translation, a tafsir, a word list, the chosen reciter's timings)
+ * is attached beside it as its own schema, and only when the screen reading
+ * it asks: [open] takes the installed set, which is the truth about the
+ * reader's shelf, and the attached set, which is what this connection may
+ * read (see [io.github.muntasimulhaque.quran.core.Attachments]). A pack on
+ * the shelf that no surface is reading stays a file.
+ *
+ * The two sets are not the same thing. [installedPacks] answers whether the
+ * reader has a pack; [attachedPack] answers whether this connection can read
+ * it. The install flow, the rows, and the repair read the first; every query
+ * reads the second, so a pack the reader did not turn on cannot take one of
+ * SQLite's ten attachments and push a pack they are reading out of the
+ * library (owner report, 20.5). A reciter's pack is attached only for the
+ * voice the reader chose (owner decision, 20.0).
  */
 class ContentDatabase private constructor(
     private val database: SQLiteDatabase,
     private val catalog: PackCatalog,
     val installedPacks: Set<String>,
+    val attachedPacks: Set<String>,
 ) {
 
     /**
@@ -56,7 +63,7 @@ class ContentDatabase private constructor(
         surahCacheValue = null
     }
 
-    /** The schema of one installed pack, quoted for SQL. */
+    /** The schema of one attached pack, quoted for SQL. */
     private fun schema(id: String): String = SafePaths.sqlIdentifier(id)
 
     /**
@@ -67,7 +74,7 @@ class ContentDatabase private constructor(
     private fun wordsPack(language: String): String =
         if (SafePaths.validLanguage(language)) wordsPackId(language) else "words-__invalid__"
 
-    private fun has(id: String): Boolean = id in installedPacks && id != PackCatalog.CORE_ID
+    private fun has(id: String): Boolean = id in attachedPacks && id != PackCatalog.CORE_ID
 
     // ------------------------------------------------------- swapping safely
 
@@ -147,16 +154,22 @@ class ContentDatabase private constructor(
         }
     }
 
-    fun installedPack(id: String): Boolean = id == PackCatalog.CORE_ID || has(id)
+    /**
+     * Whether this connection can read the pack. It is not the same question
+     * as [packOnDevice]: a pack the reader has but did not turn on is on the
+     * shelf and not attached, so no query names its schema.
+     */
+    fun attachedPack(id: String): Boolean = id == PackCatalog.CORE_ID || has(id)
 
     /**
      * Whether a pack's file is on the device, attached or not. The catalog
-     * this database was opened with already reports that set: the attached
-     * packs, and every reciter's pack on the device (owner decision, 20.0).
-     * The listening price reads it, so a voice whose timings are here but are
-     * not attached is never offered as a download again; [installedPack]
-     * stays the query guard, so an unchosen voice's segments still read as
-     * absent until the choice attaches them (owner decision, 20.4).
+     * this database was opened with already reports that set: every pack the
+     * reader has, including the ones no screen is reading, and every
+     * reciter's pack (owner decision, 20.0). The listening price reads it, so
+     * a voice whose timings are here but are not attached is never offered as
+     * a download again; [attachedPack] stays the query guard, so an unchosen
+     * voice's segments still read as absent until the choice attaches them
+     * (owner decision, 20.4).
      */
     fun packOnDevice(id: String): Boolean = catalog.get(id)?.installed == true
 
@@ -279,7 +292,7 @@ class ContentDatabase private constructor(
     )
 
     fun translations(ayahNumbers: List<Int>, pack: String): Map<Int, TranslationText> {
-        if (ayahNumbers.isEmpty() || !installedPack(pack)) return emptyMap()
+        if (ayahNumbers.isEmpty() || !attachedPack(pack)) return emptyMap()
         val placeholders = ayahNumbers.joinToString(",") { "?" }
         return query(
             "SELECT ayah_number, text, footnotes FROM ${schema(pack)}.translation " +
@@ -366,7 +379,7 @@ class ContentDatabase private constructor(
      * The installed root pack, or null: it has no language of its own, and a
      * reader without it gets a sheet with no root rather than an empty line.
      */
-    fun rootPack(): String? = if (installedPack(WORD_ROOT_PACK)) WORD_ROOT_PACK else null
+    fun rootPack(): String? = if (attachedPack(WORD_ROOT_PACK)) WORD_ROOT_PACK else null
 
     /** Every word's root in a set of ayahs: ayah to position to the root. */
     fun wordRoots(ayahNumbers: List<Int>): Map<Int, Map<Int, WordRoot>> {
@@ -548,7 +561,7 @@ class ContentDatabase private constructor(
      */
     fun meaningPack(language: String): String? {
         val wanted = wordsPack(language)
-        return if (installedPack(wanted)) wanted else null
+        return if (attachedPack(wanted)) wanted else null
     }
 
     /** The words of a set of ayahs, in order, markers excluded. */
@@ -569,7 +582,7 @@ class ContentDatabase private constructor(
     }
 
     fun tafsir(ayahNumber: Int, pack: String): TafsirPassage? {
-        if (!installedPack(pack)) return null
+        if (!attachedPack(pack)) return null
         val schema = schema(pack)
         return query(
             "SELECT p.surah, p.from_ayah, p.to_ayah, p.text FROM $schema.tafsir_ayah a " +
@@ -665,7 +678,7 @@ class ContentDatabase private constructor(
 
     fun recitationAyah(recitation: String, ayahNumber: Int): RecitationAyah? {
         val pack = reciterPack(recitation)
-        if (!installedPack(pack)) return null
+        if (!attachedPack(pack)) return null
         return query(
             "SELECT audio_path, segments FROM ${schema(pack)}.recitation_ayah WHERE ayah_number = ?",
             arrayOf(ayahNumber.toString()),
@@ -691,7 +704,7 @@ class ContentDatabase private constructor(
      */
     fun recitationAudioPaths(recitation: String, surah: Int): List<String> {
         val pack = reciterPack(recitation)
-        if (installedPack(pack)) {
+        if (attachedPack(pack)) {
             return query(
                 "SELECT ra.audio_path FROM ${schema(pack)}.recitation_ayah ra " +
                     "JOIN ayah a ON a.number = ra.ayah_number " +
@@ -943,7 +956,7 @@ class ContentDatabase private constructor(
         val matchedPassages = ArrayList<Pair<String, PassageRow>>()
         for (pack in tafsirPacks) {
             coroutineContext.ensureActive()
-            if (!installedPack(pack)) continue
+            if (!attachedPack(pack)) continue
             val passages = tafsirMatches(pack, query, limit)
             counts[2] += passages.size
             for (passage in passages) {
@@ -1194,7 +1207,7 @@ class ContentDatabase private constructor(
         limit: Int,
         wordsPack: String,
     ): Map<Int, WordMatch> {
-        if (query.arabic || !installedPack(wordsPack)) return emptyMap()
+        if (query.arabic || !attachedPack(wordsPack)) return emptyMap()
         val rows = if (hasTable(wordsPack, "word_meaning_fts")) {
             indexedMatch(query.terms)?.let { match ->
                 val pack = schema(wordsPack)
@@ -1288,7 +1301,7 @@ class ContentDatabase private constructor(
 
     /** Matches inside one installed pack's own schema. */
     private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {
-        if (!installedPack(schemaId)) return emptyList()
+        if (!attachedPack(schemaId)) return emptyList()
         if (hasTable(schemaId, "translation_fts")) {
             indexedMatch(terms)?.let { match ->
                 val pack = schema(schemaId)
@@ -1371,7 +1384,7 @@ class ContentDatabase private constructor(
             if (wanted == packs && byPack.isNotEmpty()) return
             val loaded = LinkedHashMap<String, MutableList<TafsirEntry>>(wanted.size)
             for (id in wanted) {
-                if (!installedPack(id)) continue
+                if (!attachedPack(id)) continue
                 val entries = loaded.getOrPut(id) { ArrayList() }
                 query(
                     "SELECT source_id, surah, from_ayah, to_ayah, text_search " +
@@ -1526,7 +1539,7 @@ class ContentDatabase private constructor(
 
     /** The originals of the matched passages, read in one query per pack. */
     private fun passageTexts(pack: String, sourceIds: List<Int>): Map<Int, String> {
-        if (sourceIds.isEmpty() || !installedPack(pack)) return emptyMap()
+        if (sourceIds.isEmpty() || !attachedPack(pack)) return emptyMap()
         val out = HashMap<Int, String>(sourceIds.size)
         for (chunk in sourceIds.chunked(400)) {
             val placeholders = chunk.joinToString(",") { "?" }
@@ -1641,7 +1654,15 @@ class ContentDatabase private constructor(
             context: Context,
             catalog: PackCatalog,
             installed: Set<String>,
-            /** The reciter whose timing pack is attached, or null for every installed voice. */
+            /**
+             * The packs this connection may read, in priority order: what the
+             * screen is showing, never the whole shelf. A pack the reader has
+             * but did not turn on stays a file, so it cannot spend one of
+             * SQLite's ten attachments on content nothing is drawing (see
+             * [io.github.muntasimulhaque.quran.core.Attachments]).
+             */
+            working: List<String>,
+            /** The reciter whose timing pack is attached, or null for every working voice. */
             recitation: String? = null,
         ): ContentDatabase = withContext(Dispatchers.IO) {
             val store = PackStore(context)
@@ -1659,8 +1680,11 @@ class ContentDatabase private constructor(
             }
             val attached = LinkedHashSet<String>()
             attached += PackCatalog.CORE_ID
-            for (id in installed) {
+            for (id in working) {
                 if (id == PackCatalog.CORE_ID) continue
+                // Only a pack the reader has can be attached, whatever a
+                // caller's set says.
+                if (id !in installed) continue
                 val pack = catalog.get(id) ?: continue
                 // A recitation's timings are one voice's own schema, and the
                 // voice the reader chose is the one attached. Four voices on
@@ -1729,23 +1753,21 @@ class ContentDatabase private constructor(
                     runCatching { database.execSQL("DETACH DATABASE $schema") }
                 }
             }
-            // A pack whose attach failed, or whose file does not carry the
-            // tables its type promises, is not in the library: a query for
-            // its schema would throw, and every surface that reads it would
-            // have to catch the same failure. The catalog therefore reports
-            // the attached set, not the raw files: a broken pack reads as not
-            // installed, its Add opens a repair, and the store still sees the
-            // file.
-            // The catalog says installed for the attached packs and for
-            // every reciter's pack on the device, attached or not: a voice the
-            // reader did not choose is still on the phone, still lists its
-            // bundled and downloaded surahs, and is attached by the one tap
-            // that chooses it. The query guard stays the attached set, so an
-            // unchosen voice's segments read as absent until their turn.
-            val marked = attached + installed.filter { id ->
+            // A pack the surface asked for that could not be attached reads
+            // as not installed, so its row offers Add and one tap repairs it;
+            // the store still sees the file. A pack that is merely off is
+            // still the reader's, and its row says so.
+            // The catalog also says installed for every reciter's pack on the
+            // device, attached or not: a voice the reader did not choose is
+            // still on the phone, still lists its bundled and downloaded
+            // surahs, and is attached by the one tap that chooses it. The
+            // query guard stays the attached set, so an unchosen voice's
+            // segments read as absent until their turn.
+            val unusable = working.filter { it !in attached }.toSet()
+            val marked = (installed - unusable) + installed.filter { id ->
                 catalog.get(id)?.type == PackType.Recitation
             }
-            ContentDatabase(database, catalog.withInstalled(marked), attached)
+            ContentDatabase(database, catalog.withInstalled(marked), installed, attached)
         }
 
         private fun openCore(store: PackStore, core: ContentPack): SQLiteDatabase? = runCatching {
