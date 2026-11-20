@@ -198,24 +198,30 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.8 (versionCode 210).** The signed bundle comes from `build` run
-44765836813, the newest green run on `main` at the hand-off: the unit tests,
-lint, and `assembleDebug` passed, and the signed bundle `quran-20.8-vc210.aab`
-has SHA-256
-`f896d24e99bd9d5ab7c62904fb1c74d3ae103892355034f04e21c84d67ab5449`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. The opened surah introduction wears
-one ink on both grounds where the day ground had taken another, so the three
-store sets were captured again on the phone, the 7 inch, and the 10 inch, each
-from a clean install: no set moved, because the introduction is not in a store
-frame and the two frames that differ do so at a text caret's blink and a
-status bar icon's repaint. The capture classes ran on all three AVDs; the full
-app instrumented suite was skipped. No content changed, so every pack and the
-content database are as they were and no catalog hash or tag moved, and no
-permission or app dependency moved. The 20.8 bundle was submitted for Play
-review, and the hand-off copy in `play-store/aab/` was deleted once Play had
-it.
+**20.9 (versionCode 211).** The newest green `build` run on `main` produced
+the signed bundle `quran-20.9-vc211.aab` at the hand-off. The same suite is
+green on this machine, and the content gate reproduced the committed
+database's SHA-256. No visible surface changed, so the three committed store
+sets stand and no capture leg ran. The reminder's arming changed, so
+`DailyReminderTest` and `DailyAyahToggleTest` ran on the phone from a clean
+install: ten tests, zero failures. The full app instrumented suite was
+skipped. No content changed, so every pack and the content database are as
+they were and no catalog hash or tag moved, and no permission or app
+dependency moved. The hand-off copy waits in `play-store/aab/` for Play.
+
+**What changed in 20.9.** An audit of the app's network, storage, SQL, and
+platform surface found no exploitable hole and no crash, and it closed three
+edges. A recitation manifest row that names no package size is now refused,
+the way the word pronunciation manifest's own rows already are, so every
+transfer has a ceiling and every progress line a denominator. A response
+that sends no length no longer makes a download's total read backwards; the
+line waits instead. And the daily reminder sweeps five day slots rather than
+three, on the path that arms it as well as the one that turns it off, so a
+clock or a time zone that moves cannot leave an alarm under a day number the
+new clock never produces and speak a second time. The row rule is one pure
+function the JVM suite pins; the reminder's own classes ran green on the
+phone. The Quran text, both translations, both tafsirs, the recitations, and
+every pack are unchanged.
 
 **What changed in 20.8.** The app's colors were audited end to end and not
 one was replaced: every ground, ink, wash, ornament, and rule color was
@@ -228,17 +234,6 @@ still a clear step under the verse. `ContrastTest` now carries APCA-W3
 0.1.9, so the perceptual floors the reading owes are checked by arithmetic
 on both grounds, and the night rule colors, the word mark, and the found
 ground each record why 17.1 and 10.6 put them where they are.
-
-**What changed in 20.7.** Every face the app draws was audited against its
-job, and none moved. The Quran's Hafs face, Amiri Quran's display lines,
-Kitab's Arabic prose, Literata and Inter, and the two Noto Bengali faces
-are the apt choices for this reading; the research on long reading points
-at size, line, and spacing more than at a face's name. The Bangla value
-styles keep asking for tabular figures although neither Noto Bengali file
-carries the feature: the sans face's digits are uniform by design, and the
-serif's digits only meet static text, so no rail can jitter. The KDoc now
-says so, and the font gate's allow-list names the bundled Noto Serif
-Bengali as what draws Bangla content.
 
 ## Corrections and contributions
 

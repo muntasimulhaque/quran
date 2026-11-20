@@ -6,6 +6,55 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.9
+
+Three edges of the app's own machinery, closed.
+
+An end-to-end audit of the app's network path, its storage, its SQL, its
+intents, and its platform surface found no exploitable hole and no crash. The
+downloader checks every redirect against one host family before the connection
+that would use it is opened; every pack is hashed against the catalog inside
+the signed app before it joins the library; every value that reaches SQL is
+bound, and the content connection is read-only; every name that reaches the
+disk passes one canonical-path gate; and every pending intent and receiver is
+the app's own. Three edges were still worth closing. None of them was
+reachable by a reader, and each is closed where the thing that decides it
+lives.
+
+The recitation manifest's parser accepted a row that named a package of no
+bytes. The size is the transfer's own ceiling and the progress line's
+denominator, and the word pronunciation manifest's parser already refused one.
+The rule is one pure function now, beside the parser and not inside it, so a
+machine without a screen pins it: a row must carry a `.zip` asset, a surah the
+Book has, a real size, and a SHA-256, and a row that names no size is refused
+rather than read as "size unknown".
+
+A response that carried no length left a pack's or a recitation's total at
+minus one, because the total was the header's length plus the offset the part
+had already reached. Both call sites draw a non-positive total as an
+indeterminate line, so a reader never saw it, but the arithmetic should not
+produce a number it cannot mean: it answers the catalog's size, then the
+header's, then zero.
+
+The daily reminder arms each day under its own request code, and the reader's
+local day number is the code. A clock or a time zone change re-arms the alarm
+under the new numbering, and the alarm already armed under the old one kept
+its slot: on a phone that traveled, a reminder could arrive twice on the day
+of the move. The path that turns the reminder off swept three day slots; it
+now sweeps five, and the path that arms one sweeps the same five before it
+arms. A cancel of a slot that was never armed is a no-op, and the sweep comes
+before the arm, so two applies that interleave still end with the later one's
+arm standing.
+
+The whole JVM suite, lint, the debug build, `checkdb` and the committed
+database's SHA-256, and the search gate are green on this machine. The
+reminder's arming changed, so `DailyReminderTest` and `DailyAyahToggleTest`
+ran on `quran_phone` after a clean install: ten tests, zero failures. The full
+app instrumented suite was skipped. No visible surface moved, so the three
+store sets stand. No content changed, so every pack and the content database
+are as they were and no catalog hash or tag moved, and no permission or app
+dependency moved.
+
 ## 20.8
 
 The prose states its floor, and the opened introduction wears one ink.
