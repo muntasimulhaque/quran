@@ -211,7 +211,8 @@ three store sets were captured again on the phone, the 7 inch, and the
 tests and the data layer's 65 passed. No content changed, so every pack
 and the content database are as they were and no catalog hash or tag moved,
 and no permission or app dependency moved; the build tool moved to Gradle
-9.9.2. The hand-off copy waits in `play-store/aab/` for Play.
+9.9.2. The 20.6 bundle was submitted for Play review, and the hand-off
+copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 20.6.** The library attaches the packs a screen reads,
 not every pack on the phone, and the daily reminder asks for the one
