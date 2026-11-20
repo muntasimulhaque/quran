@@ -767,6 +767,13 @@ private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamil
  * Bengali is not letterspaced: the script's conjuncts and matras are drawn as
  * clusters, and the optical tracking the Latin ladder carries would pull them
  * apart.
+ *
+ * The tabular figures the label styles ask for are a Latin ask: neither Noto
+ * Bengali file carries `tnum`, and dropping the ask for one script would be a
+ * second rule for no visible gain. The sans face's digits are uniform by
+ * design, so a Bangla count, size, or reference cannot jitter; the serif's
+ * digits vary, but only static text draws them in the Book's voice, so no
+ * number rail ever meets them (owner decision, 20.7).
  */
 val BanglaTypography = Typography(
     displayLarge = banglaStyle(FontWeight.SemiBold, 56f),

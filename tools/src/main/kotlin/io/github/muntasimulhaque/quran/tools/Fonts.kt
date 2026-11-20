@@ -18,7 +18,8 @@ import java.util.TreeMap
  *   Hafs digits behind every ayah's roundel, and the Amiri surah names,
  *   because that furniture is drawn here rather than carried in a font;
  * - every run of reading text is drawable by the font the app draws it with,
- *   with a script the app hands to the platform allowed only by name here.
+ *   with a script another bundled face draws, or the platform owns, allowed
+ *   only by name here.
  *
  * The third check is the one that keeps the app honest as content grows: a
  * translation or tafsir in a script no bundled face carries is not a tofu bug
@@ -35,15 +36,17 @@ class Fonts(private val root: File) {
     private val problems = mutableListOf<String>()
 
     /**
-     * Scripts the app draws with the platform's own font instead of a bundled
-     * one, because the platform covers them on every device the app supports
-     * and bundling another writing system for one tafsir would not earn its
-     * megabytes. Each entry is a Unicode block the platform owns, named once.
+     * The codepoints the Latin reading probe does not own: punctuation and
+     * symbols another face draws, the Arabic presentation forms, and Bangla,
+     * which the bundled Noto Serif Bengali draws. Each entry is a Unicode
+     * block, named once; the list says what Literata is not asked to draw,
+     * not what the app does not bundle (owner decision, 20.7).
      */
     private val platformScripts = mapOf(
         // Bangla: the Al-Bayan Simple Translation and the Bangla Ibn Kathir.
-        // Android ships Noto Sans Bengali on every device since API 21,
-        // which is what draws them.
+        // The reading draws this text in the bundled Noto Serif Bengali, so
+        // the entry keeps it out of the Literata probe; the platform's own
+        // Bengali face is no longer what draws it.
         0x0980..0x09FF to "Bangla",
         // Arabic-Indic and extended digits, punctuation, and the shared marks
         // that travel between scripts.
