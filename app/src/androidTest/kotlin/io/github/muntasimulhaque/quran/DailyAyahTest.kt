@@ -9,6 +9,7 @@ import io.github.muntasimulhaque.quran.daily.notificationTitle
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -189,10 +190,16 @@ class DailyAyahTest {
     private suspend fun openLibrary(): io.github.muntasimulhaque.quran.data.ContentDatabase {
         val catalog = io.github.muntasimulhaque.quran.data.PackCatalog.load(context)
         val installed = PackStore(context).installed()
+        // The reader's own voice, as the reminder passes it: the library
+        // attaches one voice and not four, so no test can be decided by
+        // SQLite's attachment ceiling (owner decision, 20.0).
+        val recitation = io.github.muntasimulhaque.quran.data.SettingsStore(context)
+            .settings.first().recitation
         return io.github.muntasimulhaque.quran.data.ContentDatabase.open(
             context,
             catalog.withInstalled(installed),
             installed,
+            recitation = recitation,
         )
     }
 

@@ -71,7 +71,19 @@ internal data class DailyAyahContent(
             val installed = runCatching { PackStore(application).installed() }.getOrNull()
                 ?: return null
             val database = runCatching {
-                ContentDatabase.open(application, catalog.withInstalled(installed), installed)
+                ContentDatabase.open(
+                    application,
+                    catalog.withInstalled(installed),
+                    installed,
+                    // The reminder reads one translation and never a timing,
+                    // so it attaches the reader's own voice and no other. The
+                    // chosen voice is what every other surface passes, and it
+                    // is what keeps the attachment count under SQLite's ten:
+                    // with four voices attached the last pack falls to the
+                    // ceiling and reads as not installed (owner decision,
+                    // 20.0, which this path had not followed).
+                    recitation = settings.recitation,
+                )
             }.getOrNull() ?: return null
             database.useLanguage(settings.readingLanguage)
             return try {

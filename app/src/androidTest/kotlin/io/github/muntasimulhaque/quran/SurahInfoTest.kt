@@ -10,6 +10,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,9 +37,22 @@ class SurahInfoTest {
         val catalog = PackCatalog.load(context)
         val store = PackStore(context)
         // Development and test builds carry every pack inside the app, so
-        // both word lists are on the device at once.
-        for (id in listOf("words-en", "words-bn")) store.install(id)
-        content = runBlocking { ContentDatabase.open(context, catalog, store.installed()) }
+        // both word lists can be placed without a network. The library is
+        // opened over these two alone: the rule under test is which list a
+        // language reads, and the packs the rest of the run installed are not
+        // part of that question. Handing over the whole store made the rule
+        // depend on how many packs happened to be there, and past SQLite's
+        // ten-attachment ceiling the last one fell out of the library and
+        // read as missing (owner decision, 20.0).
+        for (id in listOf("words-en", "words-bn")) {
+            assertTrue(
+                "the build must carry $id in its own assets",
+                store.install(id),
+            )
+        }
+        content = runBlocking {
+            ContentDatabase.open(context, catalog, setOf("words-en", "words-bn"))
+        }
     }
 
     @After
