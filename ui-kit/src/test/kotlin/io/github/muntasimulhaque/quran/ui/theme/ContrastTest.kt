@@ -113,8 +113,8 @@ class ContrastTest {
             blend(LightPage.highlight, PaperBackground, LightPage.highlight.alpha),
         )
         // The found word's ground: the result line is ink, not a family, for
-        // the reason the class notes, and the ground is the page's own warm
-        // tone rather than a tint of the accent (owner decision, 19.1).
+        // the reason the class notes, and the ground is the accent's own
+        // family at the lightness the warm tone carried (owner decision, 21.0).
         assertReadable(PaperInk, PaperMatch)
         assertReadable(LightPage.ink, PaperMatch)
         // Browse's current row wears the selected wash under its quiet words,
@@ -392,8 +392,8 @@ class ContrastTest {
      *
      * A menu is never raised over the plain page: the ayah whose menu is open
      * paints its own block in [PaperSelected]. The day's block is L* 92.9 and
-     * the sheet's white stands dE76 8.7 from it; the night's block is L* 15.6
-     * and the one-step night paper stands dE76 5.9 from it. The 17.3
+     * the sheet's white stands dE76 8.9 from it; the night's block is L* 15.6
+     * and the one-step night paper stands dE76 11.9 from it. The 17.3
      * tone that read as a veil stood dE76 4.2 from the block while it held every
      * ratio it was asked for, because the two tones sat at one lightness and
      * differed only in a chroma that no WCAG ratio can see. The direction is

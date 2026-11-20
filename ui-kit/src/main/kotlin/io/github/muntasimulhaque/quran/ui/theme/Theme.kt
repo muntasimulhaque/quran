@@ -60,12 +60,11 @@ import io.github.muntasimulhaque.quran.data.resolved
  * role: a control that reads as a control is the one thing a scheme role
  * should not be left to answer for by accident.
  *
- * The two `primaryContainer` tones are the accent's own family and are the
- * one cool pair in the scheme. That is not a ground: 19.1 retired the cold
- * grounds and kept the cold accent, and a component that asks for the
- * primary's container is asking for the accent, not for a paper. Nothing in
- * the app draws it today; it is set so that a Material control that asks can
- * never fall back to a stock tone.
+ * The two `primaryContainer` tones are the accent's own family, as the chosen
+ * and found grounds have been since 21.0 turned 19.1's warm family around. A
+ * component that asks for the primary's container is asking for the accent,
+ * not for a paper. Nothing in the app draws it today; it is set so that a
+ * Material control that asks can never fall back to a stock tone.
  *
  * The error roles are the app's quiet voice in both grounds, because this app
  * has no red. The Quran's own qalaqah is the page's only red, and a red the

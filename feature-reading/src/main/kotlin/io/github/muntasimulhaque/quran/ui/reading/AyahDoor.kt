@@ -95,7 +95,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * the quiet tone every quiet text button wears, the ink at [Wash.Door]; while
  * this ayah's menu is open it is the accent at [Wash.Control], the chosen
  * chip's own ground, so the door reads as a control before the tap and as a
- * chosen control after it, beside the warm wash the block takes and the turn
+ * chosen control after it, beside the wash the block takes and the turn
  * that says which way it went. The ink does not change, so the digits and the
  * turn do not move between the two states.
  *

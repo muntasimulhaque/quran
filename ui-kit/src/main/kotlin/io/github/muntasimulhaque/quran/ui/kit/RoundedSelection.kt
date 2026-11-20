@@ -39,15 +39,16 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * selects words to read them again or copy them, and the words must stay
  * readable through their own selection.
  *
- * **The ground is paper and the grips are the accent** (owner decision, 19.1,
- * and not an inconsistency to be fixed later). A selection is two
+ * **The ground and the grips are the accent's** (owner decision, 21.0,
+ * turning 19.1's split around). A selection is two
  * things at once: a ground the words are read through, and two handles the
- * reader drags, with the caret marking where the next letter goes. The ground
- * belongs to the paper, for the reason above. The handles and the caret belong
- * to the accent, because blue is this app's mark for the one thing that answers
+ * reader drags, with the caret marking where the next letter goes. The
+ * handles and the caret belong to the accent, because blue is this app's mark
+ * for the one thing that answers
  * a finger: every button, chevron, and tappable word is blue, so a reader has
- * already learned it before they meet a handle. A sand-colored grip beside
- * sand-colored words reads as a smudge rather than as something to hold.
+ * already learned it before they meet a handle. The ground is the accent's own
+ * quiet shade, so the grip and the words it drags read as one family, and the
+ * sand-colored smudge 19.1 named cannot return.
  *
  * So the three parts are drawn by two owners on purpose. [RoundedSelectionColors]
  * colors the handles and turns the platform's own background off, so the wash

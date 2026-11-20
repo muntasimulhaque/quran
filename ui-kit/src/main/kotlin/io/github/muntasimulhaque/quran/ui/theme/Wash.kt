@@ -11,14 +11,12 @@ package io.github.muntasimulhaque.quran.ui.theme
  * own shape is a step up, and a chosen control's another (owner decision, 19.1).
  *
  * The scale has no step for a *ground*, and that is a decision, not an
- * omission (owner decision, 19.1). The chosen thing and the found
- * thing used to wear the accent at 8 and 16 percent, which over the warm page
- * measured a neutral gray and then a real blue: the two surfaces in the app
- * that say "this one" were the only cold things on it. They are
- * [PagePalette.selected] and [PagePalette.match] now, opaque tones in the
- * paper's own family, measured by `ContrastTest` against the ink they carry.
- * So what is left here is only what really is a tint of the accent or of the
- * ink.
+ * omission. The chosen thing and the found thing are
+ * [PagePalette.selected] and [PagePalette.match], opaque tones in the
+ * accent's own family at the lightness the warm grounds of 19.1 carried,
+ * measured by `ContrastTest` against the ink they carry (owner decision,
+ * 21.0, which turned 19.1's family around). So what is left here is only
+ * what really is a tint of the accent or of the ink.
  *
  * Before this, sixteen call sites carried sixteen alphas between 0.05 and
  * 0.25 doing five jobs, and the next session that painted a chosen thing had

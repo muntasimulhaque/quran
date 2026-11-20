@@ -21,12 +21,12 @@ import androidx.compose.ui.graphics.Color
  * rule colors are drawn over it, and one drop more puts the closest of them
  * under 4.5:1.
  *
- * [selected] is the chosen thing's ground, and it is opaque and warm: the
+ * [selected] is the chosen thing's ground, and it is opaque: the
  * ayah whose menu is open, the introduction the reader opened, the row Browse
- * is standing on, and the word the word sheet is naming. It is the page's own
- * family and never a tint of the accent, so the one surface in the app that
- * says "this one" says it in the paper's voice (owner decision,
- * 19.1). See [PaperSelected] for the measurement.
+ * is standing on, and the word the word sheet is naming. It is the accent's
+ * own family at the lightness the warm ground of 19.1 carried, so the one
+ * surface in the app that says "this one" says it in the accent's voice
+ * (owner decision, 21.0). See [PaperSelected] for the measurement.
  *
  * [match] is its sibling for the thing that was *found* rather than chosen:
  * the word a search matched, and the text a reader selected in a field. Same
@@ -58,12 +58,12 @@ data class PagePalette(
      * the ayah-level recitation wash is gone (owner decision, 15.9).
      */
     val highlight: Color,
-    /** The chosen thing's ground: warm, opaque, and never the accent. */
+    /** The chosen thing's ground: opaque, in the accent's own family. */
     val selected: Color,
     /**
      * The found thing's ground: the word a search matched, and the text a
-     * reader selected in a field. Warm, opaque, one step louder than
-     * [selected], and never the accent (owner decision, 19.1).
+     * reader selected in a field. Opaque, in the accent's own family, one
+     * step louder than [selected] (owner decision, 21.0).
      */
     val match: Color,
     val tajweed: TajweedColors,

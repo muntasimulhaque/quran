@@ -209,9 +209,9 @@ internal fun AyahBlock(
     // because the two tints together put the seven rule colors under their
     // contrast floor (owner decision, 15.9).
     //
-    // The wash is the page's own warm tone and not a tint of the accent, so
-    // the one surface that says "this verse is the one you are acting on"
-    // says it in the paper's voice (owner decision, 19.1).
+    // The wash is the accent's own family at the lightness the warm tone
+    // carried, so the one surface that says "this verse is the one you are
+    // acting on" says it in the accent's voice (owner decision, 21.0).
     val wash = if (isSelected) palette.selected else Color.Transparent
     // The padding belongs to the paper, so the gaps between ayahs still
     // answer a tap with the reading chrome. The block is set apart by the

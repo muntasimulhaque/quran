@@ -196,9 +196,9 @@ fun HighlightedText(
     // reader searched it (owner decision, 13.2).
     val voice = LocalReadingVoice.current
     val resolvedStyle = style ?: voice.prose(sizeSp = sizeSp, lineSp = lineSp)
-    // The found word's ground is the page's own warm tone and no longer a tint
-    // of the accent: on the day sheet the tint measured a real blue, the only
-    // cool ground left in the app (owner decision, 19.1).
+    // The found word's ground is the accent's own family at the lightness the
+    // warm tone carried, one step louder than the chosen ground
+    // (owner decision, 21.0).
     val wash = LocalPagePalette.current.match
     val weight = FontWeight.Medium
     Text(

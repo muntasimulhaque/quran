@@ -6,6 +6,52 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.0
+
+The chosen and found grounds wear the accent, not the paper.
+
+The app's colors were audited end to end: every ground, ink, wash,
+ornament, and rule color, in both grounds, listed and measured. Four tones
+were the odd ones out. The ground behind the chosen thing (the ayah whose
+menu is open, the row Browse is standing on, the opened surah introduction,
+and the word the word sheet names) and the ground behind the found thing (a
+search match and the words a reader selects in a field) were warm paper
+tones, beige and tan on the day page and brown at night. The night's found
+ground was the most saturated brown on any interface surface in the app,
+and the pair read as one hue family too many beside the page, the accent,
+and the ornament.
+
+19.1 had moved those grounds off the accent because a lapis tint at 8
+percent over cream measured a neutral gray, and it chose the paper's own
+warm family instead. The tone now is not that tint: it is opaque, in the
+accent's own family, at the lightness the warm tones carried, with the
+chroma that family had named (5 and 8 by day, 8 and 10 at night). On the
+day page that is #E6EBF5 behind the chosen thing and #DAE2F1 behind the
+found one; at night, #1E2832 and #2E3C49.
+
+Because the lightness did not move, the pairs the contrast test measures
+landed where they were: the reading ink reads 10.6 to 1 on the chosen
+ground, the quiet word 5.8 to 1, the closest of the seven rule colors 5.4
+to 1, and the night's pairs hold on the same footing. The floating paper's
+edge over the chosen block improved with the change, from dE76 8.7 to 8.9
+by day and from 5.9 to 11.9 at night, because the block no longer shares
+the floating paper's warm hue. `ContrastTest` and `WashTest` pass unchanged.
+
+The ornament gold is not a highlight and does not move: the juz and surah
+names, the medallion's digits, and the share card's name keep it. The paper
+family, the tajweed palette, and the never-drawn Material containers stay as
+they are. The decision that moved is written where it lives, in the KDoc
+tagged `owner decision, 21.0`, which records what 19.1 refused and why, and
+`git log` holds the road between them.
+
+The whole JVM suite, lint, and the debug build are green on this machine,
+with `checkdb` reproducing the committed database's SHA-256 and the search
+gate green. A visible surface changed, so the three store sets were
+captured again on the phone, the 7 inch, and the 10 inch, each from a clean
+install. No content changed, so every pack and the content database are as
+they were and no catalog hash or tag moved, and no permission or app
+dependency moved.
+
 ## 20.9
 
 Three edges of the app's own machinery, closed.

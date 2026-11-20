@@ -125,7 +125,7 @@ val FloatingShadow = Color(0x1A000000)
 // **The day's floating paper is the sheet's white.** The page stands at
 // L* 98.0, the sheet at 100.0, and the block a menu is always raised over at
 // 92.9, so white is 2.0 L* over the page (1.05:1, dE76 3.3) and 7.1 L* over
-// the block (dE76 7.2). That is the step every sheet already stands on, and a
+// the block (dE76 8.9). That is the step every sheet already stands on, and a
 // sheet wears no border: its scrim and its lift are its edge. The pill has no
 // scrim, so its lift is that edge. The four tones before this one all went
 // down and asked the fill to carry the step: 17.0's [PaperControl] at 2.8 L*
@@ -143,7 +143,7 @@ val FloatingShadow = Color(0x1A000000)
 // darkens a light one, so the block sits above the sheet. A floating paper at
 // the sheet's tone would sink under the menu it is meant to raise.
 // [NightFloating] is the highest paper on that ground: #322E2A at L* 19.2,
-// 9.8 L* over the page (1.29:1), 5.8 over the sheet, and dE76 5.9 from the
+// 9.8 L* over the page (1.29:1), 5.8 over the sheet, and dE76 11.9 from the
 // block. The shadow is invisible at night, so the fill is the only edge there;
 // that is why the night's step is the larger one. The tone before it,
 // [NightControl] at #2E2B28, stood dE76 4.4 from the block; the one-step lift
@@ -151,7 +151,7 @@ val FloatingShadow = Color(0x1A000000)
 // [NightControl] because a track is a groove on the sheet, not a bar over the
 // page.
 //
-// The pairs the day lands in: 1.05:1 from the page, dE76 7.2 from the block,
+// The pairs the day lands in: 1.05:1 from the page, dE76 8.9 from the block,
 // and on it the quiet word reads 6.96:1, the reading's ink 12.7:1, and lapis
 // 8.79:1. The night's floating paper carries the ink at 10.41:1, the quiet
 // word at 7.12:1, and lapis at 7.06:1.
@@ -165,48 +165,42 @@ val NightOnPrimary = Color(0xFF08243D)
 /**
  * The chosen thing's ground: the ayah whose menu is open, the introduction the
  * reader opened, the row Browse is standing on, and the word the word sheet
- * names. One opaque tone per ground, and neither is the accent.
+ * names. One opaque tone per ground, in the accent's own family.
  *
- * The chosen thing used to wear the accent at `Wash.Selected` of 8 percent,
- * which is a defensible way to say "this is the app's choice" and was the only
- * cold surface in a warm app: lapis at 8 percent over cream measures #E9EBEA,
- * a neutral gray at chroma 0.9 against a page whose own chroma is 2.6, so the
- * block read as a different app's selection sitting on this app's paper. A
- * chosen thing on a warm page is a warmer sheet of the same paper, not a tint
- * of the control color (owner decision, 19.1).
+ * 19.1 moved this ground from a tint of the accent to the paper's own warm
+ * family, because lapis at 8 percent over cream had measured a neutral gray.
+ * 21.0 turns the family back, by the owner's word: the warm block read as
+ * brown beside the blue the app acts in, and it stood as a fourth hue family
+ * on a page that already carries the paper, the lapis, the gold, and the
+ * seven rule colors. The gray 19.1 refused was chroma 0.9 at the accent's
+ * hue; this tone carries 5 on the day and 8 on the night at that hue, so it
+ * reads as lapis and not as a browser's default selection (owner decision,
+ * 21.0).
  *
- * The tones are chosen at the *same lightness* as the composites they replace,
- * 92.9 on the day page and 15.6 on the night, so every pair already measured
- * against the wash still measures the same: the seven paper families keep 5.4
- * to 1 at their closest on the day wash and 5.7 on the night, the reading's
- * ink 10.6 and 10.4, and the quiet word 5.5 and 7.9. The hue is the paper's
- * own family, 80 of 94 on the day and 80 of 74 at night, at a chroma of 5 on
- * the day and 8 on the night, because a warm tint needs more of its own chroma
- * to read as warm against a dark ground.
+ * The tones keep the *same lightness* as the warm tones they replace, 92.9 on
+ * the day page and 15.6 on the night, so every pair already measured against
+ * the ground still measures the same: the seven paper families keep 5.4 to 1
+ * at their closest on the day ground and 5.8 on the night, the reading's ink
+ * 10.6 and 10.4, and the quiet word 5.8 and 7.9.
  */
-val PaperSelected = Color(0xFFF0EAE1)
-val NightSelected = Color(0xFF2D261C)
+val PaperSelected = Color(0xFFE6EBF5)
+val NightSelected = Color(0xFF1E2832)
 
 /**
  * The found thing's ground: the word a search matched, and the text a reader
- * selected in a field. One opaque tone per ground, the paper's own family.
+ * selected in a field. One opaque tone per ground, in the accent's own family.
  *
- * It is the same decision as [PaperSelected], one step louder (owner decision,
- * 19.1). The match used to be the accent at `Wash.Match` of 16
- * percent, which over the day sheet is #DBE3EA, lightness 89.8, chroma 4.5 at
- * hue 252: a real blue, and after the chosen block was warmed it was the only
- * cool ground left in the app. The chosen tone had been nearly neutral, which
- * is why it read as a slip; the match did not, and read as a browser's default
- * selection instead.
+ * It is the same decision as [PaperSelected], one step louder, turning 19.1's
+ * warm family around with it (owner decision, 21.0). The chroma is 8 on the
+ * day, one step over the chosen tone's 5, because a match is the loudest of
+ * the quiet grounds; the night takes 10, where the warm tone it replaces had
+ * drifted to 15.7 in its hex and read as a brown block behind the words.
  *
- * The tones keep the lightness of the composites they replace, 89.8 on the day
- * sheet and 24.6 on the night, so the pairs already measured are unchanged and
- * two of them improve: the interface's ink reads 11.6 before and 11.6 after,
- * the reading's ink 9.80 before and 9.83 after, and the night's ink 7.87
- * before and 7.90 after. The chroma is 8 at the paper's own hue of 80, one
- * step over the chosen tone's 5, because a match is the loudest of the quiet
- * grounds; the night takes 10, because a warm tint needs more of its own
- * chroma to read against a dark ground.
+ * The tones keep the lightness of the warm tones they replace, 89.7 on the
+ * day sheet and 24.6 on the night, so the pairs already measured keep their
+ * numbers to the hundredth: the interface's ink 11.55, the reading's 9.76,
+ * the night's 7.86, and the APCA floors hold at 81.4 on the day and -74.3 on
+ * the night.
  */
-val PaperMatch = Color(0xFFEBE0D3)
-val NightMatch = Color(0xFF463823)
+val PaperMatch = Color(0xFFDAE2F1)
+val NightMatch = Color(0xFF2E3C49)

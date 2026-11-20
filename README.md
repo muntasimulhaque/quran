@@ -198,22 +198,27 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.9 (versionCode 211).** The signed bundle comes from `build` run
-44774926755, the newest green run on `main` at the hand-off: the unit tests,
-lint, and `assembleDebug` passed, and the signed bundle `quran-20.9-vc211.aab`
-has SHA-256
-`e19aa8695d818690a50bceb434ba3fabe51d4ab76e040762234d03a79306a8a3`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine, and the content gate reproduced the
-committed database's SHA-256. No visible surface changed, so the three
-committed store sets stand and no capture leg ran. The reminder's arming
-changed, so `DailyReminderTest` and `DailyAyahToggleTest` ran on the phone
-from a clean install: ten tests, zero failures. The full app instrumented
-suite was skipped. No content changed, so every pack and the content database
-are as they were and no catalog hash or tag moved, and no permission or app
-dependency moved. The 20.9 bundle was submitted for Play review, and the
-hand-off copy in `play-store/aab/` was deleted once Play had it.
+**21.0 (versionCode 212).** The newest green `build` run on `main` produced
+the signed bundle `quran-21.0-vc212.aab` at the hand-off. The same suite is
+green on this machine, and the content gate reproduced the committed
+database's SHA-256. A visible surface changed, so the three store sets were
+captured again on the phone, the 7 inch, and the 10 inch, each from a clean
+install. No content changed, so every pack and the content database are as
+they were and no catalog hash or tag moved, and no permission or app
+dependency moved. The hand-off copy waits in `play-store/aab/` for Play.
+
+**What changed in 21.0.** The two tinted grounds in the app, the block behind
+the chosen thing and the block behind the found thing, moved from the paper's
+warm family to the accent's own. On the day page they were beige and tan; at
+night they were brown, and the found ground was the most saturated brown on
+any interface surface. They read as one hue family too many beside the page,
+the accent, and the ornament. The new tones keep the old lightness, so every
+contrast pair keeps its floor, and they carry enough of the accent's chroma
+to read as lapis rather than as a gray: #E6EBF5 behind the chosen thing and
+#DAE2F1 behind the found one, and #1E2832 and #2E3C49 at night. The floating
+paper now stands clear of the chosen block by more than it did. The ornament
+gold is furniture and stays, as do the paper family, the tajweed palette, and
+the never-drawn Material containers.
 
 **What changed in 20.9.** An audit of the app's network, storage, SQL, and
 platform surface found no exploitable hole and no crash, and it closed three
@@ -228,18 +233,6 @@ new clock never produces and speak a second time. The row rule is one pure
 function the JVM suite pins; the reminder's own classes ran green on the
 phone. The Quran text, both translations, both tafsirs, the recitations, and
 every pack are unchanged.
-
-**What changed in 20.8.** The app's colors were audited end to end and not
-one was replaced: every ground, ink, wash, ornament, and rule color was
-measured against the reading research and held. The one defect the audit
-found was the opened introduction's base tone. The day ground applied the
-night's alpha to the interface's word, so one number landed two tones and
-the longest prose on its page read weaker at night than the captions beside
-it. One base and one alpha lift it above every caption on both grounds and
-still a clear step under the verse. `ContrastTest` now carries APCA-W3
-0.1.9, so the perceptual floors the reading owes are checked by arithmetic
-on both grounds, and the night rule colors, the word mark, and the found
-ground each record why 17.1 and 10.6 put them where they are.
 
 ## Corrections and contributions
 
