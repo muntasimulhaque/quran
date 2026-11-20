@@ -48,6 +48,16 @@ on:
 permissions:
   contents: read
 
+# Maven Central answers a shared runner with 429 Too Many Requests, and
+# Gradle tries twice, waits two seconds, then disables the repository for the
+# rest of the build, so a job that resolves nothing else fails at
+# configuration. The repository retry group is the one that covers a 429 (the
+# network group does not), so a rate limit costs a few seconds here instead of
+# a red run and a manual re-run. These are Gradle's own internal knobs: check
+# them again when the wrapper moves.
+env:
+  GRADLE_OPTS: -Dorg.gradle.internal.repository.max.retries=6 -Dorg.gradle.internal.repository.initial.backoff=5000
+
 # Two pushes to main in the same minute should not race two signing runs
 # against each other; the newer run waits its turn rather than cancelling a
 # run that may be halfway through an upload.
