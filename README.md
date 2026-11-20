@@ -211,8 +211,8 @@ sets were captured again on the phone, the 7 inch, and the 10 inch, each from
 a clean install, and no set moved: the changed grounds stand in none of the
 twenty-four frames. No content changed, so every pack and the content
 database are as they were and no catalog hash or tag moved, and no permission
-or app dependency moved. The hand-off copy waits in `play-store/aab/` for
-Play.
+or app dependency moved. The 21.0 bundle was submitted for Play review, and
+the hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 21.0.** The two tinted grounds in the app, the block behind
 the chosen thing and the block behind the found thing, moved from the paper's
