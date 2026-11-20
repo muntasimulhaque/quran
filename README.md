@@ -213,8 +213,9 @@ frame and the two frames that differ do so at a text caret's blink and a
 status bar icon's repaint. The capture classes ran on all three AVDs; the full
 app instrumented suite was skipped. No content changed, so every pack and the
 content database are as they were and no catalog hash or tag moved, and no
-permission or app dependency moved. The hand-off copy waits in
-`play-store/aab/` for Play.
+permission or app dependency moved. The 20.8 bundle was submitted for Play
+review, and the hand-off copy in `play-store/aab/` was deleted once Play had
+it.
 
 **What changed in 20.8.** The app's colors were audited end to end and not
 one was replaced: every ground, ink, wash, ornament, and rule color was
