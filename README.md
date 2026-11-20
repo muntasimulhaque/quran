@@ -198,11 +198,16 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.7 (versionCode 209).** The newest green `build` run on `main` produced
-the signed bundle `quran-20.7-vc209.aab` at the hand-off. The same suite is
-green on this machine. No visible surface changed, so the three committed
-store sets stand and no capture leg ran; no runtime behavior changed, so
-the instrumented work was skipped. No content changed, so every pack and the
+**20.7 (versionCode 209).** The signed bundle comes from `build` run
+44740436737, the newest green run on `main` at the hand-off: the unit tests,
+lint, and `assembleDebug` passed, and the signed bundle `quran-20.7-vc209.aab`
+has SHA-256
+`331551b5935787c7f16d804c675720ebe5a2de77d69d070506621c89e274ca7c`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine. No visible surface changed, so the
+three committed store sets stand and no capture leg ran; no runtime behavior
+changed, so the instrumented work was skipped. No content changed, so every pack and the
 content database are as they were and no catalog hash or tag moved, and no
 permission or app dependency moved. The hand-off copy waits in
 `play-store/aab/` for Play.
