@@ -198,14 +198,21 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.0 (versionCode 212).** The newest green `build` run on `main` produced
-the signed bundle `quran-21.0-vc212.aab` at the hand-off. The same suite is
-green on this machine, and the content gate reproduced the committed
-database's SHA-256. A visible surface changed, so the three store sets were
-captured again on the phone, the 7 inch, and the 10 inch, each from a clean
-install. No content changed, so every pack and the content database are as
-they were and no catalog hash or tag moved, and no permission or app
-dependency moved. The hand-off copy waits in `play-store/aab/` for Play.
+**21.0 (versionCode 212).** The signed bundle comes from `build` run
+44788796647, the newest green run on `main` at the hand-off: the unit tests,
+lint, and `assembleDebug` passed, and the signed bundle `quran-21.0-vc212.aab`
+has SHA-256
+`a99cb9cb0c0d65c24aca197a394b5105059b4c9456b8467bc5b745a0cf224149`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine, and the content gate reproduced the
+committed database's SHA-256. A visible surface changed, so the three store
+sets were captured again on the phone, the 7 inch, and the 10 inch, each from
+a clean install, and no set moved: the changed grounds stand in none of the
+twenty-four frames. No content changed, so every pack and the content
+database are as they were and no catalog hash or tag moved, and no permission
+or app dependency moved. The hand-off copy waits in `play-store/aab/` for
+Play.
 
 **What changed in 21.0.** The two tinted grounds in the app, the block behind
 the chosen thing and the block behind the found thing, moved from the paper's

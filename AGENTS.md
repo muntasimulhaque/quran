@@ -319,14 +319,15 @@ in `play-store/aab/` once Play has it.
   refreshed by one start with `-no-snapshot-load` and a clean exit. A
   software renderer is never used here; the CI runners keep their own flags.
   `gh` is authenticated.
-- The phone AVD's display is 1080 x 2280 and the store set Play has is
-  1080 x 1920, so its leg runs with `adb shell wm size 1080x1920` at the
-  AVD's own 440 dpi, and the size is reset after it: without the override the
-  frames come out 360 px taller than the set they stand in. The 7 inch AVD's
-  display is 800 x 1280 and the store set is 1200 x 1920, the same page at
-  1.5 times the pixels, so its leg runs with `adb shell wm size 1200x1920`
-  and `wm density 320`; both are reset after the leg. The 10 inch AVD is
-  2560 x 1800 at 320 dpi, and its store set is that same display.
+- The phone AVD is 1080 x 1920 at 420 dpi, which is the store set Play has,
+  so its leg runs with no display override. A forced 440 does not reproduce
+  the set: 21.0 measured a 14 percent pixel difference against the committed
+  frames, where 420 matched them to 0.12 percent, the status bar's clock.
+  The 7 inch AVD's display is 800 x 1280 and the store set is 1200 x 1920,
+  the same page at 1.5 times the pixels, so its leg runs with
+  `adb shell wm size 1200x1920` and `wm density 320`; both are reset after
+  the leg. The 10 inch AVD is 2560 x 1800 at 320 dpi, and its store set is
+  that same display.
 - `python3` and `python` are the Store alias; the real interpreter is under
   `C:/Users/zn/AppData/Local/hermes/tools/`. Nothing in the build needs it.
 - Two tool calls in one block run in parallel. Never edit a file and read it in
