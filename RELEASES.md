@@ -6,6 +6,60 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.8
+
+The prose states its floor, and the opened introduction wears one ink.
+
+The app's colors were audited end to end and not one was replaced. Every ground,
+ink, wash, ornament, and rule color was measured against the reading research
+and held: the warm white page that is neither white nor parchment, the reading
+ink held at 12:1 rather than the 14:1 a label wants, the night page lifted off
+black and warmed so a pale letter cannot bloom on it, the one desaturated action
+color, the ornament gold that is read and never tapped, and the seven tajweed
+families in one contrast band with their color-vision floors. The palette was
+already the right side of every trade; the research says so, and the new test
+keeps it there.
+
+Two findings did come out of the audit. The first is a defect. `PagePalette`
+promises that the surah's opened introduction is the reading's ink at a step
+back, and the night ground kept that promise while the day ground applied the
+same alpha to the interface's word. One number landed two tones, and at night
+the introduction measured Lc -56.7 and read weaker than the captions beside it
+at -65.2, on the longest prose on its page beside the tafsir. One base and one
+alpha on both grounds puts it at 84.3 on the day page and -64.3 at night: above
+every caption on its own ground, and still a clear step under the verse.
+
+The second is the rule that would have caught the first. `ContrastTest` now
+carries APCA-W3 0.1.9 beside its WCAG ratios, its OKLab pair floors, and its
+cone simulation, because the 2.x ratio cannot describe a dark ground: the
+library's own documentation says it cannot be used to design one, and the night
+pairs are where that matters. Five tests pin the day prose at Lc 90 and the
+night's at -75, the quiet voice, the action color, and the ornament at 60, the
+introduction on both grounds and on the block it opens over, and the found
+ground the reading is scanned on rather than read on. Twenty-three pairs now
+fail on the machine rather than on a reader's eyes.
+
+Three pairs are recorded and deliberately not asserted, because each one is a
+decision the app already took and lifting it would undo that decision: the night
+rule colors, which 17.1 pulled off the top of the scale to stop the bloom a pale
+saturated letter makes; the word mark's rule colors, which are that same band
+drawn a step louder; and the night quiet voice on the found ground, where no
+quiet word is ever drawn. The KDoc says why each stands where it does, so a
+later session inherits the reasoning rather than re-deriving it.
+
+Two sentences were also settled where they were only ever re-derived. A press
+is not a fill: Material resolves a bare ripple to the ink of the thing pressed,
+read from material3 1.5's bytecode, so the app's three ripple tones are one rule
+and not three. And the accent's container is cool because it is the accent and
+not a ground, which is what 19.1 meant when it retired the cold grounds and kept
+the cold accent.
+
+The opened introduction's ink moved one step, so the three store sets were
+captured again on the phone, the 7 inch, and the 10 inch, each from a clean
+install. No set moved: the introduction is not in a store frame, and the two
+frames that differ do so at a text caret's blink and a status bar icon's
+repaint. The full app instrumented suite was skipped.
+
 ## 20.7
 
 The type audit keeps every face, and the Bangla ladder says what its digits do.
