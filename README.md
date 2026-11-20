@@ -198,19 +198,24 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**20.5 (versionCode 207).** The signed bundle comes from `build` run
-44580717804, the newest green run on `main` at the hand-off: the unit tests,
-lint, and `assembleDebug` passed, and the signed bundle `quran-20.5-vc207.aab`
-has SHA-256
-`1333353695f0e47d794abd530e180e668cd46741aa12ec397eb151ee95f1ee4b`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine. No committed store frame carries
-either label this release changes, so the three committed store sets stand
-and no capture leg ran; the instrumented work was skipped. No content
-changed, so every pack and the content database are as they were and no
-catalog hash or tag moved, and no permission or dependency moved. The
-hand-off copy in `play-store/aab/` was deleted once Play had it.
+**20.6 (versionCode 208).** The newest green `build` run on `main` produced
+the signed bundle `quran-20.6-vc208.aab` at the hand-off. The same suite is
+green on this machine. The translations page changed on the glass, so the
+three store sets were captured again on the phone, the 7 inch, and the
+10 inch, and the instrumented suites ran on the phone: the app's 251
+tests and the data layer's 65 passed. No content changed, so every pack
+and the content database are as they were and no catalog hash or tag moved,
+and no permission or app dependency moved; the build tool moved to Gradle
+9.9.2. The hand-off copy waits in `play-store/aab/` for Play.
+
+**What changed in 20.6.** The library attaches the packs a screen reads,
+not every pack on the phone, and the daily reminder asks for the one
+translation it shows; a pack past SQLite's tenth attachment can no
+longer be silently left out of a reading or a morning. A reading holds four
+translation columns, and the fifth installed translation says on its row why
+it waits. The app's instrumented suite was put right: three legs had
+drifted from decisions the app had already made, and the notification's red
+run now names the marks it saw.
 
 **What changed in 20.5.** A failure says Retry, a download says Downloading,
 and every decision in the code names the release that made it. "Try again"
@@ -224,20 +229,6 @@ notification's mark is named for what it draws, the touch floor and the press
 circle come from the theme at every call site, the one haptic in the app says
 why it is the only one, and the site now says Al-Fatiha ships in all four
 voices.
-
-**What changed in 20.4.** Choosing another voice on the playing pill no
-longer offers a download the device already holds. All four reciters'
-timing packs ship inside the app and Al-Fatiha's audio travels in its assets
-for all four, so on that surah there was nothing to fetch for any voice, yet
-every switch offered a package and the tap played at once. The price was read
-from the library's attached packs, and only the chosen voice's timings are
-attached. The price now asks the device, and the pill's chooser reopens the
-library over the voice it has just chosen, so a switch to a voice already
-here plays with no offer at all. An offer still stands, naming the audio's
-size alone, where a surah's audio genuinely is not on the device. Two legs
-hold it, red before the fix and green after: a voice that is not attached
-still reads as on the device, and the reader's own round ends with no offer
-on the glass.
 
 ## Corrections and contributions
 

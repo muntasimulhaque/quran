@@ -6,6 +6,36 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 20.6
+
+The page reads four translations, the reminder reads one, and the library
+attaches only what a screen is showing.
+
+A reader who keeps several translations, tafsirs, word lists, and voices
+could meet a missing pack without ever removing one: the app attached every
+pack on the phone to one SQLite connection, and that connection holds ten.
+The pack past the tenth was left out, and the daily reminder, which opened
+the library without naming a reciter, could lose the translation it was
+about to show. The library now attaches the packs the screen reads and
+nothing else, and the reminder asks for its one translation alone.
+
+A reading holds four translation columns. A fifth installed translation
+keeps its file and its row, says why it waits, and takes the place of one
+turned off; four is what leaves the page's words, its root, its voice, and
+its tafsir cards inside the same ten.
+
+The app's own instrumented suite is honest again. Three tests had drifted
+from decisions the app had already made: a size in decimal megabytes, the
+ayah door's floor, and the question before a removed voice. The notification
+test now starts from a clear shade and names the marks it saw instead of
+their resource numbers.
+
+No reader sees the rest: Gradle moves to 9.9.2, which refuses a version
+catalog's text as code; the gates job keeps its own 45 minutes; CI retries
+a rate-limited registry instead of failing the run; the tools name a missing
+source instead of dying on a null; and the prose keeps one dialect, with the
+attributes file naming the release that made its decision.
+
 ## 20.5
 
 A failure says Retry, a download says Downloading, and every decision in the
