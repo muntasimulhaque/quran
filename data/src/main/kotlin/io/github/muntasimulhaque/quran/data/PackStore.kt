@@ -225,7 +225,7 @@ class PackStore(private val context: Context) {
      * the app's own assets when the build carried it (development builds and
      * tests work with no network at all). The catalog is the expectation:
      * a file that does not match its length and SHA-256 is not installed,
-     * whichever door it arrived through (owner decision, security audit).
+     * whichever door it arrived through (owner decision, 11.7).
      */
     fun install(id: String, verified: File? = null): Boolean {
         val pack = PackCatalog.load(context).get(id) ?: return false

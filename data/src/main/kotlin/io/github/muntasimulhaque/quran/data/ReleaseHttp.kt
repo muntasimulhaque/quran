@@ -11,7 +11,7 @@ import java.net.URL
  * hop is checked before the connection that would use it is opened, and the
  * request goes to no host outside [ReleaseHosts]. The caller still owns the
  * response code, the body, and the socket; this only answers which URL was
- * allowed to receive the request (owner decision, security audit).
+ * allowed to receive the request (owner decision, 11.7).
  */
 internal object ReleaseHttp {
 

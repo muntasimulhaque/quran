@@ -8,8 +8,8 @@ import java.io.IOException
  *
  * The content tools run on the owner's machine and in CI, where a write
  * outside `content/work` is not a bad download but a changed build. A name
- * that leaves its root is refused rather than repaired (owner decision,
- * security audit).
+ * that leaves its root is refused rather than repaired
+ * (owner decision, 11.7).
  */
 object SafeFiles {
 

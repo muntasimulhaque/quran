@@ -314,7 +314,7 @@ android {
         // and later, and an old phone's unpatched platform is a risk of the
         // phone, not a reason to keep the Book from it. Raising minSdk would
         // not make targetSdk stronger; it would only leave older readers out
-        // (owner decision, security audit).
+        // (owner decision, 11.7).
         minSdk = 24
         targetSdk = 37
         versionCode = 207

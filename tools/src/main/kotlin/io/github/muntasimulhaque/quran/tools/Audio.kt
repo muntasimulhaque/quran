@@ -64,7 +64,7 @@ class Audio(private val root: File) {
      * build refuses a source file whose bytes have changed, so a CDN or an
      * upstream export cannot quietly replace a recitation between two
      * releases. The file is committed after the first run, which is what
-     * turns the recording into a pin (owner decision, security audit).
+     * turns the recording into a pin (owner decision, 11.7).
      */
     private val sourceFile = File(root, "content/audio-sources.json")
     private val sourceHashes = java.util.concurrent.ConcurrentHashMap<String, String>()

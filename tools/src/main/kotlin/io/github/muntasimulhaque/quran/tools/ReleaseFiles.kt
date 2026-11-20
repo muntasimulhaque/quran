@@ -7,7 +7,7 @@ import java.net.URL
 /**
  * The one host family the content tools may read from. A redirect is checked
  * before the connection that would use it is opened, so a release page can
- * never carry the build to another host (owner decision, security audit).
+ * never carry the build to another host (owner decision, 11.7).
  */
 object ReleaseFiles {
 

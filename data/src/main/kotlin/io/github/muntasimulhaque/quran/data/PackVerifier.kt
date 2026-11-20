@@ -14,7 +14,7 @@ import java.security.MessageDigest
  * copy has damaged is found here, named, and offered for removal instead of
  * surfacing later as a query that returns nothing. A pack whose catalog
  * entry has no 64-hex SHA-256 is never intact: a missing checksum is a
- * refusal, not a permission (owner decision, security audit).
+ * refusal, not a permission (owner decision, 11.7).
  *
  * A shipped pack is not hashed here: it comes from the app's own signed
  * assets. The core pack is checked by [PackStore.coreFile] on every open;

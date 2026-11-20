@@ -32,29 +32,48 @@ import java.io.File
  * The line that pins a checked-out file's bytes was added with a decision and
  * was still dated by its session when the sweep passed, since the sweep read
  * Kotlin and XML and this file is neither.
+ *
+ * An audit is the same fault wearing a more official word. Eight decisions
+ * from the 11.7 hardening were dated "security audit", which names a
+ * conversation and not a release, and a later reader cannot find the release
+ * that made the call. They name 11.7 now, and the gate refuses the phrase the
+ * way it refuses a session.
  */
 class DecisionDatingTest {
 
     @Test
-    fun `no settled decision is dated by a session`() {
+    fun `no settled decision is dated by a session or an audit`() {
         val root = repositoryRoot()
-        val offenders = mutableListOf<String>()
+        val sessions = mutableListOf<String>()
+        val audits = mutableListOf<String>()
         root.walkTopDown()
             .onEnter { it.name !in SKIPPED_DIRECTORIES }
             .filter { it.isFile && it.name !in SKIPPED_FILES && isScanned(it) }
             .forEach { file ->
                 val text = runCatching { file.readText() }.getOrNull() ?: return@forEach
+                val path = file.relativeTo(root).path.replace('\\', '/')
                 for (match in SESSION_TAG.findAll(text)) {
-                    val line = text.substring(0, match.range.first).count { it == '\n' } + 1
-                    offenders += file.relativeTo(root).path.replace('\\', '/') + ":" + line
+                    sessions += path + ":" + lineOf(text, match)
+                }
+                for (match in AUDIT_TAG.findAll(text)) {
+                    audits += path + ":" + lineOf(text, match)
                 }
             }
         assertTrue(
             "a decision is dated by a session instead of its version: " +
-                offenders.joinToString(", "),
-            offenders.isEmpty(),
+                sessions.joinToString(", "),
+            sessions.isEmpty(),
+        )
+        assertTrue(
+            "a decision is dated by an audit instead of its version: " +
+                audits.joinToString(", "),
+            audits.isEmpty(),
         )
     }
+
+    /** The line a tag starts on, for a failure that can be opened. */
+    private fun lineOf(text: String, match: MatchResult): Int =
+        text.substring(0, match.range.first).count { it == '\n' } + 1
 
     /**
      * The source files the rule governs, and the two prose files whose tags a
@@ -83,6 +102,17 @@ class DecisionDatingTest {
          */
         val SESSION_TAG = Regex(
             """owner\s+(?:\* |// )?\s*(decision|report),((?:(?!\d+\.\d)[^)]){0,90}?)session""",
+        )
+
+        /**
+         * A tag that names an audit instead of a release: the same shape as
+         * [SESSION_TAG], reaching `security audit` before the parenthetical
+         * closes and carrying no version on the way. The eight that named
+         * this one were the 11.7 hardening's, and a later reader owed the
+         * release, not the meeting.
+         */
+        val AUDIT_TAG = Regex(
+            """owner\s+(?:\* |// )?\s*(decision|report),((?:(?!\d+\.\d)[^)]){0,90}?)[Ss]ecurity audit""",
         )
 
         val SOURCE_EXTENSIONS = setOf("kt", "kts", "xml")

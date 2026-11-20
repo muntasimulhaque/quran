@@ -11,7 +11,7 @@ import java.io.IOException
  * None of them is a file name until it has passed this gate. A name that
  * does not is not repaired into a different name: it is refused, so a
  * content mistake can never become a write or a delete outside the folder
- * that content owns (owner decision, security audit).
+ * that content owns (owner decision, 11.7).
  */
 object SafePaths {
 
