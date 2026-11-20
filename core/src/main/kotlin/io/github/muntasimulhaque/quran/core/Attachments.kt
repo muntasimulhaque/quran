@@ -31,6 +31,19 @@ object Attachments {
     const val BUDGET = 9
 
     /**
+     * The most translation columns one page may hold.
+     *
+     * A page of the Book with four translations under every ayah is already
+     * a comparison; a fifth adds height and not reading. Four is also the
+     * number that leaves the budget its other packs: four columns, the word
+     * list, its root, one voice, and the two tafsir cards a reading language
+     * offers make nine, exactly [BUDGET] (owner decision, 20.5). The reader
+     * may install any number; the page shows four, and one turned off makes
+     * room for another.
+     */
+    const val COLUMNS = 4
+
+    /**
      * Everything the reading's screen can read: its translation columns,
      * the word list and its root, the voice being heard, and the tafsirs the
      * ayah card offers. All of them are the reader's enabled set, never the
@@ -44,7 +57,7 @@ object Attachments {
         voice: String? = null,
     ): List<String> = within(
         buildList {
-            addAll(translations)
+            addAll(translations.distinct().take(COLUMNS))
             words?.let(::add)
             root?.let(::add)
             voice?.let(::add)

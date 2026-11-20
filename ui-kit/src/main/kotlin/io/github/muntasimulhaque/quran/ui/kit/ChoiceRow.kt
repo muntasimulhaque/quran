@@ -120,6 +120,14 @@ fun ChoiceRow(
     selected: Boolean,
     radio: Boolean,
     onClick: () -> Unit,
+    /**
+     * Whether the choice can be made now. A row that cannot is still drawn,
+     * and still says what it is: a list that hides the fifth translation
+     * would be a list the reader has to guess about. The caller says why
+     * where the reason belongs, and the row loses its press and its ink
+     * (owner decision, 20.5).
+     */
+    enabled: Boolean = true,
     modifier: Modifier = Modifier,
     trailing: (@Composable () -> Unit)? = null,
     /** The room under the row; a row with a block beneath it keeps less. */
@@ -131,6 +139,7 @@ fun ChoiceRow(
             .fillMaxWidth()
             .selectable(
                 selected = selected,
+                enabled = enabled,
                 role = if (radio) Role.RadioButton else Role.Checkbox,
                 interactionSource = press,
                 indication = null,
@@ -175,7 +184,11 @@ fun ChoiceRow(
                 // list and the pill's menus read as one hand (owner decision,
                 // 13.3).
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = if (enabled) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
             )
             if (!subtitle.isNullOrBlank()) {
                 Text(

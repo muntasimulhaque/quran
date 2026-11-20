@@ -143,6 +143,10 @@
     <string name="settings_title_text">Font size</string>
     <string name="settings_title_reciters">Reciter</string>
     <string name="settings_title_translations">Translations</string>
+    <!-- The page holds four columns, so the fifth row is drawn quiet and this
+         line says why. The number is the cap itself, so the sentence cannot
+         disagree with the code (owner decision, 20.5). -->
+    <string name="settings_translations_full">Up to %1$d translations can be on at once. Turn one off to read another.</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>
     <string name="settings_version_short">Version %1$s</string>

@@ -226,6 +226,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         get() = translationPacks
             .filter { it.installed && it.id in settings.translationPacks }
             .leadingWith(readingLanguage)
+            // A page holds four columns, and the language's own leads the
+            // four; the rest of the shelf keeps its files and its rows
+            // (owner decision, 20.5).
+            .take(io.github.muntasimulhaque.quran.core.Attachments.COLUMNS)
 
     val enabledTafsirPacks: List<ContentPack>
         get() = tafsirPacks.filter { it.id in settings.tafsirPacks && it.installed }
@@ -929,6 +933,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * first one on is the one search, share, and the word by word aid read.
      */
     fun toggleTranslationPack(pack: String) {
+        if (pack !in settings.translationPacks &&
+            settings.translationPacks.size >= io.github.muntasimulhaque.quran.core.Attachments.COLUMNS
+        ) {
+            // Four columns are the page's room; a fifth is refused here as
+            // well as at the row, so no other door can pass the limit
+            // (owner decision, 20.5).
+            return
+        }
         val next = if (pack in settings.translationPacks) {
             settings.translationPacks - pack
         } else {

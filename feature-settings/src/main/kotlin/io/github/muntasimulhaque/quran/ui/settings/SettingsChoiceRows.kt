@@ -88,6 +88,12 @@ fun PackChoiceRow(
      * the one who can call it off.
      */
     onCancel: () -> Unit,
+    /**
+     * Whether the choice can be made now. An off row at a page's limit is
+     * still drawn, with its name and its size, and says by its disabled press
+     * that the room is taken; the page says why (owner decision, 20.5).
+     */
+    selectable: Boolean = true,
     /** The room under the row; a row with a block beneath it keeps less. */
     bottomPadding: Dp = Space.Row,
 ) {
@@ -145,6 +151,8 @@ fun PackChoiceRow(
         selected = selected,
         radio = radio,
         onClick = onActivate,
+        enabled = selectable,
+        modifier = Modifier.testTag("pack-choice-${pack.id}"),
         bottomPadding = bottomPadding,
         // An installed pack is a choice, and Remove is its one supplementary
         // action at the trailing end of the row (the same member of the

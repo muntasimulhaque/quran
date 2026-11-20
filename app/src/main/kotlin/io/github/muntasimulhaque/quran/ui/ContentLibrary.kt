@@ -341,6 +341,18 @@ class ContentLibrary(
             offered = offered,
             content = catalog.content(),
         )
+        // A page holds four columns, and a setting from before the cap, or
+        // one written by a door that forgot it, is trimmed here with the
+        // reading language's own first: no launch carries more columns than
+        // the page can draw (owner decision, 20.5).
+        val capped = if (repaired.size > Attachments.COLUMNS) {
+            repaired
+                .sortedBy { catalog.get(it)?.language != stored.readingLanguage }
+                .take(Attachments.COLUMNS)
+                .toSet()
+        } else {
+            repaired
+        }
         // Every pack folder the catalog does not name is a pack this build
         // no longer offers. Removing it is the one place a retired pack's
         // bytes leave the device.
@@ -348,16 +360,16 @@ class ContentLibrary(
         for (id in store.installed() - known) store.remove(id)
         val dropped = stored.translationPacks - offered
         settingsStore.removePendingPacks(dropped)
-        if (repaired != stored.translationPacks) {
-            settingsStore.setTranslationPacks(repaired)
+        if (capped != stored.translationPacks) {
+            settingsStore.setTranslationPacks(capped)
         }
         // A selected translation that is not on the device is fetched on the
         // reader's behalf, exactly as a fresh language choice is. The queue
         // brings it on any connection; the reading never waits on it.
         settingsStore.addPendingPacks(
-            repaired.filter { id -> catalog.get(id)?.installed == false }.toSet(),
+            capped.filter { id -> catalog.get(id)?.installed == false }.toSet(),
         )
-        return stored.copy(translationPacks = repaired)
+        return stored.copy(translationPacks = capped)
     }
 
     /**
@@ -432,7 +444,11 @@ class ContentLibrary(
         val shown = catalog.all().filter { it.id in installed }
         val translations = shown
             .filter { it.type == PackType.Translation && it.id in settings.translationPacks }
+            // The language's own column leads the four a page may hold, and
+            // the fifth waits its turn on the shelf (owner decision, 20.5).
+            .sortedBy { it.language != settings.readingLanguage }
             .map { it.id }
+            .take(Attachments.COLUMNS)
         val tafsirs = shown
             .filter { it.type == PackType.Tafsir && it.id in settings.tafsirPacks }
             .map { it.id }

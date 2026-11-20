@@ -47,6 +47,11 @@ import kotlinx.coroutines.launch
  * under the ayah, so the mark is a check rather than a single choice. The
  * first one turned on is the one search and the ayah card read by default.
  *
+ * Four columns are the page's room (owner decision, 20.5): a fifth switch is
+ * drawn, named, and quiet, and one line above the list says why. A column
+ * turned off gives the next one its place, and nothing about the shelf
+ * changes: a translation installed and off is still the reader's.
+ *
  * The master switch stands at the top of the page, in the same words and the
  * same state as the hub row that opened it. The page that owns the list owns
  * the switch that shows it, and a reader who came here from the row, or from
@@ -73,6 +78,32 @@ fun TranslationsPage(
             enabled = installed,
             switchTag = "switch-translation-page",
         )
+        // A page holds four columns; the fifth is not a failure but a full
+        // page, so its row stays visible and quiet and this line says why
+        // (owner decision, 20.5).
+        val columnsOn = packs.count {
+            it.type == PackType.Translation && it.installed && it.id in settings.translationPacks
+        }
+        val full = columnsOn >= io.github.muntasimulhaque.quran.core.Attachments.COLUMNS
+        if (full) {
+            Text(
+                text = stringResource(
+                    R.string.settings_translations_full,
+                    io.github.muntasimulhaque.quran.core.Attachments.COLUMNS,
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = Space.Gutter,
+                        end = Space.Gutter,
+                        top = Space.Row,
+                        bottom = Space.Tight,
+                    )
+                    .testTag("translations-full"),
+            )
+        }
         LanguageGroups(
             packs = packs,
             type = PackType.Translation,
@@ -88,6 +119,7 @@ fun TranslationsPage(
                 onInstall = { actions.onInstallPack(pack.id) },
                 onRemove = { actions.onRemovePack(pack.id) },
                 onCancel = actions.onPackSetupCancel,
+                selectable = pack.id in settings.translationPacks || !full,
             )
         }
         Spacer(Modifier.height(Space.Section))

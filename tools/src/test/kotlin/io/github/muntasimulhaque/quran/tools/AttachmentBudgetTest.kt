@@ -14,13 +14,13 @@ import java.io.File
  *
  * SQLite attaches ten databases to one connection and the app keeps one
  * spare, so a surface may ask for nine packs. The reading's screen is the
- * largest: every enabled translation is a column, every enabled tafsir is a
- * card the reader may open, and one word list, its root, and one voice stand
+ * largest: four translation columns (the page's cap), every enabled tafsir
+ * as a card the reader may open, and one word list, its root, and one voice
  * beside them. The catalog is the only thing that can grow that set without
  * a line of app code, so it is weighed here: the day a pack would push the
  * screen past the budget, the build fails and names the count, and the fix
- * is a decision (a column cap, or attaching a tafsir only when its card
- * opens) rather than a reader meeting a missing pack (owner report, 20.5).
+ * is a decision (open a tafsir only with its card, or move the cap) rather
+ * than a reader meeting a missing pack (owner report, 20.5).
  */
 class AttachmentBudgetTest {
 
@@ -28,6 +28,8 @@ class AttachmentBudgetTest {
     fun theCatalogFitsOneScreenInsideTheAttachmentBudget() {
         val packs = catalogPacks()
         val translations = idsOf(packs, "translation")
+        // A page holds four columns, whatever the shelf carries.
+        val columns = translations.take(Attachments.COLUMNS)
         val tafsirs = idsOf(packs, "tafsir")
         // The screen reads one language at a time, so one word list and one
         // voice are the most it can ask for, even with every language on the
@@ -35,19 +37,19 @@ class AttachmentBudgetTest {
         val words = idsOf(packs, "words").firstOrNull()?.let { listOf(it) } ?: emptyList()
         val root = idsOf(packs, "word-root").take(1)
         val voice = idsOf(packs, "recitation").take(1)
-        val wanted = (translations + tafsirs + words + root + voice).distinct()
+        val wanted = (columns + tafsirs + words + root + voice).distinct()
 
         assertTrue(
-            "the reading's screen can ask for ${wanted.size} packs (${translations.size} translations, " +
+            "the reading's screen can ask for ${wanted.size} packs (${columns.size} columns, " +
                 "${tafsirs.size} tafsirs, one word list, one root, one voice) and the budget is " +
-                "${Attachments.BUDGET}. Cap the columns or attach a tafsir only when its card opens, " +
-                "then raise the budget or batch the search.",
+                "${Attachments.BUDGET}. Raise the column cap only with a pack it can afford, or " +
+                "attach a tafsir only when its card opens.",
             wanted.size <= Attachments.BUDGET,
         )
         assertTrue(
             "the built set must be the whole wanted set, never a truncation",
             Attachments.screen(
-                translations = translations,
+                translations = columns,
                 tafsirs = tafsirs,
                 words = words.firstOrNull(),
                 root = root.firstOrNull(),

@@ -55,18 +55,34 @@ class AttachmentsTest {
     }
 
     @Test
-    fun `a set past the budget keeps the reading before the card`() {
-        val translations = (1..10).map { "translation-$it" }
+    fun `the columns cap keeps four on the page`() {
         val set = Attachments.screen(
-            translations = translations,
-            tafsirs = listOf("tafsir-a"),
+            translations = (1..9).map { "translation-$it" },
+            tafsirs = emptyList(),
         )
-        assertEquals(Attachments.BUDGET, set.size)
         assertEquals(
-            "the page keeps its own before an unopened card",
-            translations.take(Attachments.BUDGET),
+            "a page holds four columns; the fifth is a file, not a column",
+            Attachments.COLUMNS,
+            set.size,
+        )
+        assertEquals(
+            listOf("translation-1", "translation-2", "translation-3", "translation-4"),
             set,
         )
+    }
+
+    @Test
+    fun `a set past the budget keeps the page before the card`() {
+        val translations = (1..Attachments.COLUMNS).map { "translation-$it" }
+        val tafsirs = (1..10).map { "tafsir-$it" }
+        val set = Attachments.screen(translations = translations, tafsirs = tafsirs)
+        assertEquals(Attachments.BUDGET, set.size)
+        assertEquals(
+            "the page keeps its columns before an unopened card",
+            translations,
+            set.take(Attachments.COLUMNS),
+        )
+        assertEquals(tafsirs.take(Attachments.BUDGET - Attachments.COLUMNS), set.drop(Attachments.COLUMNS))
     }
 
     @Test
