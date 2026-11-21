@@ -6,6 +6,35 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.4
+
+The toolbox catches up, and the pin that held the sheet library goes.
+
+The newest compose BOM, 2026.11.01, carries Compose 1.13.0 and material3
+1.5.0 stable, and it requires compiling against the 37.1 platform. The
+compile platform is 37.1 now, declared as `compileSdk = 37` with
+`compileSdkMinor = 1` in all ten modules, while `targetSdk` stays 37 and
+`minSdk` 24 for the reasons their own notes give. Material3 had been
+pinned by hand to 1.5.0 stable for two releases while the BOM carried
+1.4.0, and the pin's comment said when to move: the session that raises
+the compile platform to 37.1 and proves it. This is that session. The pin
+is gone, the BOM carries the sheet's physics, and the comment beside the
+version records the move.
+
+The move changes the version of one library that ships native code, so the
+16 KB page rule was re-proved by measurement rather than assumed. The
+bundle carries the same two native libraries as 21.3, eight ABI copies in
+all, and every LOAD segment of every copy is aligned at 2^14; `zipalign
+-c -P 16 4` reports verification successful.
+
+The whole JVM suite, 91 classes and 521 tests, lint, and the debug build
+are green on this machine with the new platform and the new BOM, and four
+instrumented classes ran on the phone after the move
+(`SheetStillnessTest`, `SentenceTouchTest`, `AboutLanguageTest`,
+`SettingsRowOrderTest`), all green. No visible surface changed, so the
+three store sets stand as captured for 21.2, and no content, no
+permission, and no direct dependency moved.
+
 ## 21.3
 
 The language gets the phone's own door, and the sheet library settles.

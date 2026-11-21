@@ -6,26 +6,24 @@ serializationJson = "1.11.0"
 sqliteJdbc = "3.49.1.0"
 coreKtx = "1.19.0"
 activityCompose = "1.13.0"
-composeBom = "2026.09.00"
-# The sheet's own physics, and where this pin stands now.
+composeBom = "2026.11.01"
+# The sheet's own physics, and where the pin went.
 #
-# Material3 1.4.0, which the BOM still carries, settled a dragged sheet with
-# an underdamped spring that was allowed to pass its anchor, and an update to
+# Material3 1.4.0, which the BOM carried, settled a dragged sheet with an
+# underdamped spring that was allowed to pass its anchor, and an update to
 # the content's height mid-settle restarted it with the finger's velocity, so
 # a sheet could bounce at the top instead of resting. 1.5.0-alpha16 fixed the
 # root: the settle bounds the fling velocity and clamps every step between the
 # anchors. The app shipped against the newest beta while the 1.5.0 line was
-# still moving; 1.5.0 is stable now, so the pin names the stable release
+# still moving, then pinned 1.5.0 stable by hand while the BOM carried 1.4.0
 # (owner decision, 21.3).
 #
-# The pin stays a pin, and not a BOM move, for one measured reason: the newest
-# BOM (2026.11.01) also carries Compose 1.13.0, whose AAR metadata requires
-# compileSdk 37.1. This app compiles against android-37.0, which is the
-# platform it targets and the one its CI image installs, so the BOM move waits
-# for the session that raises compileSdk to 37.1 and proves that platform on
-# every leg. Until then this one line keeps the sheet's physics on stable
-# 1.5.0 while everything else stays on the BOM's 1.12.1.
-material3 = "1.5.0"
+# The pin is gone, and the BOM carries the sheet's physics now. The newest
+# BOM (2026.11.01) carries material3 1.5.0 stable and Compose 1.13.0, whose
+# AAR metadata requires compileSdk 37.1; the pin waited for the session that
+# raised the compile platform to 37.1 and proved it, and this is that session
+# (owner decision, 21.4). Nothing below names material3 a version again: one
+# list decides it.
 lifecycle = "2.11.0"
 datastore = "1.2.1"
 media3 = "1.11.1"
@@ -47,7 +45,7 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

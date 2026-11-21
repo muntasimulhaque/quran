@@ -8,6 +8,7 @@ plugins {
 android {
     namespace = "io.github.muntasimulhaque.quran.feature.search"
     compileSdk = 37
+    compileSdkMinor = 1
 
     defaultConfig {
         minSdk = 24

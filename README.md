@@ -200,22 +200,30 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.3 (versionCode 215).** The signed bundle comes from `build` run
-44890885636, green on `main` for the release commit `ff74392c`: the unit
-tests, `checkdb`, `search`, lint, and `assembleDebug` passed, and the signed
-bundle `quran-21.3-vc215.aab` has SHA-256
-`6dca9002ade32cfc45f95dde477e2d584ab0a5952780580c263c95c42b9a4fde`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine, and the content gate reproduced the
-committed database's SHA-256. Four instrumented classes ran on the phone
-after the sheet library moved to stable, and all were green
-(`SheetStillnessTest`, `SentenceTouchTest`, `AboutLanguageTest`,
-`SettingsRowOrderTest`). No visible surface changed, so the three store sets
-stand as captured for 21.2, and no content, permission, or other dependency
-moved. The bundle carries eight AndroidX native libraries, all of them
-2^14 LOAD aligned, and the APK passes `zipalign -P 16`. The 21.3 bundle was submitted for Play review, and
-the hand-off copy in `play-store/aab/` was deleted once Play had it.
+**21.4 (versionCode 216).** The build toolbox catches up. The compile
+platform is 37.1, the compose BOM is 2026.11.01, and it brings Compose
+1.13.0 and material3 1.5.0 stable together, so the hand pin the sheet
+library carried for two releases is gone and the BOM carries its physics.
+The whole JVM suite (91 classes, 521 tests), lint, and the debug build are
+green on this machine with the new platform and the new BOM, and the four
+instrumented classes 21.3 ran after a library move ran again on the phone
+after this one and were green (`SheetStillnessTest`, `SentenceTouchTest`,
+`AboutLanguageTest`, `SettingsRowOrderTest`). The 16 KB page rule was
+re-proved by measurement, because the move changes the version of a library
+that ships native code: the bundle carries the same two native libraries as
+21.3, eight ABI copies in all, every LOAD segment of every copy is aligned
+at 2^14, and `zipalign -c -P 16 4` reports verification successful. No
+visible surface changed, so the three store sets stand as captured for 21.2,
+and no content, no permission, and no direct dependency moved.
+
+**What changed in 21.4.** The compile platform is 37.1, declared as
+`compileSdk = 37` with `compileSdkMinor = 1` in all ten modules;
+`targetSdk` stays 37 and `minSdk` 24 for the reasons their own notes give.
+The compose BOM moves to 2026.11.01, which carries Compose 1.13.0 and
+material3 1.5.0 stable, and the hand pin on material3 is gone: the pin's own
+comment waited for exactly this session, and the comment beside the version
+now records where the pin went. Nothing the reader sees moved, and no
+string, color, or frame changed.
 
 **What changed in 21.3.** The language has a second door, and it is the
 phone's own: Android 13 and later draw a per-app language row in the system
@@ -243,18 +251,6 @@ The bundle's native libraries were measured rather than assumed: two ship,
 both from AndroidX, all eight ABI copies carry a 2^14 LOAD alignment, and the
 APK passes `zipalign -P 16`, so the 16 KB page rule is met with evidence.
 Text, translations, tafsirs, recitations, and content are unchanged.
-
-**What changed in 21.2.** An audit of every color in both themes found the
-day page's browns: the ornament gold was a bronze at L* 40, the ghunnah rule
-was a dark brown, and the ink, quiet voice, hairline, and control track
-carried a sepia cast. The gold is old gold now at L* 47 (#856E18), the
-ghunnah is amber (#844800), and the neutrals keep the paper's hue at about
-half the chroma; the interface's ink keeps its lightness, because the control
-edge it draws at half strength owes 3:1. The night page, the action blue, the
-chosen and found grounds, and the other six tajweed families are untouched.
-Both themes still hold every contrast, palette, color-vision, and switch
-floor, and the night frame proves it: on the phone and the 10 inch it is
-pixel-identical to 21.1's.
 
 ## Corrections and contributions
 

@@ -11,6 +11,7 @@ plugins {
 android {
     namespace = "io.github.muntasimulhaque.quran.content"
     compileSdk = 37
+    compileSdkMinor = 1
 
     defaultConfig {
         minSdk = 24

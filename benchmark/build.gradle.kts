@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "io.github.muntasimulhaque.quran.benchmark"
     compileSdk = 37
+    compileSdkMinor = 1
 
     defaultConfig {
         // the minSdk of the app under test, so the profile is generated for

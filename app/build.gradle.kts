@@ -305,7 +305,13 @@ val copyAudioDevAssets = tasks.register<Sync>("copyAudioDevAssets") {
 
 android {
     namespace = "io.github.muntasimulhaque.quran"
+    // The compile platform is 37.1, the toolkit the BOM's Compose 1.13.0
+    // requires: the newest BOM carries material3 1.5.0 stable, whose sheet
+    // physics the app pinned by hand while the platform was 37.0. The pin
+    // waited for this session and is gone. targetSdk stays 37 below, for
+    // the reason its own note gives (owner decision, 21.4).
     compileSdk = 37
+    compileSdkMinor = 1
 
     defaultConfig {
         applicationId = "io.github.muntasimulhaque.quran"
@@ -317,8 +323,8 @@ android {
         // (owner decision, 11.7).
         minSdk = 24
         targetSdk = 37
-        versionCode = 215
-        versionName = "21.3"
+        versionCode = 216
+        versionName = "21.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
