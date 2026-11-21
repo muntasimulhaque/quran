@@ -38,11 +38,12 @@ painter keeps its glyph boxes untouched.
 The whole JVM suite, lint, the debug build, `checkdb` and the committed
 database's SHA-256, and the search gate are green on this machine. The
 arithmetic is pinned by a new JVM suite, five tests, so the box and the
-folding are measured without a device. A visible surface changed, so the
-three store sets were captured again on the phone, the 7 inch, and the 10
-inch, each from a clean install. No content changed, so every pack and the
-content database are as they were and no catalog hash or tag moved, and no
-permission or app dependency moved.
+folding are measured without a device, and a two-test evidence class,
+`SearchMatchCaptureTest`, photographs a matched word on both of the sheet's
+paths. A visible surface changed, so the three store sets were captured again
+on the phone, the 7 inch, and the 10 inch, each from a clean install. No
+content changed, so every pack and the content database are as they were and
+no catalog hash or tag moved, and no permission or app dependency moved.
 
 ## 21.0
 
