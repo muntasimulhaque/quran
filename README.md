@@ -219,8 +219,8 @@ every copy is aligned at 2^14, and `zipalign -c -P 16 4` reports
 verification successful. No visible surface changed, so the three store sets
 stand as captured for 21.2, and no content and no permission moved; no
 dependency was added or removed, and the versions the BOM carries moved
-with it. The bundle is in `play-store/aab/` for the owner to
-submit, and the copy is deleted once Play has it.
+with it. The 21.4 bundle was submitted for Play review, and the hand-off
+copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 21.4.** The compile platform is 37.1, declared as
 `compileSdk = 37` with `compileSdkMinor = 1` in all ten modules;
