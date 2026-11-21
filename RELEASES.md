@@ -6,6 +6,49 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.5
+
+The rules that had no gate now have one, and the quiet refresh's reason is
+written down.
+
+Six decisions lived in modules whose JVM suites the release gates never ran:
+the five answers the settings hub and the app ask about a translation, a
+tafsir, and the word list; the line under the words switch; the order of the
+word sheet's grammar; the clock's digits and period marker; and the medallion's
+ink, its place on the glass, and its touch target. They moved into `:data`,
+`core`, and `ui-kit`, where the gates already look, and each carries a
+sentence-named test: `PackChoicesTest`, `WordAudioLineTest`,
+`GrammarFactsTest`, `ClockTextTest`, and `SpanInkTest`, with the About
+page's Bangla rule pinned in `PackNamesTest`. The event is invisible: no
+string moved modules, and the settings rows, the word sheet, the clock, and the
+ayah's door draw exactly what they drew.
+
+The quiet refresh keeps its place and gains its record (owner decision, 21.5).
+It runs when the app opens, on an unmetered connection, and only for packs
+already on the device, so a reader who never added a pack never pays a byte for
+it; a newer version is named by the catalog that ships inside the app, so it
+can only arrive with a new release, and none is baked into the package. There
+is no manual check and no button, because the catalog cannot change between two
+launches of one build. The dead force switch and the sentence that promised the
+check are gone.
+
+The accessibility classes are a release rule now: a session whose diff touches
+the reading, the search sheet, the settings module, the ui-kit, or the reading's
+own chrome runs `AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`,
+and `KeyboardFocusTest` on the phone before the hand-off, and the hand-off
+says so. This session ran them, 11 tests and no failures.
+
+The build moves to AGP 9.5.0. The project pins every dependency by hash, so the
+move meant regenerating `gradle/verification-metadata.xml` over the whole task
+graph: 59 components entered, all in the AGP family, and the file was checked
+component by component and artifact by artifact against the one it replaced, so
+nothing was lost. Two deprecation warnings remain in the instrumented suite
+(the v2 compose test APIs), and nothing gates on them.
+
+The whole JVM suite, `checkdb`, `search`, lint, and the debug build are
+green on this machine. No visible surface changed, so the three store sets
+stand, and no content and no permission moved.
+
 ## 21.4
 
 The toolbox catches up, and the pin that held the sheet library goes.

@@ -200,27 +200,34 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.4 (versionCode 216).** The signed bundle comes from `build` run
-44896648695, green on `main` for the release commit `4ddd50b0`: the unit
-tests, `checkdb`, `search`, lint, and `assembleDebug` passed, and the signed
-bundle `quran-21.4-vc216.aab` has SHA-256
-`3bf078b8f185ea2b0c062e10f327d294eaff40b8864503bc75beca2f46fd574e`.
-`jarsigner` reads `jar verified`, and the upload certificate is the same key
-21.3 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine with the new platform and the new
-BOM, and the four instrumented classes 21.3 ran after a library move ran
-again on the phone after this one and were green (`SheetStillnessTest`,
-`SentenceTouchTest`, `AboutLanguageTest`, `SettingsRowOrderTest`). The
-16 KB page rule was re-proved by measurement, because the move changes the
-version of a library that ships native code: the bundle carries the same two
-native libraries as 21.3, eight ABI copies in all, every LOAD segment of
-every copy is aligned at 2^14, and `zipalign -c -P 16 4` reports
-verification successful. No visible surface changed, so the three store sets
-stand as captured for 21.2, and no content and no permission moved; no
-dependency was added or removed, and the versions the BOM carries moved
-with it. The 21.4 bundle was submitted for Play review, and the hand-off
-copy in `play-store/aab/` was deleted once Play had it.
+**21.5 (versionCode 217).** The signed bundle's record follows the run. The
+whole JVM suite, `checkdb`, `search`, lint, and the debug build are green on
+this machine, and the four accessibility classes the release rule now names
+ran on the phone after the moves: `AccessibilityTest`, `LargeTextTest`,
+`ReadingSemanticsTest`, and `KeyboardFocusTest`, 11 tests and no failures.
+No visible surface changed, so the three store sets stand as captured for
+21.2, and no content, no string, and no permission moved. The build moves to
+AGP 9.5.0, and every artifact it adds is pinned by hash in
+`gradle/verification-metadata.xml`, regenerated over the whole task graph
+and proved artifact by artifact.
+
+**What changed in 21.5.** The rules that had no gate now have one. The five
+answers about a translation, a tafsir, and the word list; the line under the
+words switch; the order of the word sheet's grammar; the clock's digits and
+period marker; and the medallion's ink, its place on the glass, and its
+touch target all moved into `:data`, `core`, and `ui-kit`, whose JVM suites
+the release gates already run, and each carries a sentence-named test.
+Nothing the reader sees moved, and no string changed modules.
+
+The quiet refresh's decision is written beside it now (owner decision,
+21.5): the reader's word was the pack's choosing, only packs already on the
+device are touched, it never runs on a metered connection, and a newer
+version is named by the catalog inside the app, so it can only arrive with a
+new release of the app. Its dead `force` switch and the manual check its
+note promised are gone, because the catalog cannot change between two
+launches of one build and a button could never find anything. The
+accessibility leg is a release rule now, triggered by a path rather than a
+judgment.
 
 **What changed in 21.4.** The compile platform is 37.1, declared as
 `compileSdk = 37` with `compileSdkMinor = 1` in all ten modules;
@@ -231,32 +238,6 @@ comment waited for exactly this session, and the comment beside the version
 now records where the pin went. Nothing the reader sees moved, and no
 string, color, or frame changed.
 
-**What changed in 21.3.** The language has a second door, and it is the
-phone's own: Android 13 and later draw a per-app language row in the system
-settings for any app that declares one, and the app now declares English and
-Bangla there. The two doors are one choice, not two. The system's list is
-read first, because it is the door the reader touched last when they used
-that screen; the mirror the app's own Settings row writes is the answer when
-the platform holds none; the phone's language seeds a fresh install; and a
-tag the app carries no strings for is skipped rather than obeyed. A choice
-made in either place reaches the translation, the tafsir, and the word
-meanings, exactly as the app's row always has. The rule is arithmetic in
-`:data` and eight cases in `LanguageDoorTest` hold it.
-
-The sheet library moves from its beta to material3 1.5.0 stable. The
-predictive back gesture needed no app code after all: Material3 1.5 binds the
-gesture's progress to the sheet's own translation, so a back swipe peels a
-sheet away under the finger and a cancelled swipe puts it back, and the app's
-own back handlers are only the ones that move between pages of a sheet, where
-nothing leaves the glass. The one line that pins the library now names the
-stable release; the BOM stays where it is, because the newest BOM carries
-Compose 1.13.0 and that requires compiling against android-37.1, a platform
-this app does not build against yet.
-
-The bundle's native libraries were measured rather than assumed: two ship,
-both from AndroidX, all eight ABI copies carry a 2^14 LOAD alignment, and the
-APK passes `zipalign -P 16`, so the 16 KB page rule is met with evidence.
-Text, translations, tafsirs, recitations, and content are unchanged.
 
 ## Corrections and contributions
 

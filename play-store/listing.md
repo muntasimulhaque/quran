@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 21.4 (versionCode 216)
+Version: 21.5 (versionCode 217)
 
 ## Listing
 
@@ -221,6 +221,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (21.5, 495 characters)
+21.5 keeps the reading as it was and tightens the rules beneath it. Pack updates stay quiet and Wi-Fi only, touching only packs you already have; a newer pack arrives only with an app release, and there is no button. The pack choices, the word sheet's grammar order, the clock's digits, and the ayah medallion now sit under the test gates, and the build moves to the newest Android toolchain. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (21.4, 376 characters)
 21.4 brings the build toolbox up to date: the compile platform is 37.1, and Compose 1.13.0 with Material 3 1.5.0 stable arrive together, so the sheet library's hand pin is gone. The app reads exactly as before, and the 16 KB page rule is re-proved on the shipped libraries. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
