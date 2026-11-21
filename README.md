@@ -213,8 +213,8 @@ the 10 inch, and the 7 inch differs only in the status bar's signal triangle.
 The boundary gate caught the first ink the audit proposed and pinned the one
 that shipped, which is recorded in `Color.kt`. No content changed, so every
 pack and the content database are as they were and no catalog hash or tag
-moved, and no permission or app dependency moved. The hand-off copy waits in
-`play-store/aab/` for Play.
+moved, and no permission or app dependency moved. The 21.2 bundle was submitted for Play review, and
+the hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 21.2.** An audit of every color in both themes found the
 day page's browns: the ornament gold was a bronze at L* 40, the ghunnah rule
