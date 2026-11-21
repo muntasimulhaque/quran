@@ -20,11 +20,11 @@ import kotlin.math.sqrt
  *
  * A pair at 0.095 is the floor this app accepts (owner decision, 10.8; it was
  * 0.085 while the palette spent its lightness on a ladder).
- * The paper palette's closest pair is the quiet gray and the teal at 0.101;
- * the night palette's closest is the warm pair, ghunnah and qalaqah, at
- * 0.106. Every family is at least 0.13 from the reading's ink (the iqlab on
- * paper, the quiet gray on night): the night ink is the lightest tone on its
- * page, so it is the tone closest to the families by construction.
+ * The paper palette's closest pair is the silent gray and the ghunnah at
+ * 0.096; the night palette's closest is the warm pair, ghunnah and qalaqah,
+ * at 0.106. Every family is at least 0.13 from the reading's ink (the iqlab
+ * on paper, the quiet gray on night): the night ink is the lightest tone on
+ * its page, so it is the tone closest to the families by construction.
  *
  * OKLab is used rather than a hue difference because it is the space where a
  * unit of distance is roughly a just-noticeable difference, so the numbers

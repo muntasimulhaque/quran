@@ -198,26 +198,30 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.1 (versionCode 213).** The signed bundle comes from `build` run
-44867324693, green on `main` for the release commit `089f321c`: the unit
-tests, lint, and `assembleDebug` passed, and the signed bundle
-`quran-21.1-vc213.aab` has SHA-256
-`b1cffadf1ae564118e9f5923596e49d82eadc1ce8772a9ece07d92c46680b264`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine, and the content gate reproduced the
-committed database's SHA-256. A visible surface changed, so the three store
-sets were captured again on the phone, the 7 inch, and the 10 inch, each from
-a clean install, and no set moved: every frame is byte for byte identical
-under the status bar, and the search frame differs only by a text caret on
-the phone and the 10 inch. The store's search frame reads a reference, which
-washes nothing, so a two-test evidence class, `SearchMatchCaptureTest`,
-photographs a matched word on both of the sheet's paths and travels with the
-instrumented tests; its two frames were read from the run and are not store
-art. No content changed, so every pack and the content database are as they
-were and no catalog hash or tag moved, and no permission or app dependency
-moved. The 21.1 bundle was submitted for Play review, and
-the hand-off copy in `play-store/aab/` was deleted once Play had it.
+**21.2 (versionCode 214).** The newest green `build` run on `main` produced
+the signed bundle `quran-21.2-vc214.aab` at the hand-off. The same suite is
+green on this machine, and the content gate reproduced the committed
+database's SHA-256. A visible surface changed, so the three store sets were
+captured again on the phone, the 7 inch, and the 10 inch, each from a clean
+install; the night frame is pixel-identical to 21.1's on the phone and the
+10 inch, and the 7 inch differs only in the status bar's signal triangle. The
+boundary gate caught the first ink the audit proposed and pinned the one that
+shipped, which is recorded in `Color.kt`. No content changed, so every pack
+and the content database are as they were and no catalog hash or tag moved,
+and no permission or app dependency moved. The hand-off copy waits in
+`play-store/aab/` for Play.
+
+**What changed in 21.2.** An audit of every color in both themes found the
+day page's browns: the ornament gold was a bronze at L* 40, the ghunnah rule
+was a dark brown, and the ink, quiet voice, hairline, and control track
+carried a sepia cast. The gold is old gold now at L* 47 (#856E18), the
+ghunnah is amber (#844800), and the neutrals keep the paper's hue at about
+half the chroma; the interface's ink keeps its lightness, because the control
+edge it draws at half strength owes 3:1. The night page, the action blue, the
+chosen and found grounds, and the other six tajweed families are untouched.
+Both themes still hold every contrast, palette, color-vision, and switch
+floor, and the night frame proves it: on the phone and the 10 inch it is
+pixel-identical to 21.1's.
 
 **What changed in 21.1.** The matched words in the search sheet wore sharp
 rectangles while the reading rounded the same match the moment a result
@@ -229,19 +233,6 @@ snippets all draw it, the snippets keep the Medium weight their matched words
 carry, and the reading's own marks delegate to the same recipe, lifted
 verbatim, so they do not move. A range past an ellipsized snippet's cut
 washes nothing. The arithmetic is pinned in the JVM suite.
-
-**What changed in 21.0.** The two tinted grounds in the app, the block behind
-the chosen thing and the block behind the found thing, moved from the paper's
-warm family to the accent's own. On the day page they were beige and tan; at
-night they were brown, and the found ground was the most saturated brown on
-any interface surface. They read as one hue family too many beside the page,
-the accent, and the ornament. The new tones keep the old lightness, so every
-contrast pair keeps its floor, and they carry enough of the accent's chroma
-to read as lapis rather than as a gray: #E6EBF5 behind the chosen thing and
-#DAE2F1 behind the found one, and #1E2832 and #2E3C49 at night. The floating
-paper now stands clear of the chosen block by more than it did. The ornament
-gold is furniture and stays, as do the paper family, the tajweed palette, and
-the never-drawn Material containers.
 
 ## Corrections and contributions
 

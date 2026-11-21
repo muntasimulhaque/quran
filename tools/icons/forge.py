@@ -20,10 +20,10 @@
 import math, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
-INK   = (42, 38, 32)      # #2A2620
-GOLD  = (122, 90, 18)    # #7A5A12
+INK   = (41, 38, 34)      # #292622
+GOLD  = (133, 110, 24)    # #856E18
 PAPER = (251, 249, 244)   # #FBF9F4
-MUTED = (94, 89, 79)      # #5E594F
+MUTED = (93, 90, 85)      # #5D5A55
 WHITE = (255, 255, 255)
 
 # ------------------------------------------------------------ trace geometry

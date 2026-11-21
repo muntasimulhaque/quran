@@ -14,11 +14,20 @@ import androidx.compose.ui.graphics.Color
 // reading's own ink steps under the interface's word below, so the pair that
 // carries an hour of reading is a 95 percent page and a 12:1 ink rather than
 // the 14.3:1 a label needs (owner decision, 17.1).
+//
+// 21.2 takes the warmth out of the day family's neutrals: the word, the
+// reading's ink, the quiet voice, and the hairline keep the paper's hue and
+// give up their chroma, by about half at the reading's ink, the quiet voice,
+// and the hairline, and by a third at the word, which cannot go lighter
+// without dropping the control edge it draws at half strength under the
+// 3:1 a boundary owes. The warmest neutral comes down from b* 6.5 to 3.3,
+// so the day reads as warm paper with ink rather than as a sepia cast over
+// every surface (owner decision, 21.2).
 val PaperBackground = Color(0xFFFBF9F4)
 val PaperSurface = Color(0xFFFFFFFF)
 /** The hairline and the tint of a control that floats over the reading. */
-val PaperOutline = Color(0xFFE8E3D9)
-val PaperInk = Color(0xFF2A2620)
+val PaperOutline = Color(0xFFE7E4E0)
+val PaperInk = Color(0xFF292622)
 
 /**
  * The reading's own ink on the day page, one step under the interface's word,
@@ -28,13 +37,13 @@ val PaperInk = Color(0xFF2A2620)
  * an hour at a time, and the interface's near black is the tone a label and a
  * button want. On the night page the separation was made for bloom; on paper
  * it is made for glare, since the same 14.3:1 against a 95 percent ground is
- * the harshest pair the app owns. At 12.1:1 on the page, 12.7:1 on a sheet,
- * and 9.8:1 on the word mark, the page reads as ink rather than as a laser and
+ * the harshest pair the app owns. At 11.9:1 on the page, 12.6:1 on a sheet,
+ * and 9.7:1 on the word mark, the page reads as ink rather than as a laser and
  * the rule colors keep every floor they owe (owner decision, 17.1). A label, a
  * value, a button, and a sheet's own word keep [PaperInk].
  */
-val PaperReadingInk = Color(0xFF37322A)
-val PaperMuted = Color(0xFF5E594F)
+val PaperReadingInk = Color(0xFF363330)
+val PaperMuted = Color(0xFF5D5A55)
 val PaperHairline = PaperOutline
 
 /**
@@ -83,11 +92,20 @@ val LapisLight = Color(0xFF95C0EA)
 // control's color: every control that answers a tap wears Lapis, including
 // the ayah's number (owner decision, the consistency audit). Gold therefore
 // meets the same 4.5:1 rule every other text tone does, on each ground it is
-// drawn on: 6.0:1 on the day page and 8.4:1 on the night page. The night gold
-// is the light honey this page needs: the first #C09A50 measured APCA -50 on
-// the night ground, the one ornament tone under the small-text floor the rest
-// of the night voice already held (owner decision, 16.4).
-val Gold = Color(0xFF7A5A12)
+// drawn on: 4.7:1 on the day page and 9.2:1 on the night page, APCA 70.6 and
+// -65.4, both past the 60 the content grade asks. The day gold was #7A5A12 at
+// L* 40 in the orange sector, and it read as bronze-brown beside the blue the
+// app acts in; 21.2 lifts it to L* 47 and the gold sector, the same move the
+// night gold already made, so the ornament reads as old gold rather than as a
+// fifth brown, and it spends for that lift contrast the floors never needed:
+// 6.0:1 comes down to 4.7:1, still past 4.5, and the perceptual grade holds
+// at 70.6 (owner decision, 21.2).
+//
+// The night gold is the light honey this page needs: the first #C09A50
+// measured APCA -50 on the night ground, the one ornament tone under the
+// small-text floor the rest of the night voice already held (owner decision,
+// 16.4).
+val Gold = Color(0xFF856E18)
 
 // The one shadow the app casts, black at ten percent, where the platform's
 // own cast from a theme is a nineteen percent spot and a four percent
@@ -152,10 +170,10 @@ val FloatingShadow = Color(0x1A000000)
 // page.
 //
 // The pairs the day lands in: 1.05:1 from the page, dE76 8.9 from the block,
-// and on it the quiet word reads 6.96:1, the reading's ink 12.7:1, and lapis
+// and on it the quiet word reads 6.86:1, the reading's ink 12.6:1, and lapis
 // 8.79:1. The night's floating paper carries the ink at 10.41:1, the quiet
 // word at 7.12:1, and lapis at 7.06:1.
-val PaperControl = Color(0xFFF4F1EA)
+val PaperControl = Color(0xFFF3F1EE)
 val PaperFloating = Color(0xFFFFFFFF)
 val PaperOnPrimary = Color(0xFFFFFFFF)
 val NightControl = Color(0xFF2E2B28)
@@ -181,7 +199,7 @@ val NightOnPrimary = Color(0xFF08243D)
  * the day page and 15.6 on the night, so every pair already measured against
  * the ground still measures the same: the seven paper families keep 5.4 to 1
  * at their closest on the day ground and 5.8 on the night, the reading's ink
- * 10.6 and 10.4, and the quiet word 5.8 and 7.9.
+ * 10.5 and 10.4, and the quiet word 5.7 and 7.9.
  */
 val PaperSelected = Color(0xFFE6EBF5)
 val NightSelected = Color(0xFF1E2832)
@@ -197,9 +215,9 @@ val NightSelected = Color(0xFF1E2832)
  * drifted to 15.7 in its hex and read as a brown block behind the words.
  *
  * The tones keep the lightness of the warm tones they replace, 89.7 on the
- * day sheet and 24.6 on the night, so the pairs already measured keep their
- * numbers to the hundredth: the interface's ink 11.55, the reading's 9.76,
- * the night's 7.86, and the APCA floors hold at 81.4 on the day and -74.3 on
+ * day sheet and 24.6 on the night. The pairs already measured keep every
+ * floor they owed: the interface's ink 11.57, the reading's 9.64, the
+ * night's 7.86, and the APCA floors hold at 81.1 on the day and -74.3 on
  * the night.
  */
 val PaperMatch = Color(0xFFDAE2F1)

@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
  * on both grounds: on the night page a bright white word blooms on a dark
  * ground over a long read, and on paper the interface's near black is the tone
  * a label wants while a page read for an hour wants ink. The day page carries
- * [PaperReadingInk] at 12.1:1 and the night [NightInk] at 12.1:1, each one a
+ * [PaperReadingInk] at 11.9:1 and the night [NightInk] at 12.1:1, each one a
  * step under the word its buttons and labels wear (owner decision, 17.1).
  *
  * [highlight] is the word mark on the reading's line: the word the reciter
@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.Color
  * which it was not before 20.8: the day took 0.78 of the interface's word
  * while the night took 0.78 of the reading's, so one alpha landed two tones
  * and the night's introduction read weaker than the captions beside it
- * (Lc -56.7 against -65.2). One base and one alpha puts the prose at 84.3 on
+ * (Lc -56.7 against -65.2). One base and one alpha puts the prose at 83.9 on
  * the day page and -64.3 on the night, above every caption on its ground and
  * still a clear step under the verse, 11 Lc on the day and 17 on the night
  * (owner decision, 20.8).

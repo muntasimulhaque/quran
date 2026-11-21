@@ -6,6 +6,50 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.2
+
+The day page's browns give way to old gold and warm gray.
+
+The app's colors were audited end to end again, this time for the thing the
+owner's eye kept catching: brown. Measured in OKLab, a brown is a dark
+orange, and the day page carried three of them plus a sepia cast on
+everything else. The ornament gold, drawn at every surah's arrival, every
+verse's medallion, the juz labels, and the share card, was #7A5A12 at L* 40
+and hue 82, a bronze. The ghunnah rule was #874306 at hue 54, a dark brown
+word inside the verse. The beige tertiary container was never drawn. And the
+word, the reading's ink, the quiet voice, the hairline, and the switch's
+track all carried the paper's hue at b* 4.7 to 6.5, so a page meant to be
+warm paper read as a sepia photograph.
+
+The gold is #856E18 now, L* 47 in the gold sector, the lightest clear gold
+that keeps a margin over 4.5:1: it measures 4.71:1 on the page and 4.95:1 on
+a sheet, APCA 70.6 and 74.1. The ghunnah is #844800, hue 60, the farthest
+amber the palette's own floors allow: the deuteranopia distance to the
+qalaqah comes down from 0.030 to 0.027 against the 0.02 floor, and the
+closest normal pair is now the silent gray at 0.096 against the 0.095 floor.
+Both still hold on the machine, and the KDoc records where that headroom
+went.
+
+The neutrals keep the paper's hue and give up about half their chroma, by a
+third at the word: the first light ink the audit proposed measured the
+control edge at 2.99:1 against the 3:1 a boundary owes, and `ContrastTest`
+caught it, so the word keeps the lightness it had (L* 15.3) and is not
+lighter. The day's two undrawn Material containers align with the new
+family, and the night's two do the same; the night's own khaki tertiary
+container was the only brown in that scheme.
+
+What does not move is the point: the page ground, the night family, the
+action blue, the chosen and found grounds, and the six other tajweed families
+all keep their tones. The night frame is pixel-identical to 21.1's on the
+phone and the 10 inch.
+
+The whole JVM suite, lint, the debug build, `checkdb` against the committed
+database's SHA-256, and the search gate are green on this machine. A visible
+surface changed, so the three store sets were captured again on the phone,
+the 7 inch, and the 10 inch, each from a clean install. No content changed,
+so every pack and the content database are as they were and no catalog hash
+or tag moved, and no permission or app dependency moved.
+
 ## 21.1
 
 The found word wears the reading's rounded mark.

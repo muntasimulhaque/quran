@@ -483,7 +483,7 @@ class ContrastTest {
      * The day ground's prose, at APCA's fluent grade.
      *
      * Lc 90 is the preferred level for fluent body text and Lc 75 its
-     * minimum; the reading ink holds 95.2 on the page and 98.8 on a sheet,
+     * minimum; the reading ink holds 95.0 on the page and 98.5 on a sheet,
      * and the interface's word holds 98.4. This is the grade a reader spends
      * an hour in, so it is pinned above the minimum rather than at it.
      */
@@ -514,7 +514,7 @@ class ContrastTest {
      *
      * Lc 60 is the minimum for content a reader reads, the grade a caption, a
      * reference, a label, and an action word owe. The quiet voice measures
-     * 80.6 on the day page and 61.7 to 72.1 across the grounds it rides; on
+     * 80.2 on the day page and 71.7 to 83.7 across the grounds it rides; on
      * the night page -65.2, -64.1 on a sheet, -61.7 on the floating paper.
      * Every ground a quiet word actually stands on is listed, because a
      * label travels with the surface it sits on.
@@ -559,7 +559,7 @@ class ContrastTest {
      * It is prose, the longest beside the tafsir on its page (owner decision
      * 13.3), so it owes the content grade rather than a caption's licence. It
      * measured -56.7 at night until 20.8, when the day ground's base tone was
-     * found to differ from the night's: one base and one alpha put it at 84.3
+     * found to differ from the night's: one base and one alpha put it at 83.9
      * and -64.3, above every caption on its own ground (owner decision,
      * 20.8).
      */
@@ -594,7 +594,7 @@ class ContrastTest {
      * paint's display line.
      *
      * The found ground is a scan surface by decision 10.6: the matched word
-     * is one word in a result list, and the reading ink on it measures 81.4
+     * is one word in a result list, and the reading ink on it measures 81.1
      * on the day and -74.4 on the night, a hair under the body floor and far
      * past the content floor. The floor here is stated one grade down rather
      * than pretending it clears the body grade, because a wash that lifts a

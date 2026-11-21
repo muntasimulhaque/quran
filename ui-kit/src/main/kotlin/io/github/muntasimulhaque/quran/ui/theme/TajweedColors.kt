@@ -24,6 +24,15 @@ import io.github.muntasimulhaque.quran.core.TajweedRule
  * the grouping and its anchors, and the page keeps them (owner decision,
  * 20.1).
  *
+ * The ghunnah is amber since 21.2, not the dark brown it was: the print's
+ * warmth is kept (amber is warm, and the idgham still owns green), but the
+ * tone was #874306 at hue 54 and read as a page's fifth brown. The family
+ * moves as far as the palette's own floors allow, and this note records
+ * where the headroom went: the deuteranopia distance from the qalaqah comes
+ * down from 0.030 to 0.027 against the 0.02 floor, and the closest normal
+ * pair becomes the silent gray and this family at 0.096 against the 0.095
+ * floor. Both floors still hold, on the machine (owner decision, 21.2).
+ *
  * The palette has three rules, and all three are measured. Every tone clears
  * 4.5:1 on the page, the sheet, the floating control, the selected ayah's
  * wash, and the reciter's word mark. Every pair is far enough apart in OKLab
@@ -45,10 +54,10 @@ import io.github.muntasimulhaque.quran.core.TajweedRule
  * The band cannot collapse to a single tone, and that is the color vision rule
  * speaking. Under deuteranopia the warm pair is one hue, and under tritanopia
  * the teal and the green nearly are, so those two pairs keep a lightness step:
- * the paper palette's smallest false-color distance is 0.030 (ghunnah and
+ * the paper palette's smallest false-color distance is 0.027 (ghunnah and
  * qalaqah under deuteranopia) and the night's is 0.030 (ghunnah and idgham
- * under protanopia), against a 0.02 floor. Normal vision holds 0.101 on paper
- * (the silent gray and the iqlab) and 0.106 on night (the warm pair). Every
+ * under protanopia), against a 0.02 floor. Normal vision holds 0.096 on paper
+ * (the silent gray and the ghunnah) and 0.106 on night (the warm pair). Every
  * family also sits at least 0.13 from the reading's ink, so no rule can read
  * as plain text.
  *
@@ -94,7 +103,7 @@ data class TajweedColors(
 
 val PaperTajweed = TajweedColors(
     silent = Color(0xFF635D55),
-    ghunnah = Color(0xFF874306),
+    ghunnah = Color(0xFF844800),
     qalaqah = Color(0xFFAC1C2B),
     ikhafa = Color(0xFF7F29B5),
     iqlab = Color(0xFF035967),

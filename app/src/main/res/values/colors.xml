@@ -9,5 +9,5 @@
          drawable (owner decision, 7.2: at 24 to 48 dp one ink at
          14.3:1 reads where a thin ornament gold would not). -->
     <color name="icon_background">@color/paper</color>
-    <color name="icon_ink">#2A2620</color>
+    <color name="icon_ink">#292622</color>
 </resources>
