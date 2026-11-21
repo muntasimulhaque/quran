@@ -222,7 +222,9 @@ the three store sets stand as captured for 21.2, and no content, no string,
 and no permission moved. The build moves to AGP 9.5.0, and every artifact it
 adds is pinned by hash in
 `gradle/verification-metadata.xml`, regenerated over the whole task graph
-and proved artifact by artifact.
+and proved artifact by artifact. The 21.5 bundle was submitted for Play
+review, and the hand-off copy in `play-store/aab/` was deleted once Play had
+it.
 
 **What changed in 21.5.** The rules that had no gate now have one. The five
 answers about a translation, a tafsir, and the word list; the line under the
