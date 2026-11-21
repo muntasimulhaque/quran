@@ -299,6 +299,17 @@ genuinely touches runtime behavior may run the affected classes on the phone,
 and the hand-off says so; otherwise the instrumented work is skipped, and the
 hand-off says it was skipped.
 
+The accessibility classes are the phone's own ear, and no JVM gate can hear:
+a session whose diff touches any file under `feature-reading/`,
+`feature-search/`, `feature-settings/`, `ui-kit/`, or
+`app/src/main/kotlin/io/github/muntasimulhaque/quran/ui/reader/` runs
+`AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`, and
+`KeyboardFocusTest` on `quran_phone` before the hand-off, with the
+clean-install trap respected, and the hand-off says so. Any other session
+skips them and the hand-off says that too. The trigger is a path, never a
+judgment: a path is a fact a diff can be checked against, and whether a
+change touches accessibility is an opinion.
+
 The bundle comes from the newest green `build` run on `main`, not the first
 one after the version bump, and signing is proved by `jarsigner`'s words and
 its certificate SHA-256, never by exit code alone. Delete the hand-off copy
