@@ -7,13 +7,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -171,6 +177,26 @@ private const val MarkerFloor = 10f
 /** A marker's size: its share of the body, never below [MarkerFloor]. */
 private fun markerSp(bodySp: Float, share: Float) = maxOf(bodySp * share, MarkerFloor).sp
 /**
+ * The ranges the wash and the weight both carry, folded once against each
+ * other and against the text: a range that reaches back into the one before
+ * it is trimmed to where that one ended, a range that runs past the end
+ * folds back to the last letter, and an empty one is dropped. The run
+ * builder and the wash painter read the same list, so the ground can never
+ * disagree with the ink it carries.
+ */
+internal fun foldedRanges(text: String, ranges: List<IntRange>): List<IntRange> {
+    val out = ArrayList<IntRange>(ranges.size)
+    var index = 0
+    for (range in ranges) {
+        val from = range.first.coerceIn(index, text.length)
+        val to = (range.last + 1).coerceIn(from, text.length)
+        if (to > from) out += IntRange(from, to - 1)
+        index = to
+    }
+    return out
+}
+
+/**
  * A plain sentence with the matched words washed in the accent color. Used by
  * search results, where the text is a snippet rather than rich runs.
  *
@@ -179,6 +205,12 @@ private fun markerSp(bodySp: Float, share: Float) = maxOf(bodySp * share, Marker
  * must not meet it small again in the sheet they searched from. The fixed base
  * it used to stand at was a size the reader could not move
  * (owner decision, 13.3).
+ *
+ * The matched words carry the Medium weight and the found ground. The ground
+ * is drawn behind the shaped line, rounded the way the reading rounds the
+ * same match when a result lands on the page: a background span paints
+ * sharp corners, and this app keeps one shape language
+ * (owner decision, 21.1).
  */
 @Composable
 fun HighlightedText(
@@ -201,19 +233,17 @@ fun HighlightedText(
     // (owner decision, 21.0).
     val wash = LocalPagePalette.current.match
     val weight = FontWeight.Medium
+    val folded = remember(text, ranges) { foldedRanges(text, ranges) }
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     Text(
         text = buildAnnotatedString {
             var index = 0
-            for (range in ranges) {
-                val from = range.first.coerceIn(index, text.length)
-                val to = (range.last + 1).coerceIn(from, text.length)
-                if (from > index) append(text.substring(index, from))
-                if (to > from) {
-                    withStyle(SpanStyle(background = wash, fontWeight = weight)) {
-                        append(text.substring(from, to))
-                    }
+            for (range in folded) {
+                if (range.first > index) append(text.substring(index, range.first))
+                withStyle(SpanStyle(fontWeight = weight)) {
+                    append(text.substring(range.first, range.last + 1))
                 }
-                index = to
+                index = range.last + 1
             }
             if (index < text.length) append(text.substring(index))
         },
@@ -221,7 +251,13 @@ fun HighlightedText(
         color = color,
         maxLines = maxLines,
         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-        modifier = modifier.fillMaxWidth(),
+        onTextLayout = { layout = it },
+        modifier = modifier
+            .fillMaxWidth()
+            .drawWithContent {
+                layout?.let { result -> drawWash(result, folded, wash) }
+                drawContent()
+            },
     )
 }
 

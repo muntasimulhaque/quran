@@ -198,21 +198,25 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.0 (versionCode 212).** The signed bundle comes from `build` run
-44788796647, the newest green run on `main` at the hand-off: the unit tests,
-lint, and `assembleDebug` passed, and the signed bundle `quran-21.0-vc212.aab`
-has SHA-256
-`a99cb9cb0c0d65c24aca197a394b5105059b4c9456b8467bc5b745a0cf224149`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine, and the content gate reproduced the
-committed database's SHA-256. A visible surface changed, so the three store
-sets were captured again on the phone, the 7 inch, and the 10 inch, each from
-a clean install, and no set moved: the changed grounds stand in none of the
-twenty-four frames. No content changed, so every pack and the content
-database are as they were and no catalog hash or tag moved, and no permission
-or app dependency moved. The 21.0 bundle was submitted for Play review, and
-the hand-off copy in `play-store/aab/` was deleted once Play had it.
+**21.1 (versionCode 213).** The newest green `build` run on `main` produced
+the signed bundle `quran-21.1-vc213.aab` at the hand-off. The same suite is
+green on this machine, and the content gate reproduced the committed
+database's SHA-256. A visible surface changed, so the three store sets were
+captured again on the phone, the 7 inch, and the 10 inch, each from a clean
+install. No content changed, so every pack and the content database are as
+they were and no catalog hash or tag moved, and no permission or app
+dependency moved. The hand-off copy waits in `play-store/aab/` for Play.
+
+**What changed in 21.1.** The matched words in the search sheet wore sharp
+rectangles while the reading rounded the same match the moment a result
+landed on the page. The app now keeps one wash recipe: the reading's word
+mark, named in `ui-kit`, with a pad wider each side, half a pad trimmed
+above and below, and a corner at a share of the ink box's height. The search
+sheet's Arabic lines and its translation, note, word-meaning, and tafsir
+snippets all draw it, the snippets keep the Medium weight their matched words
+carry, and the reading's own marks delegate to the same recipe, lifted
+verbatim, so they do not move. A range past an ellipsized snippet's cut
+washes nothing. The arithmetic is pinned in the JVM suite.
 
 **What changed in 21.0.** The two tinted grounds in the app, the block behind
 the chosen thing and the block behind the found thing, moved from the paper's
@@ -226,20 +230,6 @@ to read as lapis rather than as a gray: #E6EBF5 behind the chosen thing and
 paper now stands clear of the chosen block by more than it did. The ornament
 gold is furniture and stays, as do the paper family, the tajweed palette, and
 the never-drawn Material containers.
-
-**What changed in 20.9.** An audit of the app's network, storage, SQL, and
-platform surface found no exploitable hole and no crash, and it closed three
-edges. A recitation manifest row that names no package size is now refused,
-the way the word pronunciation manifest's own rows already are, so every
-transfer has a ceiling and every progress line a denominator. A response
-that sends no length no longer makes a download's total read backwards; the
-line waits instead. And the daily reminder sweeps five day slots rather than
-three, on the path that arms it as well as the one that turns it off, so a
-clock or a time zone that moves cannot leave an alarm under a day number the
-new clock never produces and speak a second time. The row rule is one pure
-function the JVM suite pins; the reminder's own classes ran green on the
-phone. The Quran text, both translations, both tafsirs, the recitations, and
-every pack are unchanged.
 
 ## Corrections and contributions
 

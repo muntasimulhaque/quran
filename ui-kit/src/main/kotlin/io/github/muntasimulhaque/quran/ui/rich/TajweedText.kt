@@ -8,7 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -207,12 +210,24 @@ class TajweedPainter {
 }
 
 /**
- * Draws a wash behind a shaped line, one rectangle per line of each range.
+ * Draws a wash behind a shaped line, one rounded box per line of each range.
  *
  * A background span is a `CharacterStyle`, so it re-shapes the line the same
  * way a color span does, and a match can change the width of the result under
  * the reader as they type. The wash is geometry from the layout instead, so
  * the words never move (owner decision, the QPC rendering audit).
+ *
+ * The box is the reading's own word mark: a pad wider each side, half a pad
+ * shorter above and below, and a corner at a share of the ink box's height.
+ * One recipe serves every matched run, the search sheet's Arabic lines, its
+ * prose snippets, and the reading's own marks, so the same word cannot be
+ * rounded in one place and square in another (owner decision, 21.1: the
+ * search sheet wore rectangles while the reading rounded the same match).
+ * The washes are opaque tones, so two boxes that touch draw as one; a
+ * translucent wash would need the union of the boxes restored first.
+ *
+ * An ellipsized line washes only the text it draws: a match past the cut has
+ * no box on the glass and draws nothing.
  */
 fun DrawScope.drawWash(
     layout: TextLayoutResult,
@@ -220,43 +235,70 @@ fun DrawScope.drawWash(
     color: Color,
 ) {
     if (ranges.isEmpty() || color.alpha == 0f) return
-    val text = layout.layoutInput.text.text
-    val path = Path()
+    if (layout.lineCount == 0) return
+    val visibleEnd = layout.getLineEnd(layout.lineCount - 1, visibleEnd = true)
+    val last = min(layout.layoutInput.text.length, visibleEnd) - 1
     for (range in ranges) {
-        var line = -1
-        var left = Float.MAX_VALUE
-        var right = -Float.MAX_VALUE
-        var top = Float.MAX_VALUE
-        var bottom = -Float.MAX_VALUE
-
-        fun flush() {
-            if (line >= 0 && right > left && bottom > top) {
-                path.addRect(Rect(left, top, right, bottom))
+        val start = range.first.coerceAtLeast(0)
+        val end = range.last.coerceAtMost(last)
+        if (end < start) continue
+        var line = layout.getLineForOffset(start)
+        var box: Rect? = null
+        for (offset in start..end) {
+            val nextLine = layout.getLineForOffset(offset)
+            if (nextLine != line) {
+                box?.let { drawWashBox(it, color) }
+                box = null
+                line = nextLine
             }
-            line = -1
-            left = Float.MAX_VALUE
-            right = -Float.MAX_VALUE
-            top = Float.MAX_VALUE
-            bottom = -Float.MAX_VALUE
+            val charBox = layout.getBoundingBox(offset)
+            box = box?.let { union ->
+                Rect(
+                    left = min(union.left, charBox.left),
+                    top = min(union.top, charBox.top),
+                    right = max(union.right, charBox.right),
+                    bottom = max(union.bottom, charBox.bottom),
+                )
+            } ?: charBox
         }
-
-        for (offset in range) {
-            if (offset !in text.indices) continue
-            val box = layout.getBoundingBox(offset)
-            if (box.right <= box.left) continue
-            val boxLine = layout.getLineForOffset(offset)
-            if (boxLine != line) {
-                flush()
-                line = boxLine
-            }
-            left = min(left, box.left)
-            right = max(right, box.right)
-            top = min(top, box.top)
-            bottom = max(bottom, box.bottom)
-        }
-        flush()
+        box?.let { drawWashBox(it, color) }
     }
-    drawPath(path, color)
+}
+
+/** The share of an ink box's height a wash grows each side. */
+internal const val WashPadShare = 0.08f
+
+/** The share of an ink box's height a wash's corner rounds at. */
+internal const val WashCornerShare = 0.26f
+
+/**
+ * The box a wash wears around one line's ink: a pad wider each side and
+ * half a pad shorter above and below, so the mark clears the letters beside
+ * it without eating the line it stands on.
+ */
+internal fun washBox(box: Rect): Rect {
+    val pad = box.height * WashPadShare
+    return Rect(
+        left = box.left - pad,
+        top = box.top + pad * 0.5f,
+        right = box.right + pad,
+        bottom = box.bottom - pad * 0.5f,
+    )
+}
+
+/** The corner a wash rounds at, a share of the ink box's own height. */
+internal fun washCorner(height: Float): Float = height * WashCornerShare
+
+/** One line's wash: the rounded box, drawn behind the shaped line. */
+private fun DrawScope.drawWashBox(box: Rect, color: Color) {
+    val rect = washBox(box)
+    if (rect.width <= 0f || rect.height <= 0f) return
+    drawRoundRect(
+        color = color,
+        topLeft = Offset(rect.left, rect.top),
+        size = Size(rect.width, rect.height),
+        cornerRadius = CornerRadius(washCorner(box.height)),
+    )
 }
 
 /**

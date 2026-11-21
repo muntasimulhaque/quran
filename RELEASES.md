@@ -6,6 +6,44 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.1
+
+The found word wears the reading's rounded mark.
+
+The search sheet's matched runs were the app's only sharp rectangles. Two
+mechanisms drew them: the Arabic match line painted one rectangle per line of
+each range, and every prose snippet, the translation, the reader's note, the
+word meaning, and the tafsir passage, still carried a background span, which
+Compose always draws square. The same matched word was rounded a tap later,
+when the result landed on the reading, because the reading's word mark, the
+reciter's word, and the word sheet's sounding word were already drawn as one
+rounded box per line.
+
+There is one wash recipe now, and it is the reading's: a pad of 8 percent of
+the ink box's height wider each side, half a pad trimmed above and below, and
+a corner at 26 percent of that height. It lives in `ui-kit` beside the wash
+that draws it, the reading's mark is its name for one range, and the search
+sheet's Arabic lines and prose snippets draw the same box. The prose snippets
+lose their background span and keep the Medium weight the matched run
+carries, so the ink and the ground still name the same words, and the ranges
+the two read are folded once, so they cannot disagree. A match past an
+ellipsized snippet's cut washes nothing rather than a stray box at the
+ellipsis.
+
+The reading did not move: its box and its union were lifted verbatim, and the
+visible-end clamp never triggers on a line that is not ellipsized. The
+field's own selection keeps its separate 6 dp radius, and the tajweed color
+painter keeps its glyph boxes untouched.
+
+The whole JVM suite, lint, the debug build, `checkdb` and the committed
+database's SHA-256, and the search gate are green on this machine. The
+arithmetic is pinned by a new JVM suite, five tests, so the box and the
+folding are measured without a device. A visible surface changed, so the
+three store sets were captured again on the phone, the 7 inch, and the 10
+inch, each from a clean install. No content changed, so every pack and the
+content database are as they were and no catalog hash or tag moved, and no
+permission or app dependency moved.
+
 ## 21.0
 
 The chosen and found grounds wear the accent, not the paper.
