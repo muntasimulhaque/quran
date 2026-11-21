@@ -200,14 +200,27 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.5 (versionCode 217).** The signed bundle's record follows the run. The
-whole JVM suite, `checkdb`, `search`, lint, and the debug build are green on
-this machine, and the four accessibility classes the release rule now names
-ran on the phone after the moves: `AccessibilityTest`, `LargeTextTest`,
-`ReadingSemanticsTest`, and `KeyboardFocusTest`, 11 tests and no failures.
-No visible surface changed, so the three store sets stand as captured for
-21.2, and no content, no string, and no permission moved. The build moves to
-AGP 9.5.0, and every artifact it adds is pinned by hash in
+**21.5 (versionCode 217).** The signed bundle comes from `build` run
+44931558235, green on `main` for the commit `a4520eca`: the unit tests,
+`checkdb`, `search`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-21.5-vc217.aab` has SHA-256
+`8eb68658f288a41314a993ea29c1941c0611ba5345f78281d3a60db01b5de175`.
+`jarsigner` reads `jar verified`, and the upload certificate is the same key
+21.4 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The whole JVM suite, `checkdb`, `search`, lint, and the debug build were also
+green on this machine before the push, and the four accessibility classes the
+release rule now names ran on the phone after the moves: `AccessibilityTest`,
+`LargeTextTest`, `ReadingSemanticsTest`, and `KeyboardFocusTest`, 11 tests and
+no failures. The run after the version commit was red at dependency
+verification, because the regenerated file held only this machine's AAPT2
+binary: the Linux and macOS copies were added from Google's own Maven,
+cross-checked against the SHA-1 that repository publishes, and proved locally
+by resolving both classifiers through the verification gate, and the run that
+built this bundle is the one after that fix. No visible surface changed, so
+the three store sets stand as captured for 21.2, and no content, no string,
+and no permission moved. The build moves to AGP 9.5.0, and every artifact it
+adds is pinned by hash in
 `gradle/verification-metadata.xml`, regenerated over the whole task graph
 and proved artifact by artifact.
 

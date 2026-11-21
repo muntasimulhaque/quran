@@ -42,8 +42,14 @@ The build moves to AGP 9.5.0. The project pins every dependency by hash, so the
 move meant regenerating `gradle/verification-metadata.xml` over the whole task
 graph: 59 components entered, all in the AGP family, and the file was checked
 component by component and artifact by artifact against the one it replaced, so
-nothing was lost. Two deprecation warnings remain in the instrumented suite
-(the v2 compose test APIs), and nothing gates on them.
+nothing was lost. What the file could not see from this machine was the other
+platforms: the regeneration pins the AAPT2 binary the host downloads, and CI's
+Linux build refused the file at its first task. The Linux and macOS copies were
+added from Google's own Maven, cross-checked against the SHA-1 that repository
+publishes, and proved locally by resolving both classifiers through the
+verification gate; the verification file now names all three platforms. Two
+deprecation warnings remain in the instrumented suite (the v2 compose test
+APIs), and nothing gates on them.
 
 The whole JVM suite, `checkdb`, `search`, lint, and the debug build are
 green on this machine. No visible surface changed, so the three store sets
