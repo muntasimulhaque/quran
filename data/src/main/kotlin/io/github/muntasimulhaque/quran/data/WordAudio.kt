@@ -457,3 +457,32 @@ data class WordAudioState(
     val failed: Boolean = false,
     val waiting: Boolean = false,
 )
+
+/**
+ * What the pronunciation line under the words switch says, as a fact and not
+ * as a sentence. The settings module maps it to its strings, and the answer
+ * is the same on the two surfaces that read it: a failure outranks a
+ * transfer in flight, and an installed pack leaves the line quiet.
+ */
+enum class WordAudioLine {
+    /** The transfer failed, and a second tap asks again. */
+    Failed,
+
+    /** The transfer is reading, and has something to show for it. */
+    Downloading,
+
+    /** Nothing to say: quiet, installed, or waiting to begin. */
+    None,
+}
+
+/**
+ * The line for one state of the pronunciation pack. A failed transfer says
+ * so even when bytes arrived, because a half pack is not a pack; a transfer
+ * that has read nothing yet says nothing, because a line at zero is noise
+ * under a switch the reader has just touched.
+ */
+fun wordAudioLine(state: WordAudioState): WordAudioLine = when {
+    state.failed -> WordAudioLine.Failed
+    state.read > 0 && !state.installed && state.surah > 0 -> WordAudioLine.Downloading
+    else -> WordAudioLine.None
+}

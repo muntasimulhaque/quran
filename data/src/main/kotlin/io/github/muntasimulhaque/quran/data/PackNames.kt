@@ -22,3 +22,15 @@ fun packName(name: String, nameBn: String, languageTag: String): String =
 
 /** [packName] for one pack. */
 fun ContentPack.displayName(languageTag: String): String = packName(name, nameBn, languageTag)
+
+/**
+ * A pack's own line in the reader's language: the catalog's Bangla line when
+ * the interface is Bangla and the catalog carries one, and the English line
+ * otherwise, so no pack is ever credited in a language nobody wrote for it
+ * (owner decision, 12.6).
+ *
+ * The line is the About page's, which reads the phone's own language for
+ * these credits; the rule itself lives here, where the JVM suite can pin it.
+ */
+fun localizedPackLine(english: String, bangla: String, language: String): String =
+    if (language.startsWith("bn") && bangla.isNotBlank()) bangla else english

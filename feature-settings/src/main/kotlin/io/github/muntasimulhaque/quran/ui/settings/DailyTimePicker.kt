@@ -88,6 +88,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.github.muntasimulhaque.quran.core.clockHourText
+import io.github.muntasimulhaque.quran.core.clockMinuteText
+import io.github.muntasimulhaque.quran.core.clockPeriodText
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.kit.AppChip
@@ -107,8 +110,6 @@ import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -275,11 +276,11 @@ internal fun DailyTimeDialog(
         editing = part
         when (part) {
             TimePart.Hour -> {
-                val text = hourText(hour, twentyFour, locale)
+                val text = clockHourText(hour, twentyFour, locale)
                 hourField = TextFieldValue(text, selection = TextRange(0, text.length))
             }
             TimePart.Minute -> {
-                val text = minuteText(minute, locale)
+                val text = clockMinuteText(minute, locale)
                 minuteField = TextFieldValue(text, selection = TextRange(0, text.length))
             }
             TimePart.None -> Unit
@@ -295,7 +296,7 @@ internal fun DailyTimeDialog(
     fun selectHour(value: Int) {
         hour = if (twentyFour) value else (value % 12) + if (evening) 12 else 0
         if (editing == TimePart.Hour) {
-            val text = hourText(hour, twentyFour, locale)
+            val text = clockHourText(hour, twentyFour, locale)
             hourField = TextFieldValue(text, selection = TextRange(0, text.length))
         }
     }
@@ -304,7 +305,7 @@ internal fun DailyTimeDialog(
     fun selectMinute(value: Int) {
         minute = value
         if (editing == TimePart.Minute) {
-            val text = minuteText(minute, locale)
+            val text = clockMinuteText(minute, locale)
             minuteField = TextFieldValue(text, selection = TextRange(0, text.length))
         }
     }
@@ -391,7 +392,7 @@ internal fun DailyTimeDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         TimeField(
-                            value = hourText(hour, twentyFour, locale),
+                            value = clockHourText(hour, twentyFour, locale),
                             editing = editing == TimePart.Hour,
                             field = hourField,
                             onFieldChange = { value ->
@@ -429,7 +430,7 @@ internal fun DailyTimeDialog(
                             modifier = Modifier.padding(horizontal = 2.dp),
                         )
                         TimeField(
-                            value = minuteText(minute, locale),
+                            value = clockMinuteText(minute, locale),
                             editing = editing == TimePart.Minute,
                             field = minuteField,
                             onFieldChange = { value ->
@@ -458,7 +459,7 @@ internal fun DailyTimeDialog(
                         )
                         if (!twentyFour) {
                             Text(
-                                text = periodName(evening, locale),
+                                text = clockPeriodText(evening, locale),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = Space.Line),
@@ -473,7 +474,7 @@ internal fun DailyTimeDialog(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             PeriodChoice(
-                                label = periodName(pm = false, locale = locale),
+                                label = clockPeriodText(pm = false, locale = locale),
                                 chosen = !evening,
                             ) {
                                 commitHour()
@@ -481,7 +482,7 @@ internal fun DailyTimeDialog(
                             }
                             Spacer(Modifier.width(Space.Action))
                             PeriodChoice(
-                                label = periodName(pm = true, locale = locale),
+                                label = clockPeriodText(pm = true, locale = locale),
                                 chosen = evening,
                             ) {
                                 commitHour()
@@ -494,14 +495,14 @@ internal fun DailyTimeDialog(
                         label = hourName,
                         values = hours,
                         selected = hourValue,
-                        format = { value -> hourText(value, twentyFour, locale) },
+                        format = { value -> clockHourText(value, twentyFour, locale) },
                         onSelect = ::selectHour,
                     )
                     TimeTape(
                         label = minuteName,
                         values = minutes,
                         selected = minute,
-                        format = { value -> minuteText(value, locale) },
+                        format = { value -> clockMinuteText(value, locale) },
                         onSelect = ::selectMinute,
                     )
                 }
@@ -843,24 +844,3 @@ private fun PeriodChoice(
     )
 }
 
-/** The hour as the phone's clock reads it: two digits on a 24 hour clock. */
-private fun hourText(hour: Int, twentyFour: Boolean, locale: Locale): String =
-    if (twentyFour) {
-        String.format(locale, "%02d", hour)
-    } else {
-        String.format(locale, "%d", ((hour + 11) % 12) + 1)
-    }
-
-/** The minute, always two digits, in the reader's language. */
-private fun minuteText(minute: Int, locale: Locale): String =
-    String.format(locale, "%02d", minute)
-
-/** The locale's own AM or PM marker, the same one `clockText` shows. */
-private fun periodName(pm: Boolean, locale: Locale): String {
-    val calendar = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, if (pm) 13 else 1)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-    }
-    return SimpleDateFormat("a", locale).format(calendar.time)
-}

@@ -43,6 +43,25 @@ class PackNamesTest {
     }
 
     @Test
+    fun aBanglaLineIsDrawnOnlyWhenItWasWritten() {
+        assertEquals("সহীহ ইন্টারন্যাশনাল", localizedPackLine("Saheeh International", "সহীহ ইন্টারন্যাশনাল", "bn"))
+        assertEquals("Word pronunciation", localizedPackLine("Word pronunciation", "   ", "bn"))
+        assertEquals("Word pronunciation", localizedPackLine("Word pronunciation", "", "bn"))
+    }
+
+    @Test
+    fun anEnglishReaderKeepsTheEnglishLineEvenWhenABanglaLineExists() {
+        assertEquals(
+            "King Fahd Glorious Quran Printing Complex",
+            localizedPackLine("King Fahd Glorious Quran Printing Complex", "বাদশাহ ফাহদ", "en"),
+        )
+        assertEquals(
+            "King Fahd Glorious Quran Printing Complex",
+            localizedPackLine("King Fahd Glorious Quran Printing Complex", "বাদশাহ ফাহদ", "fr"),
+        )
+    }
+
+    @Test
     fun aPackNamesItselfThroughItsOwnEntry() {
         val pack = ContentPack(
             id = "reciter-minshawi",

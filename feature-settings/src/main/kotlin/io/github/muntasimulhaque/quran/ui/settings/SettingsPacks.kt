@@ -9,10 +9,11 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
-import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.chosenTafsirs
+import io.github.muntasimulhaque.quran.data.chosenTranslations
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
@@ -32,15 +33,13 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 /**
  * The translations the reading draws with, in one line: the pack's own name
  * when there is one, a count when there are several, and an honest nothing
- * when the reader has added none. A pack that is chosen but not yet on the
- * device is not counted, so this line never promises a translation the
- * reading cannot draw. The switch above it follows the choice instead: the
- * value says what is here, and the switch says what the reader asked for
- * (owner decision, 14.8).
+ * when the reader has added none. The switch above it follows the choice
+ * instead: the value says what is here, and the switch says what the reader
+ * asked for (owner decision, 14.8).
  */
 @Composable
 internal fun translationName(settings: AppSettings, packs: List<ContentPack>): String {
-    val chosen = packs.filter { it.id in settings.translationPacks && it.installed }
+    val chosen = chosenTranslations(settings, packs)
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
         chosen.size == 1 -> contentPackName(chosen.first())
@@ -55,46 +54,12 @@ internal fun translationName(settings: AppSettings, packs: List<ContentPack>): S
 /** The tafsirs the reading draws with, in the same one line as the translations. */
 @Composable
 internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): String {
-    val chosen = packs.filter { it.type == PackType.Tafsir && it.installed && it.id in settings.tafsirPacks }
+    val chosen = chosenTafsirs(settings, packs)
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
         chosen.size == 1 -> contentPackName(chosen.first())
         else -> pluralStringResource(R.plurals.settings_tafsir_count, chosen.size, chosen.size)
     }
-}
-
-/**
- * Whether the reading has a translation it can draw, which is also whether
- * the switch can be used. It is not the switch's state: that is the reader's
- * own answer, and a chosen pack that is not on the device leaves the switch
- * on and disabled rather than off, so the row never reports a choice the
- * reader did not make (owner decision, 14.8: the switch used to read
- * on only when a translation could be drawn).
- */
-internal fun hasInstalledTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
-    packs.any { it.id in settings.translationPacks && it.installed }
-
-/**
- * Whether the reader has chosen a translation at all, here or not. The
- * switch's state is this and the reader's own answer; its usability is
- * [hasInstalledTranslation]. The two questions are drawn apart on purpose: a
- * chosen pack that is not on the device yet is still the reader's choice, and
- * the switch says so while it waits (owner decision, 14.8).
- */
-internal fun hasChosenTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
-    packs.any { it.id in settings.translationPacks }
-
-/**
- * The word list the reading speaks: the one that matches the reader's own
- * language, and no other. There is no fallback to English: a Bangla reader
- * whose list has not landed yet is asked to add the Bangla list, never
- * handed the English one (owner decision, 6.6). Null when the
- * catalog carries no list for the language, so the row can say nothing
- * rather than promise a list that does not exist.
- */
-internal fun wantedWordsPack(settings: AppSettings, packs: List<ContentPack>): ContentPack? {
-    val language = settings.readingLanguage
-    return packs.firstOrNull { it.id == ContentDatabase.wordsPackId(language) }
 }
 
 /**

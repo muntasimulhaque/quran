@@ -13,7 +13,9 @@ import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.hasChosenTranslation
 import io.github.muntasimulhaque.quran.data.readingMetrics
+import io.github.muntasimulhaque.quran.data.wantedWordsPack
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes

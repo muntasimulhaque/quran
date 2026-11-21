@@ -23,13 +23,25 @@ import java.security.MessageDigest
  * through Media3, so this adds no permission. And it checks a catalog once,
  * not on every launch: the catalog's own fingerprints are remembered, so a
  * reader who is offline or metered pays nothing and the check is simply
- * retried on a later launch. A reader who asks for the check themselves can
- * [force] it, which the manual check uses to repair what it finds.
+ * retried on a later launch. The check runs when the app opens, against the
+ * catalog this build carries: the catalog is a file inside the app itself, so
+ * it cannot name anything new between two launches of the same build, and a
+ * pass that could not finish is simply retried at the next open, because the
+ * fingerprint is remembered only when every stale pack caught up. There is no
+ * manual check, and none could find anything the open had not already named.
+ *
+ * The refresh is the reader's own word, given when they chose the pack
+ * (owner decision, 21.5). It touches only packs already on this device, so a
+ * reader who never added a pack never pays a byte for it, and it never runs
+ * on a metered connection: automatic never means on any connection. A newer
+ * version of a pack is named by the catalog that ships inside the app, so it
+ * can only arrive with a new release of the app, and the reader's own update
+ * is what offers it. A newer version is not baked into the app package: that
+ * would make every reader carry bytes for content they never asked for.
  *
  * A stale pack keeps working while the refresh is in flight. Nothing here
  * runs on the main thread, a replaced file is swapped by rename, and a mutex
- * keeps the quiet pass and the manual check from ever downloading the same
- * pack at once.
+ * keeps two passes from ever downloading the same pack at once.
  */
 class PackUpdater(private val context: Context) {
 
@@ -44,14 +56,14 @@ class PackUpdater(private val context: Context) {
     /**
      * Replaces every installed pack whose bytes are behind the catalog, and
      * returns the ids that changed. A no-op when the connection is metered or
-     * absent, or when the catalog was already checked and [force] is false.
+     * absent, or when the catalog was already checked.
      * Never throws: a failed download is left for the next attempt.
      */
-    suspend fun refresh(catalog: PackCatalog, force: Boolean = false): List<String> =
+    suspend fun refresh(catalog: PackCatalog): List<String> =
         mutex.withLock {
             if (!unmetered()) return@withLock emptyList()
             val fingerprint = fingerprint(catalog)
-            if (!force && preferences.getString(KEY, null) == fingerprint) {
+            if (preferences.getString(KEY, null) == fingerprint) {
                 return@withLock emptyList()
             }
             val stale = runCatching { PackVerifier(context).needsRefresh(catalog.all()) }

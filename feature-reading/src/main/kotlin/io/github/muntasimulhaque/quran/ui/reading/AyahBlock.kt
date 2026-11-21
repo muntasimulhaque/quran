@@ -72,6 +72,9 @@ import io.github.muntasimulhaque.quran.ui.kit.translationIsNamed
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.rich.TajweedPainter
 import io.github.muntasimulhaque.quran.ui.rich.drawTajweed
+import io.github.muntasimulhaque.quran.ui.rich.spanInk
+import io.github.muntasimulhaque.quran.ui.rich.spanPlace
+import io.github.muntasimulhaque.quran.ui.rich.spanTarget
 import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
@@ -753,40 +756,23 @@ private fun arabic(
  * The box is read from the shaped line's own layout, where the medallion's ink
  * stands, and moved by the line's place in the window, because the menu's
  * placement is arithmetic in window coordinates and nothing else can read a
- * text span back through a test.
+ * text span back through a test. The two steps are [spanInk] and [spanPlace]
+ * in `ui-kit`, where that test pins them.
  */
 private fun ornamentAnchor(
     layout: TextLayoutResult,
     range: IntRange,
     text: IntRect,
-): IntRect {
-    val box = ornamentBox(layout, range)
-    return IntRect(
-        text.left + box.left.toInt(),
-        text.top + box.top.toInt(),
-        text.left + box.right.toInt(),
-        text.top + box.bottom.toInt(),
-    )
-}
+): IntRect = spanPlace(text, ornamentInk(layout, range))
 
 /**
  * The medallion's own ink, as one rectangle over every character of its span.
  * The face draws the medallion from several glyphs, so the first character's
- * box alone is narrower than the mark the reader sees.
+ * box alone is narrower than the mark the reader sees; the union is
+ * [spanInk]'s rule, pinned in `ui-kit`.
  */
-private fun ornamentBox(layout: TextLayoutResult, range: IntRange): Rect {
-    var box = layout.getBoundingBox(range.first)
-    for (offset in range) {
-        val next = layout.getBoundingBox(offset)
-        box = Rect(
-            left = minOf(box.left, next.left),
-            top = minOf(box.top, next.top),
-            right = maxOf(box.right, next.right),
-            bottom = maxOf(box.bottom, next.bottom),
-        )
-    }
-    return box
-}
+private fun ornamentInk(layout: TextLayoutResult, range: IntRange): Rect =
+    spanInk(range.map { offset -> layout.getBoundingBox(offset) })
 
 /**
  * The medallion's touch target: its ink, grown until the shorter side is 48 dp.
@@ -797,15 +783,4 @@ private fun ornamentBox(layout: TextLayoutResult, range: IntRange): Rect {
 private fun PointerInputScope.ornamentTarget(
     layout: TextLayoutResult,
     range: IntRange,
-): Rect {
-    val box = ornamentBox(layout, range)
-    val side = ControlMetrics.Target.toPx()
-    val padX = ((side - box.width) / 2f).coerceAtLeast(0f)
-    val padY = ((side - box.height) / 2f).coerceAtLeast(0f)
-    return Rect(
-        left = box.left - padX,
-        top = box.top - padY,
-        right = box.right + padX,
-        bottom = box.bottom + padY,
-    )
-}
+): Rect = spanTarget(ornamentInk(layout, range), ControlMetrics.Target.toPx())

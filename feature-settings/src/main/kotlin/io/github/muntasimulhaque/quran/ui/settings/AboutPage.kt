@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.localizedPackLine
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -242,16 +243,15 @@ fun AboutPage(
 }
 
 /**
- * A pack's own line in the reader's language: the catalog's Bangla line when
- * the interface is Bangla and the catalog carries one, and the English line
- * otherwise, so no pack is ever credited in a language nobody wrote for it
- * (owner decision, 12.6).
+ * A pack's own line in the reader's language, read once per pack line. The
+ * choice itself is [localizedPackLine], in `:data`, where the JVM suite pins
+ * it (owner decision, 12.6).
  */
 @Composable
 private fun packLine(english: String, bangla: String): String {
     val language = LocalConfiguration.current.locales[0].language
     return remember(english, bangla, language) {
-        if (language.startsWith("bn") && bangla.isNotBlank()) bangla else english
+        localizedPackLine(english, bangla, language)
     }
 }
 

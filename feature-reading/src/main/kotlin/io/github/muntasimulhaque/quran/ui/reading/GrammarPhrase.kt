@@ -2,39 +2,41 @@ package io.github.muntasimulhaque.quran.ui.reading
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import io.github.muntasimulhaque.quran.core.GrammarFact
 import io.github.muntasimulhaque.quran.core.GrammaticalCase
 import io.github.muntasimulhaque.quran.core.PartOfSpeech
 import io.github.muntasimulhaque.quran.core.WordForm
 import io.github.muntasimulhaque.quran.core.WordGrammar
+import io.github.muntasimulhaque.quran.core.grammarFacts
 import io.github.muntasimulhaque.quran.feature.reading.R
 
 /**
- * One word's grammar as the sheet says it: what the word is, its case or
- * mood, its gender and number, its voice, and a verb's pattern, in the
- * reader's own language and in the order a grammar reads left to right.
+ * One word's grammar as the sheet says it: the facts [grammarFacts] decides,
+ * in their order, each drawn in the reader's own language.
  *
- * The codes come from the corpus through the word pack, and the words are
- * the app's own: they are the settled names of Arabic grammar in English
- * and in Bangla, not a translation of scripture
- * (owner decision, 18.0).
- *
- * The parts are separated by the app's middot, the mark it puts between two
- * facts in one line ("Al-Kahf · 18:10", "Downloading 43% · 5.8 MB"). A comma
- * joins clauses, so "Noun, nominative" read as one long description; the
- * middot reads as three facts (owner decision, 19.1). A middot never
- * joins a name to a sentence, and never a verb to a size: this page's parts are
- * all facts.
+ * The order and the presence belong to `core`, where a JVM test pins them;
+ * this file owns the two things such a test cannot: the string each fact is
+ * named with, and the mark between them. The parts are separated by the app's
+ * middot, the mark it puts between two facts in one line ("Al-Kahf · 18:10",
+ * "Downloading 43% · 5.8 MB"). A comma joins clauses, so "Noun,
+ * nominative" read as one long description; the middot reads as three
+ * facts (owner decision, 19.1). A middot never joins a name to a sentence,
+ * and never a verb to a size: this page's parts are all facts.
  */
 @Composable
 internal fun grammarPhrase(grammar: WordGrammar): String? {
-    val parts = buildList {
-        grammar.partOfSpeech?.let { add(stringResource(partOfSpeechLabel(it))) }
-        grammar.grammaticalCase?.let { add(stringResource(grammaticalCaseLabel(it))) }
-        grammar.form?.let { add(stringResource(wordFormLabel(it))) }
-        if (grammar.passive) add(stringResource(R.string.reading_grammar_passive))
-        grammar.pattern?.let { add(stringResource(R.string.reading_grammar_pattern, it)) }
+    val facts = grammarFacts(grammar)
+    if (facts.isEmpty()) return null
+    val parts = facts.map { fact ->
+        when (fact) {
+            is GrammarFact.PartOfSpeech -> stringResource(partOfSpeechLabel(fact.value))
+            is GrammarFact.Case -> stringResource(grammaticalCaseLabel(fact.value))
+            is GrammarFact.Form -> stringResource(wordFormLabel(fact.value))
+            GrammarFact.Passive -> stringResource(R.string.reading_grammar_passive)
+            is GrammarFact.Pattern -> stringResource(R.string.reading_grammar_pattern, fact.text)
+        }
     }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+    return parts.joinToString(" · ")
 }
 
 private fun partOfSpeechLabel(value: PartOfSpeech): Int = when (value) {

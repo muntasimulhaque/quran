@@ -27,7 +27,12 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.WordAudioLine
 import io.github.muntasimulhaque.quran.data.WordAudioState
+import io.github.muntasimulhaque.quran.data.hasChosenTranslation
+import io.github.muntasimulhaque.quran.data.hasInstalledTranslation
+import io.github.muntasimulhaque.quran.data.wantedWordsPack
+import io.github.muntasimulhaque.quran.data.wordAudioLine
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ActionPill
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
@@ -492,15 +497,13 @@ private fun PronunciationDownloads(
 @Composable
 private fun pronunciationLine(state: WordAudioState): String? {
     val surah = formatBytes(state.bytes)
-    return when {
-        state.failed ->
-            stringResource(R.string.settings_words_pronunciation_failed)
-        state.read > 0 && !state.installed && state.surah > 0 ->
-            stringResource(
-                R.string.settings_words_pronunciation_downloading,
-                formatBytes(state.read),
-                surah,
-            )
-        else -> null
+    return when (wordAudioLine(state)) {
+        WordAudioLine.Failed -> stringResource(R.string.settings_words_pronunciation_failed)
+        WordAudioLine.Downloading -> stringResource(
+            R.string.settings_words_pronunciation_downloading,
+            formatBytes(state.read),
+            surah,
+        )
+        WordAudioLine.None -> null
     }
 }
