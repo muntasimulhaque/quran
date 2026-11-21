@@ -200,21 +200,26 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.4 (versionCode 216).** The build toolbox catches up. The compile
-platform is 37.1, the compose BOM is 2026.11.01, and it brings Compose
-1.13.0 and material3 1.5.0 stable together, so the hand pin the sheet
-library carried for two releases is gone and the BOM carries its physics.
-The whole JVM suite (91 classes, 521 tests), lint, and the debug build are
-green on this machine with the new platform and the new BOM, and the four
-instrumented classes 21.3 ran after a library move ran again on the phone
-after this one and were green (`SheetStillnessTest`, `SentenceTouchTest`,
-`AboutLanguageTest`, `SettingsRowOrderTest`). The 16 KB page rule was
-re-proved by measurement, because the move changes the version of a library
-that ships native code: the bundle carries the same two native libraries as
-21.3, eight ABI copies in all, every LOAD segment of every copy is aligned
-at 2^14, and `zipalign -c -P 16 4` reports verification successful. No
-visible surface changed, so the three store sets stand as captured for 21.2,
-and no content, no permission, and no direct dependency moved.
+**21.4 (versionCode 216).** The signed bundle comes from `build` run
+44896648695, green on `main` for the release commit `4ddd50b0`: the unit
+tests, `checkdb`, `search`, lint, and `assembleDebug` passed, and the signed
+bundle `quran-21.4-vc216.aab` has SHA-256
+`3bf078b8f185ea2b0c062e10f327d294eaff40b8864503bc75beca2f46fd574e`.
+`jarsigner` reads `jar verified`, and the upload certificate is the same key
+21.3 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine with the new platform and the new
+BOM, and the four instrumented classes 21.3 ran after a library move ran
+again on the phone after this one and were green (`SheetStillnessTest`,
+`SentenceTouchTest`, `AboutLanguageTest`, `SettingsRowOrderTest`). The
+16 KB page rule was re-proved by measurement, because the move changes the
+version of a library that ships native code: the bundle carries the same two
+native libraries as 21.3, eight ABI copies in all, every LOAD segment of
+every copy is aligned at 2^14, and `zipalign -c -P 16 4` reports
+verification successful. No visible surface changed, so the three store sets
+stand as captured for 21.2, and no content, no permission, and no direct
+dependency moved. The bundle is in `play-store/aab/` for the owner to
+submit, and the copy is deleted once Play has it.
 
 **What changed in 21.4.** The compile platform is 37.1, declared as
 `compileSdk = 37` with `compileSdkMinor = 1` in all ten modules;
