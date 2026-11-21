@@ -27,8 +27,10 @@ import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.chosenLanguageTag
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
 import io.github.muntasimulhaque.quran.ui.QuranApp
+import io.github.muntasimulhaque.quran.ui.applicationLocaleTags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -62,6 +64,29 @@ class MainActivity : ComponentActivity() {
      * created, from the synchronous mirror the language choice writes. A
      * change of language writes that mirror and recreates the Activity.
      */
+    /**
+     * The language this window speaks, decided in `attachBaseContext` before
+     * anything is created. It is handed to the reading so the packs the
+     * reader's language reads follow the same answer, including a change made
+     * in the phone's own per-app language screen (owner decision, 21.3).
+     */
+    private var resolvedLanguageTag: String = UiLanguage.English.tag
+
+    /**
+     * The reader's language belongs to every window of the app. A dialog, a
+     * sheet, or a popup takes the Activity's own resources rather than a
+     * composition's, so the locale is applied here, before anything is
+     * created, from the synchronous mirror the language choice writes. A
+     * change of language writes that mirror and recreates the Activity.
+     *
+     * There are two doors to that choice since Android 13 (owner decision,
+     * 21.3): the app's Settings row and the platform's per-app language row.
+     * The precedence between them is `chosenLanguageTag` in `:data`, and it is
+     * resolved here, once per window, because every other surface inherits it:
+     * the platform's own list first, because it is the door the reader touched
+     * last when they used the system screen, and the mirror the Settings row
+     * writes when the platform holds none.
+     */
     override fun attachBaseContext(newBase: Context) {
         // A fresh install has no tag yet, so the phone's own language seeds
         // the first frame; an unsupported phone takes English, the fallback,
@@ -69,7 +94,20 @@ class MainActivity : ComponentActivity() {
         // Hebrew phone came up as an English interface mirrored for the
         // phone's direction, and only the next launch was LTR (owner
         // decision, 19.7).
-        val tag = LanguagePreference(newBase).tag() ?: UiLanguage.ofSystem().tag
+        val mirror = LanguagePreference(newBase)
+        val phoneTag = runCatching {
+            newBase.resources.configuration.locales[0]?.language
+        }.getOrNull()
+        val tag = chosenLanguageTag(
+            applicationLocales = applicationLocaleTags(newBase),
+            storedTag = mirror.tag(),
+            phoneTag = phoneTag,
+        )
+        resolvedLanguageTag = tag
+        // The mirror follows the door that won, so the next launch reads the
+        // same answer even on a phone whose platform screen is where the
+        // choice was last made.
+        if (mirror.tag() != tag) mirror.set(tag)
         val locale = Locale.forLanguageTag(tag)
         // The platform controls that take a locale of their own (the daily
         // reminder's Material clock is the one that showed Latin digits in a
@@ -179,6 +217,7 @@ class MainActivity : ComponentActivity() {
                 alarmScreenMissing = { alarmScreenMissing },
                 onOpenNotificationSettings = ::openNotificationSettings,
                 onAskExactAlarm = { askExactAlarmIfNeeded() },
+                languageTag = resolvedLanguageTag,
             )
         }
     }

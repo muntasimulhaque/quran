@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 21.0 (versionCode 212)
+Version: 21.3 (versionCode 215)
 
 ## Listing
 
@@ -221,6 +221,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (21.3, 343 characters)
+21.3 puts the language in the phone's own settings too: on Android 13 and later, choose English or Bangla there and the app follows, with the app's own language row keeping the same one choice. The sheet library moves to its stable release. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (19.9, 485 characters)
 19.9 is lighter on the battery. The screen turns off five minutes after you stop touching the page, and a sheet left open no longer keeps it lit forever. While the page is hidden, the reciter's wash and the reader's place wait, and the place is saved every thirty seconds instead of ten. Tafsir search builds when you open Search, and the next surah is prepared near this one's end. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.

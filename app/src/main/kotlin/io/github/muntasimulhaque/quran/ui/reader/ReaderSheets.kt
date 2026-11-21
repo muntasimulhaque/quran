@@ -12,6 +12,7 @@ import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.handLanguageToSystem
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.search.SearchArrival
@@ -180,9 +181,15 @@ internal fun ReaderSheets(
                         // the page for nothing.
                         if (language.tag == settings.uiLanguage) return@let
                         viewModel.chooseLanguage(language)
-                        // The locale belongs to the Activity's own resources;
-                        // the recreation brings every window up speaking it.
-                        (context as? android.app.Activity)?.recreate()
+                        // The platform's own per-app language follows the
+                        // app's row, so the system's language screen reads
+                        // the same answer (owner decision, 21.3). From
+                        // Android 13 the platform recreates this window
+                        // itself, so the app only recreates where it has no
+                        // per-app list to hand the choice to.
+                        if (!handLanguageToSystem(context, language)) {
+                            (context as? android.app.Activity)?.recreate()
+                        }
                     }
                 },
                 onTheme = { viewModel.setTheme(it) },

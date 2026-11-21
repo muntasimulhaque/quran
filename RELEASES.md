@@ -6,6 +6,44 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.3
+
+The language gets the phone's own door, and the sheet library settles.
+
+Android 13 and later put a per-app language row in the system's settings for
+any app that declares its locales. The app declares English and Bangla now, in
+`app/src/main/res/xml/locales_config.xml`, so a reader who goes looking for the
+language where Android keeps every app's language finds this one. It is the
+same one choice as the app's own Settings row, and `chosenLanguageTag` in
+`:data` is the rule that keeps them one: the platform's list first, because it
+is the door the reader touched last when they used that screen; the mirror the
+app's row writes when the platform holds none; the phone's language for a fresh
+install; and a tag the app carries no strings for is skipped rather than
+obeyed. The write goes both ways: the app's row hands its answer to
+`LocaleManager` on Android 13 and later, and a choice made in the system's row
+reaches the translation, the tafsir, and the word meanings through the same
+path the app's row has always used. Eight cases in `LanguageDoorTest` hold the
+rule.
+
+The material3 pin names 1.5.0 stable now. The predictive back work the plan
+expected turned out to be unnecessary: Material3 1.5's `BottomSheet` registers
+its own `PredictiveBackHandler` and binds the gesture's progress to the sheet's
+translation, so a back swipe peels a sheet away under the finger and a
+cancelled swipe puts it back. The app's own back handlers are only the ones
+that move between pages inside a sheet, where nothing leaves the glass, and
+`AppSheet` now says so. The BOM stays at 2026.09.00: the newest BOM carries
+Compose 1.13.0, which requires compiling against android-37.1, and the app
+compiles against android-37.0.
+
+The 16 KB page rule was measured rather than assumed. Two native libraries
+ship, `libandroidx.graphics.path.so` and `libdatastore_shared_counter.so`, and
+all eight ABI copies carry a 2^14 LOAD alignment; `zipalign -c -P 16 4` reports
+verification successful.
+
+No content changed and no permission changed. No visible surface on the
+reading, the card, the search sheet, or the settings page moved, so the three
+store sets stand as captured for 21.2.
+
 ## 21.2
 
 The day page's browns give way to old gold and warm gray.

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The languages the app carries, for the system's own per-app language screen.
+
+  Declared so a reader who goes looking for the language where Android puts
+  every app's language finds this one too, and the two doors stay one choice:
+  the system's row and the app's settings row write the same two tags, and
+  `chosenLanguageTag` in :data decides which one the window speaks when both
+  have an answer (owner decision, 21.3). The strings themselves live in
+  `values/` for English and `values-bn/` for Bangla.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="bn" />
+</locale-config>

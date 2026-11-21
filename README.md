@@ -128,7 +128,9 @@ language silently: no language screen stands before the reading. English and
 Bangla ship together, interface and content alike, including Tafsir Ibn Kathir
 and the word meanings, with the surah names written in Bengali script. A reader
 who wants the other language chooses it in Settings, where it also sets the
-translation, the tafsir, and the word meanings. Arabic is data, not a locale, so
+translation, the tafsir, and the word meanings. On Android 13 and later the
+same choice stands in the phone's own per-app language settings, and either
+row sets the other. Arabic is data, not a locale, so
 right-to-left stays on.
 
 ## The Book is not ours to change
@@ -198,23 +200,43 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.2 (versionCode 214).** The signed bundle comes from `build` run
-44883211661, green on `main` for the release commit `e5352b00`: the unit
-tests, lint, and `assembleDebug` passed, and the signed bundle
-`quran-21.2-vc214.aab` has SHA-256
-`f33ff8bbfd2767a248a7b81e4f66373b9b14df7747646960dc98cd3cd2700e14`.
-`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The same suite is green on this machine, and the content gate reproduced the
-committed database's SHA-256. A visible surface changed, so the three store
-sets were captured again on the phone, the 7 inch, and the 10 inch, each from
-a clean install; the night frame is pixel-identical to 21.1's on the phone and
-the 10 inch, and the 7 inch differs only in the status bar's signal triangle.
-The boundary gate caught the first ink the audit proposed and pinned the one
-that shipped, which is recorded in `Color.kt`. No content changed, so every
-pack and the content database are as they were and no catalog hash or tag
-moved, and no permission or app dependency moved. The 21.2 bundle was submitted for Play review, and
-the hand-off copy in `play-store/aab/` was deleted once Play had it.
+**21.3 (versionCode 215).** The gates are green on this machine: the
+whole JVM suite, lint, `assembleDebug`, and the two content gates, with
+`checkdb` reproducing the committed database's SHA-256. The sheet library
+moved to material3 1.5.0 stable against the same BOM, and the dependency
+record was extended with the one artifact that changed. The bundle's native
+libraries were measured: two ship, all eight ABI copies carry a 2^14 LOAD
+alignment, and the APK passes `zipalign -P 16`. No visible surface changed,
+so the three store sets stand as captured for 21.2, and no content, permission,
+or other dependency moved. The signed bundle and the hand-off record follow
+the run.
+
+**What changed in 21.3.** The language has a second door, and it is the
+phone's own: Android 13 and later draw a per-app language row in the system
+settings for any app that declares one, and the app now declares English and
+Bangla there. The two doors are one choice, not two. The system's list is
+read first, because it is the door the reader touched last when they used
+that screen; the mirror the app's own Settings row writes is the answer when
+the platform holds none; the phone's language seeds a fresh install; and a
+tag the app carries no strings for is skipped rather than obeyed. A choice
+made in either place reaches the translation, the tafsir, and the word
+meanings, exactly as the app's row always has. The rule is arithmetic in
+`:data` and eight cases in `LanguageDoorTest` hold it.
+
+The sheet library moves from its beta to material3 1.5.0 stable. The
+predictive back gesture needed no app code after all: Material3 1.5 binds the
+gesture's progress to the sheet's own translation, so a back swipe peels a
+sheet away under the finger and a cancelled swipe puts it back, and the app's
+own back handlers are only the ones that move between pages of a sheet, where
+nothing leaves the glass. The one line that pins the library now names the
+stable release; the BOM stays where it is, because the newest BOM carries
+Compose 1.13.0 and that requires compiling against android-37.1, a platform
+this app does not build against yet.
+
+The bundle's native libraries were measured rather than assumed: two ship,
+both from AndroidX, all eight ABI copies carry a 2^14 LOAD alignment, and the
+APK passes `zipalign -P 16`, so the 16 KB page rule is met with evidence.
+Text, translations, tafsirs, recitations, and content are unchanged.
 
 **What changed in 21.2.** An audit of every color in both themes found the
 day page's browns: the ornament gold was a bronze at L* 40, the ghunnah rule
@@ -227,17 +249,6 @@ chosen and found grounds, and the other six tajweed families are untouched.
 Both themes still hold every contrast, palette, color-vision, and switch
 floor, and the night frame proves it: on the phone and the 10 inch it is
 pixel-identical to 21.1's.
-
-**What changed in 21.1.** The matched words in the search sheet wore sharp
-rectangles while the reading rounded the same match the moment a result
-landed on the page. The app now keeps one wash recipe: the reading's word
-mark, named in `ui-kit`, with a pad wider each side, half a pad trimmed
-above and below, and a corner at a share of the ink box's height. The search
-sheet's Arabic lines and its translation, note, word-meaning, and tafsir
-snippets all draw it, the snippets keep the Medium weight their matched words
-carry, and the reading's own marks delegate to the same recipe, lifted
-verbatim, so they do not move. A range past an ellipsized snippet's cut
-washes nothing. The arithmetic is pinned in the JVM suite.
 
 ## Corrections and contributions
 

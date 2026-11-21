@@ -47,6 +47,18 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * enters a page with no title; the caller hands the name it already has in
  * the reader's language, and a sheet with a visible title hands the same one
  * (owner decision, 13.8).
+ *
+ * **Back peels the sheet, and the library does it.** Material3 1.5's
+ * `BottomSheet` registers its own `PredictiveBackHandler` and binds the
+ * gesture's progress to the sheet's translation, so on Android 14 and later a
+ * back swipe carries the sheet away under the finger and a cancelled swipe
+ * puts it back, and on the releases before that it dismisses as it always did
+ * (owner decision, 21.3: the one gesture this app must not reimplement). Two
+ * rules follow, and both are the reason this paragraph is here. A sheet must
+ * never be given an app-level `BackHandler` for its dismissal, which would
+ * consume the gesture ahead of the library and bring back the jump; and an
+ * app-level `BackHandler` inside a sheet is only for moving between pages of
+ * that sheet, where nothing leaves the glass.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

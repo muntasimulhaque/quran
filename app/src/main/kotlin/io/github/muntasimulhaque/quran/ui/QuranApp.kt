@@ -78,6 +78,14 @@ fun QuranApp(
     onOpenNotificationSettings: () -> Unit = {},
     /** Opens the phone's own screen for the exact alarm. */
     onAskExactAlarm: () -> Unit = {},
+    /**
+     * The language this window speaks, resolved once in the Activity's own
+     * `attachBaseContext` from the two doors that can set it (owner decision,
+     * 21.3). It is here so a choice made in the phone's per-app language
+     * screen reaches the content the language reads, exactly as the app's own
+     * Settings row already does.
+     */
+    languageTag: String = UiLanguage.English.tag,
 ) {
     // A tap on the reminder opens that ayah in the reading, which is
     // what a reminder is for: the reader meets the words, not the app. The
@@ -102,6 +110,20 @@ fun QuranApp(
         viewModel.jumpToReference(surah, ayah)
     }
     val settings = viewModel.settings
+    // The reader's language is one choice with two doors since Android 13
+    // (owner decision, 21.3). The app's Settings row already applies its own
+    // answer; this is the other door: when the platform's per-app language
+    // screen is where the choice was last made, the window has been recreated
+    // speaking it, but the stored content language is still the old one, so
+    // the pack set has to follow through the same path. A blank language is
+    // the first paint before the bootstrap writes one, and is left alone.
+    val language = UiLanguage.of(languageTag) ?: UiLanguage.English
+    LaunchedEffect(language, viewModel.ready, settings.uiLanguage) {
+        if (!viewModel.ready) return@LaunchedEffect
+        if (settings.uiLanguage.isNullOrBlank()) return@LaunchedEffect
+        if (settings.uiLanguage == language.tag) return@LaunchedEffect
+        viewModel.chooseLanguage(language)
+    }
     val theme = settings.theme.resolved(systemDark = isSystemInDarkTheme())
     QuranTheme(theme, language = UiLanguage.of(settings.uiLanguage) ?: UiLanguage.English) {
         // The status and navigation bars belong to the theme the reader
