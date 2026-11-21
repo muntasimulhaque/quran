@@ -200,16 +200,22 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.3 (versionCode 215).** The gates are green on this machine: the
-whole JVM suite, lint, `assembleDebug`, and the two content gates, with
-`checkdb` reproducing the committed database's SHA-256. The sheet library
-moved to material3 1.5.0 stable against the same BOM, and the dependency
-record was extended with the one artifact that changed. The bundle's native
-libraries were measured: two ship, all eight ABI copies carry a 2^14 LOAD
-alignment, and the APK passes `zipalign -P 16`. No visible surface changed,
-so the three store sets stand as captured for 21.2, and no content, permission,
-or other dependency moved. The signed bundle and the hand-off record follow
-the run.
+**21.3 (versionCode 215).** The signed bundle comes from `build` run
+44890885636, green on `main` for the release commit `ff74392c`: the unit
+tests, `checkdb`, `search`, lint, and `assembleDebug` passed, and the signed
+bundle `quran-21.3-vc215.aab` has SHA-256
+`6dca9002ade32cfc45f95dde477e2d584ab0a5952780580c263c95c42b9a4fde`.
+`jarsigner` reads `jar verified`, and the upload certificate's SHA-256 is
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The same suite is green on this machine, and the content gate reproduced the
+committed database's SHA-256. Four instrumented classes ran on the phone
+after the sheet library moved to stable, and all were green
+(`SheetStillnessTest`, `SentenceTouchTest`, `AboutLanguageTest`,
+`SettingsRowOrderTest`). No visible surface changed, so the three store sets
+stand as captured for 21.2, and no content, permission, or other dependency
+moved. The bundle carries eight AndroidX native libraries, all of them
+2^14 LOAD aligned, and the APK passes `zipalign -P 16`. The 21.3 bundle is in
+`play-store/aab/` for Play, and the hand-off copy is deleted once Play has it.
 
 **What changed in 21.3.** The language has a second door, and it is the
 phone's own: Android 13 and later draw a per-app language row in the system
