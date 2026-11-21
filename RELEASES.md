@@ -32,8 +32,9 @@ are green on this machine with the new platform and the new BOM, and four
 instrumented classes ran on the phone after the move
 (`SheetStillnessTest`, `SentenceTouchTest`, `AboutLanguageTest`,
 `SettingsRowOrderTest`), all green. No visible surface changed, so the
-three store sets stand as captured for 21.2, and no content, no
-permission, and no direct dependency moved.
+three store sets stand as captured for 21.2, and no content and no
+permission moved; no dependency was added or removed, and the versions the
+BOM carries moved with it.
 
 ## 21.3
 

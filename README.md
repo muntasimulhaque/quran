@@ -217,8 +217,9 @@ version of a library that ships native code: the bundle carries the same two
 native libraries as 21.3, eight ABI copies in all, every LOAD segment of
 every copy is aligned at 2^14, and `zipalign -c -P 16 4` reports
 verification successful. No visible surface changed, so the three store sets
-stand as captured for 21.2, and no content, no permission, and no direct
-dependency moved. The bundle is in `play-store/aab/` for the owner to
+stand as captured for 21.2, and no content and no permission moved; no
+dependency was added or removed, and the versions the BOM carries moved
+with it. The bundle is in `play-store/aab/` for the owner to
 submit, and the copy is deleted once Play has it.
 
 **What changed in 21.4.** The compile platform is 37.1, declared as
