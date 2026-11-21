@@ -216,7 +216,8 @@ photographs a matched word on both of the sheet's paths and travels with the
 instrumented tests; its two frames were read from the run and are not store
 art. No content changed, so every pack and the content database are as they
 were and no catalog hash or tag moved, and no permission or app dependency
-moved. The hand-off copy waits in `play-store/aab/` for Play.
+moved. The 21.1 bundle was submitted for Play review, and
+the hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 21.1.** The matched words in the search sheet wore sharp
 rectangles while the reading rounded the same match the moment a result
