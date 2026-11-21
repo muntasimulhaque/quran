@@ -214,8 +214,8 @@ after the sheet library moved to stable, and all were green
 `SettingsRowOrderTest`). No visible surface changed, so the three store sets
 stand as captured for 21.2, and no content, permission, or other dependency
 moved. The bundle carries eight AndroidX native libraries, all of them
-2^14 LOAD aligned, and the APK passes `zipalign -P 16`. The 21.3 bundle is in
-`play-store/aab/` for Play, and the hand-off copy is deleted once Play has it.
+2^14 LOAD aligned, and the APK passes `zipalign -P 16`. The 21.3 bundle was submitted for Play review, and
+the hand-off copy in `play-store/aab/` was deleted once Play had it.
 
 **What changed in 21.3.** The language has a second door, and it is the
 phone's own: Android 13 and later draw a per-app language row in the system
