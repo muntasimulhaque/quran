@@ -216,8 +216,8 @@ run 45047351462, green on `main` for the commit `bd6c8fba`: the unit tests,
 `versionName 22.0` and `versionCode 222`, and the upload certificate is the
 same key 21.4 through 21.9 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.0 bundle stands in `play-store/aab/` for the owner's submission, and
-the hand-off copy is deleted once Play has it.
+The 22.0 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
 
 **What changed in 22.0.** The one action color is emerald now (owner
 decision, 22.0). Lapis had carried every action since the first release;
