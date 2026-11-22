@@ -141,18 +141,12 @@ class ReadingBenchmark {
     }
 
     /**
-     * The one screen before the reading, answered once. It is inside the
-     * setup, never the measurement: a first run that stopped there would
-     * time a language card, which is not the app the reader opens every day.
+     * The reading is the only screen a first run opens on: the language
+     * card this once answered is gone, so the setup only waits for the
+     * page it measures.
      */
     private fun MacrobenchmarkScope.onboard() {
         startActivityAndWait()
-        if (device.wait(Until.hasObject(By.desc("Reading")), 3_000)) {
-            pressHome()
-            return
-        }
-        device.wait(Until.findObject(By.text("English")), 5_000)?.click()
-        device.wait(Until.findObject(By.text("Not now")), 10_000)?.click()
         device.wait(Until.hasObject(By.desc("Reading")), 10_000)
         pressHome()
     }

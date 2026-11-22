@@ -147,7 +147,7 @@ internal fun ReadingRows(
     onNextSurah: (Int) -> Unit,
     /** Opens an internal reference the surah's introduction links to. */
     onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
-    /** True while the one-time daily reminder offer is still unanswered. */
+    /** True while the daily reminder offer stands at this surah's end. */
     reminderOffer: Boolean = false,
     onReminderOn: () -> Unit = {},
     onReminderNotNow: () -> Unit = {},

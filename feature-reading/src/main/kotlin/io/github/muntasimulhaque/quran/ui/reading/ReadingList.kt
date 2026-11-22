@@ -73,7 +73,7 @@ data class ReadingListState(
     val hearingAyah: Int? = null,
     /** The sounding word's position in its ayah, when the sound is a sample. */
     val hearingWord: Int? = null,
-    /** True while the one-time daily reminder offer is still unanswered. */
+    /** True while the daily reminder offer stands at this surah's end. */
     val reminderOffer: Boolean = false,
     /** True when the reader opened this surah at its top; answered once. */
     val startAtOpening: Boolean,

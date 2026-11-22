@@ -159,13 +159,22 @@ data class AppSettings(
      */
     val dailyAyah: Boolean = false,
     /**
-     * Whether the one-time reminder offer was answered. False on a fresh
-     * install, so the offer stands at the end of the first surah the reader
-     * finishes; the offer's answer writes it true. An existing install
-     * keeps the true it has always had, so an update never asks again
-     * (owner decision, 15.5).
+     * Whether the one-time reminder offer was answered for good. False on a
+     * fresh install, so the offer stands at the end of the first surah the
+     * reader finishes; the final answer writes it true: Turn on, the second
+     * Not now, or the reminder set in Settings. An existing install keeps
+     * the true it has always had, so an update never asks again
+     * (owner decision, 15.5; the second Not now, 21.9).
      */
     val reminderAnswered: Boolean = true,
+    /**
+     * The one boundary the reader has answered with Not now: the surah whose
+     * end the offer was standing on when they tapped it. Zero means no Not
+     * now yet, so the offer stands at every boundary; the first Not now
+     * moves the ask to the end of the next surah the reader finishes, so
+     * only one surah is ever kept here (owner decision, 21.9).
+     */
+    val reminderDismissedSurah: Int = 0,
     /**
      * The minute of the day the reminder arrives, in the reader's own local
      * time: minutes from midnight, so one whole number carries the hour and
@@ -174,14 +183,17 @@ data class AppSettings(
     val dailyAyahMinute: Int = DEFAULT_DAILY_MINUTE,
 ) {
     /**
-     * Whether the one-time reminder offer stands. It stands before the
-     * reader has answered the offer and while the reminder is not already
-     * on: setting the reminder in Settings is an answer, so the card must
-     * not return after it, and a reader who already asked for the reminder
-     * is not offered it again.
+     * Whether the one-time reminder offer stands at this surah's end. It
+     * stands before the final answer and while the reminder is not already
+     * on: setting the reminder in Settings is the final answer, so the card
+     * must not return after it, and a reader who already asked for the
+     * reminder is not offered it again. It never stands at the one boundary
+     * the reader answered with Not now: the first moves the ask to the end
+     * of the next surah the reader finishes, wherever that is, and the
+     * second is the final answer (owner decision, 21.9).
      */
-    val reminderOffer: Boolean
-        get() = !reminderAnswered && !dailyAyah
+    fun reminderOfferAt(surah: Int): Boolean =
+        !reminderAnswered && !dailyAyah && surah != reminderDismissedSurah
 
     /**
      * The language the reader chose, or English before the choice.
@@ -349,6 +361,7 @@ class SettingsStore(private val context: Context) {
             tajweed = preferences[TAJWEED] ?: false,
             dailyAyah = preferences[DAILY_AYAH] ?: false,
             reminderAnswered = preferences[REMINDER_ANSWERED] ?: true,
+            reminderDismissedSurah = preferences[REMINDER_DISMISSED_SURAH] ?: 0,
             dailyAyahMinute = storedDailyMinute(preferences),
         )
     }
@@ -485,6 +498,15 @@ class SettingsStore(private val context: Context) {
     /** Writes the one-time reminder offer as answered, once. */
     suspend fun setReminderAnswered(answered: Boolean) {
         context.settingsStore.edit { it[REMINDER_ANSWERED] = answered }
+    }
+
+    /**
+     * Writes the one boundary the reader answered with Not now, so the ask
+     * moves off it and stands at the end of the next surah the reader
+     * finishes. Zero clears it.
+     */
+    suspend fun setReminderDismissedSurah(surah: Int) {
+        context.settingsStore.edit { it[REMINDER_DISMISSED_SURAH] = surah.coerceIn(0, 114) }
     }
 
     /** The moment the daily reminder arrives: minutes from midnight. */
@@ -737,6 +759,8 @@ class SettingsStore(private val context: Context) {
         val DAILY_AYAH = booleanPreferencesKey("daily_ayah")
         /** Whether the one-time reminder offer has been answered. */
         val REMINDER_ANSWERED = booleanPreferencesKey("reminder_answered")
+        /** The surah whose end the reader answered with Not now, 0 for none. */
+        val REMINDER_DISMISSED_SURAH = intPreferencesKey("reminder_dismissed_surah")
 
         /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")

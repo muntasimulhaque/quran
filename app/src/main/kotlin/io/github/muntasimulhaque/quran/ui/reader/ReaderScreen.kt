@@ -792,11 +792,13 @@ fun ReaderScreen(
                         playedWord = playedWord,
                         // The reminder is offered after the reader has read the
                         // surah, never before the text, and never once it is
-                        // on: setting it in Settings is an answer too. Turning
-                        // it on is the act that asks the phone for the
-                        // notification and the exact time; Not now writes the
-                        // no and the card never returns (owner decision, 15.5).
-                        reminderOffer = settings.reminderOffer,
+                        // on: setting it in Settings is the final answer too.
+                        // Turning it on is the act that asks the phone for the
+                        // notification and the exact time. Not now moves the
+                        // ask off this surah's end and onto the next one the
+                        // reader finishes, and the second Not now is the no
+                        // that never returns (owner decisions, 15.5 and 21.9).
+                        reminderOffer = settings.reminderOfferAt(surah.number),
                         startAtOpening = viewModel.startAtSurahOpening == surah.number,
                         // The air above a surah's opening, under the bar. The
                         // page is drawn edge to edge; the status band covers the
@@ -919,7 +921,10 @@ fun ReaderScreen(
                         onReminderNotNow = {
                             // Not now is a dismissal, not a switch: it never
                             // turns off a reminder the reader set elsewhere.
-                            viewModel.markReminderAnswered()
+                            // The first moves the ask to the next surah the
+                            // reader finishes, and the second is final
+                            // (owner decision, 21.9).
+                            viewModel.answerReminderNotNow(surah.number)
                         },
                         onAddContent = {
                             openSheet(ReaderSheet.Settings, SettingsPage.Translations)

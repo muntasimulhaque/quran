@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.data
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -23,5 +24,6 @@ class SettingsDefaultsTest {
         assertFalse("the tajweed colors start off", settings.tajweed)
         assertFalse("the word aid starts off", settings.wordByWord)
         assertTrue("an existing install is not asked again", settings.reminderAnswered)
+        assertEquals("no Not now has been answered yet", 0, settings.reminderDismissedSurah)
     }
 }

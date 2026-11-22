@@ -38,7 +38,7 @@ import kotlin.math.abs
  * Not now must stand before Turn on, the one order every pair in the app
  * keeps (18.8).
  *
- * The offer stands once, at the end of the first surah a reader finishes, so
+ * The offer stands at the end of the first surah a reader finishes, so
  * the test writes the one state that stands it: the answer unwritten, the
  * reminder off, and the reader at Al-Fatiha's last ayah, one breath above the
  * tile. It hands the app back answered, because every instrumented class in a

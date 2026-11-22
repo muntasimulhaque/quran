@@ -796,7 +796,27 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /** The one-time reminder offer has been answered, either way. */
+    /**
+     * Not now, the reader's answer to the offer standing at one surah's
+     * end: the ask moves off that boundary and stands at the end of the
+     * next surah the reader finishes, wherever that is. The second Not
+     * now is the final answer, so the offer never returns after it
+     * (owner decision, 21.9).
+     */
+    fun answerReminderNotNow(surah: Int) {
+        if (settings.reminderAnswered) return
+        if (settings.reminderDismissedSurah != 0) {
+            markReminderAnswered()
+            return
+        }
+        settings = settings.copy(reminderDismissedSurah = surah)
+        viewModelScope.launch { settingsStore.setReminderDismissedSurah(surah) }
+    }
+
+    /**
+     * The one-time reminder offer's final answer: Turn on, the second Not
+     * now, or the reminder set in Settings.
+     */
     fun markReminderAnswered() {
         if (settings.reminderAnswered) return
         settings = settings.copy(reminderAnswered = true)

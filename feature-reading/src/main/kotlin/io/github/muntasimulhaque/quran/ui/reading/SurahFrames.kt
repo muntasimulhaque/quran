@@ -247,8 +247,9 @@ internal fun SurahOpening(
 /**
  * The one-time reminder offer, at the end of the first surah the reader
  * finishes. It is not a gate: the reading is already the gift, and the ask
- * comes after it. Turn on asks the phone for what it needs; Not now writes
- * the reader's no and never asks again (owner decision, 15.5).
+ * comes after it. Turn on asks the phone for what it needs; Not now moves
+ * the ask to the end of the next surah the reader finishes, and the second
+ * Not now is the no that never asks again (owner decisions, 15.5 and 21.9).
  *
  * The tile centers its name, its sentence, and its two answers (owner
  * decision, 21.8). It stands under the surah's own centered completion
