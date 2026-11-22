@@ -215,6 +215,8 @@ SHA-256
 `versionName 21.9` and `versionCode 221`, and the upload certificate is the
 same key 21.4 through 21.8 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 21.9 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
 
 **What changed in 21.9.** Not now means its word (owner decision, 21.9). The
 daily ayah offer, at the end of a surah, carried a quiet Not now that wrote a
