@@ -208,8 +208,15 @@ four accessibility classes ran on the phone because the diff touches
 visible surface changed, so the three store sets stand as captured for 21.2,
 and no content, no string, and no permission moved. The reading scrolls back up
 the way it scrolls down, and the profile the app ships is the measured one now.
-The signed bundle comes from the `build` run on `main` after this commit, and
-its name and SHA-256 follow that run.
+The signed bundle comes from `build` run 45003696136, green on `main` for the
+commit `de4bdd45`: the unit tests, `checkdb`, `search`, lint, and
+`assembleDebug` passed, and the signed bundle `quran-21.6-vc218.aab` has
+SHA-256
+`c38df0c3dec672cf839e1f1918920bebba3dc4d5c863ce464146d99095c18b5c`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 21.6`, and the upload certificate is the same key 21.4 and 21.5
+shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
 
 **What changed in 21.6.** The reading keeps a whole screen of rows on either
 side of the glass now (owner decision, 21.6). A lazy list builds the row ahead
