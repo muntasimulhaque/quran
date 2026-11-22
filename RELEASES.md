@@ -6,6 +6,21 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 22.0
+
+The app's one action color turns green. Lapis had carried every action since
+the first release, and 22.0 turns the accent to emerald, the family of the
+green dome, by the owner's word after a measured study of three greens:
+emerald, malachite, and verdigris. The day tone is #004B1E, 9.9 to 1 on the
+page; the night tone is #A4D2A9, 10.2 to 1 on the night page. The chosen and
+found grounds keep the lightness they carried and turn with the accent, the
+word mark's washes keep their pinned alphas, and every floor the contrast
+tests enforce held unchanged: the seven rule colors on every ground, the
+quiet voice, the floating papers, and the switch. The idgham, the verse's own
+green family, sits 0.063 OKLab from the new accent, farther than any family
+sat from the lapis. The paper family, the ink, the ornament gold, the
+tajweed palette, the icon, and every content byte are unchanged.
+
 ## 21.9
 
 Not now on the daily ayah offer means its word. The first tap moves the ask

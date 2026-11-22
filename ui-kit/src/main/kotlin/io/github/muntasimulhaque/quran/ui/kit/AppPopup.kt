@@ -87,9 +87,9 @@ val PopupGutter = 10.dp
  * A menu is never raised over the plain page: the ayah whose menu is open
  * paints its own block in [PagePalette.selected], the accent's own chosen
  * tone, so the menu's edge is read against that block. The day's block is
- * L* 92.9 and the floating paper is the sheet's white at 100.0, dE76 8.9
+ * L* 92.9 and the floating paper is the sheet's white at 100.0, dE76 8.8
  * apart, so the menu is a card laid on the wash with no border. The night's
- * block is L* 15.6 and the floating paper is #322E2A at 19.2, dE76 11.9 apart;
+ * block is L* 15.4 and the floating paper is #322E2A at 19.2, dE76 8.6 apart;
  * the night's shadow is invisible, so that fill step is the whole edge. Both
  * grounds use the highest paper, never a shade of the page (owner
  * decision, 19.1). The ground

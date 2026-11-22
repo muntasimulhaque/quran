@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 21.9 (versionCode 221)
+Version: 22.0 (versionCode 222)
 
 ## Listing
 
@@ -176,17 +176,16 @@ tour starts.
 The eight are a reader's path through the app rather than the app's own map, and
 the first one is the app's face: the surah's name, its juz, and the three doors,
 over the verse with its translation and its tajweed colors. The chosen thing on
-the page is the paper's own warm tone and not a tint of the accent, so the one
-block that says "this verse" says it in the page's voice. The seven tajweed
-families hold one weight, the paper ink is the reading's own 12:1 tone, and the
-night page's colors sit below the ink instead of glowing above it. A verse's
-number is its head, in the app's blue, with the app's one chevron beside it, and
-the printed medallion closes a verse only on a page that draws the Quran alone:
-so a verse carries one number, and that number is the door. The last frame is
-the one-row offer, 64 dp, the reciter's name and its size over the surah, the
-whole block a door to the voice list, its capsule on the floating paper the pill
-already wears. The share card's Share image is the solid accent, the one answer
-that surface exists to ask for.
+the page wears the accent's own family, so the one block that says "this verse"
+says it in the accent's voice. The seven tajweed families hold one weight, the
+paper ink is the reading's own 12:1 tone, and the night page's colors sit below
+the ink instead of glowing above it. A verse's number is its head, in the app's
+green, with the app's one chevron beside it, and the printed medallion closes a
+verse only on a page that draws the Quran alone: so a verse carries one number,
+and that number is the door. The last frame is the one-row offer, 64 dp, the
+reciter's name and its size over the surah, the whole block a door to the voice
+list, its capsule on the floating paper the pill already wears. The share card's
+Share image is the solid accent, the one answer that surface exists to ask for.
 
 The fifth frame is the Tajweed page and not the settings hub, which was the
 first choice. The hub's last row carries the version, and a store frame that
@@ -221,6 +220,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (22.0, 430 characters)
+22.0 turns the app's one action color green. Every control that answers a tap, the chosen verse's ground, the found word's ground, and the word the reciter is saying now wear a deep emerald, measured to the same contrast floors as before. The page, the ink, the gold ornament, and the tajweed colors are unchanged. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (21.5, 495 characters)
 21.5 keeps the reading as it was and tightens the rules beneath it. Pack updates stay quiet and Wi-Fi only, touching only packs you already have; a newer pack arrives only with an app release, and there is no button. The pack choices, the word sheet's grammar order, the clock's digits, and the ayah medallion now sit under the test gates, and the build moves to the newest Android toolchain. Text, translations, tafsirs, recitations, and content are unchanged. No ads, no trackers, no accounts.

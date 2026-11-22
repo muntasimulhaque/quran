@@ -28,8 +28,8 @@ import androidx.compose.ui.graphics.Color
  *
  * The pair a switch is on in is the scheme's own accent and its own ink on
  * that accent, declared here so that both grounds answer for the whole
- * control in one place. It is the pair that was already there, and it already
- * measured 7.07:1 on Night and up on every ground.
+ * control in one place. It is the pair that was already there, and it measures
+ * 8.4:1 on Night and up on every ground.
  *
  * One switch in the app can be out of reach: Show translation is written as
  * the reader's answer while the pack that answers it is still arriving, so
@@ -70,20 +70,20 @@ private fun Color.dimmedToward(ground: Color, keep: Float): Color = Color(
 internal val LightSwitch = SwitchPalette(
     offTrack = PaperControl,
     offKnob = PaperMuted,
-    onTrack = Lapis,
+    onTrack = Emerald,
     onKnob = PaperOnPrimary,
     offTrackOutOfReach = PaperControl.dimmedToward(PaperSurface, 0.8f),
-    onTrackOutOfReach = Lapis.dimmedToward(PaperSurface, 0.5f),
+    onTrackOutOfReach = Emerald.dimmedToward(PaperSurface, 0.5f),
     ground = PaperSurface,
 )
 
 internal val DarkSwitch = SwitchPalette(
     offTrack = NightControl,
     offKnob = NightMuted,
-    onTrack = LapisLight,
+    onTrack = EmeraldLight,
     onKnob = NightOnPrimary,
     offTrackOutOfReach = NightControl.dimmedToward(NightSurface, 0.8f),
-    onTrackOutOfReach = LapisLight.dimmedToward(NightSurface, 0.5f),
+    onTrackOutOfReach = EmeraldLight.dimmedToward(NightSurface, 0.5f),
     ground = NightSurface,
 )
 

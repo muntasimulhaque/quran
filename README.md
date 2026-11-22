@@ -200,23 +200,25 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.9 (versionCode 221).** The whole JVM suite, `checkdb`, `search`, lint,
+**22.0 (versionCode 222).** The whole JVM suite, `checkdb`, `search`, lint,
 and `assembleDebug` were green on this machine before the push. The diff
-touches `feature-reading/` and the reader's own screen, so the four
-accessibility classes were owed; they ran with the offer's own two classes
-on the phone, 12 tests and no failures. No store frame holds the one-time
-offer, and no string moved, so the three committed sets stand and no Bangla
-leg was owed. The signed bundle comes from `build` run 45037559367, green on
-`main` for the commit `e360b133`: the unit tests, `checkdb`, `search`, lint,
-and `assembleDebug` passed, and the signed bundle `quran-21.9-vc221.aab` has
-SHA-256
-`ef0b84e618e923c4be84c10e2c1d5840fb5e8f2afa8e6f15e3a235f8e89d43a1`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 21.9` and `versionCode 221`, and the upload certificate is the
-same key 21.4 through 21.8 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 21.9 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+touches `ui-kit/`, so the four accessibility classes were owed; they ran on
+the phone, 10 tests and no failures. A visible surface changed, so the three
+store sets were captured again, each from a clean install: the phone at its
+own 1080 x 1920, the 7 inch at 1200 x 1920 and 320 dpi, and the 10 inch at
+its own 2560 x 1800. No Bangla leg was owed: no interface string moved, and
+the Bangla page wears the same colors.
+
+**What changed in 22.0.** The one action color is emerald now (owner
+decision, 22.0). Lapis had carried every action since the first release;
+the owner turned the accent to the Book's own green, and three candidates
+were measured before the word: emerald, malachite, and verdigris. The day
+tone #004B1E reads 9.9 to 1 on the page and the night tone #A4D2A9 reads
+10.2 to 1, the chosen and found grounds keep the lightness they already
+carried, the word mark's washes keep their pinned alphas, and the seven rule
+colors hold every floor beside the new family, the idgham 0.063 OKLab away.
+The paper, the ink, the gold, the tajweed palette, the icon, and every
+content byte are unchanged.
 
 **What changed in 21.9.** Not now means its word (owner decision, 21.9). The
 daily ayah offer, at the end of a surah, carried a quiet Not now that wrote a
@@ -231,20 +233,6 @@ surah number, absent on every existing install, so no update is asked again
 and no migration runs. The tile is untouched: same shape, same words, no
 string, color, or frame moved. The Quran text, both translations, both
 tafsirs, the recitations, and the content database are unchanged.
-
-**What changed in 21.8.** The reminder offer centers itself (owner decision,
-21.8). The one-time offer at the end of the first surah a reader finishes
-drew its name, its sentence, and its two answers from the leading edge, under
-the surah's own centered completion line. Every line in the tile now agrees
-on one axis: the name and the sentence center on the card, the way the empty
-note's short block does (15.0), and the pair stands centered on the same
-action gap the share sheet's pair keeps. Not now still leads and Turn on
-still trails, the one order every pair in the app keeps (18.8). The tafsir
-offer inside the ayah card keeps its sheet's leading edge, because it is a
-section of a page that starts there, not a card standing on the glass. The
-new device test measures the pair's span middle against the tile's middle on
-the glass. The Quran text, both translations, both tafsirs, the recitations,
-and the content database are unchanged.
 
 **What changed in 21.7.** The share card meets the feed (owner decision,
 21.7). A long ayah's card was aimed at a 1:2 portrait, a chat's picture,

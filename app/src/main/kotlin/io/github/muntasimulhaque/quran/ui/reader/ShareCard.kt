@@ -38,7 +38,7 @@ import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.PaperTajweed
 import io.github.muntasimulhaque.quran.ui.theme.Gold
-import io.github.muntasimulhaque.quran.ui.theme.Lapis
+import io.github.muntasimulhaque.quran.ui.theme.Emerald
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperHairline
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
@@ -180,7 +180,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
     // a foot's size one ink reads where the thin ornament gold did not).
     val mark = painterResource(R.drawable.ic_share_mark)
     val paper = lightColorScheme(
-        primary = Lapis,
+        primary = Emerald,
         background = PaperBackground,
         onBackground = PaperInk,
         surface = PaperSurface,

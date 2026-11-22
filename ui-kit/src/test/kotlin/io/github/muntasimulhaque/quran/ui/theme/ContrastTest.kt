@@ -11,7 +11,7 @@ import org.junit.Test
  * that carries words reads at 4.5:1 or better on every ground it is drawn
  * on, in each of the two themes. The pairs are the ones the schemes wire:
  * the reading ink, the muted voice, the gold of the page furniture, and the
- * lapis of an action. The muted voice is held against every ground a sheet
+ * emerald of an action. The muted voice is held against every ground a sheet
  * or a floating control stands on, not only against the sheet's own tone,
  * because the quiet words of a label travel with the surfaces they sit on.
  * A palette edit that sinks a pair fails here, on the machine, rather than
@@ -48,9 +48,9 @@ import org.junit.Test
  *   the polarity's and not the palette's.
  *
  * - **The word mark's rule colors on the night page.** The worst rule color
- *   on the reciter's mark measures -45.9, against -50.2 on the plain page:
+ *   on the reciter's mark measures -45.5, against -50.2 on the plain page:
  *   the mark is the same 17.1 decision drawn a step louder, and the reading
- *   ink on that mark still holds -76.7.
+ *   ink on that mark still holds -76.3.
  *
  * - **The night quiet voice on the found ground.** It measures -58.5, but no
  *   quiet word is ever drawn there: the wash is a span behind one word, and
@@ -75,9 +75,9 @@ class ContrastTest {
         assertSheetGrounds(LightScheme)
         assertFloatingGrounds(LightScheme, PaperSelected, day = true)
         assertReadable(Gold, PaperBackground)
-        assertReadable(Lapis, PaperBackground)
-        assertReadable(Lapis, PaperSurface)
-        assertReadable(PaperOnPrimary, Lapis)
+        assertReadable(Emerald, PaperBackground)
+        assertReadable(Emerald, PaperSurface)
+        assertReadable(PaperOnPrimary, Emerald)
         // The four container roles a Material component may ask for, so a
         // stock surface can never fall back to the baseline purple (owner
         // decision, 13.8).
@@ -128,7 +128,7 @@ class ContrastTest {
         // A chosen search source wears the ayah door's open state: the
         // accent's ink on the accent's own tint, where the full-strength fill
         // read as a pressed button times seven (owner decision, 15.0).
-        assertReadable(Lapis, blend(Lapis, PaperSurface, Wash.Control))
+        assertReadable(Emerald, blend(Emerald, PaperSurface, Wash.Control))
         // The two text tones outside the scheme, measured the way they are drawn:
         // the opened surah introduction at 0.78 of the reading ink, and the
         // masthead at 0.9 of the interface word.
@@ -250,9 +250,9 @@ class ContrastTest {
         assertSheetGrounds(DarkScheme)
         assertFloatingGrounds(DarkScheme, NightSelected, day = false)
         assertReadable(NightGold, NightBackground)
-        assertReadable(LapisLight, NightBackground)
-        assertReadable(LapisLight, NightSurface)
-        assertReadable(NightOnPrimary, LapisLight)
+        assertReadable(EmeraldLight, NightBackground)
+        assertReadable(EmeraldLight, NightSurface)
+        assertReadable(NightOnPrimary, EmeraldLight)
         assertReadable(DarkScheme.onSecondaryContainer, DarkScheme.secondaryContainer)
         assertReadable(DarkScheme.onTertiaryContainer, DarkScheme.tertiaryContainer)
         // The error roles are the quiet voice on this ground too (owner
@@ -283,7 +283,7 @@ class ContrastTest {
         // The quiet ground and the chosen search source, as on the day sheet
         // (owner decision, 15.0).
         assertReadable(NightMuted, blend(NightText, NightSurface, Wash.Door))
-        assertReadable(LapisLight, blend(LapisLight, NightSurface, Wash.Control))
+        assertReadable(EmeraldLight, blend(EmeraldLight, NightSurface, Wash.Control))
         // The same two tones on the night page.
         assertReadable(blend(DarkPage.introInk, NightBackground, DarkPage.introInk.alpha), NightBackground)
         assertReadable(
@@ -341,12 +341,12 @@ class ContrastTest {
      * the lightest thing near it, and the edge is a shadow or a 1 px line.
      *
      * The day's floating paper is therefore the sheet's own white, 2.0 L* over
-     * the page (dE76 3.3) and 7.1 L* over the chosen block (dE76 7.2). It is
+     * the page (dE76 3.3) and 7.1 L* over the chosen block (dE76 8.8). It is
      * the step every sheet already stands on, and the lift is its edge. The
-     * night's page is L* 9.4 and its sheet 13.4, but the chosen block is 15.6:
-     * the lapis wash lifts a dark page where it darkens a light one, so the
+     * night's page is L* 9.4 and its sheet 13.4, but the chosen block is 15.4:
+     * the emerald wash lifts a dark page where it darkens a light one, so the
      * night's floating paper must stand above the sheet as well. [NightFloating]
-     * is L* 19.2, 9.8 over the page (1.29:1) and dE76 5.9 from the block. The
+     * is L* 19.2, 9.8 over the page (1.29:1) and dE76 8.6 from the block. The
      * shadow is invisible at night, so the fill is the only edge there, and
      * that is why the night's step is the larger one. All of this is pinned
      * here, so a palette edit fails on the machine and not on a reader's eyes
@@ -392,8 +392,8 @@ class ContrastTest {
      *
      * A menu is never raised over the plain page: the ayah whose menu is open
      * paints its own block in [PaperSelected]. The day's block is L* 92.9 and
-     * the sheet's white stands dE76 8.9 from it; the night's block is L* 15.6
-     * and the one-step night paper stands dE76 11.9 from it. The 17.3
+     * the sheet's white stands dE76 8.8 from it; the night's block is L* 15.4
+     * and the one-step night paper stands dE76 8.6 from it. The 17.3
      * tone that read as a veil stood dE76 4.2 from the block while it held every
      * ratio it was asked for, because the two tones sat at one lightness and
      * differed only in a chroma that no WCAG ratio can see. The direction is
@@ -514,7 +514,7 @@ class ContrastTest {
      *
      * Lc 60 is the minimum for content a reader reads, the grade a caption, a
      * reference, a label, and an action word owe. The quiet voice measures
-     * 80.2 on the day page and 71.7 to 83.7 across the grounds it rides; on
+     * 80.2 on the day page and 71.6 to 83.7 across the grounds it rides; on
      * the night page -65.2, -64.1 on a sheet, -61.7 on the floating paper.
      * Every ground a quiet word actually stands on is listed, because a
      * label travels with the surface it sits on.
@@ -543,10 +543,10 @@ class ContrastTest {
         ).forEach { (where, ground) ->
             assertApca("the night quiet voice on $where", NightMuted, ground, -60.0)
         }
-        assertApca("lapis on the page", Lapis, PaperBackground, 60.0)
-        assertApca("lapis on a sheet", Lapis, PaperSurface, 60.0)
-        assertApca("the night lapis on the page", LapisLight, NightBackground, -60.0)
-        assertApca("the night lapis on a floating paper", LapisLight, NightFloating, -60.0)
+        assertApca("emerald on the page", Emerald, PaperBackground, 60.0)
+        assertApca("emerald on a sheet", Emerald, PaperSurface, 60.0)
+        assertApca("the night emerald on the page", EmeraldLight, NightBackground, -60.0)
+        assertApca("the night emerald on a floating paper", EmeraldLight, NightFloating, -60.0)
         assertApca("gold on the page", Gold, PaperBackground, 60.0)
         assertApca("gold on a sheet", Gold, PaperSurface, 60.0)
         assertApca("the night gold on the page", NightGold, NightBackground, -60.0)
@@ -595,7 +595,7 @@ class ContrastTest {
      *
      * The found ground is a scan surface by decision 10.6: the matched word
      * is one word in a result list, and the reading ink on it measures 81.1
-     * on the day and -74.4 on the night, a hair under the body floor and far
+     * on the day and -74.3 on the night, a hair under the body floor and far
      * past the content floor. The floor here is stated one grade down rather
      * than pretending it clears the body grade, because a wash that lifts a
      * dark page can only take light text down, and 10.6's decision is what
