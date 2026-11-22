@@ -48,34 +48,44 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.math.abs
 
 /**
  * The widths a card may take, narrowest first.
  *
  * The card is one column of reading at 320 dp, the width that shows a phone
- * ayah well. Its height is the ayah's and not a design number, so a long ayah
- * would otherwise be a strip: at 320, Al-Baqarah 2:255 is 1:3 and 2:282 is
- * 1:9, and a receiver that clamps a tall picture at 1280 px shows the longest
- * one about 174 px wide. The card therefore widens before it grows into a
- * strip, in 80 dp steps up to the 560 that is still narrower than the
- * reading's own 600 dp page. [shareCardWidth] picks the step from the
- * measured card, and the preview and the capture both read that one answer
- * (owner decision, this version).
+ * ayah well. Its height is the ayah's and not a design number, so a long
+ * ayah would otherwise be a strip: at 320, Al-Baqarah 2:255 is 1:3 and
+ * 2:282 is 1:9, and a receiver that clamps a tall picture at 1280 px shows
+ * the longest one about 174 px wide. But the reason a card widens is bigger
+ * than the strip: a feed gives a picture the feed's own width only while
+ * the picture stands within [ShareCardFeedLimit], and a taller one is shown
+ * whole in a shorter box, standing narrow with the feed's ground where the
+ * width should be (owner report, 21.7). The card therefore widens, in 80 dp
+ * steps up to the 560 that is still narrower than the reading's own 600 dp
+ * page, until it stands inside the limit; the longest ayahs, which overflow
+ * every rung, take the 560, the closest any card gets. [shareCardWidth]
+ * picks the rung from the measured card, and the preview and the capture
+ * both read that one answer (owner decision, 21.7).
  */
 internal val ShareCardWidths = listOf(320.dp, 400.dp, 480.dp, 560.dp)
 
 /**
- * The shape every card aims at: twice as tall as it is wide.
+ * The tallest card a feed still shows at its own width: five quarters as
+ * tall as it is wide, the 4:5 portrait (1080 by 1350) that Meta names as
+ * the feed's own shape for a single picture.
  *
- * A portrait poster at 1:2 is a chat picture; 1:3 is a receipt and 1:9 is a
- * strip a receiver shrinks to nothing. The card takes the width whose measured
- * card stands closest to this ratio, because a wider card is a shorter card,
- * and a receiver that clamps the height shows a shorter picture wider and its
- * type larger. The common ayah never leaves 320; Al-Baqarah 2:255 lands at 400
- * (1:2.15) and 2:282 at 560 (1:2.26) (owner decision, this version).
+ * A chat clamps pixels and a feed clamps shape. The card's former aim, a
+ * 1:2 portrait, is a chat picture: a receiver that clamps a tall picture's
+ * pixels shows it whole, only smaller. But Facebook's feed, and Instagram's,
+ * hold a picture to 4:5 before they give it the feed's width, and a taller
+ * one is contained into a shorter box or center-cropped on the surfaces
+ * that crop, which is what the owner's shared 2:255 card met: it left the
+ * app at 1:2.15 and Facebook stood it narrow (owner report, 21.7). At the
+ * ladder's 560 the same card stands near a square and takes the feed's
+ * whole width, so the card aims inside this limit rather than at a shape
+ * of its own choosing (owner decision, 21.7).
  */
-internal const val ShareCardPosterRatio = 2f
+internal const val ShareCardFeedLimit = 1.25f
 
 /** One measured card: the width it was drawn at, and the height it took. */
 internal data class ShareCardMeasure(val width: Dp, val height: Dp) {
@@ -84,30 +94,21 @@ internal data class ShareCardMeasure(val width: Dp, val height: Dp) {
 }
 
 /**
- * The width whose card stands closest to [ShareCardPosterRatio].
+ * The narrowest rung whose card stands inside [ShareCardFeedLimit].
  *
- * [measures] are the cards measured narrowest first. The search stops at the
- * first width at or under the ratio, because every wider card is shorter
- * still and can only be farther from it; a tie goes to the narrower card, and
- * an empty list to the ladder's first width. The arithmetic is here so a JVM
- * test can pin the rule without a screen, which is the only way a card's
- * shape can be read back.
+ * [measures] are the cards measured narrowest first, and every wider rung
+ * is shorter still, so the search stops at the first width inside the
+ * limit and no wider one is needed. A card that overflows every measured
+ * rung takes the last one, the widest, which is the closest any rung gets
+ * to the limit; an empty list keeps the ladder's first width. The
+ * arithmetic is here so a JVM test can pin the rule without a screen, which
+ * is the only way a card's shape can be read back.
  */
 internal fun shareCardWidth(measures: List<ShareCardMeasure>): Dp {
-    val first = measures.firstOrNull() ?: return ShareCardWidths.first()
-    var best = first
-    var bestGap = abs(first.ratio - ShareCardPosterRatio)
-    if (first.ratio > ShareCardPosterRatio) {
-        for (measure in measures.drop(1)) {
-            val gap = abs(measure.ratio - ShareCardPosterRatio)
-            if (gap < bestGap) {
-                best = measure
-                bestGap = gap
-            }
-            if (measure.ratio <= ShareCardPosterRatio) break
-        }
+    for (measure in measures) {
+        if (measure.ratio <= ShareCardFeedLimit) return measure.width
     }
-    return best.width
+    return measures.lastOrNull()?.width ?: ShareCardWidths.first()
 }
 
 /**

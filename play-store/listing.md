@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 21.5 (versionCode 217)
+Version: 21.7 (versionCode 219)
 
 ## Listing
 

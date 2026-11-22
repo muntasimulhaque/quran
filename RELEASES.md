@@ -6,6 +6,29 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.7
+
+A long ayah's share card stands at the width a feed gives a picture instead of
+standing narrow inside it.
+
+**The card's shape.** The card was aimed at a 1:2 portrait, on the reasoning
+that a chat clamps a tall picture's pixels and shows it whole, only smaller.
+A feed clamps the picture's shape instead: Facebook and Instagram give a
+picture the feed's own width only up to the 4:5 portrait, 1080 by 1350, and a
+taller one is contained into a shorter box, standing whole but narrow with
+the feed's ground where the width should be, or center-cropped where the
+surface crops. That is what a shared Al-Baqarah 2:255 card met: it left the
+app at 1:2.15 and Facebook stood it narrow beside a column of other posts.
+The ladder now widens until the card stands inside 4:5, in the same 80 dp
+steps, and the owner's own card shows the rule: 2:255 is 1:3 at 320 dp, and
+at 560 dp it stands at 1.207, a 1,680 by 2,027 px picture at the capture's
+3x, which a feed shows at its full width. An ordinary ayah already inside
+the limit never moves; a card that overflows every rung, like 2:282, keeps
+the widest card as before, and a feed will still contain it, small but whole
+with a tap to the full picture. The preview and the capture read the one
+rule, and the JVM test that pins it carries both cards' recorded shapes, the
+2:255 one taken from the capture's own print on the phone.
+
 ## 21.6
 
 The reading scrolls back up the way it scrolls down, and a first launch reaches

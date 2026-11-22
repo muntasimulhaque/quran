@@ -197,15 +197,17 @@ internal fun ShareCardPreview(card: ShareCard, width: Dp = ShareCardWidths.first
  * an ordinary ayah was cut; the version before this one scaled the whole card
  * at a fixed 320 dp, which showed a long ayah as a 1:3 strip and the longest
  * as a 1:9 one. The preview now measures the card at each of
- * [ShareCardWidths] and keeps the one closest to [ShareCardPosterRatio], then
- * says that width through [onWidth] so the capture draws the same card. The
- * layer carries the scale to the drawing, so the type is set at the card's
- * own size and then reduced as one picture, which is exactly what the shared
- * image is. The card never scales up past 1, because a preview of a 320 dp
- * artifact should not be larger than the artifact.
+ * [ShareCardWidths] and keeps the narrowest one that stands inside
+ * [ShareCardFeedLimit], or the widest when the card overflows them all
+ * (owner decision, 21.7), then says that width through [onWidth] so the
+ * capture draws the same card. The layer carries the scale to the drawing,
+ * so the type is set at the card's own size and then reduced as one
+ * picture, which is exactly what the shared image is. The card never scales
+ * up past 1, because a preview of a 320 dp artifact should not be larger
+ * than the artifact.
  *
- * The measure stops at the first width at or under the poster ratio: every
- * wider card is shorter still, so nothing wider can stand closer to it. The
+ * The measure stops at the first width inside the feed limit: every wider
+ * card is shorter still, so no wider rung is needed once one fits. The
  * writes to the chosen width are guarded, so the first frame settles on one
  * answer and the measure does not run again.
  *
@@ -247,7 +249,7 @@ internal fun ShareCardPreviewBox(
                     .measure(Constraints.fixedWidth(wide))
                 cards += width to placeable
                 measured += ShareCardMeasure(width, with(density) { placeable.height.toDp() })
-                if (measured.last().ratio <= ShareCardPosterRatio) break
+                if (measured.last().ratio <= ShareCardFeedLimit) break
             }
             val width = shareCardWidth(measured)
             if (width != chosen) chosen = width
