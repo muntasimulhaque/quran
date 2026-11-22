@@ -6,6 +6,42 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.6
+
+The reading scrolls back up the way it scrolls down, and a first launch reaches
+the text in about half the time.
+
+**The reading's window.** A lazy list builds the row ahead of the reader and
+throws the row behind them away. Scroll down and every row is new; scroll back
+up and every row is new again, so a reader who returns to a verse pays for it
+twice: the shaped Arabic line, the translation's runs, and the words a screen
+reader speaks are all built again on the frame the block comes back. The list
+now keeps a whole screen of rows on either side of the glass (owner decision,
+21.6), which is the only thing in this release the reading does differently.
+Measured on the phone by counting the blocks a return rebuilt, with a
+temporary counter in the block itself: two at the list's default, one with the
+window, and never more than one. The same counter settled the diagnosis: no
+block recomposes during a scroll, so every block a return meets is a fresh
+composition, which is what made the count worth taking. The bar's rule, the
+place, the taps, and the sheets are untouched.
+
+**The measured profile.** What the app shipped as its profile was a
+hand-written list of nineteen rules naming the launch path by hand, and nothing
+of the reading. It is the profile the benchmark module generates now, by
+walking the app the way its own note always promised: launch, scroll down, and
+scroll back up. The return was missing from the journey, so the page the
+reading rebuilds was never compiled. Cold start on the phone, five cold starts
+each way through `am start -W`, measured a median of 4504 ms before and 2559 ms
+after, with the spread tightening from 3.3 to 6.3 seconds to 2.3 to 2.7. The
+startup metric itself cannot read this emulator's frame timeline, so the wall
+clock is the number here and the artifacts are unchanged: no dependency, no
+permission, no content, and no string.
+
+**A second number for the scroll.** The benchmark module read the scroll in one
+direction only. It now measures the same gesture in both directions, with the
+frame timeline for a real phone and the choreographer's own frame for a machine
+whose GPU is the bottleneck, and the walk back is part of the profile's journey.
+
 ## 21.5
 
 The rules that had no gate now have one, and the quiet refresh's reason is
@@ -54,6 +90,19 @@ APIs), and nothing gates on them.
 The whole JVM suite, `checkdb`, `search`, lint, and the debug build are
 green on this machine. No visible surface changed, so the three store sets
 stand, and no content and no permission moved.
+
+The 21.5 bundle came from `build` run 44931558235, green on `main` for the
+commit `a4520eca`, and `quran-21.5-vc217.aab` has SHA-256
+`8eb68658f288a41314a993ea29c1941c0611ba5345f78281d3a60db01b5de175`.
+`jarsigner` reads `jar verified`, and the upload certificate is the key 21.4
+shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The run after the version commit was red at dependency verification, because
+the regenerated file held only this machine's AAPT2 binary: the other two
+copies were added from Google's own Maven and proved by resolving both
+classifiers through the gate, and the run that built the bundle is the one
+after that fix. The bundle was submitted for Play review, and the hand-off copy
+in `play-store/aab/` was deleted once Play had it.
 
 ## 21.4
 

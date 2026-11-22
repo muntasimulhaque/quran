@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +54,44 @@ import kotlinx.coroutines.flow.first
  * read has all the time it needs.
  */
 private const val READ_AHEAD_AYAHS = 12
+
+/**
+ * The reading's cache window: how far ahead of the reader a row is built, and
+ * how far behind them it is kept (owner decision, 21.6).
+ *
+ * The list's own default keeps nothing behind the page and holds its ahead
+ * window under half a screen. An item that leaves the top is disposed on the
+ * frame it leaves, and a return to it rebuilds the whole block on the frame it
+ * comes back: the spoken ayah, the shaped Arabic line, the translation's runs,
+ * and the semantics around all three. A reader who scrolls up is therefore the
+ * reader who pays for their rows twice, and the taller a block is the less the
+ * default can reach across it, because a block that carries a translation is
+ * often more than half the viewport.
+ *
+ * A whole viewport each way was measured on the phone AVD by counting the
+ * blocks composed during a return: four slow drags into the surah, then four
+ * back, with a temporary counter in the block itself, taken out before this
+ * was committed. The return built two blocks at the list's own default (three
+ * of the four trials built two), one with half a viewport behind, and one with
+ * a whole viewport behind, and the whole viewport was the one that never built
+ * more than one. The same counter settled the rest of the diagnosis: no block
+ * ever recomposed during a scroll, so every block a return meets is a fresh
+ * composition, which is what makes that count a count of rows rebuilt.
+ *
+ * What the window costs is composed state alone: the surah's rows are read
+ * whole and held in hand before the list is drawn, so nothing here asks the
+ * library for a query it was not already making.
+ *
+ * One consequence is written down where it shows. The read ahead request reads
+ * the last visible index, and a window keeps items composed past the viewport,
+ * so that request can arrive a row or two early. It waits behind twelve rows,
+ * which is more than a screen, so an early arrival lands inside the room the
+ * request already kept.
+ */
+private val ReadingCacheWindow = LazyLayoutCacheWindow(
+    aheadFraction = 1f,
+    behindFraction = 1f,
+)
 
 /** The surah's rows, drawn and driven once the text is on hand. */
 @Composable
@@ -320,6 +359,10 @@ internal fun ReadingRows(
     val side = rememberPageMargin() - Space.WashInset
     LazyColumn(
         state = listState,
+        // A viewport ahead and half of one behind: the row the reader is about
+        // to reach is already built, and the row they just passed is still
+        // there when they turn back (owner decision, 21.6).
+        cacheWindow = ReadingCacheWindow,
         modifier = modifier
             .fillMaxSize()
             .semantics { contentDescription = pageDescription }

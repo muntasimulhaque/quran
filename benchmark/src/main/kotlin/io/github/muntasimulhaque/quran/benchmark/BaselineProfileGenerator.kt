@@ -56,8 +56,14 @@ class BaselineProfileGenerator {
             pressHome()
             startActivityAndWait()
             device.wait(Until.hasObject(By.desc("Reading")), 10_000)
-            // the reader's own work: read, then scroll and come back
+            // the reader's own work: read, then scroll down and come back up.
+            // The walk back used to be missing from a journey whose own words
+            // promised it, so the profile compiled the forward page and left
+            // the reading's other direction, the one that builds each block
+            // again, out of the bundle (owner decision, 21.6).
             device.swipe(500, 1500, 500, 500, 20)
+            device.waitForIdle()
+            device.swipe(500, 500, 500, 1500, 20)
             device.waitForIdle()
         }
     }

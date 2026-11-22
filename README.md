@@ -200,49 +200,37 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.5 (versionCode 217).** The signed bundle comes from `build` run
-44931558235, green on `main` for the commit `a4520eca`: the unit tests,
-`checkdb`, `search`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-21.5-vc217.aab` has SHA-256
-`8eb68658f288a41314a993ea29c1941c0611ba5345f78281d3a60db01b5de175`.
-`jarsigner` reads `jar verified`, and the upload certificate is the same key
-21.4 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The whole JVM suite, `checkdb`, `search`, lint, and the debug build were also
-green on this machine before the push, and the four accessibility classes the
-release rule now names ran on the phone after the moves: `AccessibilityTest`,
-`LargeTextTest`, `ReadingSemanticsTest`, and `KeyboardFocusTest`, 11 tests and
-no failures. The run after the version commit was red at dependency
-verification, because the regenerated file held only this machine's AAPT2
-binary: the Linux and macOS copies were added from Google's own Maven,
-cross-checked against the SHA-1 that repository publishes, and proved locally
-by resolving both classifiers through the verification gate, and the run that
-built this bundle is the one after that fix. No visible surface changed, so
-the three store sets stand as captured for 21.2, and no content, no string,
-and no permission moved. The build moves to AGP 9.5.0, and every artifact it
-adds is pinned by hash in
-`gradle/verification-metadata.xml`, regenerated over the whole task graph
-and proved artifact by artifact. The 21.5 bundle was submitted for Play
-review, and the hand-off copy in `play-store/aab/` was deleted once Play had
-it.
+**21.6 (versionCode 218).** The whole JVM suite, `checkdb`, `search`,
+lint, and `assembleDebug` were green on this machine before the push, and the
+four accessibility classes ran on the phone because the diff touches
+`feature-reading/`: `AccessibilityTest`, `LargeTextTest`,
+`ReadingSemanticsTest`, and `KeyboardFocusTest`, 10 tests and no failures. No
+visible surface changed, so the three store sets stand as captured for 21.2,
+and no content, no string, and no permission moved. The reading scrolls back up
+the way it scrolls down, and the profile the app ships is the measured one now.
+The signed bundle comes from the `build` run on `main` after this commit, and
+its name and SHA-256 follow that run.
 
-**What changed in 21.5.** The rules that had no gate now have one. The five
-answers about a translation, a tafsir, and the word list; the line under the
-words switch; the order of the word sheet's grammar; the clock's digits and
-period marker; and the medallion's ink, its place on the glass, and its
-touch target all moved into `:data`, `core`, and `ui-kit`, whose JVM suites
-the release gates already run, and each carries a sentence-named test.
-Nothing the reader sees moved, and no string changed modules.
+**What changed in 21.6.** The reading keeps a whole screen of rows on either
+side of the glass now (owner decision, 21.6). A lazy list builds the row ahead
+of the reader and throws the row behind them away, so a reader who scrolls back
+up rebuilt every block on the frame it returned: the shaped Arabic line, the
+translation's runs, and the words a screen reader speaks. Counted on the phone
+with a temporary counter in the block, a return of four blocks rebuilt two blocks
+at the list's default and one with the window, and the same counter showed that
+no block recomposes during a scroll, so every block a return met was a fresh
+composition. The bar's rule, the place, the taps, and the sheets are untouched.
 
-The quiet refresh's decision is written beside it now (owner decision,
-21.5): the reader's word was the pack's choosing, only packs already on the
-device are touched, it never runs on a metered connection, and a newer
-version is named by the catalog inside the app, so it can only arrive with a
-new release of the app. Its dead `force` switch and the manual check its
-note promised are gone, because the catalog cannot change between two
-launches of one build and a button could never find anything. The
-accessibility leg is a release rule now, triggered by a path rather than a
-judgment.
+The shipped profile is the one the benchmark module generates by walking the
+app, not the nineteen hand-written rules that named the launch path alone. The
+journey was missing its walk back, which its own note had promised, so the
+page the reading rebuilds was never compiled; it is in the journey now. Cold
+start measured a median of 4504 ms before and 2559 ms after through
+`am start -W` on the phone, with the spread tightening from 3.3 to 6.3
+seconds to 2.3 to 2.7, because the startup metric cannot read this emulator's
+frame timeline. The benchmark module also reads the scroll in both directions
+now, with the frame timeline for a real phone and the choreographer's own frame
+for a machine whose GPU is the bottleneck.
 
 **What changed in 21.4.** The compile platform is 37.1, declared as
 `compileSdk = 37` with `compileSdkMinor = 1` in all ten modules;
