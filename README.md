@@ -208,8 +208,15 @@ moved, so the four share classes ran with them: 16 tests on the phone, no
 failures. A visible surface changed, so all three store sets were captured
 again, on the phone, the 7 inch, and the 10 inch, and the share card's frame
 shows the wider card. No content, no string, and no permission moved. The
-signed bundle comes from the `build` run on `main` after this commit, and its
-name and SHA-256 follow that run.
+signed bundle comes from `build` run 45021196325, green on `main` for the
+commit `974190e0`: the unit tests, `checkdb`, `search`, lint, and
+`assembleDebug` passed, and the signed bundle `quran-21.7-vc219.aab` has
+SHA-256
+`27f899fbc3c6fec2c58e06568176cb717e0f3b423b910689744e9f0573eddc9a`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 21.7`, and the upload certificate is the same key 21.4, 21.5,
+and 21.6 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
 
 **What changed in 21.7.** The share card meets the feed (owner decision,
 21.7). A long ayah's card was aimed at a 1:2 portrait, a chat's picture,
