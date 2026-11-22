@@ -200,23 +200,35 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.8 (versionCode 220).** The whole JVM suite, `checkdb`, `search`, lint,
+**21.9 (versionCode 221).** The whole JVM suite, `checkdb`, `search`, lint,
 and `assembleDebug` were green on this machine before the push. The diff
-touches `feature-reading/`, so the four accessibility classes were owed, and
-the reminder offer's new axis test ran with them: 11 tests on the phone, no
-failures. No store frame holds the one-time offer, so the three committed
-sets stand, and no Bangla string moved, so that leg was not owed either. The
-signed bundle comes from `build` run 45028558044, green on `main` for the
-commit `4a6865fd`: the unit tests, `checkdb`, `search`, lint, and
-`assembleDebug` passed, and the signed bundle `quran-21.8-vc220.aab` has
+touches `feature-reading/` and the reader's own screen, so the four
+accessibility classes were owed; they ran with the offer's own two classes
+on the phone, 12 tests and no failures. No store frame holds the one-time
+offer, and no string moved, so the three committed sets stand and no Bangla
+leg was owed. The signed bundle comes from `build` run 45037559367, green on
+`main` for the commit `e360b133`: the unit tests, `checkdb`, `search`, lint,
+and `assembleDebug` passed, and the signed bundle `quran-21.9-vc221.aab` has
 SHA-256
-`04cd88acbb1328e723005311dea0b43cd43bcf666fba38f0e80bbdfdfa99670c`.
+`ef0b84e618e923c4be84c10e2c1d5840fb5e8f2afa8e6f15e3a235f8e89d43a1`.
 `jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 21.8` and `versionCode 220`, and the upload certificate is the
-same key 21.4 through 21.7 shipped under, SHA-256
+`versionName 21.9` and `versionCode 221`, and the upload certificate is the
+same key 21.4 through 21.8 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 21.8 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+
+**What changed in 21.9.** Not now means its word (owner decision, 21.9). The
+daily ayah offer, at the end of a surah, carried a quiet Not now that wrote a
+permanent no on its first tap, so the button said later and meant never. The
+first Not now records the boundary it was tapped on: the ask leaves that
+surah's end and stands at the end of the next surah the reader finishes,
+wherever that is. The second Not now is the final answer, so the offer never
+nags a reader who keeps saying no and never dies on one who meant later.
+Turn on, and the reminder set in Settings, remain the final answer, and a
+fresh install meets the offer exactly as before. The stored state is one
+surah number, absent on every existing install, so no update is asked again
+and no migration runs. The tile is untouched: same shape, same words, no
+string, color, or frame moved. The Quran text, both translations, both
+tafsirs, the recitations, and the content database are unchanged.
 
 **What changed in 21.8.** The reminder offer centers itself (owner decision,
 21.8). The one-time offer at the end of the first surah a reader finishes

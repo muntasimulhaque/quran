@@ -6,6 +6,19 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.9
+
+Not now on the daily ayah offer means its word. The first tap moves the ask
+to the end of the next surah the reader finishes, wherever that is, and the
+second tap is the final answer, so the offer never nags a reader who keeps
+saying no and never dies on one who meant later. Turn on, and the reminder
+set in Settings, remain the final answer, and a fresh install meets the
+offer exactly as before. The stored state is one surah number, absent on
+every existing install, so no update is asked again and no migration runs.
+The tile itself is untouched: same shape, same words, no string, color, or
+frame moved. The Quran text, both translations, both tafsirs, the
+recitations, and the content database are unchanged.
+
 ## 21.8
 
 The reminder's one-time offer, at the end of the first surah a reader
