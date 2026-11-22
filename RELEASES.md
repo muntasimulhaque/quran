@@ -6,6 +6,18 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 21.8
+
+The reminder's one-time offer, at the end of the first surah a reader
+finishes, centers itself: its name, its sentence, and its two answers stand
+on one axis under the surah's centered completion line, the same axis the
+empty note keeps for a short block that must read as one. Not now still
+leads and Turn on still trails, the one order every pair in the app keeps.
+The tafsir offer inside the ayah card keeps its sheet's leading edge,
+because it is a section of a page that starts there, not a card standing on
+the glass. The Quran text, both translations, both tafsirs, the recitations,
+and the content database are unchanged.
+
 ## 21.7
 
 A long ayah's share card stands at the width a feed gives a picture instead of

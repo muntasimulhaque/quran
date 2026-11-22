@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 21.7 (versionCode 219)
+Version: 21.8 (versionCode 220)
 
 ## Listing
 

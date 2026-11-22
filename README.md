@@ -200,25 +200,35 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**21.7 (versionCode 219).** The whole JVM suite, `checkdb`, `search`, lint,
+**21.8 (versionCode 220).** The whole JVM suite, `checkdb`, `search`, lint,
 and `assembleDebug` were green on this machine before the push. The diff
-touches `app/src/main/kotlin/io/github/muntasimulhaque/quran/ui/reader/`, so
-the four accessibility classes were owed, and the share card's shape rule
-moved, so the four share classes ran with them: 16 tests on the phone, no
-failures. A visible surface changed, so all three store sets were captured
-again, on the phone, the 7 inch, and the 10 inch, and the share card's frame
-shows the wider card. No content, no string, and no permission moved. The
-signed bundle comes from `build` run 45021196325, green on `main` for the
-commit `974190e0`: the unit tests, `checkdb`, `search`, lint, and
-`assembleDebug` passed, and the signed bundle `quran-21.7-vc219.aab` has
+touches `feature-reading/`, so the four accessibility classes were owed, and
+the reminder offer's new axis test ran with them: 11 tests on the phone, no
+failures. No store frame holds the one-time offer, so the three committed
+sets stand, and no Bangla string moved, so that leg was not owed either. The
+signed bundle comes from `build` run 45028558044, green on `main` for the
+commit `4a6865fd`: the unit tests, `checkdb`, `search`, lint, and
+`assembleDebug` passed, and the signed bundle `quran-21.8-vc220.aab` has
 SHA-256
-`27f899fbc3c6fec2c58e06568176cb717e0f3b423b910689744e9f0573eddc9a`.
+`04cd88acbb1328e723005311dea0b43cd43bcf666fba38f0e80bbdfdfa99670c`.
 `jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 21.7`, and the upload certificate is the same key 21.4, 21.5,
-and 21.6 shipped under, SHA-256
+`versionName 21.8` and `versionCode 220`, and the upload certificate is the
+same key 21.4 through 21.7 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 21.7 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+
+**What changed in 21.8.** The reminder offer centers itself (owner decision,
+21.8). The one-time offer at the end of the first surah a reader finishes
+drew its name, its sentence, and its two answers from the leading edge, under
+the surah's own centered completion line. Every line in the tile now agrees
+on one axis: the name and the sentence center on the card, the way the empty
+note's short block does (15.0), and the pair stands centered on the same
+action gap the share sheet's pair keeps. Not now still leads and Turn on
+still trails, the one order every pair in the app keeps (18.8). The tafsir
+offer inside the ayah card keeps its sheet's leading edge, because it is a
+section of a page that starts there, not a card standing on the glass. The
+new device test measures the pair's span middle against the tile's middle on
+the glass. The Quran text, both translations, both tafsirs, the recitations,
+and the content database are unchanged.
 
 **What changed in 21.7.** The share card meets the feed (owner decision,
 21.7). A long ayah's card was aimed at a 1:2 portrait, a chat's picture,
