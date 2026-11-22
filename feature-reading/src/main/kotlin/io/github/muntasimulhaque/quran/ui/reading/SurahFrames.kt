@@ -5,6 +5,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -248,6 +249,17 @@ internal fun SurahOpening(
  * finishes. It is not a gate: the reading is already the gift, and the ask
  * comes after it. Turn on asks the phone for what it needs; Not now writes
  * the reader's no and never asks again (owner decision, 15.5).
+ *
+ * The tile centers its name, its sentence, and its two answers (owner
+ * decision, 21.8). It stands under the surah's own centered completion
+ * line, and a short invitation on a full-width card reads as one block only
+ * when every line in it agrees on one axis, the rule the empty note already
+ * keeps (15.0). The reading's own lines start at the leading edge because
+ * they are long; the tile's are one short sentence each. The pair keeps its
+ * one order and gap (18.8) and stands the way the share sheet's centered
+ * pair does. The tafsir offer inside the ayah card keeps its sheet's
+ * leading edge, because it is a section of a page that starts there, not a
+ * card standing on the glass.
  */
 @Composable
 internal fun ReadingReminderOffer(
@@ -262,20 +274,29 @@ internal fun ReadingReminderOffer(
             .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
             .padding(horizontal = Space.Block, vertical = Space.Block)
             .testTag("reading-reminder-offer"),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = stringResource(R.string.reading_reminder_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
         Text(
             text = stringResource(R.string.reading_reminder_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = Space.Line),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Space.Line),
         )
         Row(
-            modifier = Modifier.padding(top = Space.Block),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Space.Block),
+            horizontalArrangement = Arrangement.spacedBy(Space.Action, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
@@ -286,7 +307,6 @@ internal fun ReadingReminderOffer(
             TextButton(
                 label = stringResource(R.string.reading_reminder_turn_on),
                 onClick = onTurnOn,
-                modifier = Modifier.padding(start = Space.Action),
                 prominent = true,
             )
         }
