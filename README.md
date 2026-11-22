@@ -217,6 +217,8 @@ SHA-256
 `versionName 21.6`, and the upload certificate is the same key 21.4 and 21.5
 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 21.6 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
 
 **What changed in 21.6.** The reading keeps a whole screen of rows on either
 side of the glass now (owner decision, 21.6). A lazy list builds the row ahead
