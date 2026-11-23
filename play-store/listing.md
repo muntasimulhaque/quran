@@ -216,19 +216,19 @@ What each set shows, in order:
    doors. The card says "Built to be read." with "Offline. No ads. No account."
    under it.
 2. The tafsir open on its passage, with the source line above it. The card says
-   "Ibn Kathir, a tap away."
+   "Tafsir, a tap away."
 3. Search reading a reference ("kahf 10"), with the places it reads behind the
-   "Search in" door. The card says "Type kahf 10, land on the verse."
+   "Search in" door. The card says "Go to any ayah directly."
 4. Saved: the reader's own notes under the places they were written on. The card
-   says "Your notes live under the verses."
+   says "Save ayah and take notes."
 5. The Tajweed page: seven color families, each with a word from the reading and
-   its rules. The card says "Seven colors, each explained."
+   its rules. The card says "Tajweed colors with rules."
 6. The reading at night. The card says "The same page, gentle at night."
 7. The share card the app hands out, with Share image as its solid answer. The
-   card says "The verse as one image."
+   card says "Share any ayah as screenshot."
 8. The recitation's own offer: the one-row capsule naming the reciter and its
    size over the surah before a tap, the block a door to the voice list, with
-   Download at its end. The card says "Four reciters, on your word."
+   Download at its end. The card says "Play recitation with one tap."
 
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
