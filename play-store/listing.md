@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 22.3 (versionCode 225)
+Version: 22.4 (versionCode 226)
 
 ## Listing
 
@@ -122,8 +122,8 @@ own capture of the whole display, unedited. The card around it is the store's:
 the headline in the app's Literata, the sub-line in its Inter, the paper ground,
 the gold rule, and the device outline drawn from the theme's own colors, in the
 feature graphic's family. The cards are English (owner decision, 22.4). This
-first set was composed from the standing 22.3 captures, because the app's
-surfaces did not change with it.
+set was captured on this session's legs, all three form factors, and composed
+from those frames.
 
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
@@ -233,6 +233,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (22.4, 307 characters)
+22.4 gives the store a new face: eight cards, each composed from a real screen and naming one thing the app does, from the reading to recitation. The app is unchanged: the same text, translations, tafsirs, recitations, and content database, with every setting where it was. No ads, no trackers, no accounts.
 
 ## Release notes (22.3, 433 characters)
 22.3 makes search recover. A misspelled word comes back as one word to tap, rewritten in your own sentence; a reference past a surah's end says how many ayahs it has; words in "double quotes" must sit together; and juz 30, para 30, or পারা ৩০ lands where the juz opens. Answers arrive in a frame, and nothing leaves the phone. Text, translations, recitations, and the content database are unchanged. No ads, no trackers, no accounts.

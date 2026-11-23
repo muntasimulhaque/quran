@@ -169,10 +169,13 @@ through `tools/` like every other content change.
 ```bash
 export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"
 
-# the release gates: unit tests, lint, and a debug build
+# the release gates: the JVM suite, the content gates, the store cards, lint
 ./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest \
   :feature-browse:testDebugUnitTest :feature-playback:testDebugUnitTest \
   :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :tools:run --args="checkdb"
+./gradlew :tools:run --args="search"
+./gradlew :tools:run --args="storecards --check"
 
 # the content pipeline, every step and its arguments
 ./gradlew :tools:run --args="help"
@@ -202,29 +205,31 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.3 (versionCode 225).** The whole JVM suite, `checkdb`, `search`, lint,
-and `assembleDebug` were green on this machine before the push. The diff
-touches `feature-search/`, so the four accessibility classes were owed; they
-ran on the phone with the three search classes, 46 tests and no failures.
-One leg went red on the first combined run, `LargeTextTest`'s size row, on a
-compose host that had not launched; it passed six of six alone, and the
-surfaces it composes are untouched by the diff. All three store sets were
-captured, and `03-search` reads as the committed frame does at every size,
-so the three committed sets stand. The Bangla leg ran green on the phone.
-Nothing under `tools/` or `content/` changed, and `content/quran.db` still
-hashes what it did before:
+**22.4 (versionCode 226).** The whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` were green on this machine
+before the push. The diff touches `tools/`, `play-store/`, the two records,
+and one comment in the capture workflow, so no accessibility class was owed
+and none ran. The three store sets were captured on this session's legs, all
+green: `quran_phone` at 1080 x 1920, `quran_tablet7` at 1200 x 1920 and 320
+dpi, and `quran_tablet10` at 2560 x 1800. The app itself is 22.3: no file
+under `app/`, `core/`, `data/`, `ui-kit/`, or a `feature-*` changed, and
+`content/quran.db` still hashes
 `9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f`.
-The signed bundle comes from `build` run 45194275597, green on `main` for
-the commit `29e15813`: the unit tests, `checkdb`, `search`, lint, and
-`assembleDebug` passed, and the signed bundle `quran-22.3-vc225.aab` has
-SHA-256
-`c3e43a735b8766f8fb3d54a685d7b0b4d987f5f6c26dafb792f5da21e5364446`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.3` and `versionCode 225`, and the upload certificate is the
-same key 21.4 through 22.2 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.3 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+The signed bundle follows from the newest green `build` run on `main`.
+
+**What changed in 22.4.** The store set is the app's own face (owner
+decision, 22.4). The eight screenshots Play shows are cards now: each is a
+real capture from the screenshot test, whole and unedited, laid on the app's
+own paper inside an outline drawn in its ink, under one line set in the app's
+Literata with the app's Inter beneath it. The card's gold rule is the feature
+graphic's, so the icon, the graphic, and the cards read as one face.
+`./gradlew :tools:run --args="storecards"` composes all three sets from the
+captures committed under `play-store/frames/`, and `storecards --check` is a
+release gate: it compares the pictures the command would draw with the ones
+the repository holds, at a tolerance wide enough for a platform's own font
+rasterizer and narrow enough that one changed word fails. The app itself is
+unchanged, and the accessibility classes were not owed: the diff touches
+`tools/`, `play-store/`, and the records, and no path the trigger names.
 
 **What changed in 22.3.** Search recovers where it used to stop (owner
 decision, 22.3). A query that finds nothing is offered the one word the
@@ -271,17 +276,6 @@ and behind the word the word sheet names, is lifted to 18.4 L*, where the
 15.4 it carried since 21.0 stood 2 L* over its sheet and read as nothing at
 all. The paper, the ink, the gold ornament, the tajweed palette, the icon,
 and every content byte are unchanged.
-
-**What changed in 22.0.** The one action color is emerald now (owner
-decision, 22.0). Lapis had carried every action since the first release;
-the owner turned the accent to the Book's own green, and three candidates
-were measured before the word: emerald, malachite, and verdigris. The day
-tone #004B1E reads 9.9 to 1 on the page and the night tone #A4D2A9 reads
-10.2 to 1, the chosen and found grounds keep the lightness they already
-carried, the word mark's washes keep their pinned alphas, and the seven rule
-colors hold every floor beside the new family, the idgham 0.063 OKLab away.
-The paper, the ink, the gold, the tajweed palette, the icon, and every
-content byte are unchanged.
 
 ## Corrections and contributions
 

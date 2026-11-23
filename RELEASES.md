@@ -6,6 +6,22 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 22.3
+
+Search recovers where it used to stop (owner decision, 22.3). A query that
+finds nothing is offered the one word the reader's own library says is
+nearest to what they typed, in their own sentence, and tapping it rewrites
+that word and runs the search again. A reference past its surah's last ayah
+answers with the surah's own count, and a surah past the hundred and
+fourteenth with the Book's count, in place of "No matches". Words wrapped in
+double quotes must sit together, and a quoted reference is a phrase and
+never a place. `juz 30`, `para 30`, `পারা ৩০`, and `جزء 30` land on the ayah a
+juz opens, and the row names the juz in the reader's own word. The
+vocabulary is the Book's words, the enabled translations, and the word list,
+warmed when the sheet opens, so the suggestion lands in a frame; nothing
+leaves the phone. The text, both translations, both tafsirs, and the content
+database are unchanged.
+
 ## 22.2
 
 The page opens on Light (owner decision, 22.2, superseding 13.5). A fresh
