@@ -215,8 +215,8 @@ green on `main` for the commit `c65661fc`: the unit tests, `checkdb`,
 `versionName 22.2` and `versionCode 224`, and the upload certificate is the
 same key 21.4 through 22.1 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.2 bundle stands in `play-store/aab/` for the owner's submission, and
-the hand-off copy is deleted once Play has it.
+The 22.2 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
 
 **What changed in 22.2.** The page opens on Light (owner decision, 22.2,
 superseding 13.5). A fresh install no longer follows the phone's own day and
