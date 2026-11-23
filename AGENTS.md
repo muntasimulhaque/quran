@@ -236,6 +236,7 @@ as a dead letter.
 ./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-browse:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ./gradlew :tools:run --args="checkdb"                  # the content gate build.yml runs
 ./gradlew :tools:run --args="search"                   # the content gate build.yml runs
+./gradlew :tools:run --args="storecards --check"       # the store cards match their frames
 ./gradlew :data:connectedDebugAndroidTest   # an instrumented audit, never a release gate
 ./gradlew :app:connectedDebugAndroidTest    # an instrumented audit, never a release gate
 ./gradlew :tools:run --args="help"          # the content pipeline, every step
@@ -251,8 +252,8 @@ release starts.
 A release is three steps and no more.
 
 1. **Gates.** The `gates` job of `build.yml` is the release gate: the whole JVM
-   suite, `checkdb`, `search`, lint, and `assembleDebug`, run locally with the
-   commands in Verify. Nothing else gates a release.
+   suite, `checkdb`, `search`, `storecards --check`, lint, and `assembleDebug`,
+   run locally with the commands in Verify. Nothing else gates a release.
 2. **Version and record.** `versionCode` by 1, `versionName` up one tenth
    within the major line. Write the release notes and the README status, and
    move the release before this one into `RELEASES.md`; the hand-off record

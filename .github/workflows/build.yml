@@ -139,6 +139,12 @@ jobs:
       - name: Search check
         run: ./gradlew :tools:run --args="search" --console=plain
 
+      # The store cards are composed from the committed frames, so one run
+      # proves the set a release would ship matches its copy and the captures
+      # beside it. No device, no emulator, no artifact.
+      - name: Store cards check
+        run: ./gradlew :tools:run --args="storecards --check" --console=plain
+
       - name: Lint
         run: ./gradlew :app:lintDebug --console=plain
 
