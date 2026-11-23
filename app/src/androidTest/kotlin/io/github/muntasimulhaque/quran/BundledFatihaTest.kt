@@ -40,12 +40,15 @@ import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Al-Fatiha is the one surah the app carries in every reciter's voice, so the
- * first Play on 1:1 has to work with no network and no offer. This class pins
- * the three parts of that promise: the four timing packs install from assets on
- * the first open, every ayah of the surah answers with a bundled asset, and
- * the word wash moves through the same ExoPlayer engine the app's service uses
- * for every reciter.
+ * Al-Fatiha is the one surah the app carries, and it rides in the default
+ * voice's folder alone (owner decision, 22.2, closing 20.0's extension of
+ * 15.8 to the voices after it): the first Play on 1:1 in Husary works with
+ * no network and no offer, and a reader who has chosen another voice meets
+ * the offer every other surah already makes. This class pins the three
+ * parts of that promise: the four timing packs install from assets on the
+ * first open, every ayah of the surah answers with a bundled asset in
+ * Husary's voice and as a download in the others, and the word wash moves
+ * through the same ExoPlayer engine the app's service uses.
  *
  * The whole-surah rule is pinned by asking about 2:1: the debug sample carries
  * that one ayah, but surah 2 is not whole, so it must still be a download.
@@ -142,19 +145,19 @@ class BundledFatihaTest {
                 library.isInstalled("reciter-minshawi"),
             )
             assertTrue(
-                "Minshawi's whole Al-Fatiha must be playable",
-                library.hasSurahAudio("minshawi", 1),
-            )
-            assertTrue(
                 "Husary's whole Al-Fatiha must be playable",
                 library.hasSurahAudio("husary", 1),
             )
-            assertTrue(
-                "Alafasy's whole Al-Fatiha must be playable",
+            assertFalse(
+                "Minshawi's Al-Fatiha is a download now, not a bundled surah",
+                library.hasSurahAudio("minshawi", 1),
+            )
+            assertFalse(
+                "Alafasy's Al-Fatiha is a download now, not a bundled surah",
                 library.hasSurahAudio("alafasy", 1),
             )
-            assertTrue(
-                "Abdul Basit's whole Al-Fatiha must be playable",
+            assertFalse(
+                "Abdul Basit's Al-Fatiha is a download now, not a bundled surah",
                 library.hasSurahAudio("abdulbasit", 1),
             )
             assertFalse(
@@ -162,34 +165,43 @@ class BundledFatihaTest {
                 library.hasSurahAudio("minshawi", 2),
             )
             // The settings page answers what the reader can play offline, so
-            // the bundled Fatiha is on its list in every voice, marked as
-            // bundled because the app's own asset cannot be removed.
-            for (reciter in listOf("minshawi", "husary", "alafasy", "abdulbasit")) {
-                val rows = library.downloadedSurahs(reciter)
-                assertEquals(
-                    "$reciter must list the bundled Al-Fatiha",
-                    listOf(1),
-                    rows.map { it.surah },
-                )
+            // the bundled Fatiha is on the default voice's list alone,
+            // marked as bundled because the app's own asset cannot be
+            // removed; the other voices list nothing until the reader
+            // downloads a surah.
+            val husaryRows = library.downloadedSurahs("husary")
+            assertEquals(
+                "Husary must list the bundled Al-Fatiha",
+                listOf(1),
+                husaryRows.map { it.surah },
+            )
+            assertTrue(
+                "Husary's Al-Fatiha must say it is bundled",
+                husaryRows.single().bundled,
+            )
+            assertTrue(
+                "Husary's Al-Fatiha must carry its bundled size",
+                husaryRows.single().bytes > 0,
+            )
+            for (reciter in listOf("minshawi", "alafasy", "abdulbasit")) {
                 assertTrue(
-                    "$reciter's Al-Fatiha must say it is bundled",
-                    rows.single().bundled,
-                )
-                assertTrue(
-                    "$reciter's Al-Fatiha must carry its bundled size",
-                    rows.single().bytes > 0,
+                    "$reciter must list nothing until a surah is downloaded",
+                    library.downloadedSurahs(reciter).isEmpty(),
                 )
             }
-            for (reciter in listOf("minshawi", "husary", "alafasy", "abdulbasit")) {
+            assertEquals(
+                "Husary carries one playable surah",
+                1,
+                library.downloadedTotals()["husary"]?.first,
+            )
+            for (reciter in listOf("minshawi", "alafasy", "abdulbasit")) {
                 assertEquals(
-                    "$reciter carries one playable surah",
-                    1,
-                    library.downloadedTotals()[reciter]?.first,
+                    "$reciter carries no playable surah",
+                    0,
+                    library.downloadedTotals()[reciter]?.first ?: 0,
                 )
             }
-            for (path in fatihaPaths(MINSHAWI_FOLDER) + fatihaPaths(HUSARY_FOLDER) +
-                fatihaPaths(ALAFASY_FOLDER) + fatihaPaths(ABDULBASIT_FOLDER)
-            ) {
+            for (path in fatihaPaths(HUSARY_FOLDER)) {
                 assertEquals(
                     "$path must come from the app's own assets",
                     "asset",
@@ -200,13 +212,13 @@ class BundledFatihaTest {
             // must not touch the bundled ayahs.
             assertFalse(
                 "there is no downloaded Fatiha to remove",
-                library.removeDownloads("minshawi", 1),
+                library.removeDownloads("husary", 1),
             )
-            recitationStore.removeAll(MINSHAWI_FOLDER)
+            recitationStore.removeAll(HUSARY_FOLDER)
             assertEquals(
                 "the bundled audio must survive a removal",
                 "asset",
-                recitationStore.uri("$MINSHAWI_FOLDER/001001.mp3")?.scheme,
+                recitationStore.uri("$HUSARY_FOLDER/001001.mp3")?.scheme,
             )
         } finally {
             library.retire()
@@ -215,14 +227,11 @@ class BundledFatihaTest {
     }
 
     @Test
-    fun theWordWashMovesOnTheFirstMiddleAndLastAyahForEveryReciter() = runBlocking {
-        assertTrue("the build must carry the Minshawi pack", packStore.install("reciter-minshawi"))
+    fun theWordWashMovesOnTheFirstMiddleAndLastAyahInTheDefaultVoice() = runBlocking {
         assertTrue("the build must carry the Husary pack", packStore.install("reciter-husary"))
-        assertTrue("the build must carry the Alafasy pack", packStore.install("reciter-alafasy"))
-        assertTrue("the build must carry the Abdul Basit pack", packStore.install("reciter-abdulbasit"))
         val session = mainValue { ExoPlayer.Builder(context).build() }
         try {
-            for (reciter in listOf("minshawi", "husary", "alafasy", "abdulbasit")) {
+            for (reciter in listOf("husary")) {
                 // The chosen voice is the one whose timings are attached, so
                 // each voice's wash is proven on a library opened over it.
                 val database = ContentDatabase.open(

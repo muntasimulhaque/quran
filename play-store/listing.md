@@ -47,14 +47,14 @@ once, and each one draws in its own place under the ayah.
 
 Recitation plays Minshawi, Husary, Alafasy, or Abdul Basit, with the page
 following the reciter and the word being recited marked. Al-Fatiha is bundled
-for every voice, so the first Play on 1:1 needs no network and asks for
-nothing. Every other
-surah is not streamed: when you tap Play, the app tells you its size and
-downloads that one surah from the project's own release page. The word
-timings for all four reciters ship inside the app. If you turn on Continue to
-the next surah in the player's listening menu, the following surahs download
-as the recitation reaches them, each with its own name and size on the
-player. Everything you download works offline forever after.
+in Husary's voice, so the first Play on 1:1 in the default recitation needs no
+network and asks for nothing; in another voice it downloads on your word, like
+every other surah. Nothing is streamed: when you tap Play, the app tells you
+its size and downloads that one surah from the project's own release page. The
+word timings for all four reciters ship inside the app. If you turn on Continue
+to the next surah in the player's listening menu, the following surahs download
+as the recitation reaches them, each with its own name and size on the player.
+Everything you download works offline forever after.
 
 There are no ads, no trackers, no analytics, and no account. The app is
 free and its source code is public. It reaches the project's own release
@@ -394,11 +394,11 @@ something Play would reject.
 
 ## What the app carries, and what a reader adds
 
-The app ships the Quran text, both translations, both reciters' word
-timings, and Al-Fatiha's audio in both voices: a complete offline reading
-that needs no network and no account. The tafsir, the word lists, and every
-other surah's recitation are added by the reader, from the project's own
-GitHub Releases, with the size named before a tap or on the player while a
+The app ships the Quran text, both translations, every reciter's word
+timings, and Al-Fatiha's audio in the default voice: a complete offline
+reading that needs no network and no account. The tafsir, the word lists,
+and every other surah's recitation are added by the reader, from the project's
+own GitHub Releases, with the size named before a tap or on the player while a
 Continue package downloads, and a SHA-256 check before it is used:
 
 | Language | Translation | Tafsir | Word by word |
@@ -406,9 +406,9 @@ Continue package downloads, and a SHA-256 check before it is used:
 | English | Saheeh International (ships) | Ibn Kathir (29.5 MB) | 6.3 MB |
 | Bangla | Al-Bayan Simple Translation (ships) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
-Recitations: Al-Fatiha ships in every voice; every other surah downloads
-one at a time (about 0.2 to 185 MB each). The 1.7 MB of word timings per
-reciter ships with the app.
+Recitations: Al-Fatiha ships in Husary's voice; the other voices' Al-Fatiha
+and every other surah download one at a time (about 0.2 to 185 MB each).
+The 1.7 MB of word timings per reciter ships with the app.
 
 Content updates arrive on their own: when a pack you already have is
 superseded, the app replaces it quietly on Wi-Fi, so the tafsir and the

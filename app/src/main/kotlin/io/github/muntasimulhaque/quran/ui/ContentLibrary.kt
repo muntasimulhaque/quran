@@ -223,6 +223,7 @@ class ContentLibrary(
             // one launch. A fresh install has no language yet, and the phone
             // already answered: it is written here, together with the
             // language's own translation, before the library is opened.
+            settingsStore.pinSystemForReadersWhoNeverChoseAPage()
             var storedNow = settingsStore.settings.first()
             val offeredNow = PackCatalog.load(application)
             storedNow = bootstrapLanguage(storedNow, offeredNow)
@@ -693,11 +694,11 @@ class ContentLibrary(
     /**
      * The reciter the app falls back to when the selected one is removed.
      * The remaining reciter with the most audio on the device wins, because
-     * that is the one the reader has actually been listening to; the bundled
-     * Al-Fatiha counts because it plays offline, and when no reciter has any
-     * audio at all the fallback is Husary, the quiet second voice, and only
-     * then the list's own order. A removed reciter is never chosen, even if a
-     * file of his lingers.
+     * that is the one the reader has actually been listening to; Husary's
+     * bundled Al-Fatiha counts because it plays offline, and when no reciter
+     * has any audio at all the fallback is Husary, the quiet second voice, and
+     * only then the list's own order. A removed reciter is never chosen, even
+     * if a file of his lingers.
      */
     private suspend fun fallbackReciter(removed: String): String {
         val candidates = recitations.filter { it.id != removed }
@@ -764,10 +765,11 @@ class ContentLibrary(
      * among the published packages.
      *
      * The list answers what the reader can play offline, not only what was
-     * downloaded: Al-Fatiha travels in the app's own assets, and a reader who
-     * opens the Reciters page must meet it there. The two are told apart by
-     * [DownloadedSurah.bundled], because a bundled surah cannot be removed and
-     * the page must not offer a Remove that does nothing.
+     * downloaded: Al-Fatiha travels in the app's own assets in the default
+     * voice, and a reader who opens the Reciters page must meet it there. The
+     * two are told apart by [DownloadedSurah.bundled], because a bundled
+     * surah cannot be removed and the page must not offer a Remove that does
+     * nothing.
      */
     suspend fun downloadedSurahs(recitation: String): List<DownloadedSurah> = withContext(Dispatchers.IO) {
         val db = database ?: return@withContext emptyList()

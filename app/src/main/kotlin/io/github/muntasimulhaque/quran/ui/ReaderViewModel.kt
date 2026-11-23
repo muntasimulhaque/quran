@@ -905,8 +905,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * decision, 15.5).
      *
      * The language's reading is fetched without another question: the
-     * language's translation and tafsir become the queue, and the queue brings
-     * them one at a time, the tafsir on an unmetered connection. The language
+     * language's translation joins the queue, and its tafsir joins only when
+     * the reader has chosen one, so a language change swaps a chosen tafsir
+     * and never introduces one (owner decision, 22.2); the queue brings them
+     * one at a time, the tafsir on an unmetered connection. The language
      * the reader left takes its packs with it, so a former language's download
      * can never come back (owner decision, 14.8). The word list is not
      * fetched here: it is off by default, and the toggle is its own ask when
@@ -934,7 +936,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // the reader left takes its packs with it, so a former language's
             // translation can never come back when an update detaches it
             // (owner decision, 14.8).
-            settingsStore.setPendingForLanguage(previous, language, library.catalogContent)
+            settingsStore.setPendingForLanguage(
+                previous,
+                language,
+                library.catalogContent,
+                next.tafsirPacks,
+            )
             library.drainPending()
         }
         // A reader who already reads with word meanings is given the word

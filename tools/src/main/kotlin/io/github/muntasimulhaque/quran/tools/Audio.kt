@@ -31,7 +31,8 @@ import java.util.zip.ZipOutputStream
  * hash matches, so a bad download or a tampered file can never play.
  *
  * The first surah is also carried inside the app: `audio bundle` writes the
- * seven Al-Fatiha ayahs of every reciter into `content/bundled/audio`, taken
+ * seven Al-Fatiha ayahs of the default reciter, Husary, into
+ * `content/bundled/audio`, taken
  * byte for byte from the published surah 1 packages and checked against the
  * source pins. The app's own assets then answer the first Play with no
  * network (owner decision, 15.8).
@@ -140,8 +141,8 @@ class Audio(private val root: File) {
     // ------------------------------------------------------------------ bundle
 
     /**
-     * Writes the twenty-eight Al-Fatiha ayah files the app carries, all four
-     * reciters, from the published surah 1 packages.
+     * Writes the seven Al-Fatiha ayah files the app carries, in the default
+     * voice, from the published surah 1 package.
      *
      * The files are not re-encoded and not downloaded into the app at run
      * time. Each package is verified against `recitation-manifest.json` before
@@ -184,7 +185,11 @@ class Audio(private val root: File) {
         val staging = File(root, "content/work/audio-bundle")
         staging.deleteRecursively()
         val failures = mutableListOf<String>()
-        for ((reciter, paths) in pathsByReciter) {
+        // The bundle is the default voice's alone (owner decision, 22.2,
+        // closing 20.0's extension of 15.8 to the voices after it): a
+        // reader who has chosen another voice meets the offer every other
+        // surah already makes.
+        for ((reciter, paths) in pathsByReciter.filterKeys { it == "husary" }) {
             val known = existing[reciter]?.get(1)
             if (known == null) {
                 failures += "$reciter: surah 1 has no published package"

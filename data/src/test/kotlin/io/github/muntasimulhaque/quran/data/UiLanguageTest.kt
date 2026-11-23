@@ -42,7 +42,7 @@ class UiLanguageTest {
         assertEquals("bn", chosen.uiLanguage)
         assertTrue(chosen.translationPacks.isEmpty())
         assertTrue(chosen.tafsirPacks.isEmpty())
-        assertTrue(pendingAfterLanguage(null, UiLanguage.Bangla, setOf("kept"), CatalogContent()) == setOf("kept"))
+        assertTrue(pendingAfterLanguage(null, UiLanguage.Bangla, setOf("kept"), CatalogContent(), emptySet()) == setOf("kept"))
     }
 
     @Test
@@ -136,19 +136,57 @@ class UiLanguageTest {
     }
 
     @Test
-    fun aFreshChoiceSelectsTheLanguagesOwnPacks() {
+    fun aFreshChoiceSelectsTheLanguagesOwnTranslation() {
         val chosen = AppSettings().withLanguage(UiLanguage.Bangla, catalog())
         assertEquals("bn", chosen.uiLanguage)
         assertEquals(setOf("translation-al-bayan-bn"), chosen.translationPacks)
-        assertEquals(setOf("tafsir-ibn-kathir-bn"), chosen.tafsirPacks)
+        assertTrue("a language choice never introduces a tafsir", chosen.tafsirPacks.isEmpty())
     }
 
     @Test
-    fun movingLanguageSwapsTheDefaults() {
+    fun movingLanguageSwapsTheTranslationDefault() {
         val english = AppSettings().withLanguage(UiLanguage.English, catalog())
         val bangla = english.withLanguage(UiLanguage.Bangla, catalog())
         assertEquals(setOf("translation-al-bayan-bn"), bangla.translationPacks)
-        assertEquals(setOf("tafsir-ibn-kathir-bn"), bangla.tafsirPacks)
+        assertTrue("a reader who never chose a tafsir keeps none", bangla.tafsirPacks.isEmpty())
+    }
+
+    @Test
+    fun aChosenTafsirMovesWithTheReader() {
+        val before = AppSettings(
+            uiLanguage = "en",
+            translationPacks = setOf("translation-saheeh-en"),
+            tafsirPacks = setOf("tafsir-ibn-kathir-en"),
+        )
+        val after = before.withLanguage(UiLanguage.Bangla, catalog())
+        assertEquals(setOf("tafsir-ibn-kathir-bn"), after.tafsirPacks)
+        val queue = pendingAfterLanguage(
+            previous = UiLanguage.English,
+            next = UiLanguage.Bangla,
+            pending = setOf("translation-saheeh-en", "tafsir-ibn-kathir-en"),
+            content = catalog(),
+            chosenTafsir = after.tafsirPacks,
+        )
+        assertEquals(setOf("translation-al-bayan-bn", "tafsir-ibn-kathir-bn"), queue)
+    }
+
+    @Test
+    fun aReaderWhoNeverChoseATafsirIsNotGivenOneByALanguageChange() {
+        val english = AppSettings().withLanguage(UiLanguage.English, catalog())
+        val bangla = english.withLanguage(UiLanguage.Bangla, catalog())
+        assertTrue(bangla.tafsirPacks.isEmpty())
+        val queue = pendingAfterLanguage(
+            previous = UiLanguage.English,
+            next = UiLanguage.Bangla,
+            pending = setOf("translation-saheeh-en", "tafsir-ibn-kathir-en"),
+            content = catalog(),
+            chosenTafsir = bangla.tafsirPacks,
+        )
+        assertEquals(
+            "the old language's tafsir leaves the queue and none takes its place",
+            setOf("translation-al-bayan-bn"),
+            queue,
+        )
     }
 
     @Test
@@ -214,6 +252,7 @@ class UiLanguageTest {
             next = UiLanguage.Bangla,
             pending = setOf("translation-saheeh-en", "tafsir-ibn-kathir-en", "words-en"),
             content = catalog(),
+            chosenTafsir = setOf("tafsir-ibn-kathir-bn"),
         )
         assertEquals(
             setOf("translation-al-bayan-bn", "tafsir-ibn-kathir-bn", "words-en"),
@@ -228,22 +267,24 @@ class UiLanguageTest {
             next = UiLanguage.Bangla,
             pending = setOf("translation-added-by-hand"),
             content = catalog(),
+            chosenTafsir = emptySet(),
         )
         assertEquals(
-            setOf("translation-added-by-hand", "translation-al-bayan-bn", "tafsir-ibn-kathir-bn"),
+            setOf("translation-added-by-hand", "translation-al-bayan-bn"),
             after,
         )
     }
 
     @Test
-    fun aFirstChoiceAsksOnlyForItsOwnPacks() {
+    fun aFirstChoiceWithoutATafsirAsksOnlyForTheTranslation() {
         val after = pendingAfterLanguage(
             previous = null,
             next = UiLanguage.English,
             pending = emptySet(),
             content = catalog(),
+            chosenTafsir = emptySet(),
         )
-        assertEquals(setOf("translation-saheeh-en", "tafsir-ibn-kathir-en"), after)
+        assertEquals(setOf("translation-saheeh-en"), after)
     }
 
     @Test

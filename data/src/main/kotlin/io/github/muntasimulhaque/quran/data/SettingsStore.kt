@@ -91,12 +91,15 @@ data class AppSettings(
      */
     val ayah: Int = 1,
     /**
-     * The page the app opens on. System until the reader chooses a ground,
-     * so a new install follows the phone's own day and night, the way every
-     * other app on the phone does; Light and Dark are the reader's own
-     * answers once they have made one (owner decision, 13.5).
+     * The page the app opens on. Light until the reader chooses a ground,
+     * so the Book opens as its own warm page, the page the printed Book
+     * reads on; System, which follows the phone's own day and night, stays
+     * one row away, and Dark with it (owner decision, 22.2, superseding
+     * 13.5's System: the older readers this app is for are the ones least
+     * likely to look for a settings row, and dark ink on a warm ground is
+     * the page their eyes read easiest).
      */
-    val theme: AppTheme = AppTheme.System,
+    val theme: AppTheme = AppTheme.Light,
     /**
      * The language the interface is written in, and the content it reads.
      * Null only on an install from before the phone seed; a fresh install
@@ -159,11 +162,12 @@ data class AppSettings(
      */
     val dailyAyah: Boolean = false,
     /**
-     * Whether the one-time reminder offer was answered for good. False on a
+     * Whether the one-time reminder offer was answered for good. The store's
+     * own default is true, and an install from before the first open's seed
+     * keeps it, so an update never asks again; the seed writes false on a
      * fresh install, so the offer stands at the end of the first surah the
-     * reader finishes; the final answer writes it true: Turn on, the second
-     * Not now, or the reminder set in Settings. An existing install keeps
-     * the true it has always had, so an update never asks again
+     * reader finishes. The final answer writes it true: Turn on, the second
+     * Not now, or the reminder set in Settings
      * (owner decision, 15.5; the second Not now, 21.9).
      */
     val reminderAnswered: Boolean = true,
@@ -387,6 +391,30 @@ class SettingsStore(private val context: Context) {
         themePreference.setTheme(theme)
     }
 
+    /**
+     * The page a reader from before the Light default keeps, decided once.
+     * An install that has opened before this build and never chose a page
+     * is written System, before the Light default can move it, because a
+     * reader who updated must never find their page moved for a reason
+     * they cannot see (the creed of 6.0's migration, held through 22.2).
+     * The decision is written down beside the write, once, so the pin can
+     * never fire on the second open of a fresh install, whose seeded
+     * language would otherwise look like the history the pin reads.
+     *
+     * The one frame the pin costs: a never-chooser on a dark phone opens
+     * this update's first launch on the mirror's Light for the moment the
+     * DataStore read takes, then turns over to System once the pin lands.
+     * One launch, one moment, and only ever on the update itself.
+     */
+    suspend fun pinSystemForReadersWhoNeverChoseAPage() {
+        val stored = context.settingsStore.data.first()
+        if (stored[PAGE_DEFAULT_DECIDED] == true) return
+        if (stored[THEME] == null && stored[UI_LANGUAGE] != null) {
+            setTheme(AppTheme.System)
+        }
+        context.settingsStore.edit { it[PAGE_DEFAULT_DECIDED] = true }
+    }
+
     suspend fun setUiLanguage(tag: String) {
         LanguagePreference(context).set(tag)
         context.settingsStore.edit { it[UI_LANGUAGE] = tag }
@@ -581,13 +609,15 @@ class SettingsStore(private val context: Context) {
     /**
      * The queue after a language choice, written in one edit: the language the
      * reader left takes its packs with it and the new language asks for its
-     * own. A pack the reader added by hand is not a language's default and is
-     * left exactly where it was (owner decision, 14.8).
+     * own, its tafsir only when the reader's choice names it (owner decision,
+     * 22.2). A pack the reader added by hand is not a language's default and
+     * is left exactly where it was (owner decision, 14.8).
      */
     suspend fun setPendingForLanguage(
         previous: UiLanguage?,
         next: UiLanguage,
         content: CatalogContent,
+        chosenTafsir: Set<String>,
     ) {
         context.settingsStore.edit {
             it[PENDING_PACKS] = pendingAfterLanguage(
@@ -595,6 +625,7 @@ class SettingsStore(private val context: Context) {
                 next = next,
                 pending = it[PENDING_PACKS].orEmpty(),
                 content = content,
+                chosenTafsir = chosenTafsir,
             )
         }
     }
@@ -635,9 +666,10 @@ class SettingsStore(private val context: Context) {
     private fun storedTheme(preferences: Preferences): AppTheme {
         val auto = preferences[AUTO_NIGHT] == true
         return when (preferences[THEME]) {
-            // A fresh install has no page of its own yet, so it follows the
-            // phone until the reader picks one (owner decision, 13.5).
-            null -> AppTheme.System
+            // A fresh install has no page of its own yet, so it opens on
+            // the Book's own warm page until the reader picks one (owner
+            // decision, 22.2, superseding 13.5).
+            null -> AppTheme.Light
             "system" -> AppTheme.System
             "light", "paper", "sepia" -> if (auto) AppTheme.System else AppTheme.Light
             "dark", "night", "black" -> if (auto) AppTheme.System else AppTheme.Dark
@@ -710,6 +742,13 @@ class SettingsStore(private val context: Context) {
 
         val AYAH = intPreferencesKey("ayah")
         val THEME = stringPreferencesKey("theme")
+        /**
+         * Whether this build's page default has been decided for this
+         * install, so the one-time pin that keeps an existing reader on the
+         * System they read under (owner decision, 22.2) can never fire on
+         * the second open of a fresh install.
+         */
+        val PAGE_DEFAULT_DECIDED = booleanPreferencesKey("page_default_decided")
         /**
          * The automatic switch the third theme value replaced. Written by no
          * build since System became a value; read only to carry an install

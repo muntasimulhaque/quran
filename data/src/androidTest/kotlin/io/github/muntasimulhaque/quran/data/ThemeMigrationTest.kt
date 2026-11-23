@@ -18,6 +18,10 @@ import org.junit.Test
  * must never find their page moved for a reason they cannot see (owner
  * decision, 6.0).
  *
+ * Since 22.2 a fresh install opens on Light, the Book's own page, and an
+ * install from before that default is pinned to the System it read under
+ * (owner decision, 22.2).
+ *
  * This pins the read the launch mirror and the settings store share, so a
  * migration that drops a reader's choice fails here rather than in the shade.
  */
@@ -74,9 +78,9 @@ class ThemeMigrationTest {
     }
 
     @Test
-    fun aFreshInstallFollowsTheSystem() {
+    fun aFreshInstallOpensOnTheLightPage() {
         write(null, null)
-        assertEquals(AppTheme.System, ThemePreference(context).theme())
+        assertEquals(AppTheme.Light, ThemePreference(context).theme())
     }
 
     @Test

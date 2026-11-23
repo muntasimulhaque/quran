@@ -49,8 +49,8 @@ class FatihaPlayTest {
     /**
      * A reading on 1:1 in Husary's voice, with neither timing pack on the
      * device and no downloaded audio, which is the first open the app gives a
-     * fresh install. Both packs and both Fatiha sets must come back from the
-     * build's own assets.
+     * fresh install. Husary's timing pack and his Fatiha set must come back
+     * from the build's own assets.
      */
     private val library = object : ExternalResource() {
         override fun before() {
@@ -119,12 +119,14 @@ class FatihaPlayTest {
     /**
      * The reader's own round: an ayah playing in Husary, then another
      * voice chosen on the playing pill. Every voice's timings ship in the
-     * app, and the whole of Al-Fatiha is in its assets for all four, so
-     * nothing is missing and no offer may stand between the reader and the
-     * voice they asked for (owner report, 20.4).
+     * app, but Al-Fatiha's audio rides in the default voice alone, so the
+     * switch is answered with the offer that names the voice's missing
+     * surah, the same offer every other surah makes (owner decision, 22.2,
+     * closing the expectation 20.4 pinned while the bundle still carried
+     * every voice).
      */
     @Test
-    fun switchingVoicesMidPlayDoesNotOfferADownload() {
+    fun switchingVoicesMidPlayOffersTheVoiceItsAlFatiha() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
@@ -150,15 +152,11 @@ class FatihaPlayTest {
             compose.onAllNodesWithText(voice).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithText(voice).onFirst().performClick()
-        // Give a delayed offer a chance to appear before the assertion stands.
+        // Give a delayed offer a moment to stand before the assertion reads it.
         Thread.sleep(1_000)
         assertTrue(
-            "the voice's timings and Al-Fatiha are both here, so the switch must not ask for a download",
-            compose.onAllNodesWithTag("listen-offer-bar").fetchSemanticsNodes().isEmpty(),
-        )
-        assertTrue(
-            "the new voice must still be on the pill",
-            compose.onAllNodesWithTag("playback-bar").fetchSemanticsNodes().isNotEmpty(),
+            "the voice's timings are here but its Al-Fatiha is not, so the switch must ask for the surah",
+            compose.onAllNodesWithTag("listen-offer-bar").fetchSemanticsNodes().isNotEmpty(),
         )
     }
 

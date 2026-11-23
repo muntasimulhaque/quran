@@ -84,8 +84,8 @@ as sheets, so nothing stands between you and the text.
 
 The Book is here before the first tap. The app installs with the QPC Hafs text
 and its tajweed, both translations, the surah names, the recitation timings for
-every reciter, and Al-Fatiha's audio in every voice, so the first Play on 1:1
-works with the phone in airplane mode.
+every reciter, and Al-Fatiha's audio in the default voice, so the first Play
+on 1:1 works with the phone in airplane mode.
 
 Everything else is fetched from this project's GitHub Releases, only when you
 ask for it:
@@ -95,7 +95,7 @@ ask for it:
 | Tafsir Ibn Kathir | When you open the ayah card and ask for it, in the language you read | 30 MB English, 56 MB Bangla |
 | Word meanings | With the switch that turns word by word on | 11 MB English, 13 MB Bangla, plus 3 MB of roots |
 | Word pronunciation | The surah being read, when you press a word's speaker or turn the feature on | 352 MB for the Book, one surah at a time |
-| Recitation | One surah, after you see its size and tap Download (Al-Fatiha is already here) | Under 1 MB to 186 MB for Al-Baqarah |
+| Recitation | One surah, after you see its size and tap Download (Al-Fatiha is already here in Husary's voice) | Under 1 MB to 186 MB for Al-Baqarah |
 
 A pack you already hold refreshes quietly when a newer version of the app ships,
 on an unmetered connection only, and only after the first page is readable.

@@ -99,10 +99,12 @@ val screenshotPacks = setOf(
 // in the reader's language, offline, with no download and no language screen;
 // the tafsir and the word lists stay downloads (owner decision, 15.5).
 //
-// The four reciter timing packs ride with them: a downloaded surah is then
-// audio on its own, and Al-Fatiha's audio is already in the assets, so the
-// first Play on 1:1 needs neither an offer nor a network, whichever voice the
-// reader chose (owner decision, 20.0, extending 15.8 to the voices after it).
+// The four reciter timing packs ride with them, so every voice is ready to
+// be chosen offline; Al-Fatiha's audio rides in the default voice alone, so
+// the first Play on 1:1 needs neither an offer nor a network in Husary's,
+// and a reader who has chosen another voice meets the offer every other
+// surah already makes (owner decision, 22.2, closing 20.0's extension of
+// 15.8 to the voices after it).
 val shippedPacks = setOf(
     "translation-saheeh-en.db",
     "translation-al-bayan-bn.db",
@@ -185,11 +187,11 @@ abstract class PrepareContentAssets : DefaultTask() {
     fun copyAssets() {
         val out = contentAssetsOut.get().asFile
         out.deleteRecursively()
-        // The app ships the Quran text, the two translations, and the two
+        // The app ships the Quran text, the two translations, and the four
         // reciter timing packs, and nothing else: the core pack, the shipped
         // packs, and the catalog of what can be downloaded. The first page
         // needs no network, and the first Play on Al-Fatiha needs none either
-        // (owner decision, 15.8).
+        // in the default voice (owner decision, 15.8).
         val content = File(out, "content").apply { mkdirs() }
         File(packsDir.get().asFile, "core.db").copyTo(File(content, "core.db"), overwrite = true)
         catalogFile.get().asFile.copyTo(File(content, "catalog.json"), overwrite = true)
@@ -202,17 +204,17 @@ abstract class PrepareContentAssets : DefaultTask() {
             }
             source.copyTo(File(shippedOut, name), overwrite = true)
         }
-        // The twenty-eight Al-Fatiha files are read from the app's own assets,
-        // under the one prefix RecitationStore already searches. They are
-        // checked as a set here so a half-copied source cannot ship a surah
-        // that only plays some of its ayahs.
+        // The seven Al-Fatiha files of the default voice are read from the
+        // app's own assets, under the one prefix RecitationStore already
+        // searches. They are checked as a set here so a half-copied source
+        // cannot ship a surah that only plays some of its ayahs.
         val bundledAudio = bundledAudioDir.get().asFile
         if (!bundledAudio.isDirectory) {
             throw GradleException("the bundled Al-Fatiha audio is missing; run ./gradlew :tools:run --args=\"audio bundle\"")
         }
         val bundledFiles = bundledAudio.walkTopDown().filter { it.isFile && it.extension == "mp3" }.toList()
-        if (bundledFiles.size != 28) {
-            throw GradleException("the bundled Al-Fatiha audio has ${bundledFiles.size} mp3 file(s), expected 28")
+        if (bundledFiles.size != 7) {
+            throw GradleException("the bundled Al-Fatiha audio has ${bundledFiles.size} mp3 file(s), expected 7")
         }
         bundledAudio.copyRecursively(File(out, "recitation"), overwrite = true)
         // The word pronunciation pack: the manifest names one ZIP per surah,

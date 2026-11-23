@@ -597,10 +597,10 @@ class CheckDb(private val root: File) {
     }
 
     /**
-     * The app's bundled Al-Fatiha files must be exactly the surah 1 paths the
-     * database names, for every reciter, and nothing else. A missing file is a
-     * first Play that falls back to a download; an extra file is content the
-     * app carries without the database saying so.
+     * The app's bundled Al-Fatiha files must be exactly the default reciter's
+     * surah 1 paths, and nothing else (owner decision, 22.2). A missing file
+     * is a first Play that falls back to a download; an extra file is
+     * content the app carries without the database saying so.
      */
     private fun checkBundledAudio(connection: java.sql.Connection): Int {
         val expected = mutableSetOf<String>()
@@ -609,6 +609,10 @@ class CheckDb(private val root: File) {
                 "JOIN ayah a ON a.number = ra.ayah_number " +
                 "WHERE a.surah = 1 ORDER BY ra.recitation, a.ayah",
         ) { rs -> expected += rs.getString(1) ?: "" }
+        // The bundle is the default voice's alone (owner decision, 22.2):
+        // the other voices' Fatiha is a download like their every other
+        // surah, so only Husary's folder is expected here.
+        expected.retainAll { it.startsWith("husary/") }
         val bundle = File(root, "content/bundled/audio/recitation")
         val found = bundle.walkTopDown()
             .filter { it.isFile }

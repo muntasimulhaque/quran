@@ -105,7 +105,7 @@ fun RecitersPage(
  * changed: a row that stayed after its Remove was tapped would read as a
  * button that did nothing.
  *
- * A bundled surah, Al-Fatiha in every voice, is part of the app's own assets.
+ * A bundled surah, Al-Fatiha in the default voice, is part of the app's own assets.
  * It is listed with its size like a downloaded one, because the reader asked
  * which surahs are already there, and it has no Remove: the word Bundled says
  * why the row stays and why there is no button that could take it away.

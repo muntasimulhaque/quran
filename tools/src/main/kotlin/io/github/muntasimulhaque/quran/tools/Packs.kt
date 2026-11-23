@@ -23,8 +23,8 @@ import java.sql.Connection
  * text and layout, a translation, a tafsir, a word list, a script. The app
  * ships the core pack, the two translations, and the four reciter timing
  * packs; the recitation audio itself is downloaded per surah on the reader's
- * word, except Al-Fatiha, whose twenty-eight ayahs the app carries as assets
- * (owner decision, 15.8).
+ * word, except Al-Fatiha, whose seven ayahs the app carries as assets in
+ * the default voice (owner decision, 15.8; the default voice alone, 22.2).
  *
  * The pack files are derived from the audited database, so there is exactly
  * one place where content is assembled and one set of gates that guard it.

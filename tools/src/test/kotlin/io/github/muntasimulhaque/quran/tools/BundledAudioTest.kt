@@ -9,9 +9,13 @@ import org.junit.Test
 import java.io.File
 
 /**
- * The twenty-eight Fatiha files the app carries are the published recording, not
+ * The seven Fatiha files the app carries are the published recording, not
  * a hand edit and not a second encode: every bundled byte must match its pin
  * in `content/audio-sources.json`, and no other file may stand beside them.
+ *
+ * The bundle is the default voice's alone (owner decision, 22.2, closing
+ * 20.0's extension of 15.8 to the voices after it), so a second voice's
+ * folder beside it fails here rather than shipping.
  *
  * The check runs without a content database or a network, so a fresh clone
  * and CI can prove the bundle before the app is built. `checkdb` pins the
@@ -19,7 +23,7 @@ import java.io.File
  */
 class BundledAudioTest {
 
-    private val reciters = listOf("minshawyMurattal", "husary", "alafasy", "abdulBasitMurattal")
+    private val reciters = listOf("husary")
 
     @Test
     fun theBundledFatihaIsThePinnedSourceAudio() {
@@ -36,7 +40,7 @@ class BundledAudioTest {
             .filter { it.isFile }
             .map { it.relativeTo(bundle).invariantSeparatorsPath }
             .toSet()
-        assertEquals("the bundle must carry exactly the four Fatiha reciters", expected, found)
+        assertEquals("the bundle must carry exactly the default reciter's Fatiha", expected, found)
         for (path in expected) {
             val pin = sources[path]?.jsonPrimitive?.content
             assertTrue("$path has no source pin", !pin.isNullOrBlank())

@@ -126,10 +126,12 @@ fun AppSettings.bootstrapFor(language: UiLanguage, content: CatalogContent): App
 
 /**
  * The settings after a language choice: the tag is stored, and the language's
- * translation and tafsir replace the other offered language's own defaults,
+ * translation replaces the other offered language's own default, while its
+ * tafsir replaces the other's only when the reader has chosen one at all,
  * so a reader who moves from Bangla to English never keeps two defaults
- * fighting. A pack that is not a language default is left exactly where it
- * was.
+ * fighting, and a reader who never chose a tafsir is never handed one
+ * (owner decision, 22.2). A pack that is not a language default is left
+ * exactly where it was.
  */
 fun AppSettings.withLanguage(language: UiLanguage, content: CatalogContent): AppSettings {
     val mine = content.of(language)
@@ -139,9 +141,19 @@ fun AppSettings.withLanguage(language: UiLanguage, content: CatalogContent): App
         translationPacks = translationPacks
             .minus(previous?.let { content.of(it) }?.translation.orEmpty())
             .plusPack(mine.translation),
-        tafsirPacks = tafsirPacks
-            .minus(previous?.let { content.of(it) }?.tafsir.orEmpty())
-            .plusPack(mine.tafsir),
+        // The tafsir is swapped, never introduced (owner decision, 22.2): a
+        // reader who has chosen no tafsir keeps none through a language
+        // change, exactly as the first open leaves them none, so no
+        // language change can queue a download the reader never asked for
+        // (15.5). A reader who has chosen one is moved to the new language's
+        // own, the way their translation is.
+        tafsirPacks = if (tafsirPacks.isEmpty()) {
+            tafsirPacks
+        } else {
+            tafsirPacks
+                .minus(previous?.let { content.of(it) }?.tafsir.orEmpty())
+                .plusPack(mine.tafsir)
+        },
     )
 }
 
@@ -181,7 +193,9 @@ fun translationSelectionAfterRemoval(
  * The download queue after a language choice: the packs the language the
  * reader left had asked for leave it, and the new language's packs join it.
  * A pack the reader added by hand is not a language's default and stays
- * exactly where it was.
+ * exactly where it was. The tafsir joins the queue only when the reader's
+ * own choice names it, so a language change swaps a chosen tafsir and
+ * never introduces one (owner decision, 22.2).
  *
  * A queue entry used to outlive the language that asked for it, because a
  * pack that was already installed was skipped by the drain and never
@@ -195,7 +209,18 @@ fun pendingAfterLanguage(
     next: UiLanguage,
     pending: Set<String>,
     content: CatalogContent,
-): Set<String> = pending - previous?.let { content.of(it) }?.asked.orEmpty() + content.of(next).asked
+    chosenTafsir: Set<String>,
+): Set<String> {
+    val mine = content.of(next)
+    // The tafsir is asked for only when the reader's choice names it,
+    // the same rule withLanguage holds (owner decision, 22.2), so a
+    // reader who never chose one is not handed a download behind their
+    // back.
+    val asked = LinkedHashSet<String>()
+    if (mine.translation.isNotBlank()) asked += mine.translation
+    if (mine.tafsir.isNotBlank() && mine.tafsir in chosenTafsir) asked += mine.tafsir
+    return pending - previous?.let { content.of(it) }?.asked.orEmpty() + asked
+}
 
 /**
  * The packs that speak [language]: what search reads when the reader's chosen
