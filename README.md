@@ -200,23 +200,32 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.2 (versionCode 224).** The whole JVM suite, `checkdb`, `search`, lint,
+**22.3 (versionCode 225).** The whole JVM suite, `checkdb`, `search`, lint,
 and `assembleDebug` were green on this machine before the push. The diff
-touches `feature-settings/`, so the four accessibility classes were owed;
-they ran on the phone, 10 tests and no failures. No store set was captured:
-no visible surface changed, because every capture class sets its ground
-explicitly, and the three committed sets stand. No Bangla leg was owed: no
-interface string moved. The signed bundle comes from `build` run 45131892264,
-green on `main` for the commit `c65661fc`: the unit tests, `checkdb`,
-`search`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-22.2-vc224.aab` has SHA-256
-`592228fe451130e6493bf5cbc950798db90faa1605001c57085f2e96758a29dd`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.2` and `versionCode 224`, and the upload certificate is the
-same key 21.4 through 22.1 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.2 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+touches `feature-search/`, so the four accessibility classes were owed; they
+ran on the phone with the three search classes, 46 tests and no failures.
+One leg went red on the first combined run, `LargeTextTest`'s size row, on a
+compose host that had not launched; it passed six of six alone, and the
+surfaces it composes are untouched by the diff. All three store sets were
+captured, and `03-search` reads as the committed frame does at every size,
+so the three committed sets stand. The Bangla leg ran green on the phone.
+Nothing under `tools/` or `content/` changed, and `content/quran.db` still
+hashes what it did before:
+`9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f`.
+
+**What changed in 22.3.** Search recovers where it used to stop (owner
+decision, 22.3). A query that finds nothing is offered the one word the
+reader's own library says is nearest to what they typed, in their own
+sentence, and tapping it rewrites that word and runs the search again. A
+reference past its surah's last ayah answers with the surah's own count, and
+a surah past the hundred and fourteenth with the Book's count, in place of
+"No matches". Words wrapped in double quotes must sit together, and a quoted
+reference is a phrase and never a place. `juz 30`, `para 30`, `পারা ৩০`, and
+`جزء 30` land on the ayah a juz opens, and the row names the juz in the
+reader's own word. The vocabulary is the Book's words, the enabled
+translations, and the word list, warmed when the sheet opens, so the
+suggestion lands in a frame; nothing leaves the phone. The text, both
+translations, both tafsirs, and the content database are unchanged.
 
 **What changed in 22.2.** The page opens on Light (owner decision, 22.2,
 superseding 13.5). A fresh install no longer follows the phone's own day and
@@ -260,20 +269,6 @@ carried, the word mark's washes keep their pinned alphas, and the seven rule
 colors hold every floor beside the new family, the idgham 0.063 OKLab away.
 The paper, the ink, the gold, the tajweed palette, the icon, and every
 content byte are unchanged.
-
-**What changed in 21.9.** Not now means its word (owner decision, 21.9). The
-daily ayah offer, at the end of a surah, carried a quiet Not now that wrote a
-permanent no on its first tap, so the button said later and meant never. The
-first Not now records the boundary it was tapped on: the ask leaves that
-surah's end and stands at the end of the next surah the reader finishes,
-wherever that is. The second Not now is the final answer, so the offer never
-nags a reader who keeps saying no and never dies on one who meant later.
-Turn on, and the reminder set in Settings, remain the final answer, and a
-fresh install meets the offer exactly as before. The stored state is one
-surah number, absent on every existing install, so no update is asked again
-and no migration runs. The tile is untouched: same shape, same words, no
-string, color, or frame moved. The Quran text, both translations, both
-tafsirs, the recitations, and the content database are unchanged.
 
 ## Corrections and contributions
 

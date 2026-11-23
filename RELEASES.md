@@ -6,6 +6,24 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 22.2
+
+The page opens on Light (owner decision, 22.2, superseding 13.5). A fresh
+install no longer follows the phone's own day and night: the Book opens as
+its own warm page, the page the printed Book reads on, and System stays one
+row away for a reader who wants the phone to choose. An install that has
+opened before and never chose a page keeps the System it reads under, written
+once before the new default can move it, so no update changes a reader's page
+for a reason they cannot see. A language change now swaps a tafsir the reader
+has chosen and never introduces one: until now, moving from English to Bangla
+started a 56 MB tafsir download behind a reader who had never asked for a
+tafsir, which the first open deliberately leaves off. Al-Fatiha's recitation
+rides in Husary's voice alone, the default recitation; a reader who has
+chosen another voice meets the same download offer every other surah makes,
+0.7 MB for the surah. All four voices' word timings still ship, so every
+reciter is ready offline. The Quran text, both translations, both tafsirs,
+and the content database are unchanged.
+
 ## 22.1
 
 The action color returns to lapis, measured deeper, and the dark theme's

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 22.0 (versionCode 222)
+Version: 22.3 (versionCode 225)
 
 ## Listing
 
@@ -220,6 +220,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (22.3, 433 characters)
+22.3 makes search recover. A misspelled word comes back as one word to tap, rewritten in your own sentence; a reference past a surah's end says how many ayahs it has; words in "double quotes" must sit together; and juz 30, para 30, or পারা ৩০ lands where the juz opens. Answers arrive in a frame, and nothing leaves the phone. Text, translations, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (22.2, 474 characters)
 22.2 opens a new install on the light page, the warm paper of the printed Book, and leaves every existing reader's page exactly as it was. A language change now carries the tafsir you chose to the new language and never downloads one you did not. Al-Fatiha's recitation ships in Husary's voice; another reciter's Fatiha downloads on your word, like every other surah. Text, translations, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
