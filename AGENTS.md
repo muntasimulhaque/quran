@@ -39,7 +39,8 @@ as a dead letter.
    checked against `settings.gradle.kts`, the tree clean. What may go:
    `build/` directories, `content/work/`, the hand-off AAB. What must stay:
    `content/raw/` (the owner's manual exports, the provenance of every pack),
-   `content/quran.db`, `content/packs/`, and `play-store/screenshots/`.
+   `content/quran.db`, `content/packs/`, `play-store/frames/`, and
+   `play-store/screenshots/`.
 
 ## The law
 
@@ -143,7 +144,7 @@ as a dead letter.
 | `tools/` | the offline pipeline (`--args="help"` lists it), with `word-audio` cutting the pronunciation pack; `tools/icons/forge.py` draws every icon and the feature graphic |
 | `content/` | `quran.db`, `packs/`, `bundled/`, `word-audio/`, `manifest.json`, `recitation-manifest.json`, `catalog.json`, `build-report.json`, `surah-names-bn.json`, `audio-sources.json`, `audio-edges.txt`, `audit-report.md`; `raw/` is local and gitignored |
 | `licenses/` | the SIL Open Font License the six open faces ship under, wired into the app's assets |
-| `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
+| `play-store/` | the listing, the store cards per form factor and the frames they are composed from, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `docs/` | the Pages site and the privacy policy Play links to |
 | `.github/workflows/` | `build.yml` (gates, signed bundle), `instrumented.yml` (dispatch-only data and app tests, signal only), `screenshots.yml` (dispatch-only capture signal; the store set is local) |
@@ -220,6 +221,11 @@ as a dead letter.
   have to be collected before it, and it pays a second install and a second
   test runner on top. A frame that wants a different orientation, a different
   theme, or a different size is a test that changes it itself.
+- **A capture leg ends in `play-store/frames/`, not in the cards.** The
+  compositor reads the committed frames, so a leg whose frames are not copied
+  in composes the cards from the old UI while every gate stays green: copy the
+  frames in, run `storecards`, and let `storecards --check` before the commit
+  say the cards are current.
 - **Verify by exit code**, never by grepping piped output. **Do not hand-drive
   the app to verify UI**: JVM suite and lint, push, then read the capture
   run's frames. Every UI claim is backed by a frame or a compose run.
@@ -269,12 +275,16 @@ on `quran_phone`, `quran_tablet7`, and `quran_tablet10` in turn. Before each
 leg, uninstall the app and its test APK from that AVD, the clean-install trap.
 Collect the frames from
 `app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/<AVD>/`
-before another call replaces them, read the eight of each, and commit them to
-`play-store/screenshots/phone/`, `play-store/screenshots/tablet7/`, and
-`play-store/screenshots/tablet10/`. The phone leg runs at 1080 x 1920, the
-7 inch at 1200 x 1920 and 320 dpi, and the 10 inch at its own 2560 x 1800 (see
-This machine). When no visible surface changed, the three committed sets
-stand.
+before another call replaces them, read the eight of each, and copy them to
+`play-store/frames/phone/`, `play-store/frames/tablet7/`, and
+`play-store/frames/tablet10/`. Compose the store set with
+`./gradlew :tools:run --args="storecards"`, read the eight cards of each form,
+and commit the frames and the cards together: the cards land in
+`play-store/screenshots/` under the same eight names. The phone leg runs at
+1080 x 1920, the 7 inch at 1200 x 1920 and 320 dpi, and the 10 inch at its own
+2560 x 1800 (see This machine). When no visible surface changed, the three
+committed sets stand. A change of card copy or layout alone recomposes with
+`storecards` and needs no capture leg.
 
 When the Bangla interface changed, one separate leg photographs it, on the
 same phone:

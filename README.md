@@ -37,9 +37,11 @@ The same reading on a 7 inch and a 10 inch tablet:
   <img src="play-store/screenshots/tablet10/01-reading.png" width="330" alt="The reading on a 10 inch tablet">
 </p>
 
-Every frame here is a real capture from an Android system, taken by the
-project's own screenshot test on a phone and on two tablets. Nothing is a
-mockup.
+Every screen inside every card is a real capture from an Android system, taken
+by the project's own screenshot test on a phone and on two tablets. The card
+around it, its caption, its gold rule, and its device outline are drawn by the
+project's own tools from the app's own fonts and the theme's own colors. No
+screen is a mockup.
 
 ## The reading
 

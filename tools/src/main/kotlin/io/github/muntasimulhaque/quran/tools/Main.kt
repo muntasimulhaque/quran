@@ -26,8 +26,17 @@ fun main(args: Array<String>) {
         }
         "fetch" -> Fetch(root).run()
         "checkdb" -> CheckDb(root).run()
+        "storecards" -> when (val option = args.getOrNull(1)) {
+            null -> StoreCards(root).run(checkOnly = false)
+            "--check" -> StoreCards(root).run(checkOnly = true)
+            else -> {
+                println("unknown option: $option")
+                2
+            }
+        }
         "help", "--help" -> {
-            println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs|word-audio>")
+            println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs|word-audio|storecards>")
+        println("       tools storecards [--check]")
         println("       tools packs [build|publish]")
         println("       tools audio [sample|bundle|packs|publish|edges]")
         println("       tools audio edges [resume]")

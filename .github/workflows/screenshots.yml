@@ -1,6 +1,6 @@
 name: Capture store screenshots
 
-# Renders real Play Store screenshots from the app's own Compose UI on an
+# Renders the raw captures the store cards are composed from, on an
 # Android emulator, for all three form factors Play asks for: phone, 7 inch
 # tablet, and 10 inch tablet. Dispatch only: the store capture is local
 # (AGENTS.md, Release), and this workflow is a manual signal that never

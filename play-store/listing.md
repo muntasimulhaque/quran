@@ -115,21 +115,31 @@ is submitted by the account owner.
 
 ## Graphics
 
-The icon and the feature graphic are made; the screenshots are captured by the
-screenshot test on a real Android system, one folder per form factor Play asks
-for.
+The icon and the feature graphic are made; the store cards are composed from
+real captures by `./gradlew :tools:run --args="storecards"`, one folder per
+form factor Play asks for. Every screen inside a card is the screenshot test's
+own capture of the whole display, unedited. The card around it is the store's:
+the headline in the app's Literata, the sub-line in its Inter, the paper ground,
+the gold rule, and the device outline drawn from the theme's own colors, in the
+feature graphic's family. The cards are English (owner decision, 22.4). This
+first set was composed from the standing 22.3 captures, because the app's
+surfaces did not change with it.
 
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
-- Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
-- 7 inch tablet screenshots: `screenshots/tablet7/` (1200 x 1920), eight of them
-- 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
+- Phone cards: `screenshots/phone/` (1080 x 1920), eight of them
+- 7 inch tablet cards: `screenshots/tablet7/` (1200 x 1920), eight of them
+- 10 inch tablet cards: `screenshots/tablet10/` (2560 x 1800), eight of them
+- The frames the cards are composed from: `frames/phone/`, `frames/tablet7/`,
+  and `frames/tablet10/`, the same eight each
 
-All three sets are current: the phone set on `quran_phone`, the seven inch set
-on `quran_tablet7` at 1200 x 1920 and 320 dpi, and the ten inch set on
-`quran_tablet10`. The seven inch set is the 600 dp page, taken with
-`wm size 1200x1920` and `wm density 320`, and its AVD's status bar drew one
-network group at that display, so every frame is clean.
+All three sets are current: the frames behind them were captured on
+`quran_phone`, on `quran_tablet7` at 1200 x 1920 and 320 dpi, and on
+`quran_tablet10`, in one session. The seven inch frames are the 600 dp page,
+taken with `wm size 1200x1920` and `wm density 320`. The bar is the demo's on
+every leg: 9:41, a full battery, and no notification icons. The network group
+is the emulator's own, and these captures drew three of them, which the next
+capture leg settles.
 
 Play's current rule for preview assets is a JPEG or 24-bit PNG, 320 to 3840
 pixels on each side, and a long side no more than twice the short side. All
@@ -165,13 +175,12 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The sets are current, captured on this machine in one session: the phone set on
-`quran_phone` (1080 x 1920), the seven inch set on `quran_tablet7` at
-1200 x 1920 and 320 dpi, and the ten inch set on `quran_tablet10`
-(2560 x 1800), all three lapis, every frame read. Every frame is a screen
-capture of the whole display. The bar is the demo's
-on every leg: 9:41, a full battery, and no notification icons, set before the
-tour starts.
+The cards are current, composed on this machine in one pass from the frames
+behind them: the phone card at 1080 x 1920, the seven inch card at
+1200 x 1920, and the ten inch card at 2560 x 1800, all three lapis, every card
+read. The capture inside a card is the whole display, and the card's own
+drawing is the theme's colors and the app's two faces, so a card can never
+drift from the app it sells.
 
 The eight are a reader's path through the app rather than the app's own map, and
 the first one is the app's face: the surah's name, its juz, and the three doors,
@@ -198,24 +207,30 @@ The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
 creating the emulator, waits for the emulated storage to mount before the test
 starts, and uploads each set as its own artifact. Its frames are signal: the
-committed sets are the ones captured here, because a hosted emulator's status
-bar and its timing are its own. Run it from the Actions tab, or let it run when
-the UI changes.
+committed frames are the ones captured here, because a hosted emulator's status
+bar and its timing are its own, and the cards are recomposed from those frames
+with `storecards`. Run it from the Actions tab, or let it run when the UI
+changes.
 
 What each set shows, in order:
 
-1. The reading with its own chrome up: the surah's name, its juz, and the three doors
-2. The tafsir open on its passage, with the source line above it
+1. The reading with its own chrome up: the surah's name, its juz, and the three
+   doors. The card says "Built to be read." with "Offline. No ads. No account."
+   under it.
+2. The tafsir open on its passage, with the source line above it. The card says
+   "Ibn Kathir, a tap away."
 3. Search reading a reference ("kahf 10"), with the places it reads behind the
-   "Search in" door
-4. Saved: the reader's own notes under the places they were written on
+   "Search in" door. The card says "Type kahf 10, land on the verse."
+4. Saved: the reader's own notes under the places they were written on. The card
+   says "Your notes live under the verses."
 5. The Tajweed page: seven color families, each with a word from the reading and
-   its rules
-6. The reading at night
-7. The share card the app hands out, with Share image as its solid answer
+   its rules. The card says "Seven colors, each explained."
+6. The reading at night. The card says "The same page, gentle at night."
+7. The share card the app hands out, with Share image as its solid answer. The
+   card says "The verse as one image."
 8. The recitation's own offer: the one-row capsule naming the reciter and its
    size over the surah before a tap, the block a door to the voice list, with
-   Download at its end
+   Download at its end. The card says "Four reciters, on your word."
 
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
@@ -393,8 +408,10 @@ something Play would reject.
 |---|---|---|
 | `icon-512.png` | 512 x 512 | store icon |
 | `feature-graphic-1024x500.png` | 1024 x 500 | feature graphic |
-| `screenshots/phone/*.png` | 1080 x 1920 | phone screenshots (8) |
-| `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
+| `screenshots/phone/*.png` | 1080 x 1920 | phone cards (8) |
+| `screenshots/tablet7/*.png` | 1200 x 1920 | 7 inch tablet cards (8) |
+| `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet cards (8) |
+| `frames/phone/*.png`, `frames/tablet7/*.png`, `frames/tablet10/*.png` | the canvas each card carries | the captures the cards are composed from |
 
 
 

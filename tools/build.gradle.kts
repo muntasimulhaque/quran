@@ -29,6 +29,12 @@ tasks.named<JavaExec>("run") {
     workingDir = rootProject.projectDir
 }
 
+// The store card tests raster text and images, so the test JVM runs headless
+// exactly as the command does (owner decision, 22.4).
+tasks.withType<Test>().configureEach {
+    jvmArgs("-Djava.awt.headless=true")
+}
+
 tasks.register<JavaExec>("fetchAssets") {
     group = "content"
     description = "Downloads and verifies large raw content assets such as the page fonts."
