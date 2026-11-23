@@ -221,6 +221,9 @@ The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
 
+## Release notes (22.2, 474 characters)
+22.2 opens a new install on the light page, the warm paper of the printed Book, and leaves every existing reader's page exactly as it was. A language change now carries the tafsir you chose to the new language and never downloads one you did not. Al-Fatiha's recitation ships in Husary's voice; another reciter's Fatiha downloads on your word, like every other surah. Text, translations, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
+
 ## Release notes (22.1, 465 characters)
 22.1 returns the app's one action color to lapis, the blue of the illuminated Qurans, measured deeper: gold beside ultramarine on the same warm paper. The chosen verse's ground and the found word's ground follow it, and the dark theme's current surah and juz now stand out. The page, the ink, the gold ornament, and the tajweed colors are unchanged. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 

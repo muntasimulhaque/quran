@@ -200,24 +200,30 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.1 (versionCode 223).** The whole JVM suite, `checkdb`, `search`, lint,
+**22.2 (versionCode 224).** The whole JVM suite, `checkdb`, `search`, lint,
 and `assembleDebug` were green on this machine before the push. The diff
-touches `ui-kit/`, so the four accessibility classes were owed; they ran on
-the phone, 10 tests and no failures. A visible surface changed, so the
-three store sets were captured again, each from a clean install: the phone
-at its own 1080 x 1920, the 7 inch at 1200 x 1920 and 320 dpi, and the 10
-inch at its own 2560 x 1800. No Bangla leg was owed: no interface string
-moved, and the Bangla page wears the same colors. The signed bundle comes
-from `build` run 45120393760, green on `main` for the commit `04b9f5bb`:
-the unit tests, `checkdb`, `search`, lint, and `assembleDebug` passed, and
-the signed bundle `quran-22.1-vc223.aab` has SHA-256
-`e3cfa0080dd1010f17e9a832de2c33b415fb1ad4ef1ce1313c87b3ca8a2b0f0d`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.1` and `versionCode 223`, and the upload certificate is the
-same key 21.4 through 22.0 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.1 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+touches `feature-settings/`, so the four accessibility classes were owed;
+they ran on the phone, 10 tests and no failures. No store set was captured:
+no visible surface changed, because every capture class sets its ground
+explicitly, and the three committed sets stand. No Bangla leg was owed: no
+interface string moved.
+
+**What changed in 22.2.** The page opens on Light (owner decision, 22.2,
+superseding 13.5). A fresh install no longer follows the phone's own day and
+night: the Book opens as its own warm page, the page the printed Book reads
+on, and System stays one row away for a reader who wants the phone to
+choose. An install that has opened before and never chose a page keeps the
+System it reads under, written once before the new default can move it, so
+no update changes a reader's page for a reason they cannot see. A language
+change now swaps a tafsir the reader has chosen and never introduces one:
+until now, moving from English to Bangla started a 56 MB tafsir download
+behind a reader who had never asked for a tafsir, which the first open
+deliberately leaves off. Al-Fatiha's recitation rides in Husary's voice
+alone, the default recitation; a reader who has chosen another voice meets
+the same download offer every other surah makes, 0.7 MB for the surah. All
+four voices' word timings still ship, so every reciter is ready offline.
+The Quran text, both translations, both tafsirs, and the content database
+are unchanged.
 
 **What changed in 22.1.** The one action color returns to lapis, measured
 into the ultramarine the illuminated Qurans were painted in (owner decision,
@@ -258,21 +264,6 @@ surah number, absent on every existing install, so no update is asked again
 and no migration runs. The tile is untouched: same shape, same words, no
 string, color, or frame moved. The Quran text, both translations, both
 tafsirs, the recitations, and the content database are unchanged.
-
-**What changed in 21.7.** The share card meets the feed (owner decision,
-21.7). A long ayah's card was aimed at a 1:2 portrait, a chat's picture,
-because a chat clamps a tall picture's pixels and shows it whole. A feed
-clamps the shape instead: Facebook and Instagram give a picture the feed's
-own width only up to the 4:5 portrait, and a taller one is contained into a
-shorter box, standing narrow with the feed's ground beside it, which is what
-a shared Al-Baqarah 2:255 card met. The card now widens until it stands
-inside that limit, so 2:255 takes the ladder's 560 dp card and stands at
-1.207, a picture a feed shows at its full width. An ayah already inside the
-limit keeps its one column, and the longest ayahs keep the widest card and
-still stand taller than a feed shows at full width. The preview and the
-capture read the one rule, and the test that pins it carries both cards'
-recorded shapes, the 2:255 one taken from the capture's own print on the
-phone.
 
 ## Corrections and contributions
 
