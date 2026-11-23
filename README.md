@@ -212,6 +212,16 @@ so the three committed sets stand. The Bangla leg ran green on the phone.
 Nothing under `tools/` or `content/` changed, and `content/quran.db` still
 hashes what it did before:
 `9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f`.
+The signed bundle comes from `build` run 45194275597, green on `main` for
+the commit `29e15813`: the unit tests, `checkdb`, `search`, lint, and
+`assembleDebug` passed, and the signed bundle `quran-22.3-vc225.aab` has
+SHA-256
+`c3e43a735b8766f8fb3d54a685d7b0b4d987f5f6c26dafb792f5da21e5364446`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.3` and `versionCode 225`, and the upload certificate is the
+same key 21.4 through 22.2 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The hand-off copy waits in `play-store/aab/`.
 
 **What changed in 22.3.** Search recovers where it used to stop (owner
 decision, 22.3). A query that finds nothing is offered the one word the
