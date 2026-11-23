@@ -337,4 +337,111 @@ class SearchTest {
         assertTrue("saf" in Search.surahNameAliases(61))
         assertTrue(Search.surahNameAliases(1).isEmpty())
     }
+
+    @Test
+    fun `a quoted span keeps its words together`() {
+        val query = Search.parse("\"night of decree\"")!!
+        assertEquals(listOf("night", "of", "decree"), query.terms)
+        assertEquals(listOf(listOf("night", "of", "decree")), query.phrases)
+        assertEquals(
+            "\"night of decree\"",
+            Search.matchExpression(query.terms, query.phrases),
+        )
+    }
+
+    @Test
+    fun `curly quotes read as straight ones`() {
+        val query = Search.parse("\u201Cnight of decree\u201D")!!
+        assertEquals(listOf(listOf("night", "of", "decree")), query.phrases)
+        assertEquals(listOf("night", "of", "decree"), query.terms)
+    }
+
+    @Test
+    fun `an unclosed quote is not a phrase`() {
+        val query = Search.parse("\"night of decree")!!
+        assertTrue(query.phrases.isEmpty())
+        assertEquals(listOf("night", "of", "decree"), query.terms)
+    }
+
+    @Test
+    fun `one quoted word is the search it always was`() {
+        val query = Search.parse("\"mercy\"")!!
+        assertTrue(query.phrases.isEmpty())
+        assertEquals(listOf("mercy"), query.terms)
+    }
+
+    @Test
+    fun `a phrase is one adjacent expression with no prefixes`() {
+        assertEquals(
+            "\"night of decree\"",
+            Search.matchExpression(emptyList(), listOf(listOf("night", "of", "decree"))),
+        )
+        // The words a phrase already requires are not asked a second time as
+        // prefixes beside it; the terms outside it still are.
+        assertEquals(
+            "\"night of decree\" AND power*",
+            Search.matchExpression(
+                listOf("night", "of", "decree", "power"),
+                listOf(listOf("night", "of", "decree")),
+            ),
+        )
+    }
+
+    @Test
+    fun `juz is read in every form a reader types`() {
+        assertEquals(30, Search.juzReference("juz 30"))
+        assertEquals(30, Search.juzReference("Juz 30"))
+        assertEquals(1, Search.juzReference("para 1"))
+        assertEquals(30, Search.juzReference("\u09AA\u09BE\u09B0\u09BE \u09E9\u09E6"))
+        assertEquals(1, Search.juzReference("\u062C\u0632\u0621 1"))
+        assertEquals(1, Search.juzReference("\u0627\u0644\u062C\u0632\u0621 1"))
+        // A bare number is a surah, and it stays one.
+        assertNull(Search.juzReference("30"))
+        assertNull(Search.juzReference("surah 30"))
+        assertNull(Search.juzReference("juz"))
+        assertNull(Search.juzReference("juz thirty"))
+    }
+
+    @Test
+    fun `a juz past thirty is not one`() {
+        assertNull(Search.juzReference("juz 31"))
+        assertNull(Search.juzReference("juz 0"))
+    }
+
+    @Test
+    fun `a surah past the book is named`() {
+        assertEquals(115, Search.referenceBeyondBook("115"))
+        assertEquals(999, Search.referenceBeyondBook("999:1"))
+        assertEquals(999, Search.referenceBeyondBook("surah 999"))
+        assertNull(Search.referenceBeyondBook("2:255"))
+        assertNull(Search.referenceBeyondBook("mercy"))
+    }
+
+    @Test
+    fun `a valid reference is not a problem`() {
+        assertNull(Search.referenceBeyondBook("1"))
+        assertNull(Search.referenceBeyondBook("114:6"))
+        assertNull(Search.referenceBeyondBook(" kahf 10"))
+    }
+
+    /**
+     * The reference grammar reads the raw input, so a reader who quoted a place
+     * asked for its words and not for the place. That is what makes the rule
+     * safe: no quoted query can land the reading on an ayah the reader did not
+     * ask to see.
+     */
+    @Test
+    fun `a quoted reference is not a place`() {
+        assertNull(Search.reference("\"2:255\""))
+        assertNull(Search.reference("\u201C2:255\u201D"))
+        assertNull(Search.juzReference("\"juz 30\""))
+    }
+
+    @Test
+    fun `a punctuated term is a phrase of its own and not one token`() {
+        assertFalse(Search.isSingleToken("god's"))
+        assertFalse(Search.isSingleToken("al-kahf"))
+        assertTrue(Search.isSingleToken("mercy"))
+        assertTrue(Search.isSingleToken("\u09AA\u09B0\u09A4\u09BF\u09AB\u09B2"))
+    }
 }

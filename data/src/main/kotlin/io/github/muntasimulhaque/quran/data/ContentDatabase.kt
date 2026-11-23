@@ -11,6 +11,7 @@ import io.github.muntasimulhaque.quran.core.PartOfSpeech
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.SearchQuery
+import io.github.muntasimulhaque.quran.core.Suggest
 import io.github.muntasimulhaque.quran.core.WordForm
 import io.github.muntasimulhaque.quran.core.WordGrammar
 import kotlinx.coroutines.Dispatchers
@@ -807,12 +808,12 @@ class ContentDatabase private constructor(
             leading += surahHits(query).also { counts[4] = it.size }
         }
 
-        val referenceNumber = if (sources.references) referencedAyahNumber(query.input) else null
-        val referenceHit = referenceNumber?.let { number ->
-            ayah(number)?.let { SearchHit.ReferenceHit(it) }
+        val landed = if (sources.references) referencedAyahNumber(query.input) else null
+        val referenceHit = landed?.let { place ->
+            ayah(place.ayah)?.let { SearchHit.ReferenceHit(it, place.juz) }
         }
         referenceHit?.let { leading.add(0, it) }
-        if (referenceNumber != null) {
+        if (landed != null) {
             // A typed reference is the answer: the text, the translations,
             // the tafsir, and the word list are not asked, so a number in an
             // unrelated passage cannot become a "match" beside the verse the
@@ -864,7 +865,7 @@ class ContentDatabase private constructor(
         val translationByNumber = LinkedHashMap<Int, String>()
         if (!query.arabic && translationPacks.isNotEmpty()) {
             for (pack in translationPacks) {
-                val numbers = packMatches(pack, query.terms, limit)
+                val numbers = packMatches(pack, query.terms, query.phrases, limit)
                 counts[1] += numbers.size
                 for (number in numbers) translationByNumber.putIfAbsent(number, pack)
             }
@@ -1007,10 +1008,24 @@ class ContentDatabase private constructor(
         // inside itself; the pure function carries the reasoning and the
         // test, so this call site only has to hand it what it found.
         val (hits, capped) = orderSearchHits(leading, ayahHits, tafsirHits, limit)
+        val counted = SearchCounts(counts[0], counts[1], counts[2], counts[3], counts[4], counts[5])
+        if (counted.total > 0) {
+            return SearchResults(hits = hits, counts = counted, capped = capped)
+        }
+        // Nothing matched. A reference past its surah is owed that surah's own
+        // count, and a misspelled word is owed the word itself. Both are read
+        // here, after every source has already answered and only when the
+        // answer was empty, so no other query pays for them, and the reader's
+        // library is read for a vocabulary at most once per connection
+        // (owner decision, 22.3).
+        val note = referenceNote(query)
+        val suggestion = if (note == null) suggestionFor(query, request) else null
         return SearchResults(
             hits = hits,
-            counts = SearchCounts(counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]),
+            counts = counted,
             capped = capped,
+            suggestion = suggestion,
+            referenceNote = note,
         )
     }
 
@@ -1038,11 +1053,52 @@ class ContentDatabase private constructor(
      * A named surah that matches nothing, or an ayah past the surah's end,
      * is not a reference: the query stays whatever else it was searched as.
      */
-    private fun referencedAyahNumber(input: String): Int? {
-        Search.reference(input)?.let { return referenceAyahNumber(it) }
+    private fun referencedAyahNumber(input: String): Landed? {
+        Search.reference(input)?.let { reference ->
+            return referenceAyahNumber(reference)?.let { Landed(it) }
+        }
+        // A juz is asked before a name, because "para 30" is a juz and never
+        // a surah named para. It lands on the ayah the juz opens, and the row
+        // says the word the reader used (owner decision, 22.3).
+        Search.juzReference(input)?.let { juz ->
+            return juzFirstAyah[juz]?.let { Landed(it, juz) }
+        }
         val named = Search.nameReference(input) ?: return null
         val surah = surahByName(named.name) ?: return null
-        return referenceAyahNumber(Search.Reference(surah, named.ayah))
+        return referenceAyahNumber(Search.Reference(surah, named.ayah))?.let { Landed(it) }
+    }
+
+    /** Where a typed reference lands, and the juz when the reader named one. */
+    private class Landed(val ayah: Int, val juz: Int? = null)
+
+    /**
+     * The count a reference past the Book is owed instead of "No matches".
+     *
+     * Only a well-formed reference reaches this: the grammar has already
+     * refused nothing here, it read a surah and an ayah that do not meet. The
+     * answer is the content's own count, never a guess, and it is drawn in the
+     * reader's digits and language by the sheet (owner decision, 22.3).
+     */
+    private fun referenceNote(query: SearchQuery): ReferenceNote? {
+        Search.reference(query.input)?.let { reference ->
+            val ayah = reference.ayah ?: return null
+            val surah = surahCache[reference.surah] ?: return null
+            return if (ayah > surah.versesCount) {
+                ReferenceNote.SurahAyahs(surah.number, surah.versesCount)
+            } else {
+                null
+            }
+        }
+        Search.nameReference(query.input)?.let { named ->
+            val surah = surahByName(named.name)?.let { surahCache[it] }
+            if (surah != null && named.ayah > surah.versesCount) {
+                return ReferenceNote.SurahAyahs(surah.number, surah.versesCount)
+            }
+        }
+        Search.referenceBeyondBook(query.input)?.let {
+            return ReferenceNote.BookSurahs(surahCache.size)
+        }
+        return null
     }
 
     /**
@@ -1116,7 +1172,10 @@ class ContentDatabase private constructor(
      * language; the fallback keeps the exact substring behavior of an install
      * whose packs predate the index.
      */
-    private fun indexedMatch(terms: List<String>): String? = Search.matchExpression(terms)
+    private fun indexedMatch(
+        terms: List<String>,
+        phrases: List<List<String>> = emptyList(),
+    ): String? = Search.matchExpression(terms, phrases)
 
     private class ArabicMatch(val numbers: List<Int>, val skeleton: Boolean)
 
@@ -1135,7 +1194,7 @@ class ContentDatabase private constructor(
      */
     private fun arabicMatches(query: SearchQuery, limit: Int): ArabicMatch {
         if (hasTable(null, "ayah_fts")) {
-            indexedMatch(query.terms)?.let { match ->
+            indexedMatch(query.terms, query.phrases)?.let { match ->
                 val exact = ftsAyahs("ayah_fts", match, limit)
                 if (exact.isNotEmpty()) return ArabicMatch(exact, skeleton = false)
             }
@@ -1209,7 +1268,7 @@ class ContentDatabase private constructor(
     ): Map<Int, WordMatch> {
         if (query.arabic || !attachedPack(wordsPack)) return emptyMap()
         val rows = if (hasTable(wordsPack, "word_meaning_fts")) {
-            indexedMatch(query.terms)?.let { match ->
+            indexedMatch(query.terms, query.phrases)?.let { match ->
                 val pack = schema(wordsPack)
                 query(
                     "SELECT m.ayah_number, m.position, m.meaning FROM $pack.word_meaning m " +
@@ -1300,10 +1359,15 @@ class ContentDatabase private constructor(
     }
 
     /** Matches inside one installed pack's own schema. */
-    private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {
+    private fun packMatches(
+        schemaId: String,
+        terms: List<String>,
+        phrases: List<List<String>>,
+        limit: Int,
+    ): List<Int> {
         if (!attachedPack(schemaId)) return emptyList()
         if (hasTable(schemaId, "translation_fts")) {
-            indexedMatch(terms)?.let { match ->
+            indexedMatch(terms, phrases)?.let { match ->
                 val pack = schema(schemaId)
                 return query(
                     "SELECT ayah_number FROM $pack.translation WHERE rowid IN " +
@@ -1484,9 +1548,18 @@ class ContentDatabase private constructor(
         surahCache.keys.associateWith { firstAyahOfSurah(it) }
     }
 
+    /**
+     * The ayah each juz opens on, read once: a typed juz lands there. The
+     * library's own thirty boundaries are the truth here, not an arithmetic
+     * the app would carry beside them (owner decision, 22.3).
+     */
+    private val juzFirstAyah: Map<Int, Int> by lazy {
+        juzStarts().associate { it.juz to it.ayah }
+    }
+
     private fun tafsirMatches(pack: String, query: SearchQuery, limit: Int): List<PassageRow> {
         val mine = if (hasTable(pack, "tafsir_passage_fts")) {
-            ftsTafsirMatches(pack, query.terms, limit)
+            ftsTafsirMatches(pack, query.terms, query.phrases, limit)
         } else {
             synchronized(tafsirIndex) { tafsirIndex.matches(pack, query.terms, limit) }
         }
@@ -1511,8 +1584,13 @@ class ContentDatabase private constructor(
      * first passages in the Book's own order, and their texts are read exactly
      * as before.
      */
-    private fun ftsTafsirMatches(pack: String, terms: List<String>, limit: Int): List<TafsirEntry> {
-        val match = indexedMatch(terms) ?: return emptyList()
+    private fun ftsTafsirMatches(
+        pack: String,
+        terms: List<String>,
+        phrases: List<List<String>>,
+        limit: Int,
+    ): List<TafsirEntry> {
+        val match = indexedMatch(terms, phrases) ?: return emptyList()
         val schema = schema(pack)
         return query(
             "SELECT p.source_id, p.surah, p.from_ayah, p.to_ayah FROM $schema.tafsir_passage p " +
@@ -1551,6 +1629,186 @@ class ContentDatabase private constructor(
             }
         }
         return out
+    }
+
+    /**
+     * The vocabularies this connection has read for the suggester, one per
+     * shape of search.
+     *
+     * A lexicon is built on the first query that finds nothing and kept for the
+     * life of the library, because a reader who mistyped one word may mistype
+     * another, and rebuilding a vocabulary on every miss would spend the
+     * reader's time twice. Two searches racing the first build may both read
+     * it; the later answer is the one kept, and both are correct, which is
+     * cheaper than holding a lock across the reads. The cache is cleared rather
+     * than grown: a vocabulary is the one part of a search that stays in
+     * memory, and a reader who changes packs often should not accumulate them.
+     */
+    private val lexicons = java.util.concurrent.ConcurrentHashMap<String, Suggest.Lexicon>()
+
+    /**
+     * The one word a query that found nothing may have meant, or null.
+     *
+     * The vocabulary is the library's own, and only a source the reader turned
+     * on can have matched: an Arabic query reads the Book's words, and a Latin
+     * one reads the enabled translations and the word list. The tafsirs are
+     * not read here: they are tens of megabytes of commentary for the rarest
+     * vocabulary, and a misspelled word is not hiding there (owner decision,
+     * 22.3).
+     */
+    private suspend fun suggestionFor(
+        query: SearchQuery,
+        request: SearchRequest,
+    ): SearchSuggestion? {
+        val sources = request.sources
+        val readable = if (query.arabic) {
+            sources.text
+        } else {
+            sources.translations || sources.words
+        }
+        if (!readable) return null
+        if (query.terms.none { it.codePointCount(0, it.length) >= Suggest.MIN_CULPRIT_LENGTH }) {
+            return null
+        }
+        val lexicon = lexiconFor(request.translationPacks, request.wordsPack, sources)
+        val candidate = Suggest.suggest(query.terms, lexicon) ?: return null
+        val corrected = Suggest.correction(
+            input = query.input,
+            culprit = candidate.culprit,
+            word = candidate.word,
+            arabic = query.arabic,
+        ) ?: return null
+        return SearchSuggestion(candidate.word, corrected)
+    }
+
+    /**
+     * Warms the vocabulary the suggester reads, for the sheet about to be
+     * typed into.
+     *
+     * The sheet calls this when it opens, the way it warms the tafsir, so a
+     * reader's first misspelling is answered in a frame instead of after a
+     * read of the library. The read costs a few hundred milliseconds on a
+     * worker and touches nothing on the screen; a reader who opens the sheet
+     * and types nothing has paid for a read and nothing else (owner decision,
+     * 22.3). A miss before the warm finishes builds the same vocabulary on the
+     * spot, and the two racing answers are both correct.
+     */
+    suspend fun warmSuggestion(
+        translations: List<String>,
+        wordsPack: String,
+        sources: SearchSources,
+    ) = withContext(Dispatchers.IO) { lexiconFor(translations, wordsPack, sources) }
+
+    /**
+     * The vocabulary one shape of search reads, built once.
+     *
+     * The Quran's own words come from the ayahs' indexed column rather than
+     * from the word table: the same vocabulary in ninety times fewer rows. The
+     * counts are ayahs carrying the word, and a translation's are rows carrying
+     * it; either way the likelier word is the one the library says more often.
+     *
+     * One vocabulary serves both scripts, because the sheet cannot know which
+     * one is about to be typed when it opens and warming two would read the
+     * library twice for the same answer. Each word keeps its own script's
+     * shelf, so a Latin culprit never compares against the Book's Arabic and
+     * a reader pays only for the words that could be theirs.
+     *
+     * A token enters the Latin half only when it carries a letter and no Arabic
+     * one: an Arabic quotation inside an English translation is not a spelling
+     * of an English word.
+     */
+    private suspend fun lexiconFor(
+        translations: List<String>,
+        wordsPack: String,
+        sources: SearchSources,
+    ): Suggest.Lexicon {
+        val key = lexiconKey(translations, wordsPack, sources)
+        lexicons[key]?.let { return it }
+        val counts = HashMap<String, Int>()
+        if (sources.text) {
+            query("SELECT text_search FROM ayah", null).use { cursor ->
+                while (cursor.moveToNext()) addTokens(cursor.getString(0), counts, latin = false)
+            }
+        }
+        if (sources.translations) {
+            for (pack in translations) {
+                coroutineContext.ensureActive()
+                if (!attachedPack(pack)) continue
+                query("SELECT text_search FROM ${schema(pack)}.translation", null).use { cursor ->
+                    while (cursor.moveToNext()) {
+                        addTokens(cursor.getString(0), counts, latin = true)
+                    }
+                }
+            }
+        }
+        if (sources.words && attachedPack(wordsPack)) {
+            coroutineContext.ensureActive()
+            // The glosses repeat: seventy-seven thousand rows carry about
+            // twenty-two thousand different ones, and a vocabulary does not
+            // learn anything from the second copy of a word (owner decision,
+            // 22.3).
+            query(
+                "SELECT DISTINCT meaning_search FROM ${schema(wordsPack)}.word_meaning",
+                null,
+            ).use { cursor ->
+                while (cursor.moveToNext()) {
+                    addTokens(cursor.getString(0), counts, latin = true)
+                }
+            }
+        }
+        val lexicon = Suggest.Lexicon(counts)
+        if (lexicons.size >= LEXICON_CACHE) lexicons.clear()
+        lexicons[key] = lexicon
+        return lexicon
+    }
+
+    /** The shape one vocabulary serves: the packs it reads and the sources it may answer for. */
+    private fun lexiconKey(
+        translations: List<String>,
+        wordsPack: String,
+        sources: SearchSources,
+    ): String = buildString {
+        append(wordsPack)
+        append('|').append(translations.sorted().joinToString(","))
+        append(if (sources.text) 't' else '-')
+        append(if (sources.translations) 'r' else '-')
+        append(if (sources.words) 'w' else '-')
+    }
+
+    /**
+     * One indexed text's words, counted. The index columns are already folded
+     * and single-spaced, so walking the text is the whole of the work. The
+     * walk is written out rather than handed to a regular expression: a
+     * vocabulary reads a few hundred thousand tokens, and a matcher per token
+     * would cost the reader a second on the one frame that asks for it
+     * (owner decision, 22.3).
+     *
+     * A one-letter token is kept out: no culprit is near enough to it to be
+     * worth naming, and it would only weigh the scan.
+     */
+    private fun addTokens(text: String?, counts: HashMap<String, Int>, latin: Boolean) {
+        if (text.isNullOrEmpty()) return
+        val length = text.length
+        var index = 0
+        while (index < length) {
+            while (index < length && text[index].isWhitespace()) index++
+            val start = index
+            while (index < length && !text[index].isWhitespace()) index++
+            if (index - start < 2) continue
+            var letters = false
+            var arabic = false
+            for (position in start until index) {
+                val character = text[position]
+                if (character.isLetter()) letters = true
+                if (latin && RichText.isArabic(character.code)) arabic = true
+                if (letters && (!latin || arabic)) break
+            }
+            if (!letters) continue
+            if (latin && arabic) continue
+            val token = text.substring(start, index)
+            val seen = counts[token]
+            counts[token] = if (seen == null) 1 else seen + 1
+        }
     }
 
     private fun surahHits(query: SearchQuery): List<SearchHit.SurahHit> =
@@ -1627,6 +1885,9 @@ class ContentDatabase private constructor(
 
     companion object {
         private const val TAG = "ContentDatabase"
+
+        /** How many vocabularies one connection keeps before it starts again. */
+        private const val LEXICON_CACHE = 4
 
         const val WORDS_PACK = "words-en"
         const val RECITER_PREFIX = "reciter-"

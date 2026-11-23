@@ -10,11 +10,18 @@ import java.util.Locale
  * the query, so the two always meet: Arabic queries fold letter forms and lose
  * their marks, English queries lowercase. A query is Arabic when it contains
  * any Arabic letter; everything else is treated as English.
+ *
+ * [phrases] holds the words a reader wrapped in double quotes, each span in
+ * the reader's own order, because those words must sit beside one another and
+ * not merely appear in the same ayah (owner decision, 22.3). The same words
+ * stay in [terms]: a phrase narrows a search, it never removes a word from
+ * the highlights, the excerpts, or the fallback shape an old pack reads.
  */
 data class SearchQuery(
     val input: String,
     val terms: List<String>,
     val arabic: Boolean,
+    val phrases: List<List<String>> = emptyList(),
 )
 
 object Search {
@@ -109,6 +116,49 @@ object Search {
         val ayah = match.groupValues[2].ifEmpty { match.groupValues[3] }.toIntOrNull()
         if (ayah != null && ayah < 1) return null
         return Reference(surah, ayah)
+    }
+
+    private val juzPrefixes = listOf("juz ", "para ", "পারা ", "جزء ", "الجزء ")
+
+    /**
+     * Reads the juz a reader named: "juz 30", "para 30", "পারা ৩০", "جزء 30".
+     *
+     * The juz is a reference like any other and lands on its own first ayah,
+     * so a reader who thinks in paras does not have to know which surah one
+     * opens (owner decision, 22.3). The word is required: a bare "30" is
+     * surah 30 and has been since the field first read references. `পারা` is
+     * the app's own Bangla word for it, the one the Browse tab already wears.
+     */
+    fun juzReference(input: String): Int? {
+        val normalized = Arabic.normalizeForSearch(asciiDigits(input.trim())).lowercase(Locale.ROOT)
+        val rest = juzPrefixes
+            .firstOrNull { normalized.startsWith(it) }
+            ?.let { normalized.removePrefix(it).trim() }
+            ?: return null
+        if (rest.isEmpty() || rest.any { !it.isDigit() }) return null
+        return rest.toIntOrNull()?.takeIf { it in 1..30 }
+    }
+
+    /**
+     * The surah a numbered reference names when that number is past the end of
+     * the Book: "115", "999:1".
+     *
+     * It is not a place, so the reference grammar refuses it and the query
+     * falls through to the words like any other text. The number is kept here
+     * anyway, because the sheet's one honest answer to it is the Book's own
+     * count, not "No matches" (owner decision, 22.3).
+     */
+    fun referenceBeyondBook(input: String): Int? {
+        var normalized = Arabic.normalizeForSearch(asciiDigits(input.trim())).lowercase(Locale.ROOT)
+        for (prefix in referencePrefixes) {
+            if (normalized.startsWith(prefix)) {
+                normalized = normalized.removePrefix(prefix).trim()
+                break
+            }
+        }
+        val match = referencePattern.find(normalized) ?: return null
+        val surah = match.groupValues[1].toIntOrNull() ?: return null
+        return surah.takeIf { it !in 1..114 }
     }
 
     /**
@@ -370,23 +420,61 @@ object Search {
         return merged
     }
 
+    /**
+     * Reads the query, with the words a reader wrapped in quotes kept apart.
+     *
+     * The quote marks are the keyboard's own and the typographic pair a phone
+     * editor inserts; both pair the same way, and the marks themselves never
+     * reach the normalized text. An unclosed quote is dropped and no span
+     * comes from it, because a reader who has not finished typing has not
+     * finished a phrase either (owner decision, 22.3). A span of one word is
+     * no phrase: it is the word the reader quoted, searched as that word.
+     *
+     * The reference grammar still reads the raw input, so a quoted reference
+     * is a phrase of its words and not a place. A reader who wants the place
+     * types it unquoted, which is how they found it in the first place.
+     */
     fun parse(input: String): SearchQuery? {
         val trimmed = input.trim().take(MAX_INPUT_LENGTH)
         if (trimmed.isEmpty()) return null
         val arabic = trimmed.codePoints().anyMatch { RichText.isArabic(it) }
+        val plain = trimmed.filterNot { it.isQuoteMark() }
+        val terms = words(plain, arabic).distinct().take(MAX_TERMS)
+        if (terms.isEmpty()) return null
+        val phrases = quotedSpans(trimmed)
+            .map { span -> words(span, arabic) }
+            .filter { it.size >= 2 }
+        return SearchQuery(input = trimmed, terms = terms, arabic = arabic, phrases = phrases)
+    }
+
+    /** One text's terms in the shape the content's indexed columns hold. */
+    private fun words(input: String, arabic: Boolean): List<String> {
         val normalized = if (arabic) {
-            Arabic.normalizeForSearch(trimmed)
+            Arabic.normalizeForSearch(input)
         } else {
-            normalizeEnglish(trimmed)
+            normalizeEnglish(input)
         }
-        val terms = normalized.split(whitespace)
+        return normalized.split(whitespace)
             .map { edges.replace(it, "").take(MAX_TERM_LENGTH) }
             .filter { it.length >= MIN_TERM_LENGTH }
-            .distinct()
-            .take(MAX_TERMS)
-        if (terms.isEmpty()) return null
-        return SearchQuery(input = trimmed, terms = terms, arabic = arabic)
     }
+
+    /** The text between each pair of quote marks, in the reader's order. */
+    private fun quotedSpans(input: String): List<String> {
+        val marks = input.indices.filter { input[it].isQuoteMark() }
+        val spans = ArrayList<String>(marks.size / 2)
+        var pair = 0
+        while (pair + 1 < marks.size) {
+            val from = marks[pair] + 1
+            val to = marks[pair + 1]
+            if (to > from) spans += input.substring(from, to)
+            pair += 2
+        }
+        return spans
+    }
+
+    private fun Char.isQuoteMark(): Boolean =
+        this == '"' || this == '\u201C' || this == '\u201D'
 
     /**
      * The LIKE pattern for one term. Percent and underscore are literal here,
@@ -407,6 +495,14 @@ object Search {
      * the phrase of its own fragments, because the index breaks an ASCII
      * non-alphanumeric into a token boundary: the fragments are adjacent
      * tokens in the index, in that order.
+     *
+     * A phrase the reader quoted is asked precisely: its words as they were
+     * typed, adjacent in that order, with no prefix star and no hamza-seat
+     * variant, because quotes are the reader asking for this wording and not
+     * a word that begins this way (owner decision, 22.3). Its words are still
+     * in [terms], so they keep their highlight and their place in the recall
+     * shape; they are simply not asked a second time as prefixes beside the
+     * phrase that already requires them.
      *
      * The index folds nothing itself; the content build writes the same
      * normalized shape [normalizeForIndex] gives a query into the indexed
@@ -443,8 +539,20 @@ object Search {
         return out.toList()
     }
 
-    fun matchExpression(terms: List<String>): String? {
-        val parts = terms.mapNotNull { term ->
+    fun matchExpression(
+        terms: List<String>,
+        phrases: List<List<String>> = emptyList(),
+    ): String? {
+        val inPhrase = phrases.flatten().toHashSet()
+        val parts = ArrayList<String>(terms.size + phrases.size)
+        for (phrase in phrases) {
+            val fragments = phrase
+                .flatMap { word -> word.split(SEPARATORS) }
+                .filter { it.isNotEmpty() }
+            if (fragments.size >= 2) parts += "\"" + fragments.joinToString(" ") + "\""
+        }
+        for (term in terms) {
+            if (term in inPhrase) continue
             val alternatives = expandedTerms(listOf(term)).mapNotNull { variant ->
                 val fragments = variant.split(SEPARATORS).filter { it.isNotEmpty() }
                 when {
@@ -453,8 +561,8 @@ object Search {
                     else -> "\"" + fragments.joinToString(" ") + "\""
                 }
             }
-            when (alternatives.size) {
-                0 -> null
+            parts += when (alternatives.size) {
+                0 -> continue
                 1 -> alternatives[0]
                 else -> "(" + alternatives.joinToString(" OR ") + ")"
             }
@@ -496,6 +604,14 @@ object Search {
      * decision, 19.7).
      */
     fun skeletonForIndex(input: String): String = Arabic.recallShape(normalizeForIndex(input))
+
+    /**
+     * Whether a term is one token of the index: it carries no character the
+     * index would break on. A term that does is a phrase of its own fragments,
+     * and the suggester never offers to correct one, because its pieces are
+     * what the reader meant (owner decision, 22.3).
+     */
+    fun isSingleToken(term: String): Boolean = !SEPARATORS.containsMatchIn(term)
 
     /**
      * What the index's tokenizer treats as a break: an ASCII character that is

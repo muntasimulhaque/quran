@@ -37,6 +37,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * Both stand on the sheet's own row, [sheetRow], so a search result and a
  * settings row answer a finger at the same air and the same press, and both
  * draw the Book's letter where they show the Quran's words.
+ *
+ * A reference the reader typed as a juz says so: they asked for "Juz 30", and
+ * the row answers in that word with the ayah the juz opens drawn under it.
+ * Naming it by its surah and verse key instead would answer a question the
+ * reader did not ask (owner decision, 22.3).
  */
 @Composable
 internal fun ReferenceRow(
@@ -44,6 +49,8 @@ internal fun ReferenceRow(
     surahName: String?,
     hafs: FontFamily,
     arabicStep: Float,
+    /** The juz the reader named, when the reference was one. */
+    juz: Int? = null,
     onAyah: (Ayah) -> Unit,
 ) {
     val arabicSize = (TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT) - 2f) * TextSize.step(arabicStep)
@@ -57,8 +64,12 @@ internal fun ReferenceRow(
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                text = listOfNotNull(surahName, localizedDigits(ayah.verseKey))
-                    .joinToString("  ·  "),
+                text = if (juz != null) {
+                    stringResource(R.string.search_reference_juz, juz)
+                } else {
+                    listOfNotNull(surahName, localizedDigits(ayah.verseKey))
+                        .joinToString("  ·  ")
+                },
                 style = bookRowName(),
                 color = MaterialTheme.colorScheme.onSurface,
             )

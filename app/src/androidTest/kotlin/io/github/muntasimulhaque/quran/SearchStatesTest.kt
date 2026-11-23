@@ -17,6 +17,7 @@ import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.search.R as SearchR
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -107,6 +108,65 @@ class SearchStatesTest {
             }
             rule.onNodeWithText(text(SearchR.string.search_status_no_match_hint))
                 .assertExists()
+        }
+    }
+
+    /**
+     * The recovery is a tap, not a retyping: the word the reader meant arrives
+     * as one button, and tapping it rewrites the query and runs it again.
+     */
+    @Test
+    fun aMisspelledWordIsOfferedBack() {
+        prepare()
+        openSearch().use {
+            rule.onNode(hasSetTextAction()).performTextInput("mrecy")
+            val offer = context.getString(SearchR.string.search_status_suggestion, "mercy")
+            rule.waitUntil(timeoutMillis = 60_000) {
+                rule.onAllNodesWithText(offer).fetchSemanticsNodes().isNotEmpty()
+            }
+            rule.onNodeWithText(offer).performClick()
+            // The corrected query finds its ayahs, so the empty answer goes.
+            rule.waitUntil(timeoutMillis = 60_000) {
+                rule.onAllNodesWithText(text(SearchR.string.search_status_no_matches))
+                    .fetchSemanticsNodes().isEmpty()
+            }
+        }
+    }
+
+    /**
+     * A reference past its surah is answered with the surah's own count, and
+     * the teaching hint is not drawn beside it: one line answers one thing.
+     */
+    @Test
+    fun aReferencePastItsEndNamesTheCount() {
+        prepare()
+        openSearch().use {
+            rule.onNode(hasSetTextAction()).performTextInput("2:287")
+            val note = context.getString(SearchR.string.search_status_reference_past_end, 2, 286)
+            rule.waitUntil(timeoutMillis = 60_000) {
+                rule.onAllNodesWithText(note).fetchSemanticsNodes().isNotEmpty()
+            }
+            assertTrue(
+                "the count answers the reference, so the hint does not stand beside it",
+                rule.onAllNodesWithText(text(SearchR.string.search_status_no_match_hint))
+                    .fetchSemanticsNodes().isEmpty(),
+            )
+        }
+    }
+
+    /**
+     * A juz answers in the reader's own word. The row says "Juz 30" because
+     * that is what was asked, and the ayah the juz opens is drawn under it.
+     */
+    @Test
+    fun aJuzReferenceSaysTheWordTheReaderUsed() {
+        prepare()
+        openSearch().use {
+            rule.onNode(hasSetTextAction()).performTextInput("juz 30")
+            val row = context.getString(SearchR.string.search_reference_juz, 30)
+            rule.waitUntil(timeoutMillis = 60_000) {
+                rule.onAllNodesWithText(row).fetchSemanticsNodes().isNotEmpty()
+            }
         }
     }
 }

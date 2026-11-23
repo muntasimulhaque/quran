@@ -7,8 +7,10 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.ReferenceNote
 import io.github.muntasimulhaque.quran.data.SearchHit
 import io.github.muntasimulhaque.quran.data.SearchRequest
+import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SearchArabicLine
 import io.github.muntasimulhaque.quran.data.arabicLineFor
@@ -458,5 +460,85 @@ class ContentSearchTest {
             listOf(sources.arabic, sources.translation, sources.words, sources.tafsir)
                 .count { it > 0 } >= 2,
         )
+    }
+
+    /**
+     * Quotes ask for adjacency, not for the same words somewhere in the ayah.
+     * The Night of Decree is 97:1; the same three words in another order are
+     * not the phrase the reader quoted, and must not land there.
+     */
+    @Test
+    fun aQuotedPhraseMatchesOnlyAdjacentWords() = runBlocking {
+        val phrase = content.search(request("\"night of decree\"", tafsir = false, limit = 50))
+        val found = phrase.hits.filterIsInstance<SearchHit.AyahHit>()
+            .firstOrNull { it.ayah.surah == 97 && it.ayah.ayah == 1 }
+        assertNotNull("the quoted phrase must find 97:1", found)
+        val reversed = content.search(request("\"decree night of\"", tafsir = false, limit = 50))
+        assertTrue(
+            "the same words in another order are not the phrase",
+            reversed.hits.filterIsInstance<SearchHit.AyahHit>()
+                .none { it.ayah.surah == 97 && it.ayah.ayah == 1 },
+        )
+    }
+
+    @Test
+    fun aJuzReferenceLandsOnItsFirstAyah() = runBlocking {
+        val results = content.search(request("juz 30", tafsir = false))
+        val hit = results.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()
+        assertNotNull("juz 30 must land on its first ayah", hit)
+        assertEquals("juz 30 opens An-Naba", 78, hit?.ayah?.surah)
+        assertEquals(1, hit?.ayah?.ayah)
+        assertEquals(30, hit?.juz)
+        assertEquals(1, results.counts.reference)
+        val bangla = content.search(request("\u09AA\u09BE\u09B0\u09BE \u09E9\u09E6", tafsir = false))
+        val banglaHit = bangla.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()
+        assertEquals(30, banglaHit?.juz)
+        assertEquals(hit?.ayah?.number, banglaHit?.ayah?.number)
+        val past = content.search(request("juz 31", tafsir = false))
+        assertTrue(
+            "a juz past the thirtieth is not a place",
+            past.hits.filterIsInstance<SearchHit.ReferenceHit>().isEmpty(),
+        )
+    }
+
+    @Test
+    fun aReferencePastTheSurahsEndCarriesItsNote() = runBlocking {
+        val results = content.search(
+            request("2:287", translations = false, tafsir = false)
+                .copy(sources = SearchSources(text = true, surahs = true, references = true)),
+        )
+        assertEquals(0, results.counts.total)
+        assertEquals(ReferenceNote.SurahAyahs(2, 286), results.referenceNote)
+    }
+
+    @Test
+    fun aSurahPastTheBookCarriesItsNote() = runBlocking {
+        val results = content.search(
+            request("999:1", translations = false, tafsir = false)
+                .copy(sources = SearchSources(text = true, surahs = true, references = true)),
+        )
+        assertEquals(0, results.counts.total)
+        assertEquals(ReferenceNote.BookSurahs(114), results.referenceNote)
+    }
+
+    @Test
+    fun aMisspellingCarriesOneSuggestion() = runBlocking {
+        // The sheet warms the vocabulary when it opens; the test does what the
+        // reader's sheet does, so the number below is the number a reader
+        // meets on their first misspelling.
+        val packs = content.packs().filter { it.installed }
+        content.warmSuggestion(
+            translations = packs.filter { it.type == PackType.Translation }.map { it.id },
+            wordsPack = ContentDatabase.wordsPackId("en"),
+            sources = SearchSources.ALL,
+        )
+        val warm = android.os.SystemClock.uptimeMillis()
+        val results = content.search(request("mrecy", tafsir = false, limit = 20))
+        println("SUGGEST_TIMING warm=" + (android.os.SystemClock.uptimeMillis() - warm))
+        assertEquals(0, results.counts.total)
+        val suggestion = results.suggestion
+        assertNotNull("a misspelled word must be offered back", suggestion)
+        assertEquals("mercy", suggestion?.word)
+        assertEquals("mercy", suggestion?.query)
     }
 }

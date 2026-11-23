@@ -4,8 +4,8 @@
     <string name="search_hint">কুরআনে খুঁজুন</string>
     <string name="search_clear">খোঁজা মুছুন</string>
     <string name="search_empty_title">শব্দ বা রেফারেন্স দিয়ে খুঁজুন</string>
-    <string name="search_empty_body">আরবিতে বা নিজের ভাষায় যেকোনো শব্দ লিখুন। 2:255 বা কাহফ&#160;10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
-    <string name="search_empty_body_quran">কুরআনের যেকোনো শব্দ লিখুন। 2:255 বা কাহফ&#160;10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
+    <string name="search_empty_body">আরবিতে বা নিজের ভাষায় যেকোনো শব্দ লিখুন। 2:255 বা কাহফ&#160;10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন। একসাথে থাকা শব্দ খুঁজতে চাইলে সেগুলোকে &quot;কোটেশন চিহ্নে&quot; দিন।</string>
+    <string name="search_empty_body_quran">কুরআনের যেকোনো শব্দ লিখুন। 2:255 বা কাহফ&#160;10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন। একসাথে থাকা শব্দ খুঁজতে চাইলে সেগুলোকে &quot;কোটেশন চিহ্নে&quot; দিন।</string>
     <string name="search_recent_title">সাম্প্রতিক খোঁজ</string>
     <string name="search_recent_remove_named">%1$s মুছুন</string>
     <string name="search_status_searching">খোঁজা হচ্ছে…</string>
@@ -13,6 +13,9 @@
     <string name="search_status_retry">আবার চেষ্টা করুন</string>
     <string name="search_status_no_matches">কিছু পাওয়া যায়নি।</string>
     <string name="search_status_no_match_hint">ছোট কোনো শব্দ চেষ্টা করুন, বা 2:255-এর মতো রেফারেন্স দিন।</string>
+    <string name="search_status_suggestion">আপনি কি %1$s বোঝাতে চান?</string>
+    <string name="search_status_reference_past_end">সূরা %1$d-এ %2$dটি আয়াত।</string>
+    <string name="search_status_surah_past_end">কুরআনে %1$dটি সূরা।</string>
     <string name="search_status_no_sources">খোঁজার জন্য অন্তত একটি জায়গা বাছুন।</string>
     <string name="search_status_capped">প্রথম %1$dটি মিল দেখানো হচ্ছে।</string>
     <string name="search_label_surah">সূরা</string>
@@ -20,6 +23,7 @@
     <string name="search_word_meaning_label">শব্দের অর্থ</string>
     <string name="search_note_label">নোট</string>
     <string name="search_tafsir_range">%1$s · %2$s %3$s</string>
+    <string name="search_reference_juz">পারা %1$d</string>
     <string name="search_revelation_makki">মাক্কী</string>
     <string name="search_revelation_madani">মাদানী</string>
 

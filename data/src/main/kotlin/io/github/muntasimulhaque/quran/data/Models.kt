@@ -96,8 +96,16 @@ sealed interface SearchHit {
 
     data class SurahHit(val surah: Surah) : SearchHit
 
-    /** A direct hit on a reference the reader typed; always first. */
-    data class ReferenceHit(val ayah: Ayah) : SearchHit
+    /**
+     * A direct hit on a reference the reader typed; always first.
+     *
+     * [juz] is set when the reader named a juz rather than a surah, so the row
+     * can answer in the reader's own word: "Juz 30" is what they asked for,
+     * and the ayah under it is where the juz opens (owner decision, 22.3).
+     * A reference always lands on an ayah, so this row is never a header with
+     * nothing to open.
+     */
+    data class ReferenceHit(val ayah: Ayah, val juz: Int? = null) : SearchHit
 
     /**
      * One ayah, with every source that matched it. A row can carry the Arabic
@@ -175,7 +183,45 @@ data class SearchResults(
     val hits: List<SearchHit> = emptyList(),
     val counts: SearchCounts = SearchCounts(),
     val capped: Boolean = false,
+    /**
+     * The one word the reader may have meant, when a query found nothing.
+     *
+     * It rides here rather than in a channel of its own so the sheet's own key,
+     * which pins results to the query that produced them, covers it too: a
+     * suggestion can never be drawn under a query it does not belong to
+     * (owner decision, 22.3).
+     */
+    val suggestion: SearchSuggestion? = null,
+    /** What a well-formed reference past the Book's end is owed instead of silence. */
+    val referenceNote: ReferenceNote? = null,
 )
+
+/**
+ * The one word a zero-match query is offered back.
+ *
+ * [word] is the word the sheet names, and [query] is the reader's own query
+ * with only that word replaced. A reader who typed three words and misspelled
+ * one taps once, not three times, and the other words keep the spelling and
+ * the case they were typed in (owner decision, 22.3).
+ */
+data class SearchSuggestion(val word: String, val query: String)
+
+/**
+ * What a reference that names no ayah is owed instead of "No matches".
+ *
+ * "2:999" is not a place, but it is a question with an answer Al-Baqarah
+ * already carries: two hundred and eighty-six ayahs. The sheet draws the count
+ * where a search with no matches would otherwise teach query syntax to a
+ * reader whose query was well formed (owner decision, 22.3).
+ */
+sealed interface ReferenceNote {
+
+    /** A surah that exists, and an ayah past its last. */
+    data class SurahAyahs(val surah: Int, val ayahs: Int) : ReferenceNote
+
+    /** A surah past the hundred and fourteenth. */
+    data class BookSurahs(val surahs: Int) : ReferenceNote
+}
 
 /**
  * Which sources one search reads. Everything is on until the reader turns it

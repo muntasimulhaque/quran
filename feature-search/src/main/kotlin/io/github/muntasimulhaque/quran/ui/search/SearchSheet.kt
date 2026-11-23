@@ -259,6 +259,19 @@ fun SearchSheet(
         content.warmTafsir(tafsirPacks)
     }
 
+    /*
+     * The suggester's vocabulary is the one other read too heavy for the frame
+     * a reader's first misspelling lands on, so it is warmed here beside the
+     * tafsir, while the field is still empty: the first miss is answered in a
+     * frame, and a reader who never mistypes has paid a worker read and
+     * nothing on the screen (owner decision, 22.3). The warm is for the shape
+     * the sheet opens on, every source on; a reader who narrowed the sources
+     * before typing builds their own vocabulary on the spot, once.
+     */
+    LaunchedEffect(content, translationPacks, wordsPack) {
+        content.warmSuggestion(translationPacks, wordsPack, SearchSources.ALL)
+    }
+
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -329,6 +342,14 @@ fun SearchSheet(
                     failed = failed,
                     current = resultsCurrent,
                     onRetry = { attempt++ },
+                    // The correction rewrites the field, and the sheet's own
+                    // effect runs the query again from there: one path for a
+                    // typed word and a tapped one, so the two can never
+                    // disagree about what was searched (owner decision, 22.3).
+                    onSuggest = { corrected ->
+                        text = corrected
+                        onInteraction()
+                    },
                 )
                 LazyColumn(
                     state = resultsList,
@@ -371,6 +392,7 @@ fun SearchSheet(
                                 surahName = surahName(hit.ayah.surah),
                                 hafs = hafs,
                                 arabicStep = arabicStep,
+                                juz = hit.juz,
                             ) {
                                 keepQuery()
                                 onAyah(SearchArrival.AyahMatch(hit.ayah))

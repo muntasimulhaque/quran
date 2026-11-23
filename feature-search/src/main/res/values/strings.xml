@@ -4,8 +4,8 @@
     <string name="search_sheet_name">Search</string>
     <string name="search_clear">Clear search</string>
     <string name="search_empty_title">Search by word or by reference</string>
-    <string name="search_empty_body">Type any word, in Arabic or in the language you read in. A reference like 2:255 or kahf&#160;10 goes straight to an ayah.</string>
-    <string name="search_empty_body_quran">Type any word from the Quran. A reference like 2:255 or kahf&#160;10 goes straight to an ayah.</string>
+    <string name="search_empty_body">Type any word, in Arabic or in the language you read in. A reference like 2:255 or kahf&#160;10 goes straight to an ayah. Put &quot;double quotes&quot; around words that must sit together.</string>
+    <string name="search_empty_body_quran">Type any word from the Quran. A reference like 2:255 or kahf&#160;10 goes straight to an ayah. Put &quot;double quotes&quot; around words that must sit together.</string>
     <string name="search_recent_title">Recent searches</string>
     <string name="search_recent_remove_named">Remove %1$s</string>
     <string name="search_status_searching">Searching…</string>
@@ -13,6 +13,9 @@
     <string name="search_status_retry">Retry</string>
     <string name="search_status_no_matches">No matches.</string>
     <string name="search_status_no_match_hint">Try a shorter word, or a reference like 2:255.</string>
+    <string name="search_status_suggestion">Did you mean %1$s?</string>
+    <string name="search_status_reference_past_end">Surah %1$d has %2$d ayahs.</string>
+    <string name="search_status_surah_past_end">The Quran has %1$d surahs.</string>
     <string name="search_status_no_sources">Choose at least one place to search.</string>
     <string name="search_status_capped">Showing the first %1$d matches.</string>
     <string name="search_label_surah">Surah</string>
@@ -20,6 +23,7 @@
     <string name="search_word_meaning_label">Word meaning</string>
     <string name="search_note_label">Note</string>
     <string name="search_tafsir_range">%1$s · %2$s %3$s</string>
+    <string name="search_reference_juz">Juz %1$d</string>
     <string name="search_revelation_makki">Makki</string>
     <string name="search_revelation_madani">Madani</string>
 

@@ -12,6 +12,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import io.github.muntasimulhaque.quran.core.SearchQuery
+import io.github.muntasimulhaque.quran.data.ReferenceNote
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -33,6 +34,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * query. The hint under the count is the empty sheet's teaching, at the one
  * moment it is an answer rather than a lesson beside the field.
  *
+ * **But a reader whose query was well formed is owed better than a lesson**
+ * (owner decision, 22.3). A reference past its surah's last ayah is answered
+ * with that surah's own count, because the Book already holds the answer and
+ * the reader only mistyped a number. A misspelled word is answered with the
+ * word, as one button, so the recovery is a tap and not a retyping. The hint
+ * stands only when neither is true: one line teaches one thing, and a reader
+ * is never taught query syntax beside a better answer.
+ *
  * Nothing is said while the field is empty. The line carried a prompt that
  * began with the field's own words ("Search the Quran, or type 2:255 to go
  * there"), so the same sentence stood twice on one sheet (owner report). The
@@ -51,6 +60,8 @@ internal fun StatusLine(
     current: Boolean,
     /** Runs the same query again after a failure. */
     onRetry: () -> Unit,
+    /** Rewrites the field to the corrected query the reader chose. */
+    onSuggest: (String) -> Unit,
 ) {
     val total = results.counts.total
     val message = when {
@@ -102,17 +113,62 @@ internal fun StatusLine(
             },
         )
         if (noMatches) {
-            Text(
-                text = localizedDigits(stringResource(R.string.search_status_no_match_hint)),
-                // The hint is the one line on the results' page that teaches,
-                // so it takes the body's 15 where the count above it is a
-                // caption (owner decision, 15.0).
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(top = Space.Line)
-                    .semantics { liveRegion = LiveRegionMode.Polite },
-            )
+            // One answer, never two: the count a reference is owed, then the
+            // word the reader may have meant, then the teaching hint. They
+            // crowd the same small space, and each of them is a complete
+            // answer to "why is this page empty" (owner decision, 22.3).
+            val note = results.referenceNote
+            val suggestion = results.suggestion
+            when {
+                note != null -> Text(
+                    text = localizedDigits(
+                        when (note) {
+                            is ReferenceNote.SurahAyahs -> stringResource(
+                                R.string.search_status_reference_past_end,
+                                note.surah,
+                                note.ayahs,
+                            )
+
+                            is ReferenceNote.BookSurahs -> stringResource(
+                                R.string.search_status_surah_past_end,
+                                note.surahs,
+                            )
+                        },
+                    ),
+                    // The count is the answer to the reader's question, so it
+                    // wears the body's 15 where the line above is a caption,
+                    // exactly as the hint does (owner decision, 15.0).
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(top = Space.Line)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
+                )
+
+                suggestion != null -> TextButton(
+                    label = stringResource(R.string.search_status_suggestion, suggestion.word),
+                    onClick = { onSuggest(suggestion.query) },
+                    // The correction arrives while the reader's focus is still
+                    // in the field, and it is the one thing on the page that
+                    // answers their search: a polite region announces it once,
+                    // in the same voice the hint uses (owner decision, 22.3).
+                    modifier = Modifier
+                        .padding(top = Space.Line)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
+                )
+
+                else -> Text(
+                    text = localizedDigits(stringResource(R.string.search_status_no_match_hint)),
+                    // The hint is the one line on the results' page that
+                    // teaches, so it takes the body's 15 where the count above
+                    // it is a caption (owner decision, 15.0).
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(top = Space.Line)
+                        .semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
         }
         if (failed) {
             TextButton(
