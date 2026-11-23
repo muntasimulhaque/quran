@@ -100,6 +100,24 @@ class StoreCardsTest {
         )
     }
 
+    @Test
+    fun `check names an edited card`() {
+        assertEquals(0, run(checkOnly = false).first)
+        val card = File(root, "play-store/screenshots/phone/01-reading.png")
+        val image = ImageIO.read(card)
+        val graphics = image.createGraphics()
+        try {
+            graphics.color = java.awt.Color(0x29, 0x26, 0x22)
+            graphics.fillRect(96, 150, 460, 110)
+        } finally {
+            graphics.dispose()
+        }
+        ImageIO.write(image, "png", card)
+        val (exit, output) = run(checkOnly = true)
+        assertEquals(1, exit)
+        assertTrue(output, output.contains("play-store/screenshots/phone/01-reading.png"))
+    }
+
     private fun run(checkOnly: Boolean): Pair<Int, String> {
         val buffer = ByteArrayOutputStream()
         val original = System.out

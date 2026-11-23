@@ -1,8 +1,6 @@
 package io.github.muntasimulhaque.quran.tools
 
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.security.MessageDigest
 import javax.imageio.ImageIO
 
 /**
@@ -12,15 +10,19 @@ import javax.imageio.ImageIO
  * this command refuses a frame that is absent or is not the size its form
  * asks for, rather than quietly scaling one the test did not take at the
  * store's canvas. It writes one card per frame, beside the frames under
- * `play-store/screenshots/`, and `--check` names every card the committed set
- * does not already hold, so a commit can prove the store and the source agree
- * (owner decision, 22.4).
+ * `play-store/screenshots/`.
+ *
+ * `--check` names every card the committed set does not already hold. It
+ * compares the pictures rather than the files: the committed cards are made
+ * here and the check also runs on CI, and the same font rasterizes with
+ * different edges on the two platforms, so a byte comparison would fail over
+ * a card that is correct (see [CardDiff]). It still proves what the gate
+ * exists for, which is that a changed word, color, rule, or capture reached
+ * the cards that will be uploaded (owner decision, 22.4).
  */
 class StoreCards(private val root: File) {
 
     fun run(checkOnly: Boolean): Int {
-        val framesRoot = File(root, "play-store/frames")
-        val cardsRoot = File(root, "play-store/screenshots")
         val type = StoreCardPaint.typefaces(root)
         var composed = 0
         var stale = 0
@@ -55,17 +57,17 @@ class StoreCards(private val root: File) {
                 val cardName = "play-store/screenshots/${form.folder}/${card.frame}.png"
                 val target = File(root, cardName)
                 if (checkOnly) {
-                    val current = if (target.isFile) target.readBytes() else null
+                    val current = if (target.isFile) ImageIO.read(target) else null
                     if (current == null) {
                         println("storecards: $cardName is missing")
                         stale++
-                    } else if (digest(current) != digest(encode(image))) {
+                    } else if (!CardDiff.sameEnough(image, current)) {
                         println("storecards: $cardName is not current")
                         stale++
                     }
                 } else {
                     target.parentFile?.mkdirs()
-                    target.writeBytes(encode(image))
+                    ImageIO.write(image, "png", target)
                     composed++
                 }
             }
@@ -78,14 +80,4 @@ class StoreCards(private val root: File) {
         println("storecards: composed $composed cards")
         return 0
     }
-
-    /** The bytes [run] writes and `--check` compares, from one encoder. */
-    private fun encode(image: java.awt.image.BufferedImage): ByteArray {
-        val out = ByteArrayOutputStream()
-        ImageIO.write(image, "png", out)
-        return out.toByteArray()
-    }
-
-    private fun digest(bytes: ByteArray): String =
-        MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
 }
