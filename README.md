@@ -215,7 +215,17 @@ dpi, and `quran_tablet10` at 2560 x 1800. The app itself is 22.3: no file
 under `app/`, `core/`, `data/`, `ui-kit/`, or a `feature-*` changed, and
 `content/quran.db` still hashes
 `9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f`.
-The signed bundle follows from the newest green `build` run on `main`.
+The signed bundle comes from `build` run 45225638612, green on `main` for
+the commit `1d09fc21`: the unit tests, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.4-vc226.aab` has SHA-256
+`36357c41b7424e72972baf5311c87643516d2a80bbad248a981b8dd3bf6d820d`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.4` and `versionCode 226`, and the upload certificate is the
+same key 21.4 through 22.3 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 22.4 bundle is ready for Play review, and its hand-off copy in
+`play-store/aab/` is deleted once Play has it.
 
 **What changed in 22.4.** The store set is the app's own face (owner
 decision, 22.4). The eight screenshots Play shows are cards now: each is a
