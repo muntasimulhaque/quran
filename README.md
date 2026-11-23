@@ -221,7 +221,8 @@ SHA-256
 `versionName 22.3` and `versionCode 225`, and the upload certificate is the
 same key 21.4 through 22.2 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The hand-off copy waits in `play-store/aab/`.
+The 22.3 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
 
 **What changed in 22.3.** Search recovers where it used to stop (owner
 decision, 22.3). A query that finds nothing is offered the one word the
