@@ -137,9 +137,7 @@ All three sets are current: the frames behind them were captured on
 `quran_phone`, on `quran_tablet7` at 1200 x 1920 and 320 dpi, and on
 `quran_tablet10`, in one session. The seven inch frames are the 600 dp page,
 taken with `wm size 1200x1920` and `wm density 320`. The bar is the demo's on
-every leg: 9:41, a full battery, and no notification icons. The network group
-is the emulator's own, and these captures drew three of them, which the next
-capture leg settles.
+every leg: 9:41, a full battery, one network group, and no notification icons.
 
 Play's current rule for preview assets is a JPEG or 24-bit PNG, 320 to 3840
 pixels on each side, and a long side no more than twice the short side. All
