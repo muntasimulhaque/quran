@@ -206,7 +206,17 @@ touches `feature-settings/`, so the four accessibility classes were owed;
 they ran on the phone, 10 tests and no failures. No store set was captured:
 no visible surface changed, because every capture class sets its ground
 explicitly, and the three committed sets stand. No Bangla leg was owed: no
-interface string moved.
+interface string moved. The signed bundle comes from `build` run 45131892264,
+green on `main` for the commit `c65661fc`: the unit tests, `checkdb`,
+`search`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.2-vc224.aab` has SHA-256
+`592228fe451130e6493bf5cbc950798db90faa1605001c57085f2e96758a29dd`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.2` and `versionCode 224`, and the upload certificate is the
+same key 21.4 through 22.1 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 22.2 bundle stands in `play-store/aab/` for the owner's submission, and
+the hand-off copy is deleted once Play has it.
 
 **What changed in 22.2.** The page opens on Light (owner decision, 22.2,
 superseding 13.5). A fresh install no longer follows the phone's own day and
