@@ -37,7 +37,7 @@ import io.github.muntasimulhaque.quran.data.resolved
  * floating panel is the highest paper on its ground, not a shade of the page:
  * the day wears the sheet's white (100.0 over the page's 98.0 and the block's
  * 92.9), and the night wears one step above its sheet (#322E2A at 19.2 over
- * the page's 9.4, the sheet's 13.4, and the block's 15.4), because the emerald
+ * the page's 9.4, the sheet's 13.4, and the block's 18.4), because the lapis
  * wash lifts a dark page where it darkens a light one. The four day tones
  * before it went down and asked the fill to carry the step, and each read as a
  * slip, a shade, a smudge, or a veneer. The lift is the edge: the day's shadow
@@ -75,10 +75,10 @@ import io.github.muntasimulhaque.quran.data.resolved
  * decision, 13.5).
  */
 internal val LightScheme = lightColorScheme(
-    primary = Emerald,
+    primary = Lapis,
     onPrimary = PaperOnPrimary,
-    primaryContainer = Color(0xFFD5E7D7),
-    onPrimaryContainer = Color(0xFF112E18),
+    primaryContainer = Color(0xFFD7E2F5),
+    onPrimaryContainer = Color(0xFF182641),
     secondary = PaperMuted,
     onSecondary = Color(0xFFFFFFFF),
     secondaryContainer = Color(0xFFECEAE6),
@@ -101,7 +101,7 @@ internal val LightScheme = lightColorScheme(
     surfaceTint = Color.Transparent,
     inverseSurface = PaperInk,
     inverseOnSurface = PaperSurface,
-    inversePrimary = EmeraldLight,
+    inversePrimary = LapisLight,
     error = PaperInk,
     onError = PaperSurface,
     errorContainer = PaperControl,
@@ -112,10 +112,10 @@ internal val LightScheme = lightColorScheme(
 )
 
 internal val DarkScheme = darkColorScheme(
-    primary = EmeraldLight,
+    primary = LapisLight,
     onPrimary = NightOnPrimary,
-    primaryContainer = Color(0xFF28442D),
-    onPrimaryContainer = Color(0xFFD5E7D7),
+    primaryContainer = Color(0xFF2D3C58),
+    onPrimaryContainer = Color(0xFFD7E2F5),
     secondary = NightMuted,
     onSecondary = Color(0xFF141210),
     secondaryContainer = Color(0xFF393834),
@@ -138,7 +138,7 @@ internal val DarkScheme = darkColorScheme(
     surfaceTint = Color.Transparent,
     inverseSurface = NightText,
     inverseOnSurface = NightBackground,
-    inversePrimary = Emerald,
+    inversePrimary = Lapis,
     error = NightText,
     onError = NightBackground,
     errorContainer = NightControl,
@@ -152,9 +152,9 @@ internal val DarkScheme = darkColorScheme(
 internal val LightPage = PagePalette(
     ink = PaperReadingInk,
     ornament = Gold,
-    // 0.13 of the emerald: the strongest tint the seven paper families keep
+    // 0.13 of the lapis: the strongest tint the seven paper families keep
     // their 4.5:1 on. The reciter's word and a search arrival both wear it.
-    highlight = Color(0x21004B1E),
+    highlight = Color(0x211F3D76),
     selected = PaperSelected,
     match = PaperMatch,
     tajweed = PaperTajweed,
@@ -165,8 +165,8 @@ internal val LightPage = PagePalette(
 internal val DarkPage = PagePalette(
     ink = NightInk,
     ornament = NightGold,
-    // 0.15 of the night emerald: the same ceiling for the night families.
-    highlight = Color(0x26A4D2A9),
+    // 0.15 of the night lapis: the same ceiling for the night families.
+    highlight = Color(0x26A8C2EF),
     selected = NightSelected,
     match = NightMatch,
     tajweed = NightTajweed,

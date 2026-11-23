@@ -6,6 +6,32 @@ ones live here so the front page can be about the app rather than about its
 history. The reason a decision was made lives in the KDoc beside the code it
 decided, tagged `owner decision`, and in `git log`.
 
+## 22.1
+
+The action color returns to lapis, measured deeper, and the dark theme's
+chosen step is lifted where it never read. Lapis carried every action from
+the first release until 22.0 turned it to the category's green; 22.1 turns
+it back by the owner's word, into the ultramarine the old mushafs were
+painted in, gold letters on a lapis ground, a pigment priced above gold.
+Green's claim proved to be the 1837 dome and the flags rather than the text:
+the one narration that names a beloved color is graded weak, and the dome
+was wood, then white, then blue, before it was green. The day tone #1F3D76
+reads 10.0 to 1 on the page, APCA 90.7, the grade the emerald was chosen
+for, and it sits wider from the verse's own families than the emerald ever
+sat from its green: the iqlab 0.097 OKLab away, the madda 0.115. The night
+tone #A8C2EF reads 9.6 to 1, held at a chroma under the night gold's. The
+chosen and found grounds follow the accent at the lightness they already
+carried, the word mark's washes keep their pinned alphas, and every floor
+the contrast tests enforce held unchanged: the seven rule colors on every
+ground, the quiet voice, the floating papers, and the switch. One floor is
+new: the chosen block's step over the sheet it is painted on is pinned at
+4 L* in both grounds, because the 15.4 the night had carried since 21.0
+stood 2 L* over the sheet the current surah and juz are read against, and
+the owner could not find it (owner report, 22.1). The night's chosen block
+moves to 18.4, 5 L* over the sheet, clear of the floating paper it never
+touched. The paper, the ink, the gold ornament, the tajweed palette, the
+icon, and every content byte are unchanged.
+
 ## 22.0
 
 The app's one action color turns green. Lapis had carried every action since

@@ -168,7 +168,7 @@ safe area, well clear of the edges Play may crop or overlay, and the file is
 The sets are current, captured on this machine in one session: the phone set on
 `quran_phone` (1080 x 1920), the seven inch set on `quran_tablet7` at
 1200 x 1920 and 320 dpi, and the ten inch set on `quran_tablet10`
-(2560 x 1800), all three green, every frame read. Every frame is a screen
+(2560 x 1800), all three lapis, every frame read. Every frame is a screen
 capture of the whole display. The bar is the demo's
 on every leg: 9:41, a full battery, and no notification icons, set before the
 tour starts.
@@ -180,7 +180,7 @@ the page wears the accent's own family, so the one block that says "this verse"
 says it in the accent's voice. The seven tajweed families hold one weight, the
 paper ink is the reading's own 12:1 tone, and the night page's colors sit below
 the ink instead of glowing above it. A verse's number is its head, in the app's
-green, with the app's one chevron beside it, and the printed medallion closes a
+lapis, with the app's one chevron beside it, and the printed medallion closes a
 verse only on a page that draws the Quran alone: so a verse carries one number,
 and that number is the door. The last frame is the one-row offer, 64 dp, the
 reciter's name and its size over the surah, the whole block a door to the voice
@@ -220,6 +220,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (22.1, 465 characters)
+22.1 returns the app's one action color to lapis, the blue of the illuminated Qurans, measured deeper: gold beside ultramarine on the same warm paper. The chosen verse's ground and the found word's ground follow it, and the dark theme's current surah and juz now stand out. The page, the ink, the gold ornament, and the tajweed colors are unchanged. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (22.0, 430 characters)
 22.0 turns the app's one action color green. Every control that answers a tap, the chosen verse's ground, the found word's ground, and the word the reciter is saying now wear a deep emerald, measured to the same contrast floors as before. The page, the ink, the gold ornament, and the tajweed colors are unchanged. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.

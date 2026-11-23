@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
  *
  * [highlight] is the word mark on the reading's line: the word the reciter
  * is saying and the word a search arrived on. Each theme sets its own,
- * because an emerald wash that reads as ink on paper reads as nothing at all
+ * because a lapis wash that reads as ink on paper reads as nothing at all
  * on a night ground. Its alpha is a contrast ceiling, not a taste: the seven
  * rule colors are drawn over it, and one drop more puts the closest of them
  * under 4.5:1.

@@ -78,28 +78,40 @@ val NightGold = Color(0xFFDCB870)
 // The one interactive accent, and the ornament gold that belongs to the
 // Reading.
 //
-// Emerald carries every action; its two tones differ by ground because an
-// emerald that reads as ink on paper reads as nothing at all on a night
-// page. 22.0 turns the accent to it, out of the lapis that had carried
-// every action from the first release, by the owner's word: green is the hue
-// the Book's own readers hold it in (the green dome, the green garments of
-// paradise), and the category's readers asked for it back wherever an app
-// let it go. The tone is the dome's family and not the flag's bright green:
-// at L* 27 and chroma 38 it reads as emerald ink beside the gold ornament,
-// and it measures 9.9:1 on the page and 10.4:1 on a sheet, APCA 90.0 and
-// 93.5. The verse's own green family, the idgham, sits 0.063 OKLab away in
-// normal vision, the widest separation the three greens weighed measured,
-// so the door never borrows the tajweed's voice (owner decision, 22.0).
-val Emerald = Color(0xFF004B1E)
+// Lapis carries every action; its two tones differ by ground because a
+// lapis that reads as ink on paper reads as nothing at all on a night
+// page. 22.0 turned the accent to the category's green by the owner's
+// word, and 22.1 turns it back by the same word, measured this time into
+// the ultramarine the manuscripts themselves were painted in: gold
+// letters on a lapis ground is the Blue Quran, and ultramarine beside
+// gold on cream vellum is the illumination of every fine mushaf after
+// it, a pigment the scribes priced above gold. Green's own claim proved
+// to be the 1837 dome and the flags, not the text: the one narration
+// that names a beloved color is graded weak, and the dome was wood, then
+// white, then blue, before it was green. The platform's habit is blue
+// as well, the hue every interface already reads as the way things
+// work, and the one hue every form of red-green color weakness still
+// sees as itself, so the action never borrows the verse's green
+// families for the reader whose eye collapses them. The tone is
+// ultramarine ink, not the bright blue a browser wears: at L* 27 and
+// chroma 37 it measures 10.0:1 on the page and 10.6:1 on a sheet, APCA
+// 90.7 and 94.2, the grade the emerald was chosen for, and the verse's
+// own blue family, the madda, sits 0.115 OKLab away in normal vision
+// with the iqlab at 0.097, wider than the idgham ever sat from the
+// emerald's 0.063, so the door never borrows the tajweed's voice
+// (owner decision, 22.1).
+val Lapis = Color(0xFF1F3D76)
 // The night accent is lifted so a small action label clears the same -60
-// APCA floor the quiet voice holds: it measures -71.2 on the night page and
-// 10.2:1, where an emerald that reads as ink on the day page would read as
-// nothing at all here.
-val EmeraldLight = Color(0xFFA4D2A9)
+// APCA floor the quiet voice holds: it measures -67.7 on the night page and
+// 9.6:1, where a lapis that reads as ink on the day page would read as
+// nothing at all here. It keeps the old night lapis's chroma, 0.07 against
+// the night gold's 0.10, because a saturated letter blooms on a page read
+// for an hour.
+val LapisLight = Color(0xFFA8C2EF)
 
 // Gold is the ornament tone, and it is read: juz, the surah names drawn into
 // the page, and the ornamental name at the head of the reading. It is never a
-// control's color: every control that answers a tap wears Emerald, including
+// control's color: every control that answers a tap wears Lapis, including
 // the ayah's number (owner decision, the consistency audit). Gold therefore
 // meets the same 4.5:1 rule every other text tone does, on each ground it is
 // drawn on: 4.7:1 on the day page and 9.2:1 on the night page, APCA 70.6 and
@@ -153,7 +165,7 @@ val FloatingShadow = Color(0x1A000000)
 // **The day's floating paper is the sheet's white.** The page stands at
 // L* 98.0, the sheet at 100.0, and the block a menu is always raised over at
 // 92.9, so white is 2.0 L* over the page (1.05:1, dE76 3.3) and 7.1 L* over
-// the block (dE76 8.8). That is the step every sheet already stands on, and a
+// the block (dE76 9.0). That is the step every sheet already stands on, and a
 // sheet wears no border: its scrim and its lift are its edge. The pill has no
 // scrim, so its lift is that edge. The four tones before this one all went
 // down and asked the fill to carry the step: 17.0's [PaperControl] at 2.8 L*
@@ -167,11 +179,11 @@ val FloatingShadow = Color(0x1A000000)
 // grounds.
 //
 // **The night cannot take the sheet's tone.** Its page is L* 9.4, its sheet
-// 13.4, and its chosen block 15.4: the emerald wash lifts a dark page where it
+// 13.4, and its chosen block 18.4: the lapis wash lifts a dark page where it
 // darkens a light one, so the block sits above the sheet. A floating paper at
 // the sheet's tone would sink under the menu it is meant to raise.
 // [NightFloating] is the highest paper on that ground: #322E2A at L* 19.2,
-// 9.8 L* over the page (1.29:1), 5.8 over the sheet, and dE76 8.6 from the
+// 9.8 L* over the page (1.29:1), 5.8 over the sheet, and dE76 11.8 from the
 // block. The shadow is invisible at night, so the fill is the only edge there;
 // that is why the night's step is the larger one. The tone before it,
 // [NightControl] at #2E2B28, stood dE76 4.4 from the block; the one-step lift
@@ -179,16 +191,16 @@ val FloatingShadow = Color(0x1A000000)
 // [NightControl] because a track is a groove on the sheet, not a bar over the
 // page.
 //
-// The pairs the day lands in: 1.05:1 from the page, dE76 8.8 from the block,
-// and on it the quiet word reads 6.86:1, the reading's ink 12.6:1, and emerald
-// 10.4:1. The night's floating paper carries the ink at 10.41:1, the quiet
-// word at 7.12:1, and emerald at 7.9:1.
+// The pairs the day lands in: 1.05:1 from the page, dE76 9.0 from the block,
+// and on it the quiet word reads 6.86:1, the reading's ink 12.6:1, and lapis
+// 10.6:1. The night's floating paper carries the ink at 10.41:1, the quiet
+// word at 7.12:1, and lapis at 7.5:1.
 val PaperControl = Color(0xFFF3F1EE)
 val PaperFloating = Color(0xFFFFFFFF)
 val PaperOnPrimary = Color(0xFFFFFFFF)
 val NightControl = Color(0xFF2E2B28)
 val NightFloating = Color(0xFF322E2A)
-val NightOnPrimary = Color(0xFF0F3118)
+val NightOnPrimary = Color(0xFF0E213E)
 
 /**
  * The chosen thing's ground: the ayah whose menu is open, the introduction the
@@ -217,9 +229,22 @@ val NightOnPrimary = Color(0xFF0F3118)
  * every pair holds: the seven paper families keep 5.4 to 1 at their closest
  * on the day ground and 5.8 on the night, the reading's ink 10.5 and 10.5,
  * and the quiet word 5.7 and 7.9 (owner decision, 22.0).
+ *
+ * 22.1 turns the family's hue with the accent it follows, back to the
+ * lapis the grounds wore before 22.0, and lifts the night's step, because
+ * the 15.4 both accents shared read as nothing at all on a sheet: the
+ * Browse row the reader stands on and the word the word sheet names are
+ * painted on a sheet, and 15.4 stood 2.0 L* over that sheet, a chroma-only
+ * whisper the owner could not find (owner report, 22.1). The night's
+ * step moves to 18.4, the same order of step the day's 92.9 holds under
+ * the white sheet, and every pair holds: the seven families keep 5.4 to 1
+ * at their closest on the day ground and 5.3 on the night, the reading's
+ * ink 10.5 and 9.6, and the quiet word 5.7 and 7.3. The floating paper
+ * stays clear of the wider block, dE76 11.8, and the found ground below
+ * keeps its own louder step (owner decision, 22.1).
  */
-val PaperSelected = Color(0xFFE4EDE5)
-val NightSelected = Color(0xFF1F2920)
+val PaperSelected = Color(0xFFE5EBF5)
+val NightSelected = Color(0xFF272D39)
 
 /**
  * The found thing's ground: the word a search matched, and the text a reader
@@ -236,6 +261,17 @@ val NightSelected = Color(0xFF1F2920)
  * The pairs measured keep every floor they owed: the interface's ink 11.6,
  * the reading's 9.6, the night's 7.9, and the APCA floors hold at 81.1 on
  * the day and -74.3 on the night (owner decision, 22.0).
+ *
+ * 22.1 turns their hue with the accent, back to the lapis family, at the
+ * same lightness the accents before it kept: 89.7 on the day sheet and
+ * 24.6 on the night. The pairs measured keep every floor they owed: the
+ * interface's ink 11.6, the reading's 9.7, the night's 7.9, and the APCA
+ * floors hold at 81.2 on the day and -74.3 on the night. The night's
+ * idgham on this ground measures 4.35, under the 4.5 a family owes, and
+ * it is the one pair that looks like a fault and is not: the found line
+ * is ink by decision 10.6, so no family ever rides this wash, and the
+ * emerald ground it replaces measured 4.36, the same hundredth under
+ * (owner decision, 22.1).
  */
-val PaperMatch = Color(0xFFD8E5D8)
-val NightMatch = Color(0xFF303E32)
+val PaperMatch = Color(0xFFDAE2F2)
+val NightMatch = Color(0xFF333B49)

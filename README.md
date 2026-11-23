@@ -200,24 +200,29 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.0 (versionCode 222).** The whole JVM suite, `checkdb`, `search`, lint,
+**22.1 (versionCode 223).** The whole JVM suite, `checkdb`, `search`, lint,
 and `assembleDebug` were green on this machine before the push. The diff
 touches `ui-kit/`, so the four accessibility classes were owed; they ran on
-the phone, 10 tests and no failures. A visible surface changed, so the three
-store sets were captured again, each from a clean install: the phone at its
-own 1080 x 1920, the 7 inch at 1200 x 1920 and 320 dpi, and the 10 inch at
-its own 2560 x 1800. No Bangla leg was owed: no interface string moved, and
-the Bangla page wears the same colors. The signed bundle comes from `build`
-run 45047351462, green on `main` for the commit `bd6c8fba`: the unit tests,
-`checkdb`, `search`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-22.0-vc222.aab` has SHA-256
-`e5b8fad4a448c13baf6f2f3976c3c21ad69fb45ac9647cb10496d72df153fd8b`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.0` and `versionCode 222`, and the upload certificate is the
-same key 21.4 through 21.9 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.0 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+the phone, 10 tests and no failures. A visible surface changed, so the
+three store sets were captured again, each from a clean install: the phone
+at its own 1080 x 1920, the 7 inch at 1200 x 1920 and 320 dpi, and the 10
+inch at its own 2560 x 1800. No Bangla leg was owed: no interface string
+moved, and the Bangla page wears the same colors.
+
+**What changed in 22.1.** The one action color returns to lapis, measured
+into the ultramarine the illuminated Qurans were painted in (owner decision,
+22.1). 22.0 had turned the accent to emerald on the category's word; the
+green's claim proved to be the 1837 dome and the flags rather than the text,
+while the blue the app wore before it is the hue the platform reads as the
+way things work and the one hue red-green color weakness still sees as
+itself. The day tone #1F3D76 reads 10.0 to 1 on the page and the night tone
+#A8C2EF reads 9.6 to 1, both past every floor the tests enforce, and wider
+from the verse's own blue families than the emerald ever sat from its green.
+The night's chosen block, the wash behind the current surah and juz in Browse
+and behind the word the word sheet names, is lifted to 18.4 L*, where the
+15.4 it carried since 21.0 stood 2 L* over its sheet and read as nothing at
+all. The paper, the ink, the gold ornament, the tajweed palette, the icon,
+and every content byte are unchanged.
 
 **What changed in 22.0.** The one action color is emerald now (owner
 decision, 22.0). Lapis had carried every action since the first release;
@@ -258,16 +263,6 @@ still stand taller than a feed shows at full width. The preview and the
 capture read the one rule, and the test that pins it carries both cards'
 recorded shapes, the 2:255 one taken from the capture's own print on the
 phone.
-
-**What changed in 21.4.** The compile platform is 37.1, declared as
-`compileSdk = 37` with `compileSdkMinor = 1` in all ten modules;
-`targetSdk` stays 37 and `minSdk` 24 for the reasons their own notes give.
-The compose BOM moves to 2026.11.01, which carries Compose 1.13.0 and
-material3 1.5.0 stable, and the hand pin on material3 is gone: the pin's own
-comment waited for exactly this session, and the comment beside the version
-now records where the pin went. Nothing the reader sees moved, and no
-string, color, or frame changed.
-
 
 ## Corrections and contributions
 
