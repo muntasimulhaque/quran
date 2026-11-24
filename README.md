@@ -216,7 +216,16 @@ including the three new ones that prove the name is offered back, that
 frame's surface changed, so the three committed sets stand and no capture
 leg ran. `content/quran.db` still hashes what it did before:
 `9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f`.
-The signed bundle follows from the newest green `build` run on `main`.
+The signed bundle comes from `build` run 45337800189, green on `main` for
+the commit `f8be8bdb`: the unit tests, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.5-vc227.aab` has SHA-256
+`a6d642fb1d45937a3cb14117bc97b17d48b5ec2aa74db528c66dde8119dd647e`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.5` and `versionCode 227`, and the upload certificate is the
+same key 21.4 through 22.4 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The hand-off copy waits in `play-store/aab/`.
 
 **What changed in 22.5.** Search says what the reader meant (owner
 decision, 22.5). A reader who typed `bakara` was offered `banana`, because
