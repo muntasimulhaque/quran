@@ -205,28 +205,36 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.5 (versionCode 227).** The whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` were green on this machine
-before the push. The diff touches `core/` and `data/` and three test files,
-so no accessibility class was owed and none ran: the trigger is a path, and
-no path it names changed. `ContentSearchTest` ran on `quran_phone` as a
-clean install with the lean development packs, all thirty-two cases green,
-including the three new ones that prove the name is offered back, that
-`yasin` finds Ya-Sin, and that `surah baqarah` finds Al-Baqarah. No store
-frame's surface changed, so the three committed sets stand and no capture
-leg ran. `content/quran.db` still hashes what it did before:
-`9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f`.
-The signed bundle comes from `build` run 45337800189, green on `main` for
-the commit `f8be8bdb`: the unit tests, `checkdb`, `search`, `storecards
---check`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-22.5-vc227.aab` has SHA-256
-`a6d642fb1d45937a3cb14117bc97b17d48b5ec2aa74db528c66dde8119dd647e`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.5` and `versionCode 227`, and the upload certificate is the
-same key 21.4 through 22.4 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.5 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+**22.6 (versionCode 228).** The whole JVM suite, `verify`, `checkdb`,
+`search`, `storecards --check`, lint, and `assembleDebug` were green on
+this machine before the push. The diff touches `feature-settings/`, so the
+four accessibility classes were owed; they ran on `quran_phone` as a clean
+install, ten cases and no failures. The five classes the recitation change
+touches ran with them, fifty-five cases and no failures:
+`BundledFatihaTest`, `FatihaPlayTest`, `ListenOfferDismissTest`,
+`PlaybackServiceTest`, and `PlaybackPillTest`. All three store sets were
+captured from this build, on `quran_phone` at 1080 x 1920, `quran_tablet7`
+at 1200 x 1920 and 320 dpi, and `quran_tablet10` at its own 2560 x 1800, and
+every frame of the twenty-four reads as the reading the app draws; the keys
+differ from the last set only in the status bar's network glyph and the
+sub-threshold antialiasing around it, because no frame carries a reciter
+list. The Bangla leg ran green on the phone: the settings hub reads
+তিলাওয়াতকারী over হুসারি, and nothing in the sheet is held to a line it
+cannot draw. `content/quran.db` is two voices now and hashes
+`a7f425d57cfe38156cbedc7c5d07190557933e253bc7d59505a0b838181e4f8f`,
+rebuilt twice to the byte. The core pack moved to version 8 and publishes as
+`pack-core-d7407645`, served and checked against the catalog's hash; the two
+kept reciter packs reproduce the bytes they shipped under, `af264024b1b4` and
+`9b09e6cb1b16`.
+The signed bundle follows from the newest green `build` run on `main`.
+
+**What changed in 22.6.** The app offers two recitation voices, Husary and
+Minshawi (owner decision, 22.6). Alafasy and Abdul Basit are retired: their
+catalog rows, shipped timing packs, database rows, voice edges, source pins,
+published manifest entries, About page credits, and tests are gone, and the
+core pack moves to version 8, whose recitation map names the two voices the
+catalog offers. The word pronunciation pack is unchanged. The Quran text,
+both translations, both tafsirs, and the word lists are unchanged.
 
 **What changed in 22.5.** Search says what the reader meant (owner
 decision, 22.5). A reader who typed `bakara` was offered `banana`, because
@@ -273,23 +281,6 @@ reader's own word. The vocabulary is the Book's words, the enabled
 translations, and the word list, warmed when the sheet opens, so the
 suggestion lands in a frame; nothing leaves the phone. The text, both
 translations, both tafsirs, and the content database are unchanged.
-
-**What changed in 22.2.** The page opens on Light (owner decision, 22.2,
-superseding 13.5). A fresh install no longer follows the phone's own day and
-night: the Book opens as its own warm page, the page the printed Book reads
-on, and System stays one row away for a reader who wants the phone to
-choose. An install that has opened before and never chose a page keeps the
-System it reads under, written once before the new default can move it, so
-no update changes a reader's page for a reason they cannot see. A language
-change now swaps a tafsir the reader has chosen and never introduces one:
-until now, moving from English to Bangla started a 56 MB tafsir download
-behind a reader who had never asked for a tafsir, which the first open
-deliberately leaves off. Al-Fatiha's recitation rides in Husary's voice
-alone, the default recitation; a reader who has chosen another voice meets
-the same download offer every other surah makes, 0.7 MB for the surah. All
-four voices' word timings still ship, so every reciter is ready offline.
-The Quran text, both translations, both tafsirs, and the content database
-are unchanged.
 
 ## Corrections and contributions
 

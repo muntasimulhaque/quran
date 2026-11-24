@@ -5,6 +5,26 @@ summarized on the [front page](README.md); the releases before it are written
 in full below. The reason a decision was made lives in the KDoc beside the code
 it decided, tagged `owner decision`, and in `git log`.
 
+## 22.5
+
+Search says what the reader meant (owner
+decision, 22.5). A reader who typed `bakara` was offered `banana`, because
+the surah they meant was not in the vocabulary the suggestion is chosen
+from and the fruit was the only word within two edits; the surahs' names
+are part of that vocabulary now, offered as the name the interface draws,
+so `bakara` comes back as one tap on `Al-Baqarah`. A Latin term of five
+letters and up is ranked by how it sounds before how it is spelled: `q`
+folds into `k`, the vowels a transliteration never agrees on fall away, and
+a final `h` falls away with them, so `bakara` and `baqarah` are one shape
+and `koran` and `quran` another. A word that only sounds vaguely near is
+refused rather than offered. The surah match reads the keys a name may be
+typed by, so `yasin` finds Ya-Sin and `albaqarah` finds Al-Baqarah, whose
+stored names carry a hyphen the reader does not type, and the word `surah`
+no longer hides the surah it introduces: `surah baqarah` opens Al-Baqarah.
+The vocabulary is counted in the index's own tokens, so a count is a count
+of what search matches. The Quran text, both translations, both tafsirs,
+the recitations, and the content database are unchanged.
+
 ## 22.4
 
 The store set is the app's own face (owner decision, 22.4). The eight
