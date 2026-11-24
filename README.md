@@ -225,6 +225,17 @@ packs moved to `reciter-husary b9b25a95f10c` and `reciter-minshawi
 09beaef021c8`. `tools audio words` measured 494 ayahs of each voice against
 their own audio: the boundary error's median is 40 ms for Husary and 50 ms
 for Minshawi, and the ninetieth percentile is 140 ms and 120 ms.
+The content database publishes as `content-db-0c5d878e`, created before the
+push so the run fetched it the first time. The signed bundle comes from
+`build` run 45432178871, green on `main` for the commit `4a2b0056`: the
+unit tests, `checkdb`, `search`, `storecards --check`, lint, and
+`assembleDebug` passed, and the signed bundle `quran-22.7-vc229.aab` has
+SHA-256
+`e1dfdcbe93eb88b289627560b0ad378cc0610d4fe605eefbdfabf001014fc380`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.7` and `versionCode 229`, and the upload certificate is the
+same key 21.4 through 22.6 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a
