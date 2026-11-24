@@ -205,27 +205,36 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.4 (versionCode 226).** The whole JVM suite, `checkdb`, `search`,
+**22.5 (versionCode 227).** The whole JVM suite, `checkdb`, `search`,
 `storecards --check`, lint, and `assembleDebug` were green on this machine
-before the push. The diff touches `tools/`, `play-store/`, the two records,
-and one comment in the capture workflow, so no accessibility class was owed
-and none ran. The three store sets were captured on this session's legs, all
-green: `quran_phone` at 1080 x 1920, `quran_tablet7` at 1200 x 1920 and 320
-dpi, and `quran_tablet10` at 2560 x 1800. The app itself is 22.3: no file
-under `app/`, `core/`, `data/`, `ui-kit/`, or a `feature-*` changed, and
-`content/quran.db` still hashes
+before the push. The diff touches `core/` and `data/` and three test files,
+so no accessibility class was owed and none ran: the trigger is a path, and
+no path it names changed. `ContentSearchTest` ran on `quran_phone` as a
+clean install with the lean development packs, all thirty-two cases green,
+including the three new ones that prove the name is offered back, that
+`yasin` finds Ya-Sin, and that `surah baqarah` finds Al-Baqarah. No store
+frame's surface changed, so the three committed sets stand and no capture
+leg ran. `content/quran.db` still hashes what it did before:
 `9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f`.
-The signed bundle comes from `build` run 45225638612, green on `main` for
-the commit `1d09fc21`: the unit tests, `checkdb`, `search`, `storecards
---check`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-22.4-vc226.aab` has SHA-256
-`36357c41b7424e72972baf5311c87643516d2a80bbad248a981b8dd3bf6d820d`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.4` and `versionCode 226`, and the upload certificate is the
-same key 21.4 through 22.3 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.4 bundle is ready for Play review, and its hand-off copy in
-`play-store/aab/` is deleted once Play has it.
+The signed bundle follows from the newest green `build` run on `main`.
+
+**What changed in 22.5.** Search says what the reader meant (owner
+decision, 22.5). A reader who typed `bakara` was offered `banana`, because
+the surah they meant was not in the vocabulary the suggestion is chosen
+from and the fruit was the only word within two edits; the surahs' names
+are part of that vocabulary now, offered as the name the interface draws,
+so `bakara` comes back as one tap on `Al-Baqarah`. A Latin term of five
+letters and up is ranked by how it sounds before how it is spelled: `q`
+folds into `k`, the vowels a transliteration never agrees on fall away, and
+a final `h` falls away with them, so `bakara` and `baqarah` are one shape
+and `koran` and `quran` another. A word that only sounds vaguely near is
+refused rather than offered. The surah match reads the keys a name may be
+typed by, so `yasin` finds Ya-Sin and `albaqarah` finds Al-Baqarah, whose
+stored names carry a hyphen the reader does not type, and the word `surah`
+no longer hides the surah it introduces: `surah baqarah` opens Al-Baqarah.
+The vocabulary is counted in the index's own tokens, so a count is a count
+of what search matches. The Quran text, both translations, both tafsirs,
+the recitations, and the content database are unchanged.
 
 **What changed in 22.4.** The store set is the app's own face (owner
 decision, 22.4). The eight screenshots Play shows are cards now: each is a
@@ -271,21 +280,6 @@ the same download offer every other surah makes, 0.7 MB for the surah. All
 four voices' word timings still ship, so every reciter is ready offline.
 The Quran text, both translations, both tafsirs, and the content database
 are unchanged.
-
-**What changed in 22.1.** The one action color returns to lapis, measured
-into the ultramarine the illuminated Qurans were painted in (owner decision,
-22.1). 22.0 had turned the accent to emerald on the category's word; the
-green's claim proved to be the 1837 dome and the flags rather than the text,
-while the blue the app wore before it is the hue the platform reads as the
-way things work and the one hue red-green color weakness still sees as
-itself. The day tone #1F3D76 reads 10.0 to 1 on the page and the night tone
-#A8C2EF reads 9.6 to 1, both past every floor the tests enforce, and wider
-from the verse's own blue families than the emerald ever sat from its green.
-The night's chosen block, the wash behind the current surah and juz in Browse
-and behind the word the word sheet names, is lifted to 18.4 L*, where the
-15.4 it carried since 21.0 stood 2 L* over its sheet and read as nothing at
-all. The paper, the ink, the gold ornament, the tajweed palette, the icon,
-and every content byte are unchanged.
 
 ## Corrections and contributions
 

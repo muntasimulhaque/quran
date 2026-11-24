@@ -1,10 +1,25 @@
 # Release notes
 
 Every release of Quran: The Noble Book, newest first. The current release is
-summarized on the [front page](README.md) and written in full below; the older
-ones live here so the front page can be about the app rather than about its
-history. The reason a decision was made lives in the KDoc beside the code it
-decided, tagged `owner decision`, and in `git log`.
+summarized on the [front page](README.md); the releases before it are written
+in full below. The reason a decision was made lives in the KDoc beside the code
+it decided, tagged `owner decision`, and in `git log`.
+
+## 22.4
+
+The store set is the app's own face (owner decision, 22.4). The eight
+screenshots Play shows are cards now: each is a real capture from the
+screenshot test, whole and unedited, laid on the app's own paper inside an
+outline drawn in its ink, under one line set in the app's Literata with the
+app's Inter beneath it. The card's gold rule is the feature graphic's, so the
+icon, the graphic, and the cards read as one face.
+`./gradlew :tools:run --args="storecards"` composes all three sets from the
+captures committed under `play-store/frames/`, and `storecards --check` is a
+release gate: it compares the pictures the command would draw with the ones
+the repository holds, at a tolerance wide enough for a platform's own font
+rasterizer and narrow enough that one changed word fails. The app itself is
+unchanged, and the accessibility classes were not owed: the diff touches
+`tools/`, `play-store/`, and the records, and no path the trigger names.
 
 ## 22.3
 
