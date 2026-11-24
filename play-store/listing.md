@@ -234,6 +234,9 @@ The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
 
+## Release notes (22.6, 314 characters)
+22.6 offers two recitation voices, Husary and Minshawi. Alafasy and Abdul Basit retire, and the two that remain keep their timings inside the app, so a reciter is ready offline. Word pronunciation, the word lists, both translations, both tafsirs, and the Quran text are unchanged. No ads, no trackers, no accounts.
+
 ## Release notes (22.5, 404 characters)
 22.5 makes search know the surahs. Typing bakara now answers with Al-Baqarah, not a word that only looked similar: yasin finds Ya-Sin, and surah baqarah opens Al-Baqarah. A suggestion is offered only when it sounds like what you typed, so a near miss no longer swaps in an unrelated word. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
