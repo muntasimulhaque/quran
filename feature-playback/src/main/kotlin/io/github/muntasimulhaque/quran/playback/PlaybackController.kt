@@ -34,6 +34,7 @@ import io.github.muntasimulhaque.quran.data.RecitationAyah
 import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
+import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.WordAudioStore
 import io.github.muntasimulhaque.quran.data.WordSegment
@@ -224,7 +225,7 @@ class PlaybackController(
      * read with the playlist, so this is a map lookup and an arithmetic walk,
      * not a disk read on the frame.
      */
-    fun heardWordNow(): Int? {
+    fun heardWordNow(): RecitedWord? {
         val player = controller ?: return null
         if (player.playbackState == Player.STATE_ENDED) return null
         if (stoppedAtAyahEnd && !player.playWhenReady) return null
@@ -233,12 +234,13 @@ class PlaybackController(
         val segments = segmentsByAyah[ayahNumber] ?: return null
         val recitation = recitationId ?: return null
         val edges = edges
-        return recitedWordAt(
+        val word = recitedWordAt(
             segments = segments,
             positionMs = player.currentPosition.coerceAtLeast(0L),
             firstSpeechMs = edges?.firstMs(recitation, ayahNumber) ?: NO_EDGE_MS,
             lastSpeechMs = edges?.lastMs(recitation, ayahNumber) ?: NO_EDGE_MS,
-        )
+        ) ?: return null
+        return RecitedWord(ayahNumber, word)
     }
 
     /**

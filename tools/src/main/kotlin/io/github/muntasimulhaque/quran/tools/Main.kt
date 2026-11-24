@@ -12,10 +12,10 @@ fun main(args: Array<String>) {
         "verify" -> Verify(root).run()
         "audit" -> Audit(root).run()
         "search" -> SearchCheck(root).run()
-        "audio" -> if (args.getOrNull(1) == "edges") {
-            AudioEdges(root).run(resume = args.getOrNull(2) == "resume")
-        } else {
-            Audio(root).run(args.drop(1))
+        "audio" -> when (args.getOrNull(1)) {
+            "edges" -> AudioEdges(root).run(resume = args.getOrNull(2) == "resume")
+            "words" -> AudioWords(root).run()
+            else -> Audio(root).run(args.drop(1))
         }
         "build" -> Build(root).run()
         "word-audio" -> WordAudio(root).run(args.drop(1))
@@ -38,8 +38,9 @@ fun main(args: Array<String>) {
             println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs|word-audio|storecards>")
         println("       tools storecards [--check]")
         println("       tools packs [build|publish]")
-        println("       tools audio [sample|bundle|packs|publish|edges]")
+        println("       tools audio [sample|bundle|packs|publish|edges|words]")
         println("       tools audio edges [resume]")
+        println("       tools audio words")
         println("       tools word-audio [plan|build [surahs]|publish]")
             Runbook.print()
             0

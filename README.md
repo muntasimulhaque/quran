@@ -151,7 +151,7 @@ facts live. The app's About page reads that record and names every source.
 | Tafsir Ibn Kathir, English and Bangla | Quranic Universal Library by Tarteel | QUL lists no license; rights unverified |
 | Word by word and word roots | Quranic Universal Library | QUL lists no license; rights unverified |
 | Grammar and dictionary forms | Quranic Arabic Corpus by Dr. Kais Dukes, via Quranpedia | GNU GPL, attribution required |
-| Recitations | Sheikh Muhammad Siddiq Al-Minshawi and Sheikh Mahmoud Khalil Al-Husary, via QUL | QUL lists no license; rights unverified |
+| Recitations | Sheikh Muhammad Siddiq Al-Minshawi and Sheikh Mahmoud Khalil Al-Husary, via QUL, with word timings by quran-align | QUL lists no license for the recordings; timings CC BY 4.0 |
 | Word pronunciation | Mishari Rashid al-Afasy, via QUL, with word timings by quran-align | Audio: rights unverified; timings: CC BY 4.0 |
 | Uthmani reference text | Tanzil Project | CC BY 3.0, unmodified, credited |
 | Bangla surah names | Compiled and reviewed for this app after Dr. Abu Bakr Muhammad Zakaria's index | No verse text is copied |
@@ -205,43 +205,48 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.6 (versionCode 228).** The whole JVM suite, `verify`, `checkdb`,
-`search`, `storecards --check`, lint, and `assembleDebug` were green on
-this machine before the push. The diff touches `feature-settings/`, so the
-four accessibility classes were owed; they ran on `quran_phone` as a clean
-install, ten cases and no failures. The five classes the recitation change
-touches ran with them, fifty-five cases and no failures:
-`BundledFatihaTest`, `FatihaPlayTest`, `ListenOfferDismissTest`,
-`PlaybackServiceTest`, and `PlaybackPillTest`. All three store sets were
-captured from this build, on `quran_phone` at 1080 x 1920, `quran_tablet7`
-at 1200 x 1920 and 320 dpi, and `quran_tablet10` at its own 2560 x 1800, and
-every frame of the twenty-four reads as the reading the app draws; the keys
-differ from the last set only in the status bar's network glyph and the
-sub-threshold antialiasing around it, because no frame carries a reciter
-list. The Bangla leg ran green on the phone: the settings hub reads
-তিলাওয়াতকারী over হুসারি, and nothing in the sheet is held to a line it
-cannot draw. `content/quran.db` is two voices now and hashes
-`a7f425d57cfe38156cbedc7c5d07190557933e253bc7d59505a0b838181e4f8f`,
-rebuilt twice to the byte. The core pack moved to version 8 and publishes as
-`pack-core-d7407645`, served and checked against the catalog's hash; the two
-kept reciter packs reproduce the bytes they shipped under, `af264024b1b4` and
-`9b09e6cb1b16`.
-The content database publishes as
-`content-db-a7f425d5`, and the first `build` run on `main` failed at
-`fetch` because that release did not exist yet: `fetch` brings the database
-from the release named for its hash, so the release is published before the
-run. The rerun of that same commit 45379585918 was green.
-The signed bundle comes from `build` run 45379585918, green on `main` for
-the commit `5c82a2ea`: the unit tests, `checkdb`, `search`, `storecards
---check`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-22.6-vc228.aab` has SHA-256
-`ff756fdd16034037db0871d0c38ef6acb1e59c07e11d023e6a690f7009f362a7`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.6` and `versionCode 228`, and the upload certificate is the
-same key 21.4 through 22.5 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.6 bundle was submitted for Play review, and the hand-off
-copy in `play-store/aab/` was deleted once Play had it.
+**22.7 (versionCode 229).** The word follow is measured now (owner
+decision, 22.7). The whole JVM suite, `verify`, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` were green on this machine.
+The diff touches `feature-reading/` and the reading's own screen, so the four
+accessibility classes were owed; they ran on `quran_phone` as a clean install,
+ten cases and no failures. No visible surface changed for a still frame, so
+the three committed store sets stand and no capture leg ran.
+`content/quran.db` hashes
+`0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
+and was rebuilt twice to the byte. The voice edges were re-measured in the
+same change, one line per file taken from the file's whole energy: the old
+head window read a first voice from decoder noise on the ayahs that open in
+more silence than it held, and its tail windows measured the last voice
+hundreds of milliseconds into closing pauses, on 518 ayahs. The table's hash
+moved with it and is pinned in the manifest. The core pack stays at version 8
+and publishes as `pack-core-d7407645`, its rows unchanged; the two reciter
+packs moved to `reciter-husary b9b25a95f10c` and `reciter-minshawi
+09beaef021c8`. `tools audio words` measured 494 ayahs of each voice against
+their own audio: the boundary error's median is 40 ms for Husary and 50 ms
+for Minshawi, and the ninetieth percentile is 140 ms and 120 ms.
+
+**What changed in 22.7.** The page follows the reciter by measured time
+(owner decision, 22.7). The word timings of both recitations were cut against a
+different edit of the recordings than the files the app plays: on 284 Husary and
+283 Minshawi ayahs the first region began up to a second after the voice, so the
+page rested through the first word, and the boundaries inside an ayah wandered
+by a median of about half a second. Both voices now read cpfair's quran-align
+timings, cut against the same takes the app ships and verified against their
+audio, and the page's word stands within tens of milliseconds of the voice.
+Three smaller rules came with it: a one-word ayah, which is every muqata'ah
+that stands alone, now spans its file's whole voice instead of the aligner's
+guess; the wash rests at the last sound's own millisecond, so the last word no
+longer stands through the closing pause when the reading wakes exactly on it;
+and the wash carries its ayah, so a turn can no longer light a word on the
+wrong row for a frame. `tools audio words` measures a sampled ayah against its
+own audio for both voices, and `checkdb` compares every first region to the
+measured voice. The voice edges were re-measured in the same
+change: one line per file, taken from the file's whole energy instead of a
+window that decoder noise could fool, which pulled 518 closing pauses back out
+of the last word's wash and put every head that opens in long silence at its
+true voice. The Quran text, both translations, both tafsirs, the word
+lists, and the word pronunciation pack are unchanged.
 
 **What changed in 22.6.** The app offers two recitation voices, Husary and
 Minshawi (owner decision, 22.6). Alafasy and Abdul Basit are retired: their
@@ -282,20 +287,6 @@ the repository holds, at a tolerance wide enough for a platform's own font
 rasterizer and narrow enough that one changed word fails. The app itself is
 unchanged, and the accessibility classes were not owed: the diff touches
 `tools/`, `play-store/`, and the records, and no path the trigger names.
-
-**What changed in 22.3.** Search recovers where it used to stop (owner
-decision, 22.3). A query that finds nothing is offered the one word the
-reader's own library says is nearest to what they typed, in their own
-sentence, and tapping it rewrites that word and runs the search again. A
-reference past its surah's last ayah answers with the surah's own count, and
-a surah past the hundred and fourteenth with the Book's count, in place of
-"No matches". Words wrapped in double quotes must sit together, and a quoted
-reference is a phrase and never a place. `juz 30`, `para 30`, `পারা ৩০`, and
-`جزء 30` land on the ayah a juz opens, and the row names the juz in the
-reader's own word. The vocabulary is the Book's words, the enabled
-translations, and the word list, warmed when the sheet opens, so the
-suggestion lands in a frame; nothing leaves the phone. The text, both
-translations, both tafsirs, and the content database are unchanged.
 
 ## Corrections and contributions
 

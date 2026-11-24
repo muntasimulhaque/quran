@@ -63,6 +63,7 @@ import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.feature.reading.R
@@ -93,7 +94,7 @@ internal fun AyahBlock(
      * being heard. The null on every other block keeps a word change from
      * rebuilding its line (owner decision, 19.9).
      */
-    playedWord: State<Int?>?,
+    playedWord: State<RecitedWord?>?,
     /** The search arrival to reveal on this ayah, when it is this one. */
     reveal: ReadingReveal? = null,
     /** True when the reader's own word-by-word switch is on. */
@@ -520,7 +521,9 @@ internal fun AyahBlock(
                             // of it invalidates the wash and not the block
                             // (owner decision, 19.9).
                             val recited = if (playing) {
-                                playedWord?.value?.let { arabicLine.wordRangeByPosition[it] }
+                                playedWord?.value
+                                    ?.takeIf { it.ayahNumber == row.ayah.number }
+                                    ?.let { arabicLine.wordRangeByPosition[it.position] }
                             } else {
                                 null
                             }

@@ -50,11 +50,23 @@ class RecitedWordTest {
     }
 
     @Test
-    fun `no word is marked after the last sound`() {
+    fun `no word is marked from the last sound's own millisecond`() {
         val segments = listOf(segment(1, 0, 840), segment(2, 2880, 4920))
-        assertEquals(2, recitedWordAt(segments, 4200, lastSpeechMs = 4200))
+        assertEquals(2, recitedWordAt(segments, 4199, lastSpeechMs = 4200))
+        assertNull(recitedWordAt(segments, 4200, lastSpeechMs = 4200))
         assertNull(recitedWordAt(segments, 4201, lastSpeechMs = 4200))
         assertNull(recitedWordAt(segments, 4900, lastSpeechMs = 4200))
+    }
+
+    @Test
+    fun `a wake on the last sound rests instead of holding the last word`() {
+        // The reading schedules its next change at the last sound, so the wake
+        // lands exactly on it: the rest must be the same at that millisecond as
+        // after it, which is what keeps the last word off the closing pause.
+        val segments = listOf(segment(1, 0, 1000), segment(2, 1000, 2000))
+        assertNull(recitedWordAt(segments, 2000, lastSpeechMs = 2000))
+        assertEquals(2, recitedWordAt(segments, 1999, lastSpeechMs = 2000))
+        assertNull(nextWordChangeMs(segments, 2000, lastSpeechMs = 2000))
     }
 
     @Test

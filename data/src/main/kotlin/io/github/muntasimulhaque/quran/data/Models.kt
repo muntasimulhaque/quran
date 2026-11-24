@@ -92,6 +92,16 @@ data class RecitationAyah(
     val segments: List<WordSegment>,
 )
 
+/**
+ * The word under the reciter, with the ayah it belongs to.
+ *
+ * The ayah rides beside the word because the wash is one state for a page of
+ * many ayahs: at a turn the word a row last read can outlive the ayah it was
+ * measured on by a frame, and a value that carries its own ayah cannot light
+ * the wrong row, whatever a word number happens to fit (owner decision, 22.7).
+ */
+data class RecitedWord(val ayahNumber: Int, val position: Int)
+
 sealed interface SearchHit {
 
     data class SurahHit(val surah: Surah) : SearchHit

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
@@ -124,7 +125,7 @@ internal fun ReadingRows(
     savedAyahs: Set<Int> = emptySet(),
     playingAyah: Int?,
     /** The word being recited, read inside the one ayah being heard. */
-    playedWord: State<Int?>,
+    playedWord: State<RecitedWord?>,
     /** The ayah whose word is sounding, when the sound is a word sample. */
     hearingAyah: Int? = null,
     /** The sounding word's position in its ayah, when the sound is a sample. */

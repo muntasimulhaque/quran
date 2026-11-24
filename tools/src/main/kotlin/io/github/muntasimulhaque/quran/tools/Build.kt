@@ -33,13 +33,15 @@ class Build(private val root: File) {
     private val problems = mutableListOf<String>()
 
     /**
-     * How many recitation rows the build moved back one word, and how many
-     * regions it folded onto the last drawn word. They are reported with the
-     * database hash so a release can say exactly what changed.
+     * What the timing files gave up on the way in: the regions the aligner
+     * could not bound and the build dropped, the regions it could not split
+     * across words, and the drawn words that end with no region of their own
+     * and are pinned in [QuranAlignSegments.UNCOVERED]. They are reported with
+     * the database hash so a release can say exactly what changed.
      */
-    private var recitationSegmentsShifted = 0
-    private var recitationSegmentsClamped = 0
-    private var recitationSegmentsMapped = 0
+    private var recitationRegionsDropped = 0
+    private var recitationRegionSpans = 0
+    private var recitationUncoveredWords = 0
 
     private data class Word(
         val id: Int,
@@ -1221,6 +1223,22 @@ class Build(private val root: File) {
         }
     }
 
+    /**
+     * Every ayah file's measured voice, read once. A one-word ayah needs it:
+     * the page draws one word and the file says that word, so the word spans
+     * the file's whole voice, whatever the aligner made of a muqata'ah.
+     */
+    private val voices: Map<String, Map<Int, VoiceTable.Voice>> by lazy { VoiceTable.read(root) }
+
+    /**
+     * The two recitations the app ships, each read in two halves: the QUL
+     * export names the audio, the voice, and the credit, and the quran-align
+     * file gives the word regions. The export's own segments column is never
+     * read: it was cut against a different edit of the recording, and its head
+     * and its mid-ayah boundaries disagree with the audio the reader gets
+     * (owner decision, 22.7). [QuranAlignSegments] holds the whole of how a
+     * timing file becomes the reading's words.
+     */
     private fun insertRecitations(
         connection: Connection,
         manifest: Manifest,
@@ -1235,11 +1253,13 @@ class Build(private val root: File) {
                 "INSERT INTO recitation_ayah(recitation, ayah_number, audio_path, segments) VALUES(?,?,?,?)",
             ).use { insertAyah ->
                 for (dataset in recitations) {
+                    val reciter = dataset.id.removePrefix("recitation-")
                     val directory = sourceDb(dataset.id)
+                    val timings = timingFile(reciter)
                     var inserted = 0
                     openSqlite(directory).use { source ->
                         var basePath = ""
-                        source.each("SELECT surah_number, ayah_number, audio_url, segments FROM verses ORDER BY ayah_number") { rs ->
+                        source.each("SELECT surah_number, ayah_number, audio_url FROM verses ORDER BY ayah_number") { rs ->
                             val url = rs.getString(3) ?: ""
                             val path = url.substringAfter("/quran/", "")
                             val file = path.substringAfterLast('/')
@@ -1262,37 +1282,17 @@ class Build(private val root: File) {
                                 fail("recitation ${dataset.id}: $surah:$ayah has no ayah")
                                 return@each
                             }
-                            insertAyah.setString(1, dataset.id.removePrefix("recitation-"))
+                            insertAyah.setString(1, reciter)
                             insertAyah.setInt(2, number)
                             insertAyah.setString(3, path)
-                            val raw = rs.getString(4) ?: "[]"
-                            val regions = RecitationSegments.parse(raw)
-                            if (regions == null) {
-                                fail("recitation ${dataset.id}: $surah:$ayah segments are not a readable word list")
-                                insertAyah.setString(4, raw)
-                            } else {
-                                val correction = RecitationSegments.correct(
-                                    raw,
-                                    regions,
-                                    wordCounts[number] ?: 0,
-                                ) { source -> QpcWords.position(surah, ayah, source) }
-                                if (correction.shifted) recitationSegmentsShifted += 1
-                                recitationSegmentsClamped += correction.clamped
-                                recitationSegmentsMapped += correction.mapped
-                                insertAyah.setString(
-                                    4,
-                                    RecitationSegments.extendTail(
-                                        dataset.id.removePrefix("recitation-"),
-                                        number,
-                                        correction.json,
-                                        wordCounts[number] ?: 0,
-                                    ),
-                                )
-                            }
+                            insertAyah.setString(
+                                4,
+                                timingSegments(reciter, surah, ayah, number, wordCounts, timings),
+                            )
                             insertAyah.addBatch()
                             inserted += 1
                         }
-                        insertRecitation.setString(1, dataset.id.removePrefix("recitation-"))
+                        insertRecitation.setString(1, reciter)
                         insertRecitation.setString(2, dataset.name)
                         insertRecitation.setString(3, dataset.credit)
                         insertRecitation.setString(4, basePath)
@@ -1304,6 +1304,84 @@ class Build(private val root: File) {
                 insertAyah.executeBatch()
             }
         }
+    }
+
+    /** One recitation's quran-align file, indexed by its ayah key. */
+    private fun timingFile(reciter: String): Map<String, QuranAlignSegments.Ayah> {
+        val datasetId = QuranAlignSegments.DATASETS[reciter]
+            ?: error("recitation $reciter has no quran-align timing dataset")
+        val file = sourceJson(datasetId)
+        val ayahs = QuranAlignSegments.parse(file.readText())
+            ?: error("$datasetId is not a readable quran-align timing file")
+        return ayahs.associateBy { it.key }
+
+    }
+
+    /**
+     * One ayah's word regions, as the content database stores them, or a build
+     * failure that names the recitation and the ayah.
+     *
+     * Every check here is a data surprise rather than a correction: a missing
+     * entry, a word outside the page, or a word that ends uncovered without
+     * being in [QuranAlignSegments.UNCOVERED] stops the build. Inventing a
+     * region to make one pass is what the sacred-text rule forbids, and a hole
+     * the owner has not seen is the same lie with a quieter voice
+     * (owner decision, 22.7).
+     */
+    private fun timingSegments(
+        reciter: String,
+        surah: Int,
+        ayah: Int,
+        number: Int,
+        wordCounts: Map<Int, Int>,
+        timings: Map<String, QuranAlignSegments.Ayah>,
+    ): String {
+        val wordCount = wordCounts[number] ?: 0
+        val timing = timings["$surah:$ayah"]
+        if (timing == null) {
+            fail("recitation $reciter: $surah:$ayah has no quran-align timing")
+            return "[]"
+        }
+        val regions = QuranAlignSegments.regions(reciter, surah, ayah, timing.segments)
+        val spoken = voices[reciter]?.get(number)
+        val measured = if (regions.size == 1 && wordCount == 1 && spoken != null) {
+            // A one-word ayah is the whole of its file's voice, so its region
+            // is that voice. The aligner reads a muqata'ah as letters and can
+            // place the word anywhere in the file: on 42:2 it named a 290 ms
+            // window four seconds into the speech, so the page waited through
+            // the word (owner decision, 22.7).
+            listOf(QuranAlignSegments.Region(1, spoken.firstMs, spoken.lastMs))
+        } else {
+            regions
+        }
+        if (measured.isEmpty()) {
+            fail("recitation $reciter: $surah:$ayah has no region the aligner could bound")
+            return "[]"
+        }
+        val outside = measured.firstOrNull { it.word < 1 || it.word > wordCount }
+        if (outside != null) {
+            fail(
+                "recitation $reciter: $surah:$ayah names word ${outside.word} outside 1..$wordCount",
+            )
+            return "[]"
+        }
+        val drawn = measured.map { it.word }
+        if (drawn.zipWithNext().any { (a, b) -> b < a }) {
+            fail("recitation $reciter: $surah:$ayah regions are not in the ayah's word order")
+        }
+        val uncovered = QuranAlignSegments.uncovered(measured, wordCount)
+        val pinned = QuranAlignSegments.UNCOVERED[reciter]?.get("$surah:$ayah").orEmpty()
+        if (uncovered.toSet() != pinned) {
+            fail(
+                "recitation $reciter: $surah:$ayah rests on words ${uncovered.joinToString(",")}, " +
+                    "pinned ${pinned.sorted().joinToString(",")}",
+            )
+            return "[]"
+        }
+        recitationRegionsDropped += timing.segments.count { it.failed }
+        recitationRegionSpans += timing.segments.count { it.spans && !it.failed }
+        recitationUncoveredWords += uncovered.size
+        return QuranAlignSegments.json(measured)
     }
 
     private fun insertSurahInfo(connection: Connection) {
@@ -1385,9 +1463,9 @@ class Build(private val root: File) {
             appendLine("  \"markers\": $markers,")
             appendLine("  \"translations\": $translations,")
             appendLine("  \"grammar\": $grammar,")
-            appendLine("  \"recitationSegmentsShifted\": $recitationSegmentsShifted,")
-            appendLine("  \"recitationSegmentsMapped\": $recitationSegmentsMapped,")
-            appendLine("  \"recitationSegmentsClamped\": $recitationSegmentsClamped,")
+            appendLine("  \"recitationRegionsDropped\": $recitationRegionsDropped,")
+            appendLine("  \"recitationRegionSpans\": $recitationRegionSpans,")
+            appendLine("  \"recitationUncoveredWords\": $recitationUncoveredWords,")
             appendLine("  \"problems\": ${problems.size},")
             appendLine("  \"databaseBytes\": ${database.length()},")
             appendLine("  \"databaseSha256\": \"${sha256(database)}\"")

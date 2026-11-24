@@ -284,10 +284,25 @@
       "license": "QUL lists no license for this recording; the reciter's and publisher's rights are unverified.",
       "licenseBn": "QUL এই আবৃত্তির কোনো লাইসেন্স উল্লেখ করেনি; আবৃত্তিকার ও প্রকাশকের স্বত্ব যাচাই করা হয়নি।",
       "credit": "Sheikh Muhammad Siddiq Al-Minshawi, via QUL",
-      "usedFor": "Recitation with word segments; the seven Al-Fatiha ayahs are bundled in the app from the published surah 1 MP3 package",
+      "usedFor": "Recitation audio, name, and credit; the word segments come from the quran-align timings, not this export",
       "path": "content/raw/qul/recitation-minshawi.sqlite.zip",
       "bytes": 504515,
       "sha256": "1ecc86377e0e58342d9168a066bd3ac02311bcb76d4a9eb3e066f88b9ffdfc58",
+      "assetUrl": null
+    },
+    {
+      "id": "quran-align-minshawi",
+      "name": "quran-align word timings, Minshawi 128 kbps",
+      "source": "quran-align by cpfair",
+      "url": "https://github.com/cpfair/quran-align/releases/tag/release-2016-11-24",
+      "format": "json",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "licenseBn": "ক্রিয়েটিভ কমন্স অ্যাট্রিবিউশন ৪.০ আন্তর্জাতিক (CC BY 4.0)",
+      "credit": "Word timings by cpfair/quran-align",
+      "usedFor": "The word regions of the Minshawi recitation, cut against the same murattal recording the app ships; the QUL export's own segments disagreed with its audio",
+      "path": "content/raw/quran-align/Minshawy_Murattal_128kbps.json",
+      "bytes": 2329090,
+      "sha256": "5fb1f51734790ce3a477c2c413897028ebf5d60a0e369c527a2c779ee0dd206d",
       "assetUrl": null
     },
     {
@@ -300,10 +315,25 @@
       "license": "QUL lists no license for this recording; the reciter's and publisher's rights are unverified.",
       "licenseBn": "QUL এই আবৃত্তির কোনো লাইসেন্স উল্লেখ করেনি; আবৃত্তিকার ও প্রকাশকের স্বত্ব যাচাই করা হয়নি।",
       "credit": "Sheikh Mahmoud Khalil Al-Husary, via QUL",
-      "usedFor": "Recitation with word segments; the seven Al-Fatiha ayahs are bundled in the app from the published surah 1 MP3 package",
+      "usedFor": "Recitation audio, name, and credit; the word segments come from the quran-align timings, not this export",
       "path": "content/raw/qul/recitation-husary.sqlite.zip",
       "bytes": 521149,
       "sha256": "98b41ab7dd4ebe60e75511f572faa166535478d4c0b24a343e79b4bfeef50dc7",
+      "assetUrl": null
+    },
+    {
+      "id": "quran-align-husary",
+      "name": "quran-align word timings, Husary 64 kbps",
+      "source": "quran-align by cpfair",
+      "url": "https://github.com/cpfair/quran-align/releases/tag/release-2016-11-24",
+      "format": "json",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "licenseBn": "ক্রিয়েটিভ কমন্স অ্যাট্রিবিউশন ৪.০ আন্তর্জাতিক (CC BY 4.0)",
+      "credit": "Word timings by cpfair/quran-align",
+      "usedFor": "The word regions of the Husary recitation, cut against the same murattal recording the app ships; the QUL export's own segments disagreed with its audio",
+      "path": "content/raw/quran-align/Husary_64kbps.json",
+      "bytes": 2348746,
+      "sha256": "4ccb674446203398531a5cc034ac2ca35e3c4632a2b881c16562fa7b185e7d2a",
       "assetUrl": null
     },
     {
@@ -413,8 +443,8 @@
       "credit": "Measured by this project from the Al-Minshawi and Al-Husary recordings published via QUL",
       "usedFor": "The first and last voiced millisecond of every ayah file, so the word wash starts and stops with the voice",
       "path": "content/audio-edges.txt",
-      "bytes": 353811,
-      "sha256": "dd21e5f4fde6a3b62e630476bc5e7c05996d17f2de248edccdc53e28f1919a80",
+      "bytes": 353781,
+      "sha256": "9db761a974e599bbcdd0bcfea806be3576aee057f8eef4215dc0c2146dc4cca5",
       "assetUrl": null
     },
     {

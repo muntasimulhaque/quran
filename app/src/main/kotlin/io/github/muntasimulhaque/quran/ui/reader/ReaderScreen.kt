@@ -53,6 +53,7 @@ import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
@@ -166,7 +167,7 @@ fun ReaderScreen(
     // The wash is read at each scheduled change and handed down as a State
     // this screen never reads, so a change that moves it invalidates the one
     // ayah being heard instead of the page (owner decision, 16.3).
-    val playedWord = remember { mutableStateOf<Int?>(null) }
+    val playedWord = remember { mutableStateOf<RecitedWord?>(null) }
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     // The Save marks, by ayah, so a door can say what the reader kept. A note
     // alone is not a Save: the two marks are the reader's own and the app

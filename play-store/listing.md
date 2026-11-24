@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 22.6 (versionCode 228)
+Version: 22.7 (versionCode 229)
 
 ## Listing
 
@@ -65,7 +65,7 @@ when a newer version ships, on Wi-Fi only.
 Credits: Quran text by the King Fahd Complex for the Printing of the Holy
 Quran, audited against the QUL QPC text, with Tanzil as the independent
 cross-reference. Translation by Saheeh International via QuranEnc. Tafsir
-Ibn Kathir and the recitations via the Quranic Universal Library by Tarteel.
+Ibn Kathir and the recitations via the Quranic Universal Library by Tarteel, and the recitations' word timings by quran-align.
 The app's About page names each source and records each dataset's licensing
 status from the content manifest. The source code is MIT.
 
@@ -233,6 +233,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (22.7, 491 characters)
+The recitation follows the page by measured time now. Both reciters' word timings were cut against a different edit of the recordings than the audio the app plays, so on about five percent of ayahs the mark waited through the first word and drifted inside the verse; both voices now read timings measured against the same recordings, and the marked word lands with the voice. Text, translations, tafsirs, recitations, and word lists are otherwise unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (22.6, 314 characters)
 22.6 offers two recitation voices, Husary and Minshawi. Alafasy and Abdul Basit retire, and the two that remain keep their timings inside the app, so a reciter is ready offline. Word pronunciation, the word lists, both translations, both tafsirs, and the Quran text are unchanged. No ads, no trackers, no accounts.

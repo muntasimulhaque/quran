@@ -21,6 +21,7 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
+import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.WordVoice
@@ -68,7 +69,7 @@ data class ReadingListState(
     val savedAyahs: Set<Int> = emptySet(),
     val playingAyah: Int?,
     /** The word being recited, read only by the ayah being heard. */
-    val playedWord: State<Int?>,
+    val playedWord: State<RecitedWord?>,
     /** The ayah whose word is sounding, when the sound is a word sample. */
     val hearingAyah: Int? = null,
     /** The sounding word's position in its ayah, when the sound is a sample. */

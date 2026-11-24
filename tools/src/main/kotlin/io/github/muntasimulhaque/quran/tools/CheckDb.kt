@@ -528,9 +528,16 @@ class CheckDb(private val root: File) {
 
     /**
      * Every region the app reads must name a word the reading draws, and every
-     * drawn word must have at least one region. The build folds QUL's leading
-     * fragment and its ayah number into that range; this gate is what proves it
-     * did, on the database alone and without the raw sources.
+     * drawn word must either have a region or be pinned as resting in
+     * [QuranAlignSegments.UNCOVERED]. The build folds the aligner's spans and its
+     * failed matches into that range; this gate is what proves it did, on the
+     * database alone and without the raw sources.
+     *
+     * The head gate beside it is the one measurement the pipeline cannot repeat
+     * without the audio: the first region must stand within two seconds of the
+     * file's measured first voice. A voice that starts later than that is the
+     * fault this change exists to remove, and a table that drifts from its audio
+     * is a release stop rather than a reader's surprise (owner decision, 22.7).
      */
     private fun checkRecitationSegments(connection: java.sql.Connection, reciters: Set<String>): Int {
         if (reciters.isEmpty()) {
@@ -539,12 +546,13 @@ class CheckDb(private val root: File) {
         }
         var failures = 0
         var rows = 0
+        var resting = 0
         val seen = HashMap<String, Int>(reciters.size)
         val placeholders = reciters.joinToString(",") { "?" }
-        val sql = "SELECT ra.recitation, ra.ayah_number, ra.segments, " +
+        val sql = "SELECT ra.recitation, ra.ayah_number, ra.segments, a.surah, a.ayah, " +
             "(SELECT COUNT(*) FROM word w WHERE w.ayah_number = ra.ayah_number AND w.marker = 0) " +
-            "FROM recitation_ayah ra WHERE ra.recitation IN ($placeholders) " +
-            "ORDER BY ra.recitation, ra.ayah_number"
+            "FROM recitation_ayah ra JOIN ayah a ON a.number = ra.ayah_number " +
+            "WHERE ra.recitation IN ($placeholders) ORDER BY ra.recitation, ra.ayah_number"
         connection.prepareStatement(sql).use { statement ->
             reciters.forEachIndexed { index, reciter -> statement.setString(index + 1, reciter) }
             statement.executeQuery().use { rs ->
@@ -553,15 +561,16 @@ class CheckDb(private val root: File) {
                     val recitation = rs.getString(1)
                     seen[recitation] = (seen[recitation] ?: 0) + 1
                     val ayah = rs.getInt(2)
+                    val key = "${rs.getInt(4)}:${rs.getInt(5)}"
                     val regions = RecitationSegments.parse(rs.getString(3) ?: "")
-                    val words = rs.getInt(4)
+                    val words = rs.getInt(6)
                     if (regions == null) {
-                        println("checkdb: $recitation $ayah has unreadable segments")
+                        println("checkdb: $recitation $key has unreadable segments")
                         failures++
                         continue
                     }
                     if (words <= 0) {
-                        println("checkdb: $recitation $ayah has no drawn words")
+                        println("checkdb: $recitation $key has no drawn words")
                         failures++
                         continue
                     }
@@ -569,7 +578,7 @@ class CheckDb(private val root: File) {
                     var outside = false
                     for (region in regions) {
                         if (region.wordTo !in 1..words) {
-                            println("checkdb: $recitation $ayah has word ${region.wordTo} outside 1..$words")
+                            println("checkdb: $recitation $key has word ${region.wordTo} outside 1..$words")
                             failures++
                             outside = true
                             break
@@ -577,11 +586,22 @@ class CheckDb(private val root: File) {
                         covered += region.wordTo
                     }
                     if (outside) continue
+                    // The words a pinned ayah rests on are the list itself: a word
+                    // that leaves it, or a word that joins it, stops the release just
+                    // as a missing region does (owner decision, 22.7).
+                    val pinned = QuranAlignSegments.UNCOVERED[recitation]?.get(key).orEmpty()
                     val missing = (1..words).filterNot { it in covered }
-                    if (missing.isNotEmpty()) {
-                        println("checkdb: $recitation $ayah has no region for word(s) ${missing.take(5)}")
+                    val unexpected = missing.filterNot { it in pinned }
+                    val resolved = pinned.filterNot { it in missing }
+                    if (unexpected.isNotEmpty()) {
+                        println("checkdb: $recitation $key has no region for word(s) ${unexpected.take(5)}")
                         failures++
                     }
+                    if (resolved.isNotEmpty()) {
+                        println("checkdb: $recitation $key pins word(s) ${resolved.sorted().take(5)} that have a region")
+                        failures++
+                    }
+                    resting += missing.count { it in pinned }
                 }
             }
         }
@@ -592,7 +612,62 @@ class CheckDb(private val root: File) {
                 failures++
             }
         }
-        if (failures == 0) println("checkdb: $rows recitation rows, every word in range and covered")
+        if (failures == 0) {
+            println("checkdb: $rows recitation rows, every word in range and covered, $resting pinned words resting")
+        }
+        return failures + checkRecitationHeads(connection, reciters)
+    }
+
+    /**
+     * The first region must stand where the voice does.
+     *
+     * The QUL export began 284 Husary and 283 Minshawi ayahs some hundreds of
+     * milliseconds after the voice, and no reader-side rule could repair a late
+     * head: the page simply waited through the first word. The distance from the
+     * file's measured first voice to its first region is therefore a gate. Two
+     * seconds is a voice the table cannot explain; the forty-plus ayahs inside
+     * that bound are measured, and their lead-in is the reciter's own breath
+     * or the ta'awwudh some ayahs open with, which the page rightly rests
+     * through: 60:10 opens with two seconds of it (owner decision, 22.7).
+     */
+    private fun checkRecitationHeads(connection: java.sql.Connection, reciters: Set<String>): Int {
+        val edges = VoiceTable.read(root)
+        if (edges.isEmpty()) {
+            println("checkdb: content/audio-edges.txt is missing; the head gate did not run")
+            return 1
+        }
+        var failures = 0
+        for (reciter in reciters.sorted()) {
+            val spoken = edges[reciter]
+            if (spoken == null) {
+                println("checkdb: $reciter has no measured voice edges")
+                failures++
+                continue
+            }
+            var trailing = 0
+            connection.each(
+                "SELECT ra.ayah_number, ra.segments, a.surah, a.ayah FROM recitation_ayah ra " +
+                    "JOIN ayah a ON a.number = ra.ayah_number WHERE ra.recitation = '$reciter'",
+            ) { rs ->
+                val key = "${rs.getInt(3)}:${rs.getInt(4)}"
+                val voice = spoken[rs.getInt(1)] ?: return@each
+                val first = RecitationSegments.parse(rs.getString(2) ?: "")?.firstOrNull() ?: return@each
+                val gap = first.startMs - voice.firstMs
+                if (gap > HEAD_SLACK_MS) {
+                    println("checkdb: $reciter $key begins $gap ms after its first voice")
+                    failures++
+                } else if (gap > HEAD_REPORT_MS) {
+                    trailing++
+                }
+            }
+            if (trailing > 0) {
+                println(
+                    "checkdb: $reciter has $trailing ayahs whose first region trails the voice " +
+                        "by over $HEAD_REPORT_MS ms",
+                )
+            }
+        }
+        if (failures == 0) println("checkdb: every first region stands with its voice")
         return failures
     }
 
@@ -626,3 +701,9 @@ class CheckDb(private val root: File) {
         return 0
     }
 }
+
+// The head gate's two distances. Two seconds is a voice the table cannot
+// explain; four hundred milliseconds is the trail worth naming in the run's
+// own words (owner decision, 22.7).
+private const val HEAD_SLACK_MS = 2_000L
+private const val HEAD_REPORT_MS = 400L

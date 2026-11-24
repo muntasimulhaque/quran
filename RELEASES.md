@@ -5,6 +5,54 @@ summarized on the [front page](README.md); the releases before it are written
 in full below. The reason a decision was made lives in the KDoc beside the code
 it decided, tagged `owner decision`, and in `git log`.
 
+## 22.6
+
+The whole JVM suite, `verify`, `checkdb`,
+`search`, `storecards --check`, lint, and `assembleDebug` were green on
+this machine before the push. The diff touches `feature-settings/`, so the
+four accessibility classes were owed; they ran on `quran_phone` as a clean
+install, ten cases and no failures. The five classes the recitation change
+touches ran with them, fifty-five cases and no failures:
+`BundledFatihaTest`, `FatihaPlayTest`, `ListenOfferDismissTest`,
+`PlaybackServiceTest`, and `PlaybackPillTest`. All three store sets were
+captured from this build, on `quran_phone` at 1080 x 1920, `quran_tablet7`
+at 1200 x 1920 and 320 dpi, and `quran_tablet10` at its own 2560 x 1800, and
+every frame of the twenty-four reads as the reading the app draws; the keys
+differ from the last set only in the status bar's network glyph and the
+sub-threshold antialiasing around it, because no frame carries a reciter
+list. The Bangla leg ran green on the phone: the settings hub reads
+তিলাওয়াতকারী over হুসারি, and nothing in the sheet is held to a line it
+cannot draw. `content/quran.db` is two voices now and hashes
+`a7f425d57cfe38156cbedc7c5d07190557933e253bc7d59505a0b838181e4f8f`,
+rebuilt twice to the byte. The core pack moved to version 8 and publishes as
+`pack-core-d7407645`, served and checked against the catalog's hash; the two
+kept reciter packs reproduce the bytes they shipped under, `af264024b1b4` and
+`9b09e6cb1b16`.
+The content database publishes as
+`content-db-a7f425d5`, and the first `build` run on `main` failed at
+`fetch` because that release did not exist yet: `fetch` brings the database
+from the release named for its hash, so the release is published before the
+run. The rerun of that same commit 45379585918 was green.
+The signed bundle comes from `build` run 45379585918, green on `main` for
+the commit `5c82a2ea`: the unit tests, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.6-vc228.aab` has SHA-256
+`ff756fdd16034037db0871d0c38ef6acb1e59c07e11d023e6a690f7009f362a7`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.6` and `versionCode 228`, and the upload certificate is the
+same key 21.4 through 22.5 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 22.6 bundle was submitted for Play review, and the hand-off
+copy in `play-store/aab/` was deleted once Play had it.
+
+The app offers two recitation voices, Husary and
+Minshawi (owner decision, 22.6). Alafasy and Abdul Basit are retired: their
+catalog rows, shipped timing packs, database rows, voice edges, source pins,
+published manifest entries, About page credits, and tests are gone, and the
+core pack moves to version 8, whose recitation map names the two voices the
+catalog offers. The word pronunciation pack is unchanged. The Quran text,
+both translations, both tafsirs, and the word lists are unchanged.
+
 ## 22.5
 
 Search says what the reader meant (owner

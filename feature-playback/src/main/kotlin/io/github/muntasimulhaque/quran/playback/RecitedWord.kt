@@ -12,11 +12,12 @@ import io.github.muntasimulhaque.quran.data.WordSegment
  * export's own order, which is the ayah's order.
  *
  * [firstSpeechMs] and [lastSpeechMs] are the file's own voice edges, read from
- * the audio and shipped beside the timings: the export starts almost every
- * ayah's first word at 0 and lets the last one run to the end of the file, so
- * the wash used to sit on a word through the lead-in and the closing pause.
- * Before the first sound and after the last one there is no word. [NO_EDGE_MS]
- * means the file has no measured edge, and the old reading stands.
+ * the audio and shipped beside the timings: a file begins before its first
+ * word and ends after its last one, so a reading taken from the word regions
+ * alone sits on a word through the lead-in and the closing pause. Before the
+ * first sound there is no word, and at the last sound's own millisecond the
+ * wash rests, because the reading can wake exactly on it. [NO_EDGE_MS] means
+ * the file has no measured edge, and the regions alone are read.
  *
  * [holdMaxMs] is the longest a word may stay marked without the next one
  * starting. The export sometimes leaves a gap of twenty seconds where the
@@ -38,7 +39,12 @@ internal fun recitedWordAt(
         return recitedWordAt(segments, positionMs, NO_EDGE_MS, NO_EDGE_MS, holdMaxMs)
     }
     if (firstSpeechMs != NO_EDGE_MS && positionMs < firstSpeechMs) return null
-    if (lastSpeechMs != NO_EDGE_MS && positionMs > lastSpeechMs) return null
+    // The table's last voice is one past the last voiced millisecond, and the
+    // reading can wake exactly on it. Resting at that wake is the same rule
+    // the position after it already had, and it is what keeps the last word
+    // from standing through the closing pause until the next ayah
+    // (owner decision, 22.7).
+    if (lastSpeechMs != NO_EDGE_MS && positionMs >= lastSpeechMs) return null
     var word: Int? = null
     var wordStart = 0L
     var nextStart: Long? = null

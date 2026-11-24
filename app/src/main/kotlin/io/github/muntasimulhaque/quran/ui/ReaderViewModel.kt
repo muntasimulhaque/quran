@@ -25,6 +25,7 @@ import io.github.muntasimulhaque.quran.data.LAST_MINUTE_OF_DAY
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.Recitation
+import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
@@ -197,7 +198,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * polling, so the wash is on time at any pace and the page is idle
      * between words (owner decision, 16.3).
      */
-    fun playedWordNow(): Int? = playback.heardWordNow()
+    fun playedWordNow(): RecitedWord? = playback.heardWordNow()
 
     fun millisToNextWord(): Long? = playback.millisToNextWord()
 

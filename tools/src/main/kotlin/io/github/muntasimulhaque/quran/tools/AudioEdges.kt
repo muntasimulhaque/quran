@@ -4,36 +4,42 @@ import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.roundToLong
-import kotlin.math.sqrt
 
 /**
  * Writes the voice edges of every shipped recitation file.
  *
- * The recitation export marks almost every first word at 0 and lets the last
- * word run to the end of the file, so a wash taken from it alone sits on a
- * word through the lead-in and through the closing pause. This step listens to
- * the files the reader actually gets, with the same `audio packs` output the
- * build publishes, and records the first and the last voiced millisecond of
- * each one.
+ * The recitation file begins with almost every ayah's first word marked at 0
+ * and lets the last word run to the end of it, so a wash taken from the word
+ * timings alone sits on a word through the lead-in and through the closing
+ * pause. This step listens to the files the reader actually gets, with the same
+ * `audio packs` output the build publishes, and records the first and the last
+ * voiced millisecond of each one.
  *
- * The measurement is the file's own energy: a ten-millisecond RMS envelope,
- * with speech being ten percent of the window's loud end. A fixed decibel
- * threshold was fooled by a quiet room tone on one recitation and by a long
- * madd on another; the relative line moves with the recording, which is what
- * a reader's ear does. A run of three frames is required, so one click is not
- * a word.
+ * The measurement is [AudioProbe]'s: the file decoded once, whole, a
+ * ten-millisecond RMS envelope over its full length, and speech is ten percent
+ * of the file's own loud end, with a run of three frames required so one click
+ * is not a word.
  *
- * The head window is 2.5 s and grows when the file opens with a long silence,
- * so a split that kept six seconds before the first word still finds it. The
- * tail starts at 4 s and grows the same way, so a long closing pause still
- * finds the last word.
+ * The line is the file's own because a window's is not: the first table was
+ * measured with the threshold taken from a 2.5 s head window, and a file that
+ * opens with more silence than that turned the window's loud end into the room
+ * floor, so the decoder's own noise crossed the line and the table read a
+ * first voice at the file's first noise. Minshawi 25:21 and 27:65 recorded
+ * 50 ms where the speech begins at 2560 and 2870, and the tail windows of the
+ * same table measured the last voice hundreds of milliseconds past its end,
+ * into the closing pause. One line taken from one whole file cannot be fooled
+ * by either end (owner decision, 22.7).
  *
  * The output is `content/audio-edges.txt`, one line per recitation and ayah:
  * `reciter ayah firstMs lastMs durationMs`. It is read by the app from its
  * assets, and the build's gate checks that every recitation row has a line.
  * The step needs ffmpeg, so it runs on the owner's machine, like the gates
  * that read `content/raw`; the committed table is what CI and the app read.
+ *
+ * The same table is the head gate's reference: the content build's
+ * `checkdb` compares every first word region against the voice this step
+ * measured, so a recitation whose timings disagree with its audio stops the
+ * release rather than reaching the reader (owner decision, 22.7).
  */
 class AudioEdges(private val root: File) {
 
@@ -41,9 +47,6 @@ class AudioEdges(private val root: File) {
     private val packs = File(root, "content/work/audio-packs")
     private val work = File(root, "content/work/audio-edges")
     private val output = File(root, "content/audio-edges.txt")
-
-    private val headWindows = listOf(2.5, 5.0, 10.0, 20.0, 40.0)
-    private val tailWindows = listOf(4, 8, 16, 32, 64, 128, 256)
 
     fun run(resume: Boolean = false): Int {
         if (!database.exists()) {
@@ -158,116 +161,26 @@ class AudioEdges(private val root: File) {
     }
 
     private fun measure(file: File, row: Row): Edge? {
-        val head = runFfmpeg(file, headWindows.first(), fromEnd = false)
-        val duration = head.durationMs ?: return null
-        var first = firstSpeech(threshold(head.frames), head.frames)
-        if (first < 0) {
-            for (window in headWindows.drop(1)) {
-                val wider = runFfmpeg(file, window, fromEnd = false)
-                first = firstSpeech(threshold(wider.frames), wider.frames)
-                if (first >= 0) break
-            }
-        }
-        if (first < 0) return null
-        var last = -1L
-        for (window in tailWindows) {
-            val windowStart = (duration - (window * 1000).toLong()).coerceAtLeast(0L)
-            val tail = runFfmpeg(file, window.toDouble(), fromEnd = true)
-            val at = lastSpeech(threshold(tail.frames), tail.frames)
-            if (at < 0) continue
-            last = (windowStart + at).coerceAtMost(duration)
-            break
-        }
-        if (last < 0 || last <= first || last > duration + 100) return null
+        val whole = AudioProbe.probe(file)
+        val duration = whole.durationMs ?: return null
+        val line = threshold(whole.frames)
+        val first = firstSpeech(line, whole.frames)
+        val last = lastSpeech(line, whole.frames)
+        if (first < 0 || last < 0 || last <= first || last > duration + 100) return null
         return Edge(row.reciter, row.ayah, first, last, duration)
     }
 
-    /** The line a word has to cross to be heard rather than a room. */
-    internal fun threshold(frames: DoubleArray): Double {
-        if (frames.isEmpty()) return 1.0
-        val sorted = frames.sortedArray()
-        val loud = sorted[((sorted.size - 1) * 0.9).toInt()]
-        return maxOf(loud * 0.10, MIN_RMS)
-    }
+    internal fun threshold(frames: DoubleArray): Double = AudioProbe.threshold(frames)
 
-    /** The first voiced millisecond, or -1 when the window never reaches the line. */
-    internal fun firstSpeech(threshold: Double, frames: DoubleArray): Long {
-        var run = 0
-        for (index in frames.indices) {
-            if (frames[index] > threshold) {
-                run++
-                if (run >= RUN) return (index - RUN + 1).toLong() * HOP_MS
-            } else {
-                run = 0
-            }
-        }
-        return -1
-    }
+    internal fun firstSpeech(threshold: Double, frames: DoubleArray): Long =
+        AudioProbe.firstSpeech(threshold, frames)
 
-    /** The end of the last voiced millisecond, or -1 when nothing is voiced. */
-    internal fun lastSpeech(threshold: Double, frames: DoubleArray): Long {
-        var run = 0
-        for (index in frames.indices.reversed()) {
-            if (frames[index] > threshold) {
-                run++
-                if (run >= RUN) return (index + RUN).toLong() * HOP_MS
-            } else {
-                run = 0
-            }
-        }
-        return -1
-    }
+    internal fun lastSpeech(threshold: Double, frames: DoubleArray): Long =
+        AudioProbe.lastSpeech(threshold, frames)
 
-    private fun runFfmpeg(file: File, seconds: Double, fromEnd: Boolean): Probe {
-        val args = mutableListOf("ffmpeg", "-hide_banner", "-v", "info")
-        if (fromEnd) {
-            args += listOf("-sseof", "-${formatSeconds(seconds)}")
-        } else {
-            args += listOf("-t", formatSeconds(seconds))
-        }
-        args += listOf("-i", file.absolutePath, "-ac", "1", "-ar", "$SAMPLE_RATE", "-f", "s16le", "-")
-        val process = ProcessBuilder(args).start()
-        val bytes = process.inputStream.readBytes()
-        val error = process.errorStream.bufferedReader().use { it.readText() }
-        process.waitFor(2, TimeUnit.MINUTES)
-        if (process.isAlive) process.destroyForcibly()
-        return Probe(parseDurationMs(error), envelope(bytes))
-    }
+    internal fun envelope(bytes: ByteArray): DoubleArray = AudioProbe.envelope(bytes)
 
-    /** One RMS value per 10 ms, on a 0..1 scale. */
-    internal fun envelope(bytes: ByteArray): DoubleArray {
-        val samples = bytes.size / 2
-        val hop = SAMPLE_RATE / (1000 / HOP_MS)
-        val frames = ArrayList<Double>(samples / hop + 1)
-        var index = 0
-        while (index + hop <= samples) {
-            var sum = 0.0
-            for (offset in 0 until hop) {
-                val at = (index + offset) * 2
-                val value = ((bytes[at + 1].toInt() shl 8) or (bytes[at].toInt() and 0xff)).toShort()
-                val normalized = value / 32768.0
-                sum += normalized * normalized
-            }
-            frames += sqrt(sum / hop)
-            index += hop
-        }
-        return frames.toDoubleArray()
-    }
-
-    /** `Duration: 00:00:04.97, start: ...` in the input's own header. */
-    internal fun parseDurationMs(text: String): Long? {
-        val match = DURATION.find(text) ?: return null
-        val hours = match.groupValues[1].toLongOrNull() ?: return null
-        val minutes = match.groupValues[2].toLongOrNull() ?: return null
-        val seconds = match.groupValues[3].toDoubleOrNull() ?: return null
-        return ((hours * 3600 + minutes * 60) * 1000 + (seconds * 1000).roundToLong())
-    }
-
-    private fun formatSeconds(seconds: Double): String {
-        val whole = seconds.toInt()
-        val fraction = ((seconds - whole) * 10).roundToLong()
-        return if (fraction == 0L) "$whole" else "$whole.$fraction"
-    }
+    internal fun parseDurationMs(text: String): Long? = AudioProbe.parseDurationMs(text)
 
     private fun fileLine(rows: List<Row>, results: List<Edge>) {
         val byKey = results.associateBy { "${it.reciter}/${it.ayah}" }
@@ -290,15 +203,7 @@ class AudioEdges(private val root: File) {
 
     private data class Edge(val reciter: String, val ayah: Int, val firstMs: Long, val lastMs: Long, val durationMs: Long)
 
-    private data class Probe(val durationMs: Long?, val frames: DoubleArray)
-
     private companion object {
         const val WORKERS = 10
-        const val SAMPLE_RATE = 16_000
-        const val HOP_MS = 10
-        const val RUN = 3
-        const val MIN_RMS = 0.004
-
-        private val DURATION = Regex("""Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)""")
     }
 }

@@ -97,6 +97,7 @@ class Verify(private val root: File) {
             "metadata-ruku" -> checkJsonMinKeys(dataset.id, dir, 500)
             "surah-info-en" -> checkJsonKeys(dataset.id, dir, 114)
             "tanzil-uthmani" -> checkTanzil(dataset.id, dir)
+            "quran-align-husary", "quran-align-minshawi" -> checkQuranAlign(dataset.id, dir)
             "quran-font-hafs" -> checkFonts(dataset.id, dir, expected = 1)
         }
     }
@@ -608,5 +609,33 @@ class Verify(private val root: File) {
     private fun checkFonts(id: String, dir: File, expected: Int) {
         val fonts = dir.walkTopDown().filter { it.isFile && it.name.endsWith(".ttf") }.toList()
         if (fonts.size != expected) fail(id, "expected $expected font files, found ${fonts.size}")
+    }
+
+    /**
+     * A quran-align timing file: one entry for each of the 6,236 ayahs, every
+     * segment a four-number list, and the segments in the ayah's own word order.
+     * The file is a recitation's whole word timing, so a missing ayah is a page
+     * that would stop following the reciter there (owner decision, 22.7).
+     */
+    private fun checkQuranAlign(id: String, dir: File) {
+        val file = dir.firstWithExtension(".json") ?: return fail(id, "no timing JSON")
+        val ayahs = QuranAlignSegments.parse(file.readText())
+            ?: return fail(id, "not a readable quran-align timing file")
+        if (ayahs.size != 6236) fail(id, "expected 6236 ayahs, found ${ayahs.size}")
+        val keys = ayahs.mapTo(HashSet<String>(ayahs.size)) { it.key }
+        if (keys.size != 6236) fail(id, "expected 6236 distinct ayahs, found ${keys.size}")
+        for (ayah in ayahs) {
+            if (ayah.segments.isEmpty()) {
+                fail(id, "${ayah.key} has no regions")
+                continue
+            }
+            var previous = -1
+            for (segment in ayah.segments) {
+                if (segment.wordStart < 0) fail(id, "${ayah.key} names a word before the first")
+                if (segment.wordStart < previous) fail(id, "${ayah.key} has its regions out of word order")
+                if (segment.wordEnd < segment.wordStart) fail(id, "${ayah.key} has a region that ends before it starts")
+                previous = segment.wordStart
+            }
+        }
     }
 }
