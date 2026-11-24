@@ -226,7 +226,21 @@ rebuilt twice to the byte. The core pack moved to version 8 and publishes as
 `pack-core-d7407645`, served and checked against the catalog's hash; the two
 kept reciter packs reproduce the bytes they shipped under, `af264024b1b4` and
 `9b09e6cb1b16`.
-The signed bundle follows from the newest green `build` run on `main`.
+The content database publishes as
+`content-db-a7f425d5`, and the first `build` run on `main` failed at
+`fetch` because that release did not exist yet: `fetch` brings the database
+from the release named for its hash, so the release is published before the
+run. The rerun of that same commit 45379585918 was green.
+The signed bundle comes from `build` run 45379585918, green on `main` for
+the commit `5c82a2ea`: the unit tests, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.6-vc228.aab` has SHA-256
+`ff756fdd16034037db0871d0c38ef6acb1e59c07e11d023e6a690f7009f362a7`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.6` and `versionCode 228`, and the upload certificate is the
+same key 21.4 through 22.5 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The hand-off copy waits in `play-store/aab/`.
 
 **What changed in 22.6.** The app offers two recitation voices, Husary and
 Minshawi (owner decision, 22.6). Alafasy and Abdul Basit are retired: their
