@@ -444,4 +444,27 @@ class SearchTest {
         assertTrue(Search.isSingleToken("mercy"))
         assertTrue(Search.isSingleToken("\u09AA\u09B0\u09A4\u09BF\u09AB\u09B2"))
     }
+
+    @Test
+    fun `the index's own tokens carry no punctuation`() {
+        assertEquals(listOf("Muhammad", "mercy"), Search.indexTokens("[Muhammad], mercy."))
+        // A tokenizer is not a normalizer: the caller hands it an already
+        // folded column, so the case it was given is the case it keeps.
+        assertEquals(listOf("God", "s"), Search.indexTokens("God's"))
+        assertEquals(listOf("al", "baqarah"), Search.indexTokens("al-baqarah"))
+        // A Bengali vowel sign is not an ASCII break and stays inside its word.
+        assertEquals(listOf("\u0995\u09BF"), Search.indexTokens("\u0995\u09BF"))
+        assertTrue(Search.indexTokens("  ").isEmpty())
+    }
+
+    @Test
+    fun `qualifier words never name a surah`() {
+        assertTrue(Search.isNameQualifier("surah"))
+        assertTrue(Search.isNameQualifier("sura"))
+        assertTrue(Search.isNameQualifier("surat"))
+        assertTrue(Search.isNameQualifier("\u09B8\u09C2\u09B0\u09BE"))
+        assertTrue(Search.isNameQualifier("\u0633\u0648\u0631\u0629"))
+        assertFalse(Search.isNameQualifier("baqarah"))
+        assertFalse(Search.isNameQualifier("kahf"))
+    }
 }

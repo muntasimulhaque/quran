@@ -1115,7 +1115,7 @@ class ContentDatabase private constructor(
         var bestScore = Int.MAX_VALUE
         var bestSurah: Int? = null
         for (number in surahCache.keys.sorted()) {
-            val forms = surahNameKeys[number] ?: continue
+            val forms = surahNames.forms[number] ?: continue
             val score = when {
                 key in forms -> 0
                 else -> {
@@ -1531,17 +1531,51 @@ class ContentDatabase private constructor(
             surahCacheValue ?: surahs().associateBy { it.number }.also { surahCacheValue = it }
         }
 
-    /** Every key each surah's name may be typed by, built once with the names. */
-    private val surahNameKeys: Map<Int, Set<String>> by lazy {
-        surahCache.values.associate { surah ->
-            surah.number to buildSet {
-                addAll(Search.surahNameForms(surah.nameSimple))
-                addAll(Search.surahNameForms(surah.nameLatin))
-                addAll(Search.surahNameForms(surah.nameArabic))
-                addAll(Search.surahNameForms(surah.nameBangla))
-                addAll(Search.surahNameAliases(surah.number))
+    /**
+     * The surahs' names as the search reads them, built once from the table's
+     * own columns: every key a name may be typed by, and the display name each
+     * key is offered as when a suggestion names it.
+     *
+     * The columns are read raw and never through [surahOf], whose nameSimple
+     * follows the interface language: a name typed in one language must find
+     * its surah whatever the interface is drawing, and a name index built
+     * while Bangla was on screen must not leave the English names behind
+     * (owner decision, 22.5).
+     */
+    private class SurahNames(
+        val forms: Map<Int, Set<String>>,
+        val displays: Map<String, String>,
+    )
+
+    private val surahNames: SurahNames by lazy {
+        val forms = HashMap<Int, Set<String>>(114)
+        val displays = HashMap<String, String>()
+        query(
+            "SELECT number, name_simple, name_latin, name_arabic, name_bangla FROM surah",
+            null,
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                val number = cursor.getInt(0)
+                val names = listOf(
+                    cursor.getString(1) ?: "",
+                    cursor.getString(2) ?: "",
+                    cursor.getString(3) ?: "",
+                    cursor.getString(4) ?: "",
+                )
+                val keys = buildSet {
+                    for (name in names) addAll(Search.surahNameForms(name))
+                    addAll(Search.surahNameAliases(number))
+                }
+                forms[number] = keys
+                for (name in names) {
+                    if (name.isEmpty()) continue
+                    for (form in Search.surahNameForms(name)) {
+                        displays.putIfAbsent(form, name)
+                    }
+                }
             }
         }
+        SurahNames(forms, displays)
     }
 
     private val firstAyahCache: Map<Int, Int?> by lazy {
@@ -1664,7 +1698,10 @@ class ContentDatabase private constructor(
         val readable = if (query.arabic) {
             sources.text
         } else {
-            sources.translations || sources.words
+            // A name can now be the one word offered when only the surahs
+            // source is on, so the gate reads that source too (owner decision,
+            // 22.5).
+            sources.translations || sources.words || sources.surahs
         }
         if (!readable) return null
         if (query.terms.none { it.codePointCount(0, it.length) >= Suggest.MIN_CULPRIT_LENGTH }) {
@@ -1756,7 +1793,19 @@ class ContentDatabase private constructor(
                 }
             }
         }
-        val lexicon = Suggest.Lexicon(counts)
+        // The surahs' own names are the reader's navigation vocabulary: a reader
+        // who misspells one is naming a surah, and the names are already in the
+        // core pack's one small table, so every shape of search can offer them
+        // back. A form's count is the surahs that carry it: the Book's own
+        // frequency breaks the tie, and a name that names a surah is likelier
+        // than a hapax the translation says once (owner decision, 22.5).
+        for (forms in surahNames.forms.values) {
+            for (form in forms) {
+                val seen = counts[form]
+                counts[form] = if (seen == null) 1 else seen + 1
+            }
+        }
+        val lexicon = Suggest.Lexicon(counts, surahNames.displays)
         if (lexicons.size >= LEXICON_CACHE) lexicons.clear()
         lexicons[key] = lexicon
         return lexicon
@@ -1776,57 +1825,56 @@ class ContentDatabase private constructor(
     }
 
     /**
-     * One indexed text's words, counted. The index columns are already folded
-     * and single-spaced, so walking the text is the whole of the work. The
-     * walk is written out rather than handed to a regular expression: a
-     * vocabulary reads a few hundred thousand tokens, and a matcher per token
-     * would cost the reader a second on the one frame that asks for it
-     * (owner decision, 22.3).
+     * One indexed text's words, counted. The tokens are the index's own, read
+     * through [Search.indexTokens], because a count is only honest when it
+     * counts what the search matches: a vocabulary that held "muhammad]" as a
+     * word offered brackets back to the reader and split one word's frequency
+     * across its punctuation (owner decision, 22.5).
      *
      * A one-letter token is kept out: no culprit is near enough to it to be
      * worth naming, and it would only weigh the scan.
      */
     private fun addTokens(text: String?, counts: HashMap<String, Int>, latin: Boolean) {
         if (text.isNullOrEmpty()) return
-        val length = text.length
-        var index = 0
-        while (index < length) {
-            while (index < length && text[index].isWhitespace()) index++
-            val start = index
-            while (index < length && !text[index].isWhitespace()) index++
-            if (index - start < 2) continue
+        for (token in Search.indexTokens(text)) {
+            if (token.length < 2) continue
             var letters = false
             var arabic = false
-            for (position in start until index) {
-                val character = text[position]
+            for (character in token) {
                 if (character.isLetter()) letters = true
                 if (latin && RichText.isArabic(character.code)) arabic = true
                 if (letters && (!latin || arabic)) break
             }
             if (!letters) continue
             if (latin && arabic) continue
-            val token = text.substring(start, index)
             val seen = counts[token]
             counts[token] = if (seen == null) 1 else seen + 1
         }
     }
 
-    private fun surahHits(query: SearchQuery): List<SearchHit.SurahHit> =
-        surahCache.values.asSequence()
+    private fun surahHits(query: SearchQuery): List<SearchHit.SurahHit> {
+        // "surah baqarah" is a reader naming a surah with the word for one in
+        // front: the qualifier is dropped from the name match and kept in the
+        // text search (owner decision, 22.5).
+        val names = query.terms.filterNot { Search.isNameQualifier(it) }
+        // The match runs against the keys a name may be typed by, so "yasin"
+        // finds Ya-Sin and "albaqarah" finds Al-Baqarah, whose stored names
+        // carry a hyphen the reader did not type. A query of qualifiers alone
+        // names no surah, because its list of keys is empty (owner decision,
+        // 22.5).
+        val keys = names.map { Search.nameKey(it) }.filter { it.isNotEmpty() }
+        val number = query.terms.singleOrNull()
+        return surahCache.values.asSequence()
             .filter { surah ->
-                val simple = Search.normalizeForIndex(surah.nameSimple)
-                val latin = Search.normalizeForIndex(surah.nameLatin)
-                val arabicName = Search.normalizeForIndex(surah.nameArabic)
-                val bangla = Search.normalizeForIndex(surah.nameBangla)
-                val numberMatch = query.terms.size == 1 && query.terms.first() == surah.number.toString()
-                numberMatch || query.terms.all { term ->
-                    simple.contains(term) || latin.contains(term) || arabicName.contains(term) ||
-                        bangla.contains(term)
-                }
+                surah.number.toString() == number ||
+                    (keys.isNotEmpty() && keys.all { key ->
+                        surahNames.forms[surah.number].orEmpty().any { it.contains(key) }
+                    })
             }
             .take(8)
             .map { SearchHit.SurahHit(it) }
             .toList()
+    }
 
     /**
      * Lets the database go without waiting: the last query still reading it

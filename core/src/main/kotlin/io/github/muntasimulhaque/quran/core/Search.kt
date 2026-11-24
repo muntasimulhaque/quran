@@ -224,6 +224,18 @@ object Search {
     }
 
     /**
+     * The words a reader puts in front of a surah's name: "surah baqarah" is a
+     * reader naming a surah, and the word for one is not part of its name. The
+     * surah match drops these terms; the text search keeps them, because
+     * "surah" is also a word the Book says and a reader may be looking for it
+     * (owner decision, 22.5).
+     */
+    private val nameQualifiers = setOf("surah", "sura", "surat", "সূরা", "سورة")
+
+    /** Whether [term] is the word for a surah rather than a surah's name. */
+    fun isNameQualifier(term: String): Boolean = term in nameQualifiers
+
+    /**
      * Every key a surah's name may be typed by: the whole key, and the same
      * with a leading article removed, because readers say "baqara" for
      * "Al-Baqarah" and "rahman" for "Ar-Rahman".
@@ -622,4 +634,37 @@ object Search {
      * index holds (owner report, 8.5).
      */
     private val SEPARATORS = Regex("[\\x00-\\x7F&&[^A-Za-z0-9]]+")
+
+    /**
+     * The tokens the index's own tokenizer holds in one text: every ASCII
+     * character that is not a letter or a digit is a break, and every other
+     * code point stays inside its token, a combining mark included.
+     *
+     * The suggester's vocabulary reads these tokens rather than the text's
+     * whitespace words, because a count is only honest when it counts what the
+     * search matches: a lexicon that held "muhammad]" as a word offered brackets
+     * back to the reader and split one word's frequency across its punctuation
+     * (owner decision, 22.5). The walk is written out rather than handed to a
+     * regular expression, the way the vocabulary's walk always has been: a
+     * vocabulary reads a few hundred thousand tokens once per connection, and a
+     * matcher per token would cost the reader a second on the one frame that
+     * asks for it.
+     */
+    fun indexTokens(text: String): List<String> {
+        if (text.isEmpty()) return emptyList()
+        val tokens = ArrayList<String>()
+        val length = text.length
+        var index = 0
+        while (index < length) {
+            while (index < length && isIndexSeparator(text[index])) index++
+            val start = index
+            while (index < length && !isIndexSeparator(text[index])) index++
+            if (index > start) tokens += text.substring(start, index)
+        }
+        return tokens
+    }
+
+    /** One character the index's tokenizer breaks on: an ASCII non-alphanumeric. */
+    private fun isIndexSeparator(character: Char): Boolean =
+        character.code < 0x80 && !character.isLetterOrDigit()
 }

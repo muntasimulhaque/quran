@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.core
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -103,5 +104,61 @@ class SuggestTest {
     @Test
     fun `an empty lexicon suggests nothing`() {
         assertNull(Suggest.suggest(listOf("mrecy"), Suggest.Lexicon(emptyMap())))
+    }
+
+    @Test
+    fun `the surah the reader meant is offered, not the fruit that sounds near`() {
+        val lexicon = Suggest.Lexicon(
+            counts = mapOf("banana" to 1, "baqarah" to 1),
+            names = mapOf("baqarah" to "Al-Baqarah"),
+        )
+        val candidate = Suggest.suggest(listOf("bakara"), lexicon)
+        assertNotNull("the surah's name must be the one word offered", candidate)
+        assertEquals("Al-Baqarah", candidate?.word)
+        assertEquals("bakara", candidate?.culprit)
+        assertEquals(2, candidate?.distance)
+    }
+
+    @Test
+    fun `a word that only sounds near is never offered`() {
+        // banana is two letters from bakara but three sounds away: the spoken
+        // tier refuses it, and the sheet offers nothing rather than a wrong word.
+        assertNull(Suggest.suggest(listOf("bakara"), lexicon("banana" to 1)))
+    }
+
+    @Test
+    fun `the spoken shape folds what a reader cannot keep spelled`() {
+        assertEquals("bkr", Suggest.spokenShape("bakara"))
+        assertEquals("bkr", Suggest.spokenShape("baqarah"))
+        assertEquals("krn", Suggest.spokenShape("koran"))
+        assertEquals("krn", Suggest.spokenShape("quran"))
+        assertEquals("ft", Suggest.spokenShape("fatiah"))
+        assertEquals("ft", Suggest.spokenShape("fatihah"))
+        assertEquals("rmzn", Suggest.spokenShape("ramzan"))
+        assertEquals("rmdn", Suggest.spokenShape("ramadan"))
+    }
+
+    @Test
+    fun `five letters earn the spoken tier and four do not`() {
+        // moosa sounds like musa and is near nothing else by sound: the tier
+        // offers the gloss the reader meant over the common word.
+        assertEquals(
+            "musa",
+            Suggest.suggest(listOf("moosa"), lexicon("musa" to 145, "most" to 287))?.word,
+        )
+        // merc is four letters, so the letter rule decides it and the likelier
+        // word wins, exactly as it always has.
+        assertEquals(
+            "mercy",
+            Suggest.suggest(listOf("merc"), lexicon("mercu" to 3, "mercy" to 100))?.word,
+        )
+    }
+
+    @Test
+    fun `a name's display shape is what the tap writes`() {
+        assertEquals(
+            "Al-Baqarah",
+            Suggest.correction("bakara", "bakara", "Al-Baqarah", arabic = false),
+        )
     }
 }

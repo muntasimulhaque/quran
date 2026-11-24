@@ -22,6 +22,21 @@ import kotlin.math.abs
  * likelier to have meant. That number is in the content already, so nothing
  * has to be guessed or stored.
  *
+ * **The spoken shape outranks the letters.** A reader typing a
+ * transliteration is not making two mistakes: k for q is one sound, the
+ * vowel a transliteration never agrees on is none, and the final h of a
+ * ta marbuta is furniture. A Latin term of five letters and up is ranked
+ * by the distance between spoken shapes before the letter distance is
+ * read, and a word that only sounds near (banana for bakara) is never
+ * offered at all. This is the tier that made "bakara" offer "Al-Baqarah"
+ * instead of the fruit the alphabet kept picking (owner decision, 22.5).
+ *
+ * **What the spoken shape cannot do is cross into the word a translation
+ * chose instead.** "musa" finds its glosses and "moosa" is offered "musa",
+ * but a reader whose word for prayer is "namaz" is owed the translation's
+ * "prayer", and no shape reaches across that gap. The list of equivalents
+ * that would close it is deferred (owner decision, 22.5).
+ *
  * **Only a whole token is corrected.** A term with inner punctuation (`god's`,
  * `al-kahf`) is a phrase of fragments in the index, and its pieces are what
  * the reader meant; it is never a misspelling. [Search.isSingleToken] is the
@@ -44,6 +59,23 @@ object Suggest {
     private const val ONE_EDIT_LENGTH = 4
 
     /**
+     * Terms of five letters and up are ranked by how they sound. Five is the
+     * same boundary as [ONE_EDIT_LENGTH]: it is where a term earns two edits,
+     * and two edits are where the spoken shape earns its say, because a term
+     * one edit away can only be one sound away already (owner decision, 22.5).
+     */
+    private const val SPOKEN_TERM_LENGTH = 5
+
+    /** A spoken shape shorter than this matches too much to rank by. */
+    private const val SPOKEN_SHAPE_LENGTH = 2
+
+    /** How far a word may sound from the term and still be offered. */
+    private const val SPOKEN_DISTANCE_LIMIT = 1
+
+    /** The vowels a transliteration never agrees on. */
+    private const val SPOKEN_VOWELS = "aeiou"
+
+    /**
      * The nearest word to one of the reader's terms.
      *
      * [culprit] is the term the reader typed, already in the query's
@@ -51,7 +83,18 @@ object Suggest {
      * letters in the raw text. A null result is an honest answer: no word in
      * the reader's library is close enough to be worth offering.
      */
-    data class Candidate(val culprit: String, val word: String, val distance: Int, val count: Int)
+    data class Candidate(
+        val culprit: String,
+        val word: String,
+        val distance: Int,
+        val count: Int,
+        /**
+         * How far the word sounds from the culprit, or null when the letters
+         * alone ranked it. Null for Arabic terms and Latin terms shorter than
+         * [SPOKEN_TERM_LENGTH].
+         */
+        val spoken: Int? = null,
+    )
 
     /**
      * The words one search could have meant, with how often each appears.
@@ -62,10 +105,23 @@ object Suggest {
      * found nothing, which is why a scan of the words near the reader's own
      * length and script is the right shape here: it costs nothing on the
      * keystroke path and answers in a frame on the only frame that asks.
+     *
+     * [names] maps a folded name form to the display name it is offered as:
+     * the surahs' names are seeded by the caller as vocabulary, and the word
+     * that comes back to the reader is the name the interface draws, so
+     * "bakara" is offered "Al-Baqarah" and the tap searches a name the reader
+     * can read (owner decision, 22.5).
      */
-    class Lexicon(counts: Map<String, Int>) {
+    class Lexicon(counts: Map<String, Int>, names: Map<String, String> = emptyMap()) {
 
-        private class Entry(val word: String, val count: Int, val length: Int, val points: IntArray)
+        private class Entry(
+            val word: String,
+            val display: String,
+            val count: Int,
+            val length: Int,
+            val points: IntArray,
+            val spoken: IntArray,
+        )
 
         /** Words grouped by their length in code points: a near word's length is near. */
         private val latinByLength: Map<Int, List<Entry>>
@@ -80,7 +136,9 @@ object Suggest {
             for ((word, count) in counts) {
                 if (word.isEmpty()) continue
                 val length = word.codePointCount(0, word.length)
-                val entry = Entry(word, count, length, word.codePoints().toArray())
+                val points = word.codePoints().toArray()
+                val spoken = spokenShape(word).codePoints().toArray()
+                val entry = Entry(word, names[word] ?: word, count, length, points, spoken)
                 val script = if (word.any { RichText.isArabic(it.code) }) arabic else latin
                 script.getOrPut(length) { ArrayList() } += entry
             }
@@ -99,32 +157,78 @@ object Suggest {
             if (counts.isEmpty()) return null
             var best: Candidate? = null
             for (term in terms) {
-                val length = term.codePointCount(0, term.length)
-                if (length < MIN_CULPRIT_LENGTH) continue
-                if (counts.containsKey(term)) continue
-                if (!Search.isSingleToken(term)) continue
-                val limit = if (length <= ONE_EDIT_LENGTH) 1 else 2
-                val points = term.codePoints().toArray()
-                // A word in the other script is never one or two edits away,
-                // so the scan reads the reader's own script and the rest of
-                // the vocabulary costs the build nothing and the scan less.
-                val buckets = if (term.any { RichText.isArabic(it.code) }) {
-                    arabicByLength
+                val candidate = suggestTerm(term) ?: continue
+                val current = best
+                if (current == null || better(candidate, current)) best = candidate
+            }
+            return best
+        }
+
+        /**
+         * The best word for one term, or null when the term is too short,
+         * already held, punctuated, or near nothing. A Latin term of five
+         * letters and up is ranked by how it sounds first, and a word that
+         * sounds further than [SPOKEN_DISTANCE_LIMIT] is refused even when its
+         * letters are near: the word the reader meant sounds like what they
+         * typed, and a word that does not is a wrong answer wearing a near
+         * spelling (owner decision, 22.5).
+         */
+        private fun suggestTerm(term: String): Candidate? {
+            val length = term.codePointCount(0, term.length)
+            if (length < MIN_CULPRIT_LENGTH) return null
+            if (counts.containsKey(term)) return null
+            if (!Search.isSingleToken(term)) return null
+            val limit = if (length <= ONE_EDIT_LENGTH) 1 else 2
+            val arabic = term.any { RichText.isArabic(it.code) }
+            val points = term.codePoints().toArray()
+            // A word in the other script is never one or two edits away,
+            // so the scan reads the reader's own script and the rest of the
+            // vocabulary costs the build nothing and the scan less.
+            val buckets = if (arabic) arabicByLength else latinByLength
+            val spokenPoints = if (arabic) {
+                null
+            } else {
+                val shape = spokenShape(term)
+                if (length >= SPOKEN_TERM_LENGTH &&
+                    shape.codePointCount(0, shape.length) >= SPOKEN_SHAPE_LENGTH
+                ) {
+                    shape.codePoints().toArray()
                 } else {
-                    latinByLength
+                    null
                 }
-                for (candidateLength in maxOf(1, length - limit)..(length + limit)) {
-                    val entries = buckets[candidateLength] ?: continue
-                    for (entry in entries) {
-                        val distance = distance(points, entry.points, limit)
-                        if (distance > limit) continue
-                        val candidate = Candidate(term, entry.word, distance, entry.count)
-                        val current = best
-                        if (current == null || better(candidate, current)) best = candidate
+            }
+            var best: Candidate? = null
+            for (candidateLength in maxOf(1, length - limit)..(length + limit)) {
+                val entries = buckets[candidateLength] ?: continue
+                for (entry in entries) {
+                    val distance = distance(points, entry.points, limit)
+                    if (distance > limit) continue
+                    val spoken = if (spokenPoints != null) {
+                        val value = distance(spokenPoints, entry.spoken, SPOKEN_DISTANCE_LIMIT)
+                        if (value > SPOKEN_DISTANCE_LIMIT) continue
+                        value
+                    } else {
+                        null
                     }
+                    val candidate = Candidate(term, entry.display, distance, entry.count, spoken)
+                    val current = best
+                    if (current == null || betterWithinTerm(candidate, current)) best = candidate
                 }
             }
             return best
+        }
+
+        /**
+         * The order one term's candidates are chosen by: how they sound, then
+         * the order the term would use without the spoken tier. The candidates
+         * of one term always share the tier, so the spoken distance decides
+         * before the letters do and never after them.
+         */
+        private fun betterWithinTerm(candidate: Candidate, current: Candidate): Boolean {
+            if (candidate.spoken != null && current.spoken != null) {
+                if (candidate.spoken != current.spoken) return candidate.spoken < current.spoken
+            }
+            return better(candidate, current)
         }
 
         /**
@@ -148,6 +252,32 @@ object Suggest {
 
     /** The best word for [terms], or null. Kept here so a caller names the act. */
     fun suggest(terms: List<String>, lexicon: Lexicon): Candidate? = lexicon.suggest(terms)
+
+    /**
+     * The shape a transliterated word keeps when a reader spells it their own
+     * way: `q` folds into `k`, the vowels fall away, and a final `h` (the ta
+     * marbuta) or apostrophe falls away with them. "bakara" and "baqarah" are
+     * one shape, and so are "koran" and "quran".
+     *
+     * This is the Latin twin of the recall shape: the Arabic one lets spellings
+     * meet inside the index, and this one lets them meet inside the suggester's
+     * ranking. It is never an index and no column carries it; only the
+     * suggester reads it, and only for a Latin term (owner decision, 22.5).
+     */
+    fun spokenShape(word: String): String {
+        val out = StringBuilder(word.length)
+        for (character in word) {
+            when {
+                character == 'q' -> out.append('k')
+                character in SPOKEN_VOWELS -> Unit
+                else -> out.append(character)
+            }
+        }
+        while (out.isNotEmpty() && (out.last() == 'h' || out.last() == '\'')) {
+            out.deleteCharAt(out.length - 1)
+        }
+        return out.toString()
+    }
 
     /**
      * The reader's own query with the mistyped word replaced, or null when the

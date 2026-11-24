@@ -541,4 +541,39 @@ class ContentSearchTest {
         assertEquals("mercy", suggestion?.word)
         assertEquals("mercy", suggestion?.query)
     }
+
+    @Test
+    fun aMisspelledSurahNameIsOfferedAsItself() = runBlocking {
+        // The reader who typed bakara meant Al-Baqarah, and the sheet says so
+        // as one tap: the name is offered in the shape the interface draws it
+        // in, and the search the tap runs finds the surah.
+        val packs = content.packs().filter { it.installed }
+        content.warmSuggestion(
+            translations = packs.filter { it.type == PackType.Translation }.map { it.id },
+            wordsPack = ContentDatabase.wordsPackId("en"),
+            sources = SearchSources.ALL,
+        )
+        val results = content.search(request("bakara", tafsir = false, limit = 20))
+        assertEquals(0, results.counts.total)
+        val suggestion = results.suggestion
+        assertNotNull("a misspelled surah name must be offered back", suggestion)
+        assertEquals("Al-Baqarah", suggestion?.word)
+        assertEquals("Al-Baqarah", suggestion?.query)
+    }
+
+    @Test
+    fun aSurahTypedAsOneWordIsFound() = runBlocking {
+        val results = content.search(request("yasin", tafsir = false))
+        val hit = results.hits.filterIsInstance<SearchHit.SurahHit>().firstOrNull()
+        assertNotNull("yasin must find Ya-Sin, whose stored name carries a hyphen", hit)
+        assertEquals(36, hit?.surah?.number)
+    }
+
+    @Test
+    fun aQualifierWordDoesNotHideTheSurah() = runBlocking {
+        val results = content.search(request("surah baqarah", tafsir = false))
+        val hit = results.hits.filterIsInstance<SearchHit.SurahHit>().firstOrNull()
+        assertNotNull("surah baqarah must find Al-Baqarah", hit)
+        assertEquals(2, hit?.surah?.number)
+    }
 }
