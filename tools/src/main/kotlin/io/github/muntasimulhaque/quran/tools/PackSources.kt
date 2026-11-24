@@ -84,7 +84,10 @@ object PackSources {
             // Version 7 carries the recitation map, so any voice's audio
             // folder is readable without attaching that voice's timing pack
             // (owner decision, 20.0).
-            version = "7",
+            // Version 8 narrows the map to the two voices the catalog
+            // offers, Husary and Minshawi, so the map names no voice the
+            // reader cannot choose (owner decision, 22.6).
+            version = "8",
             shipped = true,
             ayahs = 6236,
             datasets = listOf(
@@ -178,32 +181,6 @@ object PackSources {
             shipped = true,
             ayahs = 6236,
             datasets = listOf("recitation-husary"),
-        ),
-        Pack(
-            id = "reciter-alafasy",
-            type = "recitation",
-            name = "Alafasy",
-            nameBn = "আফাসি",
-            language = "ar",
-            credit = "Mishari Rashid al-Afasy, via the Quranic Universal Library",
-            creditBn = "মিশারি রশীদ আল-আফাসি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
-            version = "QUL",
-            shipped = true,
-            ayahs = 6236,
-            datasets = listOf("recitation-alafasy"),
-        ),
-        Pack(
-            id = "reciter-abdulbasit",
-            type = "recitation",
-            name = "Abdul Basit",
-            nameBn = "আব্দুল বাসিত",
-            language = "ar",
-            credit = "Abdul Basit Abdul Samad, via the Quranic Universal Library",
-            creditBn = "আব্দুল বাসিত আব্দুস সামাদ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
-            version = "QUL",
-            shipped = true,
-            ayahs = 6236,
-            datasets = listOf("recitation-abdulbasit"),
         ),
         Pack(
             id = "words-en",

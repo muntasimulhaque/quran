@@ -50,8 +50,6 @@ class Audio(private val root: File) {
     private val reciterTags = mapOf(
         "minshawi" to "recitation-minshawi",
         "husary" to "recitation-husary",
-        "alafasy" to "recitation-alafasy",
-        "abdulbasit" to "recitation-abdulbasit",
     )
 
     private val githubBase = "https://github.com/muntasimulhaque/quran/releases/download"

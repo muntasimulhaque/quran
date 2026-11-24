@@ -307,38 +307,6 @@
       "assetUrl": null
     },
     {
-      "id": "recitation-alafasy",
-      "name": "Mishari Rashid al-Afasy, murattal",
-      "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/recitation/118",
-      "resourceId": "953",
-      "format": "sqlite",
-      "license": "QUL lists no license for this recording; the reciter's and publisher's rights are unverified.",
-      "licenseBn": "QUL এই আবৃত্তির কোনো লাইসেন্স উল্লেখ করেনি; আবৃত্তিকার ও প্রকাশকের স্বত্ব যাচাই করা হয়নি।",
-      "credit": "Sheikh Mishari Rashid al-Afasy, via QUL",
-      "usedFor": "Recitation with word segments; the seven Al-Fatiha ayahs are bundled in the app from the published surah 1 MP3 package",
-      "path": "content/raw/qul/recitation-alafasy.sqlite.zip",
-      "bytes": 501328,
-      "sha256": "1ce2eedfed2943d616fa64f31551332134e5a791ca06ee10c7ba72c81234ac9e",
-      "assetUrl": null
-    },
-    {
-      "id": "recitation-abdulbasit",
-      "name": "Abdul Basit Abdul Samad, murattal",
-      "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/recitation/115",
-      "resourceId": "950",
-      "format": "sqlite",
-      "license": "QUL lists no license for this recording; the reciter's and publisher's rights are unverified.",
-      "licenseBn": "QUL এই আবৃত্তির কোনো লাইসেন্স উল্লেখ করেনি; আবৃত্তিকার ও প্রকাশকের স্বত্ব যাচাই করা হয়নি।",
-      "credit": "Sheikh Abdul Basit Abdul Samad, via QUL",
-      "usedFor": "Recitation with word segments; the seven Al-Fatiha ayahs are bundled in the app from the published surah 1 MP3 package",
-      "path": "content/raw/qul/recitation-abdulbasit.sqlite.zip",
-      "bytes": 508746,
-      "sha256": "33dde2584d09bd59379353402be8068a85670d7dd50686e912cf038d76473d37",
-      "assetUrl": null
-    },
-    {
       "id": "tanzil-uthmani",
       "name": "Tanzil Quran Text, Uthmani, version 1.1",
       "source": "Tanzil Project",
@@ -442,11 +410,11 @@
       "format": "text",
       "license": "Derived from the QUL recitation audio; QUL lists no license for the recordings; no Quran text.",
       "licenseBn": "QUL-এর আবৃত্তি অডিও থেকে তৈরি; রেকর্ডিংয়ের কোনো লাইসেন্স QUL উল্লেখ করেনি; কোনো কুরআন লেখা নেই।",
-      "credit": "Measured by this project from the Al-Minshawi, Al-Husary, al-Afasy, and Abdul Basit recordings published via QUL",
+      "credit": "Measured by this project from the Al-Minshawi and Al-Husary recordings published via QUL",
       "usedFor": "The first and last voiced millisecond of every ayah file, so the word wash starts and stops with the voice",
       "path": "content/audio-edges.txt",
-      "bytes": 721172,
-      "sha256": "e8c4fc8cf55485665a2585b9d0988f5e54012005454a9a3bebf0db6b11e08e1f",
+      "bytes": 353811,
+      "sha256": "dd21e5f4fde6a3b62e630476bc5e7c05996d17f2de248edccdc53e28f1919a80",
       "assetUrl": null
     },
     {

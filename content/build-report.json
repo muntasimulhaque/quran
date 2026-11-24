@@ -5,10 +5,10 @@
   "markers": 6235,
   "translations": 6236,
   "grammar": 77429,
-  "recitationSegmentsShifted": 937,
-  "recitationSegmentsMapped": 128,
-  "recitationSegmentsClamped": 1450,
+  "recitationSegmentsShifted": 468,
+  "recitationSegmentsMapped": 64,
+  "recitationSegmentsClamped": 724,
   "problems": 0,
-  "databaseBytes": 117850112,
-  "databaseSha256": "9f808fdf4ea6e114a492a507c05b5ad712d626f1a381eee4c27ce7c904ff224f"
+  "databaseBytes": 114126848,
+  "databaseSha256": "a7f425d57cfe38156cbedc7c5d07190557933e253bc7d59505a0b838181e4f8f"
 }

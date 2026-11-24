@@ -99,7 +99,7 @@ val screenshotPacks = setOf(
 // in the reader's language, offline, with no download and no language screen;
 // the tafsir and the word lists stay downloads (owner decision, 15.5).
 //
-// The four reciter timing packs ride with them, so every voice is ready to
+// The two reciter timing packs ride with them, so every voice is ready to
 // be chosen offline; Al-Fatiha's audio rides in the default voice alone, so
 // the first Play on 1:1 needs neither an offer nor a network in Husary's,
 // and a reader who has chosen another voice meets the offer every other
@@ -110,8 +110,6 @@ val shippedPacks = setOf(
     "translation-al-bayan-bn.db",
     "reciter-minshawi.db",
     "reciter-husary.db",
-    "reciter-alafasy.db",
-    "reciter-abdulbasit.db",
 )
 
 /**
@@ -187,7 +185,7 @@ abstract class PrepareContentAssets : DefaultTask() {
     fun copyAssets() {
         val out = contentAssetsOut.get().asFile
         out.deleteRecursively()
-        // The app ships the Quran text, the two translations, and the four
+        // The app ships the Quran text, the two translations, and the two
         // reciter timing packs, and nothing else: the core pack, the shipped
         // packs, and the catalog of what can be downloaded. The first page
         // needs no network, and the first Play on Al-Fatiha needs none either

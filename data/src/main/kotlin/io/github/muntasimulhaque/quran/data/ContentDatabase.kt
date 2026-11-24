@@ -1996,17 +1996,16 @@ class ContentDatabase private constructor(
                 if (id !in installed) continue
                 val pack = catalog.get(id) ?: continue
                 // A recitation's timings are one voice's own schema, and the
-                // voice the reader chose is the one attached. Four voices on
-                // one device are four packs, and SQLite's ceiling is ten
-                // attached databases: a reader who holds both tafsirs, both
-                // word lists, and the root could not have held a fourth
-                // voice too without the last pack falling to the limit and
-                // reading as not installed, which is what the capture leg
-                // met as the word list (owner report, 20.0). The voices the
-                // reader did not choose keep their files and their listing;
-                // only their segment rows wait for their turn. A null
-                // [recitation] keeps the older shape, every installed voice
-                // attached, which the tests hold.
+                // voice the reader chose is the one attached. SQLite's
+                // ceiling is ten attached databases, and a library that held
+                // the core, both translations, both tafsirs, both word
+                // lists, the root, and both voices would cross it: the last
+                // pack would fall to the limit and read as not installed,
+                // which is what the capture leg met as the word list (owner
+                // report, 20.0). The voice the reader did not choose keeps
+                // its files and its listing; only its segment rows wait for
+                // their turn. A null [recitation] keeps the older shape,
+                // every installed voice attached, which the tests hold.
                 if (recitation != null &&
                     pack.type == PackType.Recitation &&
                     id != reciterPack(recitation)

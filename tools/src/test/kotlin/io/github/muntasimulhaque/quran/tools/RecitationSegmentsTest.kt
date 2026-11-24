@@ -66,13 +66,6 @@ class RecitationSegmentsTest {
     }
 
     @Test
-    fun `an export that stops one word short washes the last word on the measured tail`() {
-        val json = "[[49,50,78800,79160]]"
-        val extended = RecitationSegments.extendTail("abdulbasit", 5126, json, wordCount = 51)
-        assertEquals("[[49,50,78800,79160],[50,51,79160,81140]]", extended)
-    }
-
-    @Test
     fun `an export that covers the last word is not rewritten`() {
         val json = "[[0,1,0,1000],[1,2,1000,2000]]"
         assertEquals(json, RecitationSegments.extendTail("minshawi", 1, json, wordCount = 2))

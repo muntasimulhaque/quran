@@ -25,9 +25,9 @@ class CheckDb(private val root: File) {
         Expectation("surah", 114),
         Expectation("ayah", 6236),
         Expectation("word", 83_664),
-        // The database carries the four recitations the app ships, Minshawi,
-        // Husary, Alafasy, and Abdul Basit, 6,236 rows each.
-        Expectation("recitation_ayah", 24_944),
+        // The database carries the two recitations the app ships, Minshawi
+        // and Husary, 6,236 rows each.
+        Expectation("recitation_ayah", 12_472),
         Expectation("surah_info", 114),
         // Every drawn word has one grammar row, and no row is for a word the
         // page does not draw: the sheet's three study lines and the reading's

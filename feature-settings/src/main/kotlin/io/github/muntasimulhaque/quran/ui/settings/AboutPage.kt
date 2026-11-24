@@ -177,16 +177,6 @@ fun AboutPage(
             madeBy = stringResource(R.string.credit_husary_by),
             usedFor = stringResource(R.string.credit_husary_use),
         )
-        Face(
-            title = stringResource(R.string.credit_alafasy),
-            madeBy = stringResource(R.string.credit_alafasy_by),
-            usedFor = stringResource(R.string.credit_alafasy_use),
-        )
-        Face(
-            title = stringResource(R.string.credit_abdulbasit),
-            madeBy = stringResource(R.string.credit_abdulbasit_by),
-            usedFor = stringResource(R.string.credit_abdulbasit_use),
-        )
 
         // One door off the page, and it opens the reader's own mail app on a
         // letter to the maker: a correction, a rights request, or a plain

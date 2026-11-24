@@ -85,7 +85,7 @@ class Verify(private val root: File) {
             "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> checkTafsirQul(dataset.id, dir)
             "word-by-word-english", "word-by-word-bengali" -> checkWordTranslation(dataset.id, dir)
             "word-morphology" -> checkMorphology(dataset.id, dir)
-            "recitation-minshawi", "recitation-husary", "recitation-alafasy", "recitation-abdulbasit" -> checkRecitation(dataset.id, dir)
+            "recitation-minshawi", "recitation-husary" -> checkRecitation(dataset.id, dir)
             "metadata-surah-names" -> checkJsonKeys(dataset.id, dir, 114)
             "surah-names-bn" -> checkSurahNamesBn(dataset.id, dir)
             "metadata-ayah" -> checkJsonKeys(dataset.id, dir, 6236)

@@ -143,7 +143,7 @@ class FatihaPlayTest {
         // The other voice, named by the catalog and not by a literal: a
         // voice's name is content, and this leg must not carry its own copy.
         val voice = PackCatalog.load(context)
-            .get(ContentDatabase.reciterPack("alafasy"))
+            .get(ContentDatabase.reciterPack("minshawi"))
             ?.name
             .orEmpty()
         assertTrue("the catalog must name the second voice", voice.isNotEmpty())

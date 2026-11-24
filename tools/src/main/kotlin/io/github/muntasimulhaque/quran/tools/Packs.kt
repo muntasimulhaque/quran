@@ -21,7 +21,7 @@ import java.sql.Connection
  *
  * A pack is one unit of content a reader can have, or not have: the core
  * text and layout, a translation, a tafsir, a word list, a script. The app
- * ships the core pack, the two translations, and the four reciter timing
+ * ships the core pack, the two translations, and the two reciter timing
  * packs; the recitation audio itself is downloaded per surah on the reader's
  * word, except Al-Fatiha, whose seven ayahs the app carries as assets in
  * the default voice (owner decision, 15.8; the default voice alone, 22.2).
@@ -324,13 +324,15 @@ class Packs(private val root: File) {
                 when (pack.type) {
                     "script" -> {
                         statement.execute("CREATE TABLE meta AS SELECT * FROM src.meta")
-                        // The recitation map, four rows naming every voice's
-                        // audio folder, so the app can name any voice's files
+                        // The recitation map, one row per voice's audio
+                        // folder, so the app can name any voice's files
                         // without attaching that voice's timing pack. SQLite
-                        // allows ten attached databases and four voices are
-                        // four packs, so the map is what keeps a library of
-                        // both tafsirs and both word lists open while a
-                        // fourth voice stands ready (owner decision, 20.0).
+                        // allows ten attached databases, and a library that
+                        // held the core, both translations, both tafsirs,
+                        // both word lists, the root, and both voices would
+                        // cross the ceiling, so the map is what keeps the
+                        // unchosen voice's files nameable without its pack
+                        // (owner decision, 20.0).
                         statement.execute("CREATE TABLE recitation AS SELECT * FROM src.recitation")
                         statement.execute("CREATE TABLE surah AS SELECT * FROM src.surah")
                         statement.execute("CREATE TABLE ayah AS SELECT * FROM src.ayah")

@@ -45,9 +45,9 @@ import java.util.concurrent.atomic.AtomicReference
  * 15.8 to the voices after it): the first Play on 1:1 in Husary works with
  * no network and no offer, and a reader who has chosen another voice meets
  * the offer every other surah already makes. This class pins the three
- * parts of that promise: the four timing packs install from assets on the
+ * parts of that promise: the two timing packs install from assets on the
  * first open, every ayah of the surah answers with a bundled asset in
- * Husary's voice and as a download in the others, and the word wash moves
+ * Husary's voice and as a download in the other, and the word wash moves
  * through the same ExoPlayer engine the app's service uses.
  *
  * The whole-surah rule is pinned by asking about 2:1: the debug sample carries
@@ -104,12 +104,8 @@ class BundledFatihaTest {
         // A fresh install has neither timing pack and no downloaded audio.
         packStore.remove("reciter-minshawi")
         packStore.remove("reciter-husary")
-        packStore.remove("reciter-alafasy")
-        packStore.remove("reciter-abdulbasit")
         recitationStore.removeAll(MINSHAWI_FOLDER)
         recitationStore.removeAll(HUSARY_FOLDER)
-        recitationStore.removeAll(ALAFASY_FOLDER)
-        recitationStore.removeAll(ABDULBASIT_FOLDER)
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         val opened = CompletableDeferred<ContentLibrary.Opening>()
         val library = ContentLibrary(
@@ -130,7 +126,7 @@ class BundledFatihaTest {
             // pack is attached: the device's truth and the library's truth
             // are both read, because a voice that is not chosen is still on
             // the phone with its files.
-            for (id in listOf("reciter-minshawi", "reciter-husary", "reciter-alafasy", "reciter-abdulbasit")) {
+            for (id in listOf("reciter-minshawi", "reciter-husary")) {
                 assertTrue(
                     "the $id timing pack must install from the first open",
                     library.pack(id)?.installed == true,
@@ -151,14 +147,6 @@ class BundledFatihaTest {
             assertFalse(
                 "Minshawi's Al-Fatiha is a download now, not a bundled surah",
                 library.hasSurahAudio("minshawi", 1),
-            )
-            assertFalse(
-                "Alafasy's Al-Fatiha is a download now, not a bundled surah",
-                library.hasSurahAudio("alafasy", 1),
-            )
-            assertFalse(
-                "Abdul Basit's Al-Fatiha is a download now, not a bundled surah",
-                library.hasSurahAudio("abdulbasit", 1),
             )
             assertFalse(
                 "2:1 is a sample, not a whole surah",
@@ -183,7 +171,7 @@ class BundledFatihaTest {
                 "Husary's Al-Fatiha must carry its bundled size",
                 husaryRows.single().bytes > 0,
             )
-            for (reciter in listOf("minshawi", "alafasy", "abdulbasit")) {
+            for (reciter in listOf("minshawi")) {
                 assertTrue(
                     "$reciter must list nothing until a surah is downloaded",
                     library.downloadedSurahs(reciter).isEmpty(),
@@ -194,7 +182,7 @@ class BundledFatihaTest {
                 1,
                 library.downloadedTotals()["husary"]?.first,
             )
-            for (reciter in listOf("minshawi", "alafasy", "abdulbasit")) {
+            for (reciter in listOf("minshawi")) {
                 assertEquals(
                     "$reciter carries no playable surah",
                     0,
@@ -267,7 +255,7 @@ class BundledFatihaTest {
 
     @Test
     fun theChosenVoiceIsTheOnlyOneWhoseTimingsAreAttached() = runBlocking {
-        for (id in listOf("reciter-minshawi", "reciter-husary", "reciter-alafasy", "reciter-abdulbasit")) {
+        for (id in listOf("reciter-minshawi", "reciter-husary")) {
             assertTrue("the build must carry $id", packStore.install(id))
         }
         val database = ContentDatabase.open(
@@ -284,20 +272,20 @@ class BundledFatihaTest {
             )
             assertNull(
                 "a voice the reader did not choose keeps its files without its schema",
-                database.recitationAyah("alafasy", 1),
+                database.recitationAyah("minshawi", 1),
             )
             assertEquals(
-                "an unattached voice still names its bundled surah from the map",
+                "an unattached voice still names its surah's files from the map",
                 listOf(
-                    "alafasy/001001.mp3",
-                    "alafasy/001002.mp3",
-                    "alafasy/001003.mp3",
-                    "alafasy/001004.mp3",
-                    "alafasy/001005.mp3",
-                    "alafasy/001006.mp3",
-                    "alafasy/001007.mp3",
+                    "minshawyMurattal/001001.mp3",
+                    "minshawyMurattal/001002.mp3",
+                    "minshawyMurattal/001003.mp3",
+                    "minshawyMurattal/001004.mp3",
+                    "minshawyMurattal/001005.mp3",
+                    "minshawyMurattal/001006.mp3",
+                    "minshawyMurattal/001007.mp3",
                 ),
-                database.recitationAudioPaths("alafasy", 1),
+                database.recitationAudioPaths("minshawi", 1),
             )
         } finally {
             database.close()
@@ -375,7 +363,5 @@ class BundledFatihaTest {
     private companion object {
         const val MINSHAWI_FOLDER = "minshawyMurattal"
         const val HUSARY_FOLDER = "husary"
-        const val ALAFASY_FOLDER = "alafasy"
-        const val ABDULBASIT_FOLDER = "abdulBasitMurattal"
     }
 }

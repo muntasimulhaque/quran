@@ -5,7 +5,7 @@
 A free Quran reader for Android, built to be read. It opens on the ayah you
 left, with the QPC Hafs text, color-coded tajweed, the Saheeh International and
 Al-Bayan translations, word-by-word meanings with roots and grammar, Tafsir Ibn
-Kathir, and recitation by Minshawi, Husary, Alafasy, and Abdul Basit. In
+Kathir, and recitation by Minshawi and Husary. In
 English and বাংলা.
 
 There is one reading and no home screen. No ads, no trackers, no accounts, and
@@ -59,7 +59,7 @@ as sheets, so nothing stands between you and the text.
 | **Tafsir** | Ibn Kathir opens in the ayah card, in English or Bangla, with the Quran quotations set apart from the commentary. |
 | **Search** | Arabic is read without diacritics, and a spelling the print does not carry still finds its verse; English is read without accents. A reference like `2:255` or `kahf 10` goes straight to the ayah. Search in the Quran text, translations, word meanings, tafsirs, your notes, surah names, or references. |
 | **Saved and notes** | Keep any ayah, write your own note on it, and find both again under Browse. Last Read keeps the places you have been reading, newest first. |
-| **Recitation** | Minshawi, Husary, Alafasy, and Abdul Basit, with the page following the reciter and the word being recited washed as it sounds. Five speeds, repeat the ayah or the surah, stop after this ayah, or continue to the next surah. |
+| **Recitation** | Minshawi and Husary, with the page following the reciter and the word being recited washed as it sounds. Five speeds, repeat the ayah or the surah, stop after this ayah, or continue to the next surah. |
 | **Share** | Send the verse as text, or as one image card in the app's own paper and type. |
 | **Daily ayah** | One ayah a day at a time you choose, dealt by the day number from a reshuffled deck of all 6,236. A notification, no streaks and no guilt. |
 | **Links** | A `quran://ayah/2:255` link opens that verse. |
@@ -151,7 +151,7 @@ facts live. The app's About page reads that record and names every source.
 | Tafsir Ibn Kathir, English and Bangla | Quranic Universal Library by Tarteel | QUL lists no license; rights unverified |
 | Word by word and word roots | Quranic Universal Library | QUL lists no license; rights unverified |
 | Grammar and dictionary forms | Quranic Arabic Corpus by Dr. Kais Dukes, via Quranpedia | GNU GPL, attribution required |
-| Recitations | Sheikh Muhammad Siddiq Al-Minshawi, Sheikh Mahmoud Khalil Al-Husary, Mishari Rashid al-Afasy, and Abdul Basit Abdul Samad, via QUL | QUL lists no license; rights unverified |
+| Recitations | Sheikh Muhammad Siddiq Al-Minshawi and Sheikh Mahmoud Khalil Al-Husary, via QUL | QUL lists no license; rights unverified |
 | Word pronunciation | Mishari Rashid al-Afasy, via QUL, with word timings by quran-align | Audio: rights unverified; timings: CC BY 4.0 |
 | Uthmani reference text | Tanzil Project | CC BY 3.0, unmodified, credited |
 | Bangla surah names | Compiled and reviewed for this app after Dr. Abu Bakr Muhammad Zakaria's index | No verse text is copied |
