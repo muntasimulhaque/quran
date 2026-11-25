@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
 import io.github.muntasimulhaque.quran.daily.rememberExactGrantWithheld
 import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
@@ -26,8 +27,11 @@ import androidx.lifecycle.lifecycleScope
 import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.ThemePreference
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.chosenLanguageTag
+import io.github.muntasimulhaque.quran.data.isDark
+import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
 import io.github.muntasimulhaque.quran.ui.QuranApp
 import io.github.muntasimulhaque.quran.ui.applicationLocaleTags
@@ -152,6 +156,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // The window opens on the reader's chosen ground and not the phone's:
+        // the bars' icons are decided here, from the synchronous theme mirror
+        // the first Compose frame already reads, so frame zero is right when
+        // the two disagree instead of waiting one effect for the stored ground
+        // to land (owner decision, 22.8).
+        val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+        val dark = ThemePreference(this).theme().resolved(night).isDark()
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
+        }
         // The reminder's channel exists from the first launch, so it is
         // visible in the system's own settings before it ever speaks.
         DailyAyahScheduler.createChannel(this)
