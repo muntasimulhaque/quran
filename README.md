@@ -226,8 +226,9 @@ the commit `1bc56958`: the whole JVM suite, `checkdb`, `search`, `storecards
 21.4 through 22.8 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
 No dataset moved, so nothing was published to the project's releases and the
-run fetched the database 22.8 published. The 22.9 bundle is in
-`play-store/aab/` for the store.
+run fetched the database 22.8 published. The 22.9 bundle was submitted for
+Play review, and the hand-off copy in `play-store/aab/` was deleted once Play
+had it.
 
 **What changed in 22.9.** The store graphic is the page itself (owner decision,
 22.9). It replaces the enlarged mark on the night gold: the graphic is one
