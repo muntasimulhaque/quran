@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -64,5 +65,53 @@ class ReaderBarTest {
         val bar = ReaderBarState()
         assertEquals("the page keeps its whole drag", 0f, bar.consume(-40f), 0.001f)
         assertEquals("the bar stays standing", 1f, bar.shown, 0.001f)
+    }
+
+    @Test
+    fun aReleaseCarriesTheFingersOwnSpeed() {
+        // Three deltas over forty milliseconds: sixty pixels of travel across a
+        // fifty-six pixel span, so the release reads -60 / 0.04 / 56 of the
+        // bar's travel per second and the settle starts at that speed
+        // (owner decision, 22.8).
+        val at = 1_000_000_000L
+        val samples = listOf(
+            TimedDelta(-20f, at),
+            TimedDelta(-20f, at + 16_000_000L),
+            TimedDelta(-20f, at + 32_000_000L),
+        )
+        assertEquals(
+            "the finger's own speed",
+            -60f / 40f * 1000f / 56f,
+            ReaderBar.releaseVelocity(samples, at + 40_000_000L, 56),
+            0.001f,
+        )
+    }
+
+    @Test
+    fun aStaleReleaseHasNoSpeed() {
+        // A finger that stopped a fifth of a second before it lifted is a tap,
+        // and a tap finishes the nearer end at rest.
+        val at = 1_000_000_000L
+        val samples = listOf(TimedDelta(-20f, at))
+        assertEquals(0f, ReaderBar.releaseVelocity(samples, at + 200_000_000L, 56), 0f)
+    }
+
+    @Test
+    fun aBarWithNoHeightHasNoSpeed() {
+        // There is no travel to be a share of, so nothing may be divided by it.
+        val at = 1_000_000_000L
+        val samples = listOf(TimedDelta(-20f, at))
+        assertEquals(0f, ReaderBar.releaseVelocity(samples, at + 8_000_000L, 0), 0f)
+    }
+
+    @Test
+    fun stopClearsTheFingersTrail() {
+        var clock = 1_000_000_000L
+        val bar = ReaderBarState(now = { clock }).apply { ownHeightPx = 56 }
+        bar.consume(-20f)
+        clock += 8_000_000L
+        assertTrue("the release before the stop: " + bar.releaseVelocity(clock), bar.releaseVelocity(clock) < 0f)
+        bar.stop()
+        assertEquals("a new gesture starts with no speed", 0f, bar.releaseVelocity(clock), 0f)
     }
 }

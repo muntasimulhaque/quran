@@ -115,8 +115,8 @@ internal fun ReaderTopBar(
     val status = chrome.asPaddingValues().calculateTopPadding()
     val statusPx = with(LocalDensity.current) { status.roundToPx() }
     // The two things a rebuild is owed for: the bar arriving or leaving for
-    // good, and the name a test finds it by. Both are derived, so the 200ms a
-    // settle spends does not rebuild this row 12 times on the way.
+    // good, and the name a test finds it by. Both are derived, so the settle,
+    // about 200 ms from rest, does not rebuild this row on the way.
     val away by remember(shown) { derivedStateOf { shown.value <= 0.001f } }
     val tag by remember(shown) {
         derivedStateOf { if (shown.value >= 0.99f) "reading-bar-shown" else "reading-bar" }
