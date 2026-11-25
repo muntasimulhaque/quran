@@ -48,20 +48,17 @@ jobs:
       matrix:
         # Play Store form factors.
         include:
+          # Each leg owes the store's eight, and the eight are checked by name.
+          # The evidence frames the same tour writes (the dark and large
+          # readings, the word sheet's two pages, and the ten inch's standing
+          # reading) upload beside them and are not the store set, so they are
+          # not counted here (owner decision, 22.8).
           - name: phone
             profile: pixel_2        # 1080x1920
-            # The store's eight, the dark and large readings, and the word
-            # meaning's own frame.
-            expected: 11
           - name: tablet7
             profile: Nexus 7 2013   # 1200x1920, 7 inch
-            expected: 11
           - name: tablet10
             profile: pixel_c        # 2560x1800, 10 inch
-            # The ten inch screen's own frames, the word meaning's frame, and,
-            # when the emulator accepts the rotation, the reading standing up.
-            # The standing frame is best effort and is not counted in the floor.
-            expected: 11
     env:
       GH_TOKEN: ${{ github.token }}
       API_LEVEL: "35"
@@ -257,10 +254,12 @@ jobs:
             ls -la store-shots
             # A frame must be the app's own surface, never a dialog over it: a
             # system dialog in a store screenshot is worse than no screenshot.
-            # Count is checked too, so a leg that captured half the tour fails.
-            # The last line reports the Gradle result, so a red tour is still
-            # red while its frames are safe in the artifact.
-            frames=$(ls store-shots/*.png 2>/dev/null | wc -l) ; echo "frames: $frames" ; if [ "$frames" -lt ${{ matrix.expected }} ]; then echo "the capture is short of the ${{ matrix.expected }} frames this leg owes" ; exit 1 ; fi ; exit $(cat /tmp/gradle_status 2>/dev/null || echo 1)
+            # The store's eight are checked by name, so a leg that lost one
+            # fails even when every evidence frame arrived; the count is the
+            # eight the artifact carries, not the tour's whole output. The last
+            # line reports the Gradle result, so a red tour is still red while
+            # its frames are safe in the artifact.
+            store="" ; for n in 01-reading 02-tafsir 03-search 04-saved 05-tajweed 06-dark-reading 07-share-card 08-listen-offer ; do ls store-shots/*_$n.png >/dev/null 2>&1 || store="$store $n" ; done ; count=$(ls store-shots/*_0[1-8]-*.png 2>/dev/null | wc -l) ; echo "store frames: $count of 8" ; if [ -n "$store" ] || [ "$count" -ne 8 ]; then echo "the store set is not the eight this leg owes; missing:$store" ; exit 1 ; fi ; exit $(cat /tmp/gradle_status 2>/dev/null || echo 1)
 
       - name: Upload screenshots
         if: always()
