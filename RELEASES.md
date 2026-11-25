@@ -5,6 +5,64 @@ summarized on the [front page](README.md); the releases before it are written
 in full below. The reason a decision was made lives in the KDoc beside the code
 it decided, tagged `owner decision`, and in `git log`.
 
+## 22.7
+
+The word follow is measured now (owner
+decision, 22.7). The whole JVM suite, `verify`, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` were green on this machine.
+The diff touches `feature-reading/` and the reading's own screen, so the four
+accessibility classes were owed; they ran on `quran_phone` as a clean install,
+ten cases and no failures. No visible surface changed for a still frame, so
+the three committed store sets stand and no capture leg ran.
+`content/quran.db` hashes
+`0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
+and was rebuilt twice to the byte. The voice edges were re-measured in the
+same change, one line per file taken from the file's whole energy: the old
+head window read a first voice from decoder noise on the ayahs that open in
+more silence than it held, and its tail windows measured the last voice
+hundreds of milliseconds into closing pauses, on 518 ayahs. The table's hash
+moved with it and is pinned in the manifest. The core pack stays at version 8
+and publishes as `pack-core-d7407645`, its rows unchanged; the two reciter
+packs moved to `reciter-husary b9b25a95f10c` and `reciter-minshawi
+09beaef021c8`. `tools audio words` measured 494 ayahs of each voice against
+their own audio: the boundary error's median is 40 ms for Husary and 50 ms
+for Minshawi, and the ninetieth percentile is 140 ms and 120 ms.
+The content database publishes as `content-db-0c5d878e`, created before the
+push so the run fetched it the first time. The signed bundle comes from
+`build` run 45432178871, green on `main` for the commit `4a2b0056`: the
+unit tests, `checkdb`, `search`, `storecards --check`, lint, and
+`assembleDebug` passed, and the signed bundle `quran-22.7-vc229.aab` has
+SHA-256
+`e1dfdcbe93eb88b289627560b0ad378cc0610d4fe605eefbdfabf001014fc380`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.7` and `versionCode 229`, and the upload certificate is the
+same key 21.4 through 22.6 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 22.7 bundle was submitted for Play review, and the hand-off
+copy in `play-store/aab/` was deleted once Play had it.
+
+The page follows the reciter by measured time
+(owner decision, 22.7). The word timings of both recitations were cut against a
+different edit of the recordings than the files the app plays: on 284 Husary and
+283 Minshawi ayahs the first region began up to a second after the voice, so the
+page rested through the first word, and the boundaries inside an ayah wandered
+by a median of about half a second. Both voices now read cpfair's quran-align
+timings, cut against the same takes the app ships and verified against their
+audio, and the page's word stands within tens of milliseconds of the voice.
+Three smaller rules came with it: a one-word ayah, which is every muqata'ah
+that stands alone, now spans its file's whole voice instead of the aligner's
+guess; the wash rests at the last sound's own millisecond, so the last word no
+longer stands through the closing pause when the reading wakes exactly on it;
+and the wash carries its ayah, so a turn can no longer light a word on the
+wrong row for a frame. `tools audio words` measures a sampled ayah against its
+own audio for both voices, and `checkdb` compares every first region to the
+measured voice. The voice edges were re-measured in the same
+change: one line per file, taken from the file's whole energy instead of a
+window that decoder noise could fool, which pulled 518 closing pauses back out
+of the last word's wash and put every head that opens in long silence at its
+true voice. The Quran text, both translations, both tafsirs, the word
+lists, and the word pronunciation pack are unchanged.
+
 ## 22.6
 
 The whole JVM suite, `verify`, `checkdb`,

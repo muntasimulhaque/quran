@@ -323,8 +323,8 @@ android {
         // (owner decision, 11.7).
         minSdk = 24
         targetSdk = 37
-        versionCode = 229
-        versionName = "22.7"
+        versionCode = 230
+        versionName = "22.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

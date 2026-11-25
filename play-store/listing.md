@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 22.7 (versionCode 229)
+Version: 22.8 (versionCode 230)
 
 ## Listing
 
@@ -233,6 +233,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (22.8, 481 characters)
+22.8 settles what you feel rather than see. Five hand-drawn marks were measured against their own grid and redrawn, and the test now reads every mark back. The reading bar's settle carries the speed of your finger instead of a fixed trip. A landscape phone's camera no longer stands over a line, and the download capsule at the foot now shares the player's measure. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (22.7, 491 characters)
 The recitation follows the page by measured time now. Both reciters' word timings were cut against a different edit of the recordings than the audio the app plays, so on about five percent of ayahs the mark waited through the first word and drifted inside the verse; both voices now read timings measured against the same recordings, and the marked word lands with the voice. Text, translations, tafsirs, recitations, and word lists are otherwise unchanged. No ads, no trackers, no accounts.

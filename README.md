@@ -205,39 +205,47 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.7 (versionCode 229).** The word follow is measured now (owner
-decision, 22.7). The whole JVM suite, `verify`, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` were green on this machine.
-The diff touches `feature-reading/` and the reading's own screen, so the four
-accessibility classes were owed; they ran on `quran_phone` as a clean install,
-ten cases and no failures. No visible surface changed for a still frame, so
-the three committed store sets stand and no capture leg ran.
-`content/quran.db` hashes
+**22.8 (versionCode 230).** The drawn set is measured now (owner decision,
+22.8). The whole JVM suite, `checkdb`, `search`, `storecards --check`, lint,
+and `assembleDebug` were green on this machine. The diff touches `ui-kit/`,
+`feature-reading/`, and the reading's own screen, so the four accessibility
+classes were owed; they ran on `quran_phone` as a clean install, ten cases and
+no failures. `content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
-and was rebuilt twice to the byte. The voice edges were re-measured in the
-same change, one line per file taken from the file's whole energy: the old
-head window read a first voice from decoder noise on the ayahs that open in
-more silence than it held, and its tail windows measured the last voice
-hundreds of milliseconds into closing pauses, on 518 ayahs. The table's hash
-moved with it and is pinned in the manifest. The core pack stays at version 8
-and publishes as `pack-core-d7407645`, its rows unchanged; the two reciter
-packs moved to `reciter-husary b9b25a95f10c` and `reciter-minshawi
-09beaef021c8`. `tools audio words` measured 494 ayahs of each voice against
-their own audio: the boundary error's median is 40 ms for Husary and 50 ms
-for Minshawi, and the ninetieth percentile is 140 ms and 120 ms.
-The content database publishes as `content-db-0c5d878e`, created before the
-push so the run fetched it the first time. The signed bundle comes from
-`build` run 45432178871, green on `main` for the commit `4a2b0056`: the
-unit tests, `checkdb`, `search`, `storecards --check`, lint, and
-`assembleDebug` passed, and the signed bundle `quran-22.7-vc229.aab` has
-SHA-256
-`e1dfdcbe93eb88b289627560b0ad378cc0610d4fe605eefbdfabf001014fc380`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 22.7` and `versionCode 229`, and the upload certificate is the
-same key 21.4 through 22.6 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 22.7 bundle was submitted for Play review, and the hand-off
-copy in `play-store/aab/` was deleted once Play had it.
+and `checkdb` verified it; no dataset moved, so no pack changed. The three
+store sets were captured again from this build, on `quran_phone` at
+1080 x 1920 and 420 dpi, `quran_tablet7` at 1200 x 1920 and 320 dpi, and
+`quran_tablet10` at its own 2560 x 1800, and the twenty-four cards were
+recomposed. This machine's `quran_phone` had drifted to a 1080 x 2280 profile
+at 440 dpi; it was rebuilt at the documented 1080 x 1920 at 420 and its
+quick-boot snapshot saved, and the phone leg on the rebuilt AVD then matched
+the committed set to 0.16 percent, the status bar's clock alone, with every
+reading body unchanged.
+
+**What changed in 22.8.** The marks were right in form and had drifted in
+measurement (owner decision, 22.8). Five of the hand-drawn set had stopped
+short of, or grown past, the keyline each one claims: the list filled 15.2 of
+its landscape line's 16.5 units, the settings grips stopped a quarter unit
+short at each end, the tafsir page was half a unit wider on each side than its
+own portrait box, the speaker's ink sat 0.6 units left of the axis with its two
+waves near enough to read as one, and the keyboard's keys and the chevron's
+center were a hair high. All five are redrawn to the tenth of a unit, and the
+test that pinned the margin and the axis now reads every mark's ink box back,
+so the set filling its keyline is a measurement rather than a hope. The
+reading bar's settle is a critically damped spring seeded with the speed the
+finger had in its last hundred milliseconds, where it was a fixed trip: a flick
+is finished at the speed it was thrown, and every settled number stays,
+including no overshoot and reduced motion's instant snap. The pack capsule at
+the foot of the reading joined the playback pill's measure, 328 by 64 on the
+family's own airs, where it had run the whole glass with its airs typed at the
+call site. The page's margin, the reading's band, the top bar, a popup's safe
+band, and the content error page take the display cutout as a floor of its own
+side, because from Android 15 a landscape window is drawn under the camera and
+the status bar says nothing about it. The window's first icon ink now follows
+the reader's chosen ground rather than the phone's, from the same synchronous
+mirror the first frame reads. The rail's arrow keys follow the layout direction
+for a language the app does not ship yet. The Quran text, both translations,
+both tafsirs, the word lists, and the recitations are unchanged.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a
