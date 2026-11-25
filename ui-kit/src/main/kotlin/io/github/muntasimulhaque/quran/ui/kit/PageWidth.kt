@@ -1,7 +1,10 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -46,6 +49,21 @@ fun pageMargin(windowWidth: Dp): Dp {
 }
 
 /**
+ * The page's margin on one side of a glass that has a camera on it.
+ *
+ * From Android 15 a window this shape is drawn under the display cutout in
+ * every rotation, and the app handles its own rotation, so a landscape phone
+ * carries the lens over the reading's own line. The status bar's inset says
+ * nothing about it: a side cutout is not the top band, and [pageMargin] is a
+ * width rather than a box. So the camera is the floor of its own side and no
+ * other number moves. A wash may still reach under it, because a tint under a
+ * lens is a tint and a word under one is a word the reader cannot read
+ * (owner decision, 22.8).
+ */
+fun pageSideMargin(windowWidth: Dp, cutout: Dp): Dp =
+    maxOf(pageMargin(windowWidth), cutout)
+
+/**
  * The width to hand a sheet: the page and its two gutters, or the glass when
  * the glass is narrower than that.
  *
@@ -70,6 +88,27 @@ fun rememberPageMargin(): Dp {
     val density = LocalDensity.current
     val windowWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
     return pageMargin(windowWidth)
+}
+
+/**
+ * The page's two margins, each raised by the camera on its own side.
+ *
+ * The pair and not one number: a cutout stands on one side of a landscape
+ * glass, and a symmetric margin would either waste the free side or leave the
+ * lens over the words. The margin is read from the window rather than the
+ * screen for the reason [rememberPageMargin] gives, and the cutout is read
+ * from the window's own insets for the same one.
+ */
+@Composable
+fun rememberPageSideMargins(): Pair<Dp, Dp> {
+    val density = LocalDensity.current
+    val windowWidth = with(density) { LocalWindowInfo.current.containerSize.width.toDp() }
+    val margin = pageMargin(windowWidth)
+    val cutout = WindowInsets.displayCutout
+    val side = LocalLayoutDirection.current
+    val start = with(density) { cutout.getLeft(density, side).toDp() }
+    val end = with(density) { cutout.getRight(density, side).toDp() }
+    return maxOf(margin, start) to maxOf(margin, end)
 }
 
 /**

@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
@@ -197,7 +200,14 @@ fun AppPopup(
     // The window is the app's own, edge to edge, so the system's bars are
     // part of it and the popup must keep out of them itself.
     val status = with(density) {
-        WindowInsets.statusBars.asPaddingValues().calculateTopPadding().roundToPx()
+        // A menu keeps out of the phone's bar and the camera: on a landscape
+        // glass from Android 15 the cutout is a side inset that the top band
+        // does not report, and a first row under a lens is a row unread
+        // (owner decision, 22.8).
+        WindowInsets.statusBars.union(WindowInsets.displayCutout)
+            .asPaddingValues()
+            .calculateTopPadding()
+            .roundToPx()
     }
     val navigation = with(density) {
         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().roundToPx()

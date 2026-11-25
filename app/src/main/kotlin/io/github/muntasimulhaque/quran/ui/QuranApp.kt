@@ -31,7 +31,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.isDark
 import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
+import io.github.muntasimulhaque.quran.ui.kit.rememberPageSideMargins
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 import kotlinx.coroutines.delay
 
@@ -183,6 +183,10 @@ fun QuranApp(
  */
 @Composable
 private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
+    // The camera is this page's margin on the side it stands on: the one
+    // sentence the app owes a reader whose content cannot be read is a word
+    // under a lens otherwise (owner decision, 22.8).
+    val (marginStart, marginEnd) = rememberPageSideMargins()
     Box(
         Modifier
             .fillMaxSize()
@@ -191,7 +195,7 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = rememberPageMargin()),
+                .padding(start = marginStart, end = marginEnd),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(

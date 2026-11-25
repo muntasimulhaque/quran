@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -106,7 +108,11 @@ internal fun ReaderTopBar(
     onOwnHeight: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val status = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    // The band clears the phone's bar and the camera alike: from Android 15 a
+    // landscape window is drawn under a side cutout, and the status bar says
+    // nothing about it (owner decision, 22.8).
+    val chrome = WindowInsets.statusBars.union(WindowInsets.displayCutout)
+    val status = chrome.asPaddingValues().calculateTopPadding()
     val statusPx = with(LocalDensity.current) { status.roundToPx() }
     // The two things a rebuild is owed for: the bar arriving or leaving for
     // good, and the name a test finds it by. Both are derived, so the 200ms a
@@ -121,7 +127,7 @@ internal fun ReaderTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .windowInsetsPadding(chrome)
                     .then(
                         if (away) {
                             Modifier.clearAndSetSemantics {}

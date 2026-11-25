@@ -89,6 +89,22 @@ class PageEdgeTest {
     }
 
     @Test
+    fun aCutoutRaisesTheFloorOfItsOwnSide() {
+        // The camera is the floor of the side it stands on and nothing else
+        // moves. On a landscape phone the page's own margin is the gutter and
+        // the lens is wider, so the words clear it; a cutout narrower than the
+        // gutter is no cutout at all; and on a glass wide enough for the page
+        // the page's margin already stands past the lens
+        // (owner decision, 22.8).
+        val landscape = 640.dp
+        assertEquals(Space.Gutter, pageSideMargin(landscape, 0.dp))
+        assertEquals(30.dp, pageSideMargin(landscape, 30.dp))
+        assertEquals("a cutout inside the gutter changes nothing", Space.Gutter, pageSideMargin(landscape, 18.dp))
+        assertEquals(pageMargin(tenInch), pageSideMargin(tenInch, 30.dp))
+        assertEquals(30.dp, pageSideMargin(sheetOfAPage + 2.dp, 30.dp))
+    }
+
+    @Test
     fun aWashedVerseStopsItsWordsAtTheOneEdge() {
         // The reading's list keeps the page's margin less the room a wash
         // reaches past its text, so the wash stands on the page's line and the

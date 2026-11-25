@@ -44,7 +44,7 @@ import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.WordVoice
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
-import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
+import io.github.muntasimulhaque.quran.ui.kit.rememberPageSideMargins
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.flow.first
@@ -357,7 +357,14 @@ internal fun ReadingRows(
     // narrower column, and a reader on a wide screen gets the page the seven
     // inch tablet already reads instead of a line as long as the glass
     // (owner decision, 12.7).
-    val side = rememberPageMargin() - Space.WashInset
+    //
+    // The two sides are read apart because a landscape glass can carry a
+    // camera on one of them: a word under a lens is a word the reader cannot
+    // read, so the camera is that side's floor while the wash still reaches
+    // under it (owner decision, 22.8).
+    val (marginStart, marginEnd) = rememberPageSideMargins()
+    val sideStart = marginStart - Space.WashInset
+    val sideEnd = marginEnd - Space.WashInset
     LazyColumn(
         state = listState,
         // A viewport ahead and half of one behind: the row the reader is about
@@ -375,8 +382,8 @@ internal fun ReadingRows(
                 detectTapGestures(onTap = { dismissAbout() })
             },
         contentPadding = PaddingValues(
-            start = side,
-            end = side,
+            start = sideStart,
+            end = sideEnd,
             top = contentPaddingTop,
             bottom = contentPaddingBottom,
         ),

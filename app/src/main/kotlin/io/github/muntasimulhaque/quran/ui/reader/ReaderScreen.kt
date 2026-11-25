@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
@@ -1237,8 +1239,10 @@ internal fun readingFoot(bottomStack: Dp, navigationBar: Dp): Dp =
  * (owner report, 18.5). They now stand on the page's color, and the
  * line under them is cut by the band the way a printed page ends rather than
  * sitting half visible under a glyph. The measure is the inset and never a
- * number: a phone with a cutout reports its own, a landscape phone whose bar
- * stands on a side reports none, and a zero band is not drawn at all.
+ * number: a phone with a cutout on its top edge reports it in the status bar,
+ * a landscape phone carries its lens on a side and the band takes that cutout's
+ * inset too, and a zero band is not drawn at all
+ * (owner decision, 22.8).
  *
  * The fill is `background`, the reading's own ground, so the band is invisible
  * over the empty air a surah's opening keeps above its head (64 dp) and shows
@@ -1248,7 +1252,13 @@ internal fun readingFoot(bottomStack: Dp, navigationBar: Dp): Dp =
  */
 @Composable
 private fun StatusBand(modifier: Modifier = Modifier) {
-    val statusBar = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    // The phone's bar and the camera are one band: from Android 15 a landscape
+    // window is drawn under a side cutout, and the words under it are the
+    // page's (owner decision, 22.8).
+    val statusBar = WindowInsets.statusBars
+        .union(WindowInsets.displayCutout)
+        .asPaddingValues()
+        .calculateTopPadding()
     if (statusBar <= 0.dp) return
     Box(
         modifier = modifier
