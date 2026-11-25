@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,6 +31,11 @@ import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
+import io.github.muntasimulhaque.quran.ui.playback.BarGutter
+import io.github.muntasimulhaque.quran.ui.playback.PillAir
+import io.github.muntasimulhaque.quran.ui.playback.PillEndAir
+import io.github.muntasimulhaque.quran.ui.playback.PillMeasure
+import io.github.muntasimulhaque.quran.ui.playback.WordsGap
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.compactBody
@@ -52,6 +58,9 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * foot of the page is built, so a change to the pill's stack is a change
  * here and never a hunt through a thousand lines of page.
  */
+
+/** The ground the stack keeps under its last capsule, above the phone's bar. */
+private val StackFoot = 10.dp
 
 /** Everything that can sit at the foot of the page, stacked in one place. */
 @Composable
@@ -84,7 +93,7 @@ internal fun BottomStack(
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
             .onSizeChanged { onHeight(it.height) }
-            .padding(bottom = 10.dp),
+            .padding(bottom = StackFoot),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Space.Line),
     ) {
@@ -92,15 +101,35 @@ internal fun BottomStack(
             onDispose { onHeight(0) }
         }
         viewModel.packSetup?.let { setup ->
+            // The pack's capsule is the pill's sibling and wears the same
+            // numbers: PillMeasure wide, PillAir above and below its 48 dp row,
+            // PillEndAir at the leading end where the capsule is a sphere,
+            // PillAir at the trailing one, and WordsGap between its words and
+            // its answer. It used to run the whole glass with its airs typed at
+            // the call site, so the two capsules at one foot stood at two
+            // measures and two rhythms, and on the ten inch screen the pack row
+            // was four times its sibling's width. The words keep the room the
+            // answer leaves them; a pack's own name is one line with an
+            // ellipsis already, and the longest may lose a word at the top type
+            // step, which is the price of one family at the foot
+            // (owner decision, 22.8).
             Row(
                 modifier = Modifier
+                    .padding(horizontal = BarGutter)
+                    .widthIn(max = PillMeasure)
+                    .fillMaxWidth()
                     .floatingLift(Radii.Pill)
                     .clip(Radii.Pill)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+                    .padding(
+                        start = PillEndAir,
+                        end = PillAir,
+                        top = PillAir,
+                        bottom = PillAir,
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(Modifier.padding(end = Space.Row).weight(1f)) {
+                Column(Modifier.padding(end = WordsGap).weight(1f)) {
                     Text(
                         text = contentPackName(setup.pack),
                         style = compactBody(),

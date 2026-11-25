@@ -5,6 +5,10 @@ import io.github.muntasimulhaque.quran.ui.kit.GlyphPress
 import io.github.muntasimulhaque.quran.ui.kit.GlyphTarget
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
+// The five below are public since 22.8: the pack capsule at the reading's foot
+// is the pill's sibling and reads the same numbers, so the two cannot drift
+// into two families at one foot (owner decision, 22.8).
+
 /**
  * The pill's own geometry, in one place, because the bar that holds the
  * words and the words themselves measure against the same numbers: a
@@ -22,7 +26,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * side and no more, while a glass wider than it keeps the capsule on the
  * page's own middle with the page's ground beside it.
  */
-internal val BarGutter = Space.Block
+val BarGutter = Space.Block
 
 /**
  * The width the pill stands at in every voice, and the width of the offer bar
@@ -54,7 +58,7 @@ internal val BarGutter = Space.Block
  * narrower than the measure takes the glass less the gutters instead, where
  * the 288 dp menu still stands on the capsule's middle.
  */
-internal val PillMeasure = 328.dp
+val PillMeasure = 328.dp
 
 /**
  * The air between the shapes the reader sees: between two controls, and
@@ -75,7 +79,7 @@ internal val PillMeasure = 328.dp
  * Everything else measures this air from its target, and everything
  * measures this air from its shape.
  */
-internal val PillAir = Space.Line
+val PillAir = Space.Line
 
 /**
  * The air the words keep from the capsule's curved end: the playing words
@@ -100,7 +104,7 @@ internal val PillAir = Space.Line
  * [PillAir] at their end, because they stand at the capsule's widest height or
  * wear a round shape of their own, where the air reads true.
  */
-internal val PillEndAir = Space.Block + Space.Tight
+val PillEndAir = Space.Block + Space.Tight
 
 /**
  * The gap between the words and what answers them: the Download, the Retry,
@@ -117,7 +121,7 @@ internal val PillEndAir = Space.Block + Space.Tight
  * [WordsGap] of shape air. A word answer's shape ends at its own edge, so its
  * lead is this number whole (owner decision, 9.6).
  */
-internal val WordsGap = Space.Row
+val WordsGap = Space.Row
 
 /**
  * One control's own target, which is the app's [GlyphTarget] and what
