@@ -217,6 +217,18 @@ the width Play's 16:9 crop keeps. The icon surfaces are byte-identical to
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
+The signed bundle comes from `build` run 45673606017, green on `main` for
+the commit `1bc56958`: the whole JVM suite, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.9-vc231.aab` has SHA-256
+`126f64a1f7705b36e2239ac625e23dc147bc8a4cd5960777698782c90d7cf538`.
+`jarsigner` reads `jar verified`, and the upload certificate is the same key
+21.4 through 22.8 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+No dataset moved, so nothing was published to the project's releases and the
+run fetched the database 22.8 published. The 22.9 bundle is in
+`play-store/aab/` for the store.
+
 **What changed in 22.9.** The store graphic is the page itself (owner decision,
 22.9). It replaces the enlarged mark on the night gold: the graphic is one
 printed page of the theme's paper, its head the colophon of the app's own mark
