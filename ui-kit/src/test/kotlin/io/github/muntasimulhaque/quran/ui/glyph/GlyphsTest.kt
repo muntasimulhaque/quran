@@ -2,9 +2,13 @@ package io.github.muntasimulhaque.quran.ui.glyph
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.sin
 
 /**
  * The set's ruler, measured by arithmetic on a machine with no screen.
@@ -183,6 +187,54 @@ class GlyphsTest {
         }
     }
 
+    /**
+     * Every mark's own box, pinned to the tenth of a unit.
+     *
+     * The set's law is that a mark fills its keyline, and the keylines were a
+     * claim nothing measured: the axis allowance is two units and the live
+     * area's floor is 13.5, so a drawing could stop 1.3 units short of its
+     * claim and still read as the set's own. Four did (owner decision, 22.8:
+     * the keyline audit). This pins every mark, the bespoke boxes included, so
+     * the set is frozen rather than merely bounded: a later edit that moves an
+     * edge fails here and says which mark and by how much.
+     */
+    @Test
+    fun everyClaimedKeylineIsPinnedToTheInk() {
+        val pinned = mapOf(
+            Icon.Search to Ink(2.25f, 2.25f, 21.75f, 21.75f),
+            Icon.Bookmark to Ink(3.75f, 2.25f, 20.25f, 21.75f),
+            Icon.BookmarkFilled to Ink(3.75f, 2.25f, 20.25f, 21.75f),
+            Icon.Note to Ink(3.75f, 2.25f, 20.25f, 21.75f),
+            Icon.Tafsir to Ink(3.75f, 2.25f, 20.25f, 21.75f),
+            Icon.Settings to Ink(2.25f, 3.75f, 21.75f, 20.25f),
+            Icon.Keyboard to Ink(2.25f, 3.75f, 21.75f, 20.25f),
+            // The dots keep their own left air, which the drawing argues.
+            Icon.Browse to Ink(3.15f, 3.75f, 21.75f, 20.25f),
+            Icon.Speaker to Ink(2.25f, 3.25f, 21.75f, 20.75f),
+            Icon.Play to Ink(7.5f, 3.75f, 20.25f, 20.25f),
+            Icon.Pause to Ink(6.75f, 3.75f, 17.25f, 20.25f),
+            Icon.Next to Ink(5.5f, 3.75f, 19f, 20.25f),
+            Icon.Previous to Ink(5f, 3.75f, 18.5f, 20.25f),
+            Icon.Close to Ink(4.75f, 4.75f, 19.25f, 19.25f),
+            Icon.Share to Ink(4f, 3.75f, 20f, 20.25f),
+            Icon.Check to Ink(2.75f, 5.6f, 21.25f, 18.4f),
+            Icon.Chevron to Ink(4.5f, 7.75f, 19.5f, 16.25f),
+        )
+        assertEquals("every mark is pinned", Icon.entries.size, pinned.size)
+        Icon.entries.forEach { icon ->
+            val expected = pinned[icon]
+            if (expected == null) {
+                fail("$icon has no pinned box")
+                return@forEach
+            }
+            val ink = inkOf(icon, GlyphGrid.Stroke)
+            assertEquals("$icon inks from the left", expected.left, ink.left, Tolerance)
+            assertEquals("$icon inks from the top", expected.top, ink.top, Tolerance)
+            assertEquals("$icon inks to the right", expected.right, ink.right, Tolerance)
+            assertEquals("$icon inks to the bottom", expected.bottom, ink.bottom, Tolerance)
+        }
+    }
+
     /** The middle of the square, in grid units. */
     private val axis = GlyphGrid.Size / 2f
 
@@ -226,8 +278,12 @@ class GlyphsTest {
                 is GlyphShape.Solid ->
                     shape.points.forEach { add(it.x, it.y, it.x, it.y) }
                 is GlyphShape.Ring -> addPoint(shape.center.x, shape.center.y, shape.radius + half)
-                // An arc keeps inside its own circle, so the circle is its box.
-                is GlyphShape.Arc -> addPoint(shape.center.x, shape.center.y, shape.radius + half)
+                // An arc inks only where it is drawn: its two tips and every
+                // quarter turn the sweep crosses, each grown by the stroke's
+                // round cap. The circle that carries it is not its box, and
+                // reading it as one over-reported the speaker's outer wave by
+                // most of a unit (owner decision, 22.8: the keyline audit).
+                is GlyphShape.Arc -> arcInk(add = ::add, arc = shape, half = half)
                 is GlyphShape.Dot -> addPoint(shape.center.x, shape.center.y, shape.radius)
                 is GlyphShape.Bar -> {
                     val bar = GlyphGrid.Bar / 2f
@@ -243,6 +299,32 @@ class GlyphsTest {
             }
         }
         return Ink(left, top, right, bottom)
+    }
+
+    /**
+     * Where one arc's ink reaches: its centreline at the sweep's two ends and
+     * at every quarter turn inside it, each grown by the stroke's round cap.
+     */
+    private fun arcInk(
+        add: (Float, Float, Float, Float) -> Unit,
+        arc: GlyphShape.Arc,
+        half: Float,
+    ) {
+        val end = arc.startDegrees + arc.sweepDegrees
+        val from = minOf(arc.startDegrees, end)
+        val to = maxOf(arc.startDegrees, end)
+        val angles = mutableListOf(arc.startDegrees, end)
+        var quarter = ceil(from / 90f) * 90f
+        while (quarter <= to) {
+            angles += quarter
+            quarter += 90f
+        }
+        angles.forEach { degrees ->
+            val radians = Math.toRadians(degrees.toDouble())
+            val x = arc.center.x + (arc.radius * cos(radians)).toFloat()
+            val y = arc.center.y + (arc.radius * sin(radians)).toFloat()
+            add(x - half, y - half, x + half, y + half)
+        }
     }
 
     private fun addSegment(

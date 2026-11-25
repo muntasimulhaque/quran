@@ -143,6 +143,9 @@ sealed interface GlyphShape {
  * chevron keeps a narrower width because a turn drawn to 20 units reads as a
  * mountain. The three filled transport marks are measured by their mass, so
  * the play triangle's box runs right of the axis and its weight sits on it.
+ * By nature is a measurement now and not a hope: the glyph test reads every
+ * mark's ink box back, so one that drifts from its keyline fails the build
+ * (owner decision, 22.8: the keyline audit).
  *
  * The drawings are built once and shared: a mark is drawn on every frame the
  * pill moves, so a fresh list per frame would be garbage on the surface the
@@ -157,14 +160,18 @@ object Glyphs {
 
         // A list: three marks and three lines. The line is a stroke with a
         // round tip, so the three lines stop at the landscape keyline while
-        // the marks beside them keep their air.
+        // the marks beside them keep their air. The rows' own height is the
+        // keyline too: the bullets alone reach 3.75 and 20.25, and the
+        // drawing stopped 1.3 units short of them, so the list read a step
+        // smaller than the marks beside it in the bar
+        // (owner decision, 22.8: the keyline audit).
         Icon.Browse to listOf(
-            dot(4.75f, 6f, GlyphGrid.Bullet),
+            dot(4.75f, 5.35f, GlyphGrid.Bullet),
             dot(4.75f, 12f, GlyphGrid.Bullet),
-            dot(4.75f, 18f, GlyphGrid.Bullet),
-            line(9.5f, 6f, 20.75f, 6f),
+            dot(4.75f, 18.65f, GlyphGrid.Bullet),
+            line(9.5f, 5.35f, 20.75f, 5.35f),
             line(9.5f, 12f, 20.75f, 12f),
-            line(9.5f, 18f, 20.75f, 18f),
+            line(9.5f, 18.65f, 20.75f, 18.65f),
         ),
 
         // The lens takes the circle keyline; the handle starts inside the
@@ -183,11 +190,15 @@ object Glyphs {
         // this version). The rails are the set's line and the grips are its
         // one filled weight, so the mark is the app's own hand and the thing
         // a hand takes hold of (owner decision: two rails and two handles).
+        // The grips are the mark's height and the landscape keyline's: they
+        // stopped a quarter unit short at each end, which is the one drift a
+        // set this measured still carried
+        // (owner decision, 22.8: the keyline audit).
         Icon.Settings to listOf(
             line(3.25f, 7f, 20.75f, 7f),
             line(3.25f, 17f, 20.75f, 17f),
-            bar(8.25f, 5.5f, 8.25f, 8.5f),
-            bar(15.75f, 15.5f, 15.75f, 18.5f),
+            bar(8.25f, 5.25f, 8.25f, 8.75f),
+            bar(15.75f, 15.25f, 15.75f, 18.75f),
         ),
 
         // The portrait keyline: a ribbon is a tall thing, and the notch is a
@@ -250,13 +261,19 @@ object Glyphs {
         // because a page is a page, the rule is at two thirds so the margin is
         // the narrow column a gloss is written in, and there is one note
         // because the mark has one thing to say; two notes made it a document
-        // (owner decision).
+        // (owner decision). The page is the portrait keyline like the ribbon
+        // and the note, and it was the one mark half a unit wider on each
+        // side than its own claim: the interior lost that width, the rule
+        // keeps the proportion it had, the text lines and the note keep an
+        // even air from the rule and from the frame at the thickest stroke,
+        // and the note is shorter because the column it writes in is
+        // (owner decision, 22.8: the keyline audit).
         Icon.Tafsir to listOf(
-            frame(4.25f, 3.5f, 19.75f, 20.5f, 2.5f),
+            frame(4.75f, 3.25f, 19.25f, 20.75f, 2.5f),
             line(13.5f, 6.5f, 13.5f, 17.5f),
-            line(7.15f, 9f, 10.6f, 9f),
-            line(7.15f, 13f, 10.6f, 13f),
-            line(16.1f, 11f, 17.1f, 11f),
+            line(7.4f, 9f, 10.85f, 9f),
+            line(7.4f, 13f, 10.85f, 13f),
+            line(16.05f, 11f, 16.7f, 11f),
         ),
 
         // A cone and two waves. The cone is one closed line whose slants are
@@ -265,20 +282,32 @@ object Glyphs {
         // mark is the sheet's one control, so both ends are drawn to the live
         // area: the cone's tail on the left keyline and the outer wave on the
         // right (owner decision, 17.7).
+        //
+        // The waves are 4 and 8 units of radius. The pair was 3.6 and 6.8,
+        // which left the ink 0.6 units left of the axis, stopped the outer
+        // wave 1.45 units short of the line it was said to reach, and left
+        // the two waves' own ink 1.2 units apart, near enough that the mark
+        // read as one thick wave. At 4 and 8 the ink is 2.25 to 21.75, the
+        // center is the axis, and the cone, the first wave, and the second
+        // keep an even 2 units between them
+        // (owner decision, 22.8: the keyline audit).
         Icon.Speaker to listOf(
             closed(
                 3.25f, 9.25f, 7.75f, 9.25f, 12.75f, 4.25f,
                 12.75f, 19.75f, 7.75f, 14.75f, 3.25f, 14.75f,
             ),
-            arc(12.75f, 12f, 3.6f, -55f, 110f),
-            arc(12.75f, 12f, 6.8f, -55f, 110f),
+            arc(12.75f, 12f, 4f, -55f, 110f),
+            arc(12.75f, 12f, 8f, -55f, 110f),
         ),
 
         // A turn, round at both tips and at the elbow. The width is the one
         // place the set departs from its live area: a chevron drawn to 20
-        // units reads as a mountain rather than a turn.
+        // units reads as a mountain rather than a turn. Its ink centers on
+        // the axis at both sizes it is drawn, 18 and 14, so the quarter turns
+        // for Back and Next turn about the mark's own center rather than a
+        // sixth of a unit beside it (owner decision, 22.8).
         Icon.Chevron to listOf(
-            poly(5.5f, 8.6f, 12f, 15.1f, 18.5f, 8.6f),
+            poly(5.5f, 8.75f, 12f, 15.25f, 18.5f, 8.75f),
         ),
 
         // The sheet, its turned corner, and one line of writing.
@@ -291,15 +320,18 @@ object Glyphs {
         // The frame, two rows of keys, and the space bar under them. A key is
         // a short round-capped dash, so it reads as a keycap, and the whole
         // mark is drawn with the set's one stroke and needs no third dot size.
+        // The key field is the frame's center: the rows began a quarter unit
+        // high, which put the keys nearer the frame's top than its foot
+        // (owner decision, 22.8: the keyline audit).
         Icon.Keyboard to listOf(
             frame(3.25f, 4.75f, 20.75f, 19.25f, 2.5f),
-            line(6.4f, 8.5f, 7.4f, 8.5f),
-            line(11.5f, 8.5f, 12.5f, 8.5f),
-            line(16.6f, 8.5f, 17.6f, 8.5f),
-            line(6.4f, 11.8f, 7.4f, 11.8f),
-            line(11.5f, 11.8f, 12.5f, 11.8f),
-            line(16.6f, 11.8f, 17.6f, 11.8f),
-            line(9.25f, 15f, 14.75f, 15f),
+            line(6.4f, 8.75f, 7.4f, 8.75f),
+            line(11.5f, 8.75f, 12.5f, 8.75f),
+            line(16.6f, 8.75f, 17.6f, 8.75f),
+            line(6.4f, 12.05f, 7.4f, 12.05f),
+            line(11.5f, 12.05f, 12.5f, 12.05f),
+            line(16.6f, 12.05f, 17.6f, 12.05f),
+            line(9.25f, 15.25f, 14.75f, 15.25f),
         ),
     )
 }
