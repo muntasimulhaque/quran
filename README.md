@@ -222,6 +222,19 @@ quick-boot snapshot saved, and the phone leg on the rebuilt AVD then matched
 the committed set to 0.16 percent, the status bar's clock alone, with every
 reading body unchanged.
 
+The signed bundle comes from `build` run 45563908431, green on `main` for
+the commit `88a6e786`: the unit tests, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.8-vc230.aab` has SHA-256
+`b8d6cb0884b74b375c36f09e00ee84ef803561cb6b90c68603c70419864dcf26`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 22.8` and `versionCode 230`, and the upload certificate is the
+same key 21.4 through 22.7 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+No dataset moved, so nothing was published to the project's releases and the
+run fetched the database 22.7 published. The bundle is in `play-store/aab/`
+for the hand-off and is deleted once Play has it.
+
 **What changed in 22.8.** The marks were right in form and had drifted in
 measurement (owner decision, 22.8). Five of the hand-drawn set had stopped
 short of, or grown past, the keyline each one claims: the list filled 15.2 of
