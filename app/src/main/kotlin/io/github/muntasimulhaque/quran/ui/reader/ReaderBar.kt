@@ -42,7 +42,7 @@ internal class ReaderBarState(private val now: () -> Long = { System.nanoTime() 
      * The bar's place on its travel, as the state Compose watches.
      *
      * It is a state rather than a field because the bar moves on every scroll
-     * delta and on every frame of its own 200ms settle. The reading hands
+     * delta and on every frame of its own settle. The reading hands
      * [shownFraction] down and never reads it in its own body: the page that
      * owns the bar is not rebuilt because the bar moved, the bar's band is
      * re-laid out and nothing above it is touched (owner decision, 19.8).
