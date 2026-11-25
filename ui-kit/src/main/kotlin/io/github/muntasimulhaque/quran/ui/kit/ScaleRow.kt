@@ -23,6 +23,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -31,6 +32,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -121,6 +123,10 @@ fun ScaleRow(
         select.value(steps[index])
     }
 
+    // The rail runs the way it reads: a right-to-left interface turns the
+    // keys with it, so a later language inherits a rail that still walks the
+    // way it looks (owner decision, 22.8).
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     Row(
         modifier = modifier
             .height(48.dp)
@@ -129,8 +135,8 @@ fun ScaleRow(
             .onKeyEvent { event ->
                 if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
                 val direction = when (event.key) {
-                    Key.DirectionLeft -> -1
-                    Key.DirectionRight -> 1
+                    Key.DirectionLeft -> if (rtl) 1 else -1
+                    Key.DirectionRight -> if (rtl) -1 else 1
                     else -> return@onKeyEvent false
                 }
                 val next = (chosen + direction).coerceIn(0, steps.lastIndex)
