@@ -26,8 +26,10 @@ import java.awt.Rectangle
  * `PaperBackground` `#FBF9F4`, `PaperInk` `#292622`, `PaperMuted` `#5D5A55`,
  * and `Gold` `#856E18`, and the night card keeps that page's own ground and
  * word, `NightBackground` `#1C1A18`, `NightText` `#E5E2DB`, and its gold
- * `NightGold` `#DCB870`. The gold rule is the feature graphic's rule, so the
- * icon, the feature graphic, and the cards read as one face.
+ * `NightGold` `#DCB870`. The cards and the feature graphic are one face of
+ * the same palette: paper, ink, and gold. The banner wears only the day
+ * page's three, flat and unframed, because a printed page has no gradient;
+ * the cards wear the gold measured for each of their own grounds.
  *
  * The type band is above the frame on every form, the ten inch card
  * included. A side-by-side column was drawn first and set aside: on a

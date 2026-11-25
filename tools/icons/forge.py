@@ -10,8 +10,10 @@
 # emit writes: app/src/main/res/drawable/ic_launcher_foreground.xml and
 # ic_launcher_monochrome.xml, ic_shortcut_mark.xml, the five mipmap legacy
 # tiles, ic_share_mark and ic_book_mark at mdpi through xxxhdpi,
-# play-store/icon-512.png, and play-store/feature-graphic-1024x500.png,
-# rebuilt with the repo's own Literata and Inter over the paper field.
+# play-store/icon-512.png, and play-store/feature-graphic-1024x500.png.
+# The icon is rebuilt with the repo's own ink on its paper field; the feature
+# graphic is the lapis reading card, set in the repo's own Literata and
+# carrying a real capture from the committed tablet frames.
 # The drawing traces the owner's reference set: the pages are sail arcs
 # diving into a spine that ends at the V where the two pages meet, each
 # plank folds onto the page's outer edge, and each lower end meets the
@@ -23,15 +25,17 @@ from PIL import Image, ImageDraw, ImageFont
 INK   = (41, 38, 34)      # #292622
 GOLD  = (133, 110, 24)    # #856E18
 PAPER = (251, 249, 244)   # #FBF9F4
+LAPIS = (31, 61, 118)     # #1F3D76
+NIGHT_GOLD = (220, 184, 112)  # #DCB870, the night page's gold
 MUTED = (93, 90, 85)      # #5D5A55
 WHITE = (255, 255, 255)
 
 # ------------------------------------------------------------ trace geometry
 AX_X, AX_Y = 85.5, 98.5
 S_FG   = 0.415
-# the banner's own hand: the mark at 210 px carries the icon's weight and
-# the icon's air, so the card and the icon are one drawing seen at two
-# sizes, not two weights of the same drawing
+# The standalone drawing's own hand: the mark at 210 px carries the icon's
+# weight and the icon's air, so the card and the icon are one drawing seen at
+# two sizes, not two weights of the same drawing.
 STROKE = 3.0
 HALO   = 1.4
 # The icon's own line, in trace units: one weight and one ink for the
@@ -56,6 +60,12 @@ STROKE_ICON = 3.8
 HALO_ICON   = 1.4
 STROKE_CANVAS = STROKE_ICON * S_FG
 HALO_CANVAS   = (STROKE_ICON + 2 * HALO_ICON) * S_FG
+# The store and legacy tiles put the mark at 64 percent of the tile. The
+# previous 60 percent left the drawing quieter than the adaptive foreground,
+# whose visible book fills about 66 percent of the 72 dp viewport; 64 is the
+# one step that reaches that presence without crowding a mask (owner
+# decision, 22.9).
+ICON_SPAN = 0.64
 
 PAGE_N   = (85.5, 63.2)
 PAGE_P   = (56.5, 52.15)
@@ -94,9 +104,6 @@ def line_dir(p0, p1):
 def line_ix(p0, d0, p1, d1):
     t = ((p1[0] - p0[0]) * d1[1] - (p1[1] - p0[1]) * d1[0]) / (d0[0] * d1[1] - d0[1] * d1[0])
     return (p0[0] + d0[0] * t, p0[1] + d0[1] * t)
-
-def cross(a, b):
-    return a[0] * b[1] - a[1] * b[0]
 
 def _perps(d):
     return ((-d[1], d[0]), (d[1], -d[0]))
@@ -336,46 +343,6 @@ def band_outline(pts, half, cap_pts=10):
         capS.append((pts[0][0] + half * math.cos(ang), pts[0][1] + half * math.sin(ang)))
     return right + capE + left[::-1] + capS
 
-def expand_closed(pts, m):
-    # offset both directions, keep the one with the larger area (outward)
-    def offset(poly, mm):
-        out = []
-        n = len(poly)
-        for i in range(n):
-            a = poly[(i - 1) % n]; b = poly[(i + 1) % n]; p = poly[i]
-            d1 = norm((p[0]-a[0], p[1]-a[1]))
-            d2 = norm((b[0]-p[0], b[1]-p[1]))
-            sgn = 1.0 if cross(d1, d2) > 0 else -1.0
-            n1 = (-d1[1]*sgn, d1[0]*sgn); n2 = (-d2[1]*sgn, d2[0]*sgn)
-            if abs(cross(d1, d2)) < 0.08:
-                out.append((p[0] + n1[0]*mm, p[1] + n1[1]*mm))
-                continue
-            u = line_ix((p[0]+n1[0]*mm, p[1]+n1[1]*mm), d1, (p[0]+n2[0]*mm, p[1]+n2[1]*mm), d2)
-            if math.hypot(u[0]-p[0], u[1]-p[1]) > 3.5*mm:
-                s = n1[0]+n2[0], n1[1]+n2[1]
-                ln = math.hypot(*s)
-                u = (p[0] + s[0]/ln*mm/abs(math.sin(math.radians(60))) * 0.7,
-                     p[1] + s[1]/ln*mm/abs(math.sin(math.radians(60))) * 0.7)
-            out.append(u)
-        return out
-    A = area(pts)
-    pa = offset(pts, m)
-    pb = offset(pts, -m)
-    if area(pa) > A and area(pa) > area(pb):
-        out = pa
-    elif area(pb) > A and area(pb) > area(pa):
-        out = pb
-    else:
-        out = pa
-    return rdp(out, 0.18)
-
-def area(pts):
-    s = 0.0
-    for i in range(len(pts)):
-        a = pts[i]; b = pts[(i+1) % len(pts)]
-        s += a[0]*b[1] - b[0]*a[1]
-    return abs(s) / 2
-
 # ---------------------------------------------------------------- svg strings
 def fmt(v):
     s = f'{v:.3f}'.rstrip('0').rstrip('.')
@@ -412,27 +379,65 @@ def fg_pieces():
     ca = cap_redraw(); cb = mir_segs(ca)
     return dict(pl=pl, pm=pm, wa=wa, wb=wb, pc=pc, pcM=pcM, ca=ca, cb=cb)
 
-# the themed silhouette's own weights: the band's half-width and the margin
-# of air cut around the book, both in trace units, tuned against the old set
+# The themed silhouette's own weights: the band's half width, the clean
+# negative space around the book, and the polygon tolerance of the stand.
+# The old cutout was an offset of a densely sampled silhouette, which left a
+# 41 KB path of stair steps and hairlines down the book's edges. A clean
+# scaled copy of the book's own cubics keeps the same air at 24 dp and reads
+# as one shape at every size (owner decision, 22.9).
 MONO_BAND = 7.6
-MONO_CUT  = 7.0
+MONO_CUT_SCALE = 1.18
+MONO_CUT_CENTER = (AX_X, 100.0)
+MONO_BAND_RDP = 0.12
+
+def scale_trace_path(segs, factor, center):
+    """Scale every move, line, and cubic about center, preserving closes."""
+    cx, cy = center
+    def scaled(p):
+        return (cx + (p[0] - cx) * factor, cy + (p[1] - cy) * factor)
+    out = []
+    for seg in segs:
+        if seg[0] == 'C':
+            out.append(('C', scaled(seg[1]), scaled(seg[2]), scaled(seg[3])))
+        elif seg[0] in ('M', 'L'):
+            out.append((seg[0], scaled(seg[1])))
+        else:
+            out.append(seg)
+    return out
 
 def mono_shapes():
     p = fg_pieces()
     cla = as_pts(p['pl'], 60)
-    bandA = band_outline(cla, MONO_BAND)
-    bandB = band_outline([mirp(x) for x in cla], MONO_BAND)
-    cut = expand_closed(as_pts(book_silhouette(), 24), MONO_CUT)
+    bandA = rdp(band_outline(cla, MONO_BAND), MONO_BAND_RDP)
+    bandB = rdp(
+        band_outline([mirp(x) for x in cla], MONO_BAND),
+        MONO_BAND_RDP,
+    )
+    cut_segs = scale_trace_path(
+        book_silhouette(),
+        MONO_CUT_SCALE,
+        MONO_CUT_CENTER,
+    )
+    # The raster fill still needs points; the vector keeps the clean cubics.
+    cut = as_pts(cut_segs, 60)
     faceL = wedge_face_pts()
     faceR = [mirp(x) for x in faceL]
     book = as_pts(book_silhouette(), 40)
-    return dict(bandA=bandA, bandB=bandB, cut=cut, faceL=faceL, faceR=faceR, book=book)
+    return dict(
+        bandA=bandA,
+        bandB=bandB,
+        cut=cut,
+        cut_segs=cut_segs,
+        faceL=faceL,
+        faceR=faceR,
+        book=book,
+    )
 
 def mono_pathdata():
     d = mono_shapes()
     scale, cx, cy = S_FG, 54.0, 54.0
-    bandA = svg_poly(d['bandA'], scale, cx, cy) + ' ' + svg_poly(d['cut'], scale, cx, cy)
-    bandB = svg_poly(d['bandB'], scale, cx, cy) + ' ' + svg_poly(d['cut'], scale, cx, cy)
+    bandA = svg_poly(d['bandA'], scale, cx, cy) + ' ' + svg_segs(d['cut_segs'], scale, cx, cy)
+    bandB = svg_poly(d['bandB'], scale, cx, cy) + ' ' + svg_segs(d['cut_segs'], scale, cx, cy)
     faces = svg_poly(d['faceL'], scale, cx, cy) + ' ' + svg_poly(d['faceR'], scale, cx, cy)
     book  = svg_segs(book_silhouette(), scale, cx, cy)
     return bandA, bandB, faces, book
@@ -496,6 +501,25 @@ def stroke_pts(draw, pts, color, width_px, cap=True):
             for e in (pts[0], pts[-1]):
                 draw.ellipse([e[0] - r, e[1] - r, e[0] + r, e[1] + r], fill=color)
 
+def stroke_icon_pts(draw, pts, color, width_px, cap=True):
+    """Draw the icon's own line with explicit round joins and caps.
+
+    Pillow's joint='curve' samples a dense joint path, and on the page's
+    long shallow arcs that sampling left light notches and hairlines in the
+    finished tile. Circles at the joins keep the line's one weight and give
+    the curves a clean edge at every size (owner decision, 22.9).
+    """
+    if len(pts) <= 1:
+        return
+    draw.line(pts, fill=color, width=width_px)
+    radius = width_px / 2
+    joins = pts if cap else pts[1:-1]
+    for x, y in joins:
+        draw.ellipse(
+            [x - radius, y - radius, x + radius, y + radius],
+            fill=color,
+        )
+
 def fill_pts(draw, pts, color):
     if len(pts) > 2:
         draw.polygon(pts, fill=color)
@@ -516,13 +540,13 @@ def draw_fg(im, scale, cx, cy, ss=SS, dy=0.0, stroke=None, halo=None, stand=None
         return [(cx + (q[0]-AX_X)*scale*ss, cy + (q[1]-AX_Y+off)*scale*ss) for q in as_pts(raw, 60)]
     lw = stroke * scale * ss
     for k in ('pl', 'pm', 'wa', 'wb'):
-        stroke_pts(dr, m(p[k]), stand, max(1, round(lw)))
+        stroke_icon_pts(dr, m(p[k]), stand, max(1, round(lw)))
     for k in ('pc', 'pcM'):
-        pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, PAPER, max(1, round(halo_w*scale*ss)))
+        pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_icon_pts(dr, pts, PAPER, max(1, round(halo_w*scale*ss)))
     for k in ('pc', 'pcM'):
-        pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw)))
+        pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_icon_pts(dr, pts, INK, max(1, round(lw)))
     for k in ('ca', 'cb'):
-        stroke_pts(dr, m(p[k]), stand, max(1, round(lw)))
+        stroke_icon_pts(dr, m(p[k]), stand, max(1, round(lw)))
     return im
 
 def draw_mono(im, scale, cx, cy, ycen, ss=SS, color=WHITE):
@@ -571,13 +595,14 @@ def render_store(size=512, out=None, ss=4):
     im = raster_canvas(size, ss)
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=size*0.60)
+    scale, xc, yc = fit_for(ids, None, span_w=size*ICON_SPAN)
     paper_bg(im)
     draw_fg(im, scale, size/2*ss - (xc-AX_X)*scale*ss, size/2*ss + (AX_Y - yc)*scale*ss, ss,
             stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
+    result = im.convert('RGBA').resize((size, size), Image.LANCZOS)
     if out:
-        im.convert('RGBA').resize((size, size), Image.LANCZOS).save(out)
-    return im
+        result.save(out)
+    return result
 
 DENS = [('mdpi', 48, 48), ('hdpi', 72, 72), ('xhdpi', 96, 96),
         ('xxhdpi', 144, 144), ('xxxhdpi', 192, 192)]
@@ -598,12 +623,15 @@ def legacy_png(size, out=None):
     im = raster_canvas(size, 4)
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=size*0.60)
+    scale, xc, yc = fit_for(ids, None, span_w=size*ICON_SPAN)
     paper_bg(im)
     stroke, halo = optical(size)
     draw_fg(im, scale, size/2*4 - (xc-AX_X)*scale*4, size/2*4 + (AX_Y-yc)*scale*4, 4,
             stroke=stroke, halo=halo, stand=INK)
-    im.convert('RGB').resize((size, size), Image.LANCZOS).save(out)
+    result = im.convert('RGB').resize((size, size), Image.LANCZOS)
+    if out:
+        result.save(out)
+    return result
 
 def share_png(size, out=None):
     im = raster_canvas(size, 4)
@@ -647,6 +675,18 @@ def book_mark_ids():
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LITERATA = os.path.join(ROOT, 'content-assets/src/main/res/font/literata_variable.ttf')
 INTERF    = os.path.join(ROOT, 'content-assets/src/main/res/font/inter_variable.ttf')
+READING_FRAME = os.path.join(ROOT, 'play-store/frames/tablet10/01-reading.png')
+STORE_ICON = os.path.join(ROOT, 'play-store/icon-512.png')
+# Ayat al-Kursi's ink inside the ten inch capture, its mark's own ink box, and
+# the column the verse may not leave: the 16:9 centre crop keeps 68 to 956, so
+# the verse is held inside 856 and no line is ever cut (owner decision, 22.9).
+BANNER_VERSE_BOX = (672, 336, 1888, 744)
+BANNER_VERSE_WIDTH = 856
+BANNER_MARK_BOX = (86, 113, 426, 399)
+BANNER_MARK_HEIGHT = 50
+BANNER_LOCK_TOP = 20
+BANNER_NAME_SIZE = 40
+BANNER_CAPTION = 'THE NOBLE BOOK'
 
 def _font(path, size, weight=None):
     try:
@@ -660,123 +700,239 @@ def _font(path, size, weight=None):
     except Exception:
         return None
 
-def banner_png(out=None, ss=1, stand=INK, span=210.0, title=96,
-               caption='THE NOBLE BOOK', track=6.0, cap_size=19):
-    """The shelf card: the mark, the name, a gold rule, the book's own name.
-    The stack is measured and centered as one group, so the mark keeps real air
-    under it instead of sitting on the title. The mark is drawn at four times
-    and laid on the card at 1:1 so its curves are clean; the type is drawn at
-    1:1 so the letterforms are the font's own pixels, never a downsample. The
-    stand is the icon's ink at the icon's weight: the gold was ornament at 1.5
-    units and became a second material at 3.0, and two materials at one weight
-    fight. The gold lives on in the rule under the name, where it does work
-    (owner decision, the surfaces session)."""
-    W, H = 1024, 500
-    im = Image.new('RGBA', (W, H), PAPER + (255,))
-    p = fg_pieces()
-    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=span)
-    tb = trace_bbox(ids)
-    mark_h = (tb[3] - tb[1]) * scale
+def ink_alpha(crop, floor=246, gain=1.75, cut=10):
+    """A captured page's luminance as ink, with nothing re-set or reshaped.
 
-    ft = _font(LITERATA, title, 'Regular')
-    bbt = _inner_bbox('Quran', ft)
-    title_h = bbt[3] - bbt[1]
-    fc = _font(INTERF, cap_size, 'Regular')
-    bbc = _inner_bbox(caption, fc)
-    cap_h = bbc[3] - bbc[1]
+    The ten inch frame already holds the QPC Hafs print, its diacritics, its
+    tajweed shapes, and the closing medallion. Reading each pixel's luminance
+    into one alpha field lets the banner paint the verse in the theme's own
+    ink while every glyph keeps the shape the app drew (owner decision, 22.9).
+    """
+    alpha = Image.new('L', crop.size)
+    src = crop.load()
+    dst = alpha.load()
+    for y in range(crop.height):
+        for x in range(crop.width):
+            r, g, b = src[x, y]
+            luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            value = round(max(0, min(255, (floor - luminance) * gain)))
+            dst[x, y] = 0 if value < cut else value
+    return alpha
 
-    g_mark_title, g_title_rule, g_rule_cap = 44, 26, 20
-    total = mark_h + g_mark_title + title_h + g_title_rule + 2 + g_rule_cap + cap_h
-    top = round((H - total) / 2)
-    cy_mark = top + mark_h / 2
+def banner_lockup(canvas, draw):
+    """The colophon: the app's own mark beside the app's own name, one line.
 
-    layer = Image.new('RGBA', (W * 4, H * 4), (0, 0, 0, 0))
-    draw_fg(layer, scale, W * 2 - (xc - AX_X) * scale * 4,
-            cy_mark * 4 + (AX_Y - yc) * scale * 4, 4,
-            stroke=STROKE, halo=HALO, stand=stand)
-    im.alpha_composite(layer.resize((W, H), Image.LANCZOS))
-    im = banner_text(im, top + mark_h + g_mark_title, ft, bbt, fc, bbc, caption,
-                     track, g_title_rule, g_rule_cap)
-    if out:
-        im.convert('RGB').save(out)
-    return im
+    The store graphic is a printed page, so its head is set the way a page's
+    head is: the mark and the name at one optical size, the book's own name
+    tracked beneath, and a single flat gold rule. Nothing here is a copy of a
+    Material header; it is the icon's drawing and the theme's type
+    (owner decision, 22.9).
+    """
+    icon = Image.open(STORE_ICON).convert('RGB')
+    mark = icon.crop(BANNER_MARK_BOX)
+    title = _font(LITERATA, BANNER_NAME_SIZE, 'Regular')
+    if title is None:
+        raise RuntimeError('the display typeface is missing: ' + LITERATA)
+    cap = _font(INTERF, 12, 'Regular')
+    if cap is None:
+        raise RuntimeError('the label typeface is missing: ' + INTERF)
 
+    bbox = draw.textbbox((0, 0), 'Quran', font=title)
+    name_w, name_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    mark_h = BANNER_MARK_HEIGHT
+    mark_w = round(mark.width * mark_h / mark.height)
+    gap = 18
+    left = (canvas.width - (mark_w + gap + name_w)) / 2
+    mark = mark.resize((mark_w, mark_h), Image.LANCZOS)
+    canvas.paste(mark, (round(left), round(BANNER_LOCK_TOP + (name_h - mark_h) / 2)))
+    draw.text(
+        (left + mark_w + gap - bbox[0], BANNER_LOCK_TOP - bbox[1]),
+        'Quran',
+        font=title,
+        fill=INK,
+    )
 
-def banner_text(im, title_top, ft, bbt, fc, bbc, caption, track, g_title_rule, g_rule_cap):
-    """Set at 1:1 on the banner's own pixels: the title's ink begins at
-    title_top, the gold rule sits g_title_rule under it, the caption g_rule_cap
-    under the rule."""
-    dr = ImageDraw.Draw(im)
-    dr.text((512 - (bbt[0] + bbt[2]) / 2, title_top - bbt[1]), 'Quran', font=ft, fill=INK)
-    ry = title_top + (bbt[3] - bbt[1]) + g_title_rule
-    dr.rectangle([512 - 42, ry, 512 + 42, ry + 2], fill=GOLD)
-    widths = [dr.textlength(c, font=fc) for c in caption]
-    x = 512 - (sum(widths) + track * (len(caption) - 1)) / 2
-    cy = ry + g_rule_cap - bbc[1]
-    for c, w in zip(caption, widths):
-        dr.text((x, cy), c, font=fc, fill=MUTED)
+    cap_top = BANNER_LOCK_TOP + name_h + 16
+    track = 5.0
+    widths = [draw.textlength(c, font=cap) for c in BANNER_CAPTION]
+    total = sum(widths) + track * (len(BANNER_CAPTION) - 1)
+    x = (canvas.width - total) / 2
+    for c, w in zip(BANNER_CAPTION, widths):
+        draw.text((x, cap_top), c, font=cap, fill=(120, 104, 72))
         x += w + track
-    return im
 
+    rule_top = cap_top + 20
+    draw.rectangle(
+        (canvas.width / 2 - 34, rule_top, canvas.width / 2 + 34, rule_top + 2),
+        fill=GOLD,
+    )
+    return rule_top
 
-def _inner_bbox(text, font):
-    tmp = Image.new('L', (2400, 600))
-    d = ImageDraw.Draw(tmp)
-    d.text((80, 80), text, font=font, fill=255)
-    b = tmp.point(lambda v: 255 if v > 60 else 0).getbbox()
-    return (b[0]-80, b[1]-80, b[2]-80, b[3]-80) if b else (0, 0, 0, 0)
+def banner_png(out=None):
+    """The page is the store's face: Ayat al-Kursi, set as a reading.
+
+    The graphic is one printed page, not a card of the app. The head is the
+    colophon and the body is the whole Ayat al-Kursi at the width Play's
+    commonest crop keeps, in the theme's ink on the theme's paper, with no
+    gradient, panel, device, or slogan anywhere: the Book is the promise and
+    the verse is the proof (owner decision, 22.9).
+    """
+    W, H = 1024, 500
+    canvas = Image.new('RGB', (W, H), PAPER)
+    draw = ImageDraw.Draw(canvas)
+    rule_top = banner_lockup(canvas, draw)
+
+    if not os.path.isfile(READING_FRAME):
+        raise RuntimeError('the committed reading frame is missing: ' + READING_FRAME)
+    with Image.open(READING_FRAME) as opened:
+        source = opened.convert('RGB')
+    if source.size != (2560, 1800):
+        raise RuntimeError(
+            'the committed reading frame is %dx%d, not 2560x1800: %s'
+            % (source.size[0], source.size[1], READING_FRAME)
+        )
+    crop = source.crop(BANNER_VERSE_BOX)
+    if crop.size != (1216, 408):
+        raise RuntimeError('the Ayat al-Kursi crop is not 1216x408')
+
+    band_top = rule_top + 20
+    fit = min(BANNER_VERSE_WIDTH / crop.width, (H - band_top - 22) / crop.height)
+    width = int(crop.width * fit)
+    height = int(crop.height * fit)
+    x = (W - width) // 2
+    y = round(band_top + (H - band_top - 22 - height) / 2)
+
+    verse = Image.new('RGB', crop.size, INK)
+    verse.putalpha(ink_alpha(crop))
+    verse = verse.resize((width, height), Image.LANCZOS)
+
+    canvas = canvas.convert('RGBA')
+    canvas.alpha_composite(verse, (x, y))
+    result = canvas.convert('RGB')
+    if out:
+        result.save(out)
+    return result
 
 # ------------------------------------------------------------------- preview
+def banner_crops(im, out):
+    """The banner on the shapes Play and a thumbnail can give it."""
+    full = im
+    views = [
+        ('16:9 center', full.crop((68, 0, 956, 500)).resize((480, 270), Image.LANCZOS)),
+        ('4:3 center', full.crop((179, 0, 845, 500)).resize((360, 270), Image.LANCZOS)),
+        ('1:1 stress', full.crop((262, 0, 762, 500)).resize((250, 250), Image.LANCZOS)),
+        ('320x156 thumbnail', full.resize((320, 156), Image.LANCZOS)),
+    ]
+    play = full.convert('RGBA')
+    overlay = Image.new('RGBA', play.size, (0, 0, 0, 0))
+    od = ImageDraw.Draw(overlay)
+    od.ellipse((464, 202, 560, 298), fill=(255, 255, 255, 205))
+    od.polygon([(498, 226), (498, 274), (542, 250)], fill=(30, 30, 30, 225))
+    play = Image.alpha_composite(play, overlay).convert('RGB').resize((640, 312), Image.LANCZOS)
+
+    sheet = Image.new('RGB', (1600, 1220), (229, 230, 232))
+    draw = ImageDraw.Draw(sheet)
+    draw.text((20, 18), 'Full 1024x500', fill=(30, 30, 30))
+    sheet.paste(full, (20, 42))
+    draw.text((20, 568), 'Play button at center, scaled', fill=(30, 30, 30))
+    sheet.paste(play, (20, 592))
+    x = 1070
+    y = 42
+    for label, view in views:
+        draw.text((x, y - 24), label, fill=(30, 30, 30))
+        sheet.paste(view, (x, y))
+        y += view.height + 62
+    sheet.save(out)
+
+
 def preview():
-    """renders surface families of the current drawing into TEMP, for the
-    owner's own eyes: nothing is written into the repository here."""
+    """Render every surface family into TEMP. Nothing lands in the repo."""
     out = os.environ.get('TEMP', r'C:/Users/zn/AppData/Local/Temp')
     def W(name):
         return os.path.join(out, name)
-    # the mark on paper, with an optional reference sheet beside it when the
-    # session carries one: point QURAN_MARK_REFERENCE at the source image
-    p = fg_pieces()
-    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
+
+    # The mark on paper, with an optional reference sheet beside it.
     panels = []
     overlays = os.environ.get('QURAN_MARK_REFERENCE')
     if overlays and os.path.exists(overlays):
         ref = Image.open(overlays).convert('RGB')
-        ref = ref.crop((0, 40, ref.width // 3, 196)).resize((512, 394), Image.LANCZOS)
-        panels.append(ref)
-    scale, xc, yc = fit_for(ids, None, span_w=512*0.53)
-    im = raster_canvas(512, 4)
-    paper_bg(im)
-    draw_fg(im, scale, 1024 - (xc-AX_X)*scale*4, 1024 + (AX_Y-yc)*scale*4, 4,
-            stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
-    panels.append(im.convert('RGB').resize((512, 512), Image.LANCZOS))
+        ref = ref.crop((0, 0, min(ref.width, ref.height), min(ref.width, ref.height)))
+        panels.append(ref.resize((512, 512), Image.LANCZOS))
+    panels.append(render_store(512).convert('RGB'))
     sheet = Image.new('RGB', (512*len(panels) + 16*(len(panels)+1), 536), (230, 230, 235))
     x = 16
-    for t in panels:
-        sheet.paste(t, (x, 12)); x += 512 + 16
+    for panel in panels:
+        sheet.paste(panel, (x, 12))
+        x += 512 + 16
     sheet.save(W('mark_preview.png'))
-    # small sizes
-    tiles = []
-    for size in (192, 96, 48, 24):
-        small = raster_canvas(size, 8)
-        s2, xc2, yc2 = fit_for(ids, None, span_w=size*0.60)
-        paper_bg(small)
-        draw_fg(small, s2, size/2*8 - (xc2-AX_X)*s2*8, size/2*8 + (AX_Y-yc2)*s2*8, 8,
-                stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
-        tiles.append(small.resize((size, size), Image.LANCZOS).convert('RGB'))
-    cols = Image.new('RGB', (sum(t.size[0] for t in tiles) + 30, 200), (230, 230, 235))
+
+    # Store icon at its practical sizes. The labels sit below each tile and
+    # the canvas is computed from the tiles, so no last tile is clipped.
+    sizes = (192, 96, 64, 48, 32, 24, 16)
+    column = 210
+    gap = 8
+    margin = 16
+    width = margin * 2 + column * len(sizes) + gap * (len(sizes) - 1)
+    small = Image.new('RGB', (width, 250), (229, 230, 232))
+    sd = ImageDraw.Draw(small)
+    x = margin
+    for size in sizes:
+        tile = render_store(size).convert('RGB')
+        small.paste(tile, (x + (column - size) // 2, 28))
+        sd.text((x + 4, 226), str(size) + ' px', fill=(30, 30, 30))
+        x += column + gap
+    small.save(W('mark_small.png'))
+
+    zoom_sizes = (48, 32, 24, 16)
+    zoom = Image.new('RGB', (4 * 152 + 20, 206), (229, 230, 232))
+    zd = ImageDraw.Draw(zoom)
     x = 10
-    for t in tiles:
-        cols.paste(t, (x, 10)); x += t.size[0] + 30
-    cols.save(W('mark_small.png'))
-    # the silhouette, the share mark, the legacy tile, the banner
-    s3, xc3, yc3 = fit_for(book_mark_ids(), None, span_w=256*0.9)
-    mono = raster_canvas(256, 8)
-    draw_mono(mono, s3, 128*8 - (xc3-AX_X)*s3*8, 128*8, yc3, 8, INK)
-    mono.convert('RGB').resize((256, 256), Image.LANCZOS).save(W('mark_mono.png'))
+    for size in zoom_sizes:
+        tile = render_store(size).convert('RGB').resize((128, 128), Image.NEAREST)
+        zoom.paste(tile, (x, 24))
+        zd.text((x + 20, 166), str(size) + ' px, 8x', fill=(30, 30, 30))
+        x += 152
+    zoom.save(W('mark_small_zoom.png'))
+
+    # The actual legacy tiles at their five densities.
+    legacy = Image.new('RGB', (5 * 224 + 20, 250), (229, 230, 232))
+    ld = ImageDraw.Draw(legacy)
+    x = 10
+    for name, size, _ in DENS:
+        tile = legacy_png(size).convert('RGB')
+        legacy.paste(tile, (x + (208 - size) // 2, 24))
+        ld.text((x + 12, 224), name + ' ' + str(size), fill=(30, 30, 30))
+        x += 224
+    legacy.save(W('mark_legacy.png'))
+
+    # The themed silhouette on the paper it is meant to read on.
+    mono_sizes = (192, 96, 48, 32, 24)
+    mono = Image.new('RGB', (260 + len(mono_sizes) * 200 + 20, 300), (229, 230, 232))
+    md = ImageDraw.Draw(mono)
+    ids = book_mark_ids()
+    scale, xc, yc = fit_for(ids, None, span_w=224 * 0.8)
+    mono_tile = raster_canvas(224, 8)
+    paper_bg(mono_tile)
+    draw_mono(mono_tile, scale, 112 * 8 - (xc - AX_X) * scale * 8,
+              112 * 8, yc, 8, INK)
+    mono.paste(mono_tile.convert('RGB').resize((224, 224), Image.LANCZOS), (10, 28))
+    md.text((10, 258), '224 px', fill=(30, 30, 30))
+    x = 260
+    for size in mono_sizes:
+        scale, xc, yc = fit_for(ids, None, span_w=size * 0.66)
+        tile = raster_canvas(size, 8)
+        paper_bg(tile)
+        draw_mono(tile, scale, size/2*8 - (xc - AX_X) * scale * 8,
+                  size/2*8, yc, 8, INK)
+        tile = tile.convert('RGB').resize((size, size), Image.LANCZOS)
+        mono.paste(tile, (x + (200 - size) // 2, 28 + (192 - size) // 2))
+        md.text((x + 76, 258), str(size) + ' px', fill=(30, 30, 30))
+        x += 200
+    mono.save(W('mark_mono.png'))
+
     share_png(96, W('mark_share.png'))
-    legacy_png(192, W('mark_legacy.png'))
-    banner_png(out=W('mark_banner.png'), ss=2)
+    banner = banner_png(W('mark_banner.png'))
+    banner_crops(banner, W('mark_banner_crops.png'))
     print('previews written:', out)
 
 def emit():
@@ -791,8 +947,8 @@ def emit():
                '  edges.')
     mono_note = ('The themed launcher layer: the same book on its stand as a solid\n'
                  '  silhouette, one band per plank, each lower end closed as a wedge,\n'
-                 '  with the margin around the book cut out of the bands so the shape\n'
-                 '  reads at 24 dp.')
+                 '  with a clean scaled copy of the book cut out of the bands so the shape\n'
+                 '  reads at 24 dp without a stair-stepped margin.')
     open(os.path.join(root, 'app/src/main/res/drawable/ic_launcher_foreground.xml'), 'w', newline='\n').write(fg_xml(fg_note))
     open(os.path.join(root, 'app/src/main/res/drawable/ic_launcher_monochrome.xml'), 'w', newline='\n').write(mono_xml(mono_note))
     # The shortcut door: the launcher foreground is a 108 dp canvas with the
@@ -816,7 +972,7 @@ def emit():
         share_png(size // 2, os.path.join(root, f'app/src/main/res/drawable-{name}/ic_share_mark.png'))
         book_mark_png(size // 2, os.path.join(root, f'ui-kit/src/main/res/drawable-{name}/ic_book_mark.png'))
     render_store(512, os.path.join(root, 'play-store/icon-512.png'))
-    banner_png(out=os.path.join(root, 'play-store/feature-graphic-1024x500.png'), ss=2)
+    banner_png(out=os.path.join(root, 'play-store/feature-graphic-1024x500.png'))
     print('emitted')
 
 if __name__ == '__main__':

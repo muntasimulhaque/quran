@@ -121,7 +121,7 @@ form factor Play asks for. Every screen inside a card is the screenshot test's
 own capture of the whole display, unedited. The card around it is the store's:
 the headline in the app's Literata, the sub-line in its Inter, the paper ground,
 the gold rule, and the device outline drawn from the theme's own colors, in the
-feature graphic's family. The cards are English (owner decision, 22.4). This
+app's own family. The cards are English (owner decision, 22.4). This
 set was captured on this session's legs, all three form factors, and composed
 from those frames.
 
@@ -146,32 +146,42 @@ is 1200 x 1920, and the ten inch set is 2560 x 1800, 1.42:1. The 16:9 and 9:16
 shapes are Play's recommendation for large-screen placements, not a submission
 requirement, so the ten inch set keeps the shape its real screen gives it.
 
-The icon and the feature graphic are the app's own mark: an open book on its
+The icon is the app's own mark: an open book on its
 rehal, the owner's own reference drawing, redrawn clean for this app as
 uniform line art on the reference's own reading: the pages are sail arcs
 diving into a spine that ends at the V where the two pages meet, each plank
 folds onto the page's outer edge, runs down beside the book, crosses below
 it, and its leg and the closing arc meet at one shared tip, so each foot is
-one clean tapered face. The whole drawing is in the theme's ink `#2A2620` on
+one clean tapered face. The whole drawing is in the theme's ink `#292622` on
 the theme's paper `#FBF9F4`, one line weight on every icon surface, the
 color the reader already sees inside the app; the cover's burgundy belongs
-to the cover and the ornament gold stays the feature graphic's frame and
-rule. The launcher
-carries the mark at five densities and in its adaptive
+to the cover, and the store cards' ornament gold stays on the card grounds
+where it was measured. The store and legacy tiles put the mark at 64 percent
+of the canvas; the adaptive foreground keeps its own 41.5 percent canvas
+measure because the launcher mask leaves 72 dp of the 108 dp layer visible.
+The launcher carries the mark at five densities and in its adaptive
 layers, the background the paper alone and the monochrome layer the book's
-silhouette, sturdier than the mark so a themed home screen keeps the shape, and
+silhouette, drawn with a clean scaled cutout rather than a stair-stepped
+offset so a themed home screen keeps the shape at 24 dp, and
 `icon-512.png` is the same drawing at 512. The reminder's small icon carries
 the silhouette with no ground, because the shade reads only its alpha channel
 and paints the shape in the notification color. The share card carries the
 drawing in the card's own ink beside the name, on the card's own paper, so the
-card's foot and the home screen show one drawing. The feature graphic is the
-book's own title page: the paper field, one gold hairline frame, the mark
-centered on the axis as a seal, in the icon's own ink, and beneath it Quran in
-Literata, a short gold rule, and The Noble Book in tracked small caps in
-Inter, the gaps between them held tight so the caption keeps air above the
-frame's foot. Every element stands inside the
-safe area, well clear of the edges Play may crop or overlay, and the file is
+card's foot and the home screen show one drawing. The feature graphic is
+the page itself: one printed page of the theme's paper, its head the
+colophon of the app's own mark beside its own name in Literata with the
+book's name tracked beneath and one flat gold rule, and its body the whole
+Ayat al-Kursi, set at the width Play's 16:9 crop keeps, in the theme's ink
+with its tajweed shapes and its closing medallion exactly as the ten inch
+capture drew them. There is no gradient, panel, device, or slogan anywhere:
+the Book is the promise and the verse is the proof. The file is
 1024 x 500, 24-bit PNG with no alpha.
+
+Play Console alt text:
+
+- App icon: "An open Quran on a rehal, drawn in dark ink on warm paper."
+- Feature graphic: "The Quran's opening mark and name above Ayat al-Kursi,
+  set in dark ink on a warm paper page."
 
 The cards are current, composed on this machine in one pass from the frames
 behind them: the phone card at 1080 x 1920, the seven inch card at
@@ -233,6 +243,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (22.9, 379 characters)
+22.9 gives the store a new face. The feature graphic is the page itself: the app's own mark and name at the head, a gold rule under them, and the whole Ayat al-Kursi beneath, in the reading's own ink on its own paper. The app is unchanged: the same text, translations, tafsirs, recitations, and content database, with every setting where it was. No ads, no trackers, no accounts.
 
 ## Release notes (22.8, 481 characters)
 22.8 settles what you feel rather than see. Five hand-drawn marks were measured against their own grid and redrawn, and the test now reads every mark back. The reading bar's settle carries the speed of your finger instead of a fixed trip. A landscape phone's camera no longer stands over a line, and the download capsule at the foot now shares the player's measure. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
