@@ -233,9 +233,18 @@ Storage row nor the mobile-data question is one of the eight cards.
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
-The signed bundle for 23.1 will be produced by the build run on this commit,
-and the hand-off record follows that run. The hand-off is for closed testing,
-not a public listing.
+The signed bundle comes from `build` run 45879466662, green on `main` for
+the commit `d1ebcce0`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.1-vc233.aab` has SHA-256
+`65a982987613dc74d30c287f23b6eac86f228572429cb64a6ffb52b556283757`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.1` and `versionCode 233`, and the upload certificate is the
+same key 21.4 through 23.0 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The bundle is in `play-store/aab/` for closed testing. It has not been
+submitted to Play from this machine: the Play Console upload is the account
+owner's step, and the hand-off copy is deleted once Play has it.
 
 **What changed in 23.1.** The download is the feature (owner decision, 23.1).
 A content pack, a surah's recitation, and a surah's pronunciation used to live
