@@ -63,6 +63,8 @@ class ScreenshotVariantsTest {
 
     @Test
     fun theDarkReadingAndTheLargeOne() {
+        val review = ReviewState(context)
+        review.save()
         prepareTheLibrary()
         try {
             runBlocking { SettingsStore(context).setTheme(AppTheme.Dark) }
@@ -90,6 +92,7 @@ class ScreenshotVariantsTest {
                 settings.setTheme(AppTheme.Light)
                 for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
             }
+            review.restore()
         }
     }
 

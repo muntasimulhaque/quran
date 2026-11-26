@@ -12,12 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -28,9 +26,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.AppChevron
 import io.github.muntasimulhaque.quran.ui.kit.ChevronRole
@@ -40,7 +36,6 @@ import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import kotlin.math.min
 import io.github.muntasimulhaque.quran.ui.theme.compactLabel
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
@@ -61,6 +56,8 @@ internal fun TransferWordsBlock(
     /** The percent or the state's sentence. */
     title: String,
     modifier: Modifier = Modifier,
+    /** The state's line allowance: one compact, two above 1.2. */
+    titleMaxLines: Int = 1,
 ) {
     Column(
         modifier = modifier.padding(horizontal = Space.Tight, vertical = 2.dp),
@@ -79,7 +76,7 @@ internal fun TransferWordsBlock(
             text = title,
             style = compactLabel(),
             color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
+            maxLines = titleMaxLines,
             overflow = TextOverflow.Ellipsis,
         )
     }
@@ -103,12 +100,12 @@ internal fun TransferWordsBlock(
  * 1x, because 1x is the pace the app starts at.
  *
  * **The place and the key never give way; the voice does** (owner decision,
- * 16.2). The pill's type follows the system scale only up to the
- * app's largest step, 1.2, and stops there. Each line is its own row, so the
- * place and the key keep their ends, the pace keeps the voice's line, and the
- * voice is the only part an ellipsis can take. The reading and the listening
- * panel still take the reader's own scale; the pill is a control with a fixed
- * measure.
+ * 16.2). Through the app's largest text step, 1.2, each line is its own row,
+ * the place and the key keep their ends, the pace keeps the voice's line, and
+ * the voice is the only part an ellipsis can take. Above 1.2 the block takes
+ * the pill's full width and the place may use two lines while the key stays
+ * whole, so the system's larger type is never suppressed (owner decision,
+ * 23.0).
  *
  * **The block is the transfer's own lockup** (owner decision, 17.0).
  * The transfer's words are a name over a state at a 2 dp inset, and this is
@@ -177,18 +174,13 @@ internal fun PlayingWordsBlock(
     expanded: Boolean = false,
     /** True while the place's line is a failure the reader has to hear. */
     announce: Boolean = false,
+    /** The place's line allowance: one in the compact pill, two above 1.2. */
+    placeMaxLines: Int = 1,
     modifier: Modifier = Modifier,
 ) {
     val press = remember { MutableInteractionSource() }
     val expandedText = stringResource(UiKitR.string.door_expanded)
     val collapsedText = stringResource(UiKitR.string.door_collapsed)
-    // The pill is a control with a fixed line, so its type follows the system
-    // scale only up to the app's largest text step. Past it the line would
-    // cut the place, and a cut place is worse than a control that holds its
-    // measure; the reading and the listening panel still take the reader's
-    // own scale (owner decision, 16.2).
-    val density = LocalDensity.current
-    val capped = Density(density.density, min(density.fontScale, TextSize.STEPS.last()))
     Column(
         modifier = modifier
             .then(
@@ -225,106 +217,104 @@ internal fun PlayingWordsBlock(
             .padding(horizontal = Space.Tight, vertical = 2.dp),
         verticalArrangement = Arrangement.Center,
     ) {
-        CompositionLocalProvider(LocalDensity provides capped) {
-            // The voice's line: who is reading, and its own values, the pace
-            // when it is not the app's own 1x and the offer's size. The voice
-            // is the part that gives way.
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        // The voice's line: who is reading, and its own values, the pace
+        // when it is not the app's own 1x and the offer's size. The voice
+        // is the part that gives way.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = reciter,
+                // The voice leads: the accent's 13, and the one part of
+                // the block that gives way when a long name meets the top
+                // step (owner decision, 17.0).
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (speed != 1f) {
                 Text(
-                    text = reciter,
-                    // The voice leads: the accent's 13, and the one part of
-                    // the block that gives way when a long name meets the top
-                    // step (owner decision, 17.0).
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    text = speedText(speed),
+                    // The pace is the pill's read-back after the panel
+                    // closes: the quiet value beside the voice, not a
+                    // second title (owner decision, 17.0).
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier.padding(start = Space.Line),
                 )
-                if (speed != 1f) {
-                    Text(
-                        text = speedText(speed),
-                        // The pace is the pill's read-back after the panel
-                        // closes: the quiet value beside the voice, not a
-                        // second title (owner decision, 17.0).
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        modifier = Modifier.padding(start = Space.Line),
-                    )
-                }
-                if (!price.isNullOrBlank()) {
-                    // The two facts of the request stand apart by the
-                    // interface's own middot, in the quiet tone it already
-                    // wears between two facts ("Makki · 44 ayahs"). It is a
-                    // separator, not a fact: the door does not speak it.
-                    Text(
-                        text = VoiceSizeDot,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        modifier = Modifier
-                            .padding(start = Space.Tight)
-                            .testTag("offer-price-dot")
-                            .clearAndSetSemantics { },
-                    )
-                    Text(
-                        text = price,
-                        // The offer's size is the voice's own value, drawn
-                        // after the name and its dot, so the voice gives way
-                        // and the size never does (owner report, 18.5).
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        modifier = Modifier.padding(start = Space.Tight),
-                    )
-                }
             }
-            // The place's line: the surah at the card's 14 Medium, its key,
-            // and the turn. The place is never the thing an ellipsis takes.
-            // The offer borrows this line with no key, and its size stands
-            // with the voice, so the block is the same two-line lockup in
-            // both of its homes.
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (!placeName.isNullOrBlank()) {
-                    Text(
-                        text = placeName,
-                        style = compactLabel(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .then(
-                                if (announce) {
-                                    Modifier.semantics { liveRegion = LiveRegionMode.Polite }
-                                } else {
-                                    Modifier
-                                },
-                            ),
-                    )
-                }
-                if (reference.isNotBlank()) {
-                    Text(
-                        text = reference,
-                        // The ayah key closes the place: 13 at Regular, the
-                        // precise reference beside the surah's own name, and it
-                        // never gives way (owner decision, 17.0).
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        modifier = Modifier.padding(start = Space.Tight),
-                    )
-                }
-                if (onOpen != null) {
-                    AppChevron(
-                        role = ChevronRole.Expand,
-                        expanded = expanded,
-                        tint = MaterialTheme.colorScheme.primary,
-                        size = GlyphSize.ChevronInline,
-                        modifier = Modifier.padding(start = Space.Tight),
-                    )
-                }
+            if (!price.isNullOrBlank()) {
+                // The two facts of the request stand apart by the
+                // interface's own middot, in the quiet tone it already
+                // wears between two facts ("Makki · 44 ayahs"). It is a
+                // separator, not a fact: the door does not speak it.
+                Text(
+                    text = VoiceSizeDot,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .padding(start = Space.Tight)
+                        .testTag("offer-price-dot")
+                        .clearAndSetSemantics { },
+                )
+                Text(
+                    text = price,
+                    // The offer's size is the voice's own value, drawn
+                    // after the name and its dot, so the voice gives way
+                    // and the size never does (owner report, 18.5).
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = Space.Tight),
+                )
+            }
+        }
+        // The place's line: the surah at the card's 14 Medium, its key,
+        // and the turn. The place is never the thing an ellipsis takes.
+        // The offer borrows this line with no key, and its size stands
+        // with the voice, so the block is the same two-line lockup in
+        // both of its homes.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (!placeName.isNullOrBlank()) {
+                Text(
+                    text = placeName,
+                    style = compactLabel(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = placeMaxLines,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .then(
+                            if (announce) {
+                                Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                            } else {
+                                Modifier
+                            },
+                        ),
+                )
+            }
+            if (reference.isNotBlank()) {
+                Text(
+                    text = reference,
+                    // The ayah key closes the place: 13 at Regular, the
+                    // precise reference beside the surah's own name, and it
+                    // never gives way (owner decision, 17.0).
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = Space.Tight),
+                )
+            }
+            if (onOpen != null) {
+                AppChevron(
+                    role = ChevronRole.Expand,
+                    expanded = expanded,
+                    tint = MaterialTheme.colorScheme.primary,
+                    size = GlyphSize.ChevronInline,
+                    modifier = Modifier.padding(start = Space.Tight),
+                )
             }
         }
     }
@@ -379,6 +369,8 @@ internal fun PlaybackWordsLine(
     announce: Boolean = false,
     /** True while the voice list is on the glass. */
     expanded: Boolean = false,
+    /** The sentence's allowance: one in the compact pill, two above 1.2. */
+    statusMaxLines: Int = 1,
 ) {
     Row(
         modifier = modifier,
@@ -395,7 +387,7 @@ internal fun PlaybackWordsLine(
             text = status,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
+            maxLines = statusMaxLines,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .weight(1f, fill = false)

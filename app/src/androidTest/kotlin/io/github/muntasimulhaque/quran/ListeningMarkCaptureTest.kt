@@ -17,7 +17,6 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
@@ -60,12 +59,12 @@ class ListeningMarkCaptureTest {
 
     private val compose = createAndroidComposeRule<MainActivity>()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private var original: AppSettings = AppSettings()
+    private val review = ReviewState(context)
 
     /** A reading on 1:1 that is the first open a fresh install gives. */
     private val library = object : ExternalResource() {
         override fun before() {
-            original = runBlocking { SettingsStore(context).settings.first() }
+            review.save()
             LanguagePreference(context).set("en")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 InstrumentationRegistry.getInstrumentation().uiAutomation
@@ -138,18 +137,7 @@ class ListeningMarkCaptureTest {
     @After
     fun handTheAppBack() {
         context.stopService(Intent(context, PlaybackService::class.java))
-        runBlocking {
-            SettingsStore(context).apply {
-                setAyah(original.ayah)
-                setRecitation(original.recitation)
-                setTranslationPacks(original.translationPacks)
-                setTafsirPacks(original.tafsirPacks)
-                setShowTranslation(original.showTranslation)
-                setWordByWord(original.wordByWord)
-                setTheme(original.theme)
-                original.uiLanguage?.let { setUiLanguage(it) }
-            }
-            PlaybackPositionStore(context).clear()
-        }
+        runBlocking { PlaybackPositionStore(context).clear() }
+        review.restore()
     }
 }

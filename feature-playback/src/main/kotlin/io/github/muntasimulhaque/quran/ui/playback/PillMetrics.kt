@@ -1,6 +1,9 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.ui.kit.GlyphPress
 import io.github.muntasimulhaque.quran.ui.kit.GlyphTarget
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -180,3 +183,17 @@ internal val GlyphLead = WordsGap - TransportInset
  * never shares a pixel with a control's press shape (owner decision).
  */
 internal val ProgressRoom = 10.dp
+
+/**
+ * Whether the pill should stop holding one row and let its words breathe.
+ *
+ * The reading's five text steps end at 1.2, and the pill keeps its one compact
+ * row through that step. Past it the reader has asked for system text larger
+ * than the app's own ladder, so the pill grows vertically: the words take the
+ * full width and the answer follows on a second row. The text itself follows
+ * the system scale in both layouts, so a larger setting is always larger type
+ * (owner decision, 23.0).
+ */
+@Composable
+internal fun isLargePlaybackText(): Boolean =
+    LocalDensity.current.fontScale > TextSize.STEPS.last()

@@ -5,6 +5,50 @@ summarized on the [front page](README.md); the releases before it are written
 in full below. The reason a decision was made lives in the KDoc beside the code
 it decided, tagged `owner decision`, and in `git log`.
 
+## 22.9
+
+**22.9 (versionCode 231).** The store graphic is the page now (owner decision,
+22.9). The whole JVM suite, `checkdb`, `search`, `storecards --check`, lint,
+and `assembleDebug` were green on this machine. The feature graphic is the
+Book's own mark and name at the head and the whole Ayat al-Kursi beneath it,
+set from the committed ten inch capture in the theme's ink on the theme's
+paper: no gradient, panel, device, or slogan, and no line of the verse outside
+the width Play's 16:9 crop keeps. The icon surfaces are byte-identical to
+22.8's, so no capture leg was owed and the three committed store sets stand.
+`content/quran.db` hashes
+`0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
+and `checkdb` verified it; no dataset moved, so no pack changed.
+
+The signed bundle comes from `build` run 45673606017, green on `main` for
+the commit `1bc56958`: the whole JVM suite, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-22.9-vc231.aab` has SHA-256
+`126f64a1f7705b36e2239ac625e23dc147bc8a4cd5960777698782c90d7cf538`.
+`jarsigner` reads `jar verified`, and the upload certificate is the same key
+21.4 through 22.8 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+No dataset moved, so nothing was published to the project's releases and the
+run fetched the database 22.8 published. The 22.9 bundle was submitted for
+Play review, and the hand-off copy in `play-store/aab/` was deleted once Play
+had it.
+
+**What changed in 22.9.** The store graphic is the page itself (owner decision,
+22.9). It replaces the enlarged mark on the night gold: the graphic is one
+printed page of the theme's paper, its head the colophon of the app's own mark
+beside its own name in Literata, the book's name tracked beneath, and one flat
+gold rule, its body the whole Ayat al-Kursi lifted from the committed ten inch
+capture by its own luminance so no glyph is moved or re-set. The verse is held
+inside the 856 pixels Play's commonest crop keeps, so no line is ever cut, and
+the mark and the verse both survive the square crop. The banner has no
+gradient, panel, or device, because a printed page has none. Two smaller
+decisions come with it: the store icon and the five legacy tiles now put the
+mark at 64 percent, up from 60, which reaches the adaptive foreground's
+presence; and the themed silhouette is a clean scaled cutout rather than a
+stair-stepped offset, which took its path from 41 KB to 4.3 KB and smoothed
+the book's edges at 24 dp. The icon rasters draw their round joins explicitly,
+so the page's long sail arcs no longer carry a hairline of notches. The Quran
+text, both translations, both tafsirs, the word lists, and the recitations are
+unchanged.
 ## 22.8
 
 **22.8 (versionCode 230).** The drawn set is measured now (owner decision,

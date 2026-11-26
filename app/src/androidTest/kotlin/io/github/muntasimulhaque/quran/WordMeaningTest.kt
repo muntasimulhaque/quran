@@ -18,7 +18,6 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
@@ -59,18 +58,12 @@ class WordMeaningTest {
     private val compose = createAndroidComposeRule<MainActivity>()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private var original: AppSettings = AppSettings()
+    private val review = ReviewState(context)
 
     private val library = object : ExternalResource() {
         override fun before() {
-            original = runBlocking { SettingsStore(context).settings.first() }
-            val store = PackStore(context)
-            store.install("translation-al-bayan-bn")
-            store.install("words-bn")
-            // The roots travel with the word list in the app, so the store
-            // frame the sheet is judged from carries them too (owner
-            // decision, 17.7).
-            store.install("word-root")
+            review.save()
+            review.install("translation-al-bayan-bn", "words-bn", "word-root")
             runBlocking {
                 SettingsStore(context).apply {
                     setUiLanguage("bn")
@@ -89,18 +82,7 @@ class WordMeaningTest {
         }
 
         override fun after() {
-            runBlocking {
-                SettingsStore(context).apply {
-                    setAyah(original.ayah)
-                    setTranslationPacks(original.translationPacks)
-                    setTafsirPacks(original.tafsirPacks)
-                    setShowTranslation(original.showTranslation)
-                    setWordByWord(original.wordByWord)
-                    original.uiLanguage?.let { setUiLanguage(it) }
-                    setTheme(original.theme)
-                    for (role in TypeRole.entries) setTypeSize(role, original.sizeOf(role))
-                }
-            }
+            review.restore()
         }
     }
 

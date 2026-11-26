@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 22.8 (versionCode 230)
+Version: 23.0 (versionCode 232)
 
 ## Listing
 
@@ -138,6 +138,7 @@ All three sets are current: the frames behind them were captured on
 `quran_tablet10`, in one session. The seven inch frames are the 600 dp page,
 taken with `wm size 1200x1920` and `wm density 320`. The bar is the demo's on
 every leg: 9:41, a full battery, one network group, and no notification icons.
+The demo bar draws the phone as connected without repeating the mobile group.
 
 Play's current rule for preview assets is a JPEG or 24-bit PNG, 320 to 3840
 pixels on each side, and a long side no more than twice the short side. All
@@ -199,10 +200,10 @@ paper ink is the reading's own 12:1 tone, and the night page's colors sit below
 the ink instead of glowing above it. A verse's number is its head, in the app's
 lapis, with the app's one chevron beside it, and the printed medallion closes a
 verse only on a page that draws the Quran alone: so a verse carries one number,
-and that number is the door. The last frame is the one-row offer, 64 dp, the
-reciter's name and its size over the surah, the whole block a door to the voice
-list, its capsule on the floating paper the pill already wears. The share card's
-Share image is the solid accent, the one answer that surface exists to ask for.
+and that number is the door. The last frame is the recitation playing: the pill
+names the voice and the place, and the word under the voice is washed on the
+verse. The share card's Share image is the solid accent, the one answer that
+surface exists to ask for.
 
 The fifth frame is the Tajweed page and not the settings hub, which was the
 first choice. The hub's last row carries the version, and a store frame that
@@ -227,22 +228,24 @@ What each set shows, in order:
    under it.
 2. The tafsir open on its passage, with the source line above it. The card says
    "Tafsir, a tap away."
-3. Search reading a reference ("kahf 10"), with the places it reads behind the
-   "Search in" door. The card says "Go to any ayah directly."
+3. Search reading a real match, with the found word washed in the English
+   translation. The card says "Search in English, Bangla, or Arabic."
 4. Saved: the reader's own notes under the places they were written on. The card
-   says "Save ayah and take notes."
+   says "Save ayahs and take notes."
 5. The Tajweed page: seven color families, each with a word from the reading and
    its rules. The card says "Tajweed colors with rules."
 6. The reading at night. The card says "The same page, gentle at night."
 7. The share card the app hands out, with Share image as its solid answer. The
-   card says "Share any ayah as screenshot."
-8. The recitation's own offer: the one-row capsule naming the reciter and its
-   size over the surah before a tap, the block a door to the voice list, with
-   Download at its end. The card says "Play recitation with one tap."
+   card says "Share any ayah as an image."
+8. Recitation playing on Al-Fatihah, with the pill at the foot and the word
+   being recited washed on the verse. The card says "Listen and follow every word."
 
-The last frame is last on purpose. The offer stays on the reading until the
-reader answers it (Download, the page, or Back), so every frame that wants a
-clean page is taken before it.
+The last frame is last on purpose. It is the one frame that leaves a player
+running, so every still page is taken before it and the player is stopped after
+the capture.
+
+## Release notes (23.0, 381 characters)
+23.0 makes playback easier to read at large text sizes. The listening pill now grows and reflows with the phone's font setting, while the reading and its controls stay familiar. The store set now shows a real search match and live recitation, with clearer captions. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (22.9, 379 characters)
 22.9 gives the store a new face. The feature graphic is the page itself: the app's own mark and name at the head, a gold rule under them, and the whole Ayat al-Kursi beneath, in the reading's own ink on its own paper. The app is unchanged: the same text, translations, tafsirs, recitations, and content database, with every setting where it was. No ads, no trackers, no accounts.

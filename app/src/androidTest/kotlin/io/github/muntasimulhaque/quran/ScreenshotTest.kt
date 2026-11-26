@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran
 
 import android.Manifest
+import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -41,10 +42,12 @@ import android.os.Build
 import androidx.test.core.app.ActivityScenario
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.PackStore
+import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
+import io.github.muntasimulhaque.quran.playback.PlaybackService
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -342,20 +345,43 @@ class ScreenshotTest {
     fun walkTheReading() {
         // The library, the reader's note, and the phone's own chrome are all
         // this test's setup, so all three are taken down with it: every class
-        // in a run shares one process, one store, and one phone.
+        // in a run shares one process, one store, and one phone. The settings
+        // and the pack set are recorded before the tour writes either, so a
+        // capture class after this one meets the phone it would have found on
+        // a clean run.
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val review = ReviewState(context)
+        review.save()
         try {
             prepareTheLibrary()
+            // The first frame opens on 2:256, whose translation ends above the
+            // gesture bar. The rest of the tour opens on 2:255, and the
+            // recitation frame opens on Al-Fatihah, where its audio ships.
+            // Each is a clean launch at its own place, so no frame depends on
+            // the search sheet's own navigation (owner decision, 23.0).
             ActivityScenario.launch(MainActivity::class.java).use {
-                runTheTour()
+                waitForAReading()
+                revealChrome()
+                captureScreen("01-reading")
+            }
+            runBlocking { SettingsStore(context).setAyah(262) }
+            ActivityScenario.launch(MainActivity::class.java).use {
+                runTheTourFromTafsir()
+            }
+            runBlocking { SettingsStore(context).setAyah(1) }
+            ActivityScenario.launch(MainActivity::class.java).use {
+                captureTheRecitation()
             }
         } finally {
-            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            context.stopService(Intent(context, PlaybackService::class.java))
             runBlocking {
+                PlaybackPositionStore(context).clear()
                 SavedStore(context).apply {
                     TOUR_NOTES.forEach { (ayah, _) -> unsave(ayah) }
                     close()
                 }
             }
+            review.restore()
         }
     }
 
@@ -418,7 +444,12 @@ class ScreenshotTest {
         shell("am broadcast -a com.android.systemui.demo -e command enter")
         shell("am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941")
         shell("am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false")
-        shell("am broadcast -a com.android.systemui.demo -e command network -e mobile show -e datatype none -e level 4")
+        // One network group, not one per modem. The seven inch image reports
+        // three modems, so the demo bar drew three repeated 3G groups; the
+        // store bar now draws a single Wi-Fi group instead (owner decision,
+        // 23.0).
+        shell("am broadcast -a com.android.systemui.demo -e command network -e mobile hide")
+        shell("am broadcast -a com.android.systemui.demo -e command network -e wifi show -e level 4")
         shell("am broadcast -a com.android.systemui.demo -e command notifications -e visible false")
     }
 
@@ -520,14 +551,8 @@ class ScreenshotTest {
      * on the reading until the reader answers it: it carries one answer and no
      * close, so every frame that wants a clean page is taken before it.
      */
-    private fun runTheTour() {
+    private fun runTheTourFromTafsir() {
         waitForAReading()
-
-        // 1. The reading with its own chrome up: the surah's name, its juz, and
-        // the three doors. This is the app's own face, and it is the frame a
-        // reader who knows nothing about the product meets first.
-        revealChrome()
-        captureScreen("01-reading")
 
         // 2. The tafsir, open on its passage. One frame carries the card and
         // the commentary: the source line names the language and the
@@ -550,9 +575,9 @@ class ScreenshotTest {
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNode(hasSetTextAction()).performTextInput("kahf 10")
+        rule.onNode(hasSetTextAction()).performTextInput("mercy")
         rule.waitUntil(timeoutMillis = 180_000) {
-            rule.onAllNodesWithText(REFERENCE_RESULT, substring = true).fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithText("mercy", substring = true).fetchSemanticsNodes().size >= 2
         }
         // Close the keyboard before the frame: its contact-suggestion strip is
         // not the app, and the store should not show it. An emulator with a
@@ -635,13 +660,21 @@ class ScreenshotTest {
         waitForTag("share-sheet", timeout = 30_000)
         captureScreen("07-share-card")
         leave(SHARE_SHEET)
+    }
 
-        // 8. The recitation's own offer, last: the compact capsule names the
-        // surah, the reciter, and the size before a tap, and it stays on the
-        // reading until the reader answers it.
-        openTheAyahActions()
+    /**
+     * The recitation playing, last: the bundled Al-Fatiha needs no download,
+     * and the frame shows the pill on the page with the word the reciter is
+     * saying washed on the verse. The filename stays the store's own slot; the
+     * picture is no longer a download offer.
+     */
+    private fun captureTheRecitation() {
+        waitForAReading()
+        revealChrome()
+        openTheAyahActions("1:1")
         rule.onAllNodesWithText(PLAY).onFirst().performClick()
-        waitForTag("listen-offer-bar", timeout = 30_000)
+        waitForTag("playback-bar", timeout = 60_000)
+        Thread.sleep(2_000)
         captureScreen("08-listen-offer")
     }
 
@@ -705,12 +738,12 @@ class ScreenshotTest {
     }
 
     /** The ayah's actions, opened from its own number. */
-    private fun openTheAyahActions() {
+    private fun openTheAyahActions(reference: String = "2:255") {
         var raised = false
         repeat(3) {
             if (raised) return@repeat
             runCatching {
-                rule.onNodeWithTag("door-2:255").performClick()
+                rule.onNodeWithTag("door-$reference").performClick()
             }
             raised = runCatching {
                 rule.waitUntil(timeoutMillis = 20_000) {
@@ -769,7 +802,6 @@ class ScreenshotTest {
         const val TAFSIR_SOURCE = "Ibn Kathir"
         const val SHARE = "Share"
         const val PLAY = "Play"
-        const val REFERENCE_RESULT = "18:10"
         const val TAJWEED_FAMILY = "Silent letters"
         const val THEME = "Theme"
         const val BACK = "Back"
@@ -785,8 +817,12 @@ class ScreenshotTest {
         /** The note the Saved list sorts last, so its arrival means all three are drawn. */
         const val SAVED_LAST_NOTE = "Come back to this one"
 
-        /** The ayahs the tour keeps, and the reader's own words on them. */
-        const val TOUR_AYAH = 262
+        /**
+         * The reading's first frame is 2:256, whose translation ends above the
+         * gesture bar; the rest of the tour returns to 2:255. The Saved notes
+         * are written on 2:255 through 2:257, in either opening order.
+         */
+        const val TOUR_AYAH = 263
         val TOUR_NOTES = listOf(
             262 to "Come back to this one on the hard mornings.",
             263 to "Read slowly.",

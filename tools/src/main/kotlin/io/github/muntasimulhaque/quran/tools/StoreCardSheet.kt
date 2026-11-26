@@ -113,12 +113,12 @@ object StoreCardSheet {
     val cards: List<StoreCard> = listOf(
         StoreCard("01-reading", "Built to be read.", "Offline. No ads. No account."),
         StoreCard("02-tafsir", "Tafsir, a tap away.", null),
-        StoreCard("03-search", "Go to any ayah directly.", null),
-        StoreCard("04-saved", "Save ayah and take notes.", null),
+        StoreCard("03-search", "Search in English, Bangla, or Arabic.", null),
+        StoreCard("04-saved", "Save ayahs and take notes.", null),
         StoreCard("05-tajweed", "Tajweed colors with rules.", null),
         StoreCard("06-dark-reading", "The same page, gentle at night.", null),
-        StoreCard("07-share-card", "Share any ayah as screenshot.", null),
-        StoreCard("08-listen-offer", "Play recitation with one tap.", null),
+        StoreCard("07-share-card", "Share any ayah as an image.", null),
+        StoreCard("08-listen-offer", "Listen and follow every word.", null),
     )
 
     /**

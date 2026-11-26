@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -281,6 +282,7 @@ fun PlaybackBar(
     } else {
         null
     }
+    val largeText = isLargePlaybackText()
     Box(
         modifier = modifier
             .padding(horizontal = BarGutter)
@@ -318,21 +320,20 @@ fun PlaybackBar(
                     // room that is left, so a long place would ellipsize rather
                     // than push the answer out; the capsule's measure and the
                     // answer's one mark are chosen so that it never has to
-                    // (owner decision, 16.2).
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = PillEndAir,
-                                end = PillAir,
-                                top = PillAir,
-                                bottom = PillAir,
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            modifier = Modifier.weight(1f),
-                            contentAlignment = Alignment.CenterStart,
+                    // (owner decision, 16.2). Above the app's top text step
+                    // the answer moves under the words, so the reader's larger
+                    // type is kept instead of suppressed (owner decision,
+                    // 23.0).
+                    if (largeText) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = PillEndAir,
+                                    end = PillAir,
+                                    top = PillAir,
+                                    bottom = PillAir,
+                                ),
                         ) {
                             PlayingWordsBlock(
                                 placeName = placeName,
@@ -341,16 +342,91 @@ fun PlaybackBar(
                                 speed = speed,
                                 onOpen = { openMenu = PillMenu.Listening },
                                 expanded = openMenu == PillMenu.Listening,
-                                modifier = Modifier.testTag("playback-words"),
+                                placeMaxLines = 2,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("playback-words"),
                             )
+                            if (controls.isNotEmpty()) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = PillAir),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    PillControls(controls)
+                                }
+                            }
                         }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = PillEndAir,
+                                    end = PillAir,
+                                    top = PillAir,
+                                    bottom = PillAir,
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                PlayingWordsBlock(
+                                    placeName = placeName,
+                                    reciter = reciterName,
+                                    reference = playbackPlace(reference.orEmpty()),
+                                    speed = speed,
+                                    onOpen = { openMenu = PillMenu.Listening },
+                                    expanded = openMenu == PillMenu.Listening,
+                                    modifier = Modifier.testTag("playback-words"),
+                                )
+                            }
+                            if (controls.isNotEmpty()) {
+                                // The first circle keeps [WordsGap] from the words'
+                                // own shape: a glyph answer draws its circle
+                                // [TransportInset] inside its target, so its lead
+                                // gives that inset back (owner decision, 17.0).
+                                Spacer(Modifier.width(GlyphLead))
+                                PillControls(controls)
+                            }
+                        }
+                    }
+                } else if (largeText) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = PillEndAir,
+                                end = PillAir,
+                                top = PillAir,
+                                bottom = PillAir,
+                            ),
+                    ) {
+                        PlaybackWordsLine(
+                            reciterName = reciterName,
+                            onOpenReciters = openReciters,
+                            status = status,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("playback-words"),
+                            announce = state.error || state.downloadFailed || state.unavailable,
+                            expanded = openMenu == PillMenu.Reciters,
+                            statusMaxLines = 2,
+                        )
                         if (controls.isNotEmpty()) {
-                            // The first circle keeps [WordsGap] from the words'
-                            // own shape: a glyph answer draws its circle
-                            // [TransportInset] inside its target, so its lead
-                            // gives that inset back (owner decision, 17.0).
-                            Spacer(Modifier.width(GlyphLead))
-                            PillControls(controls)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = PillAir),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                PillControls(controls)
+                            }
                         }
                     }
                 } else {

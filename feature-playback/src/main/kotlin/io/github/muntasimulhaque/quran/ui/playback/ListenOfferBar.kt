@@ -98,6 +98,7 @@ internal fun ListenOfferBar(
     // it, the same way the playing pill's panel closes when its pill becomes
     // another pill.
     var chooser by remember(offer.surah, offer.reciter) { mutableStateOf(false) }
+    val largeText = isLargePlaybackText()
     val progress = offer.progress
     val failure = if (offer.failed) {
         stringResource(
@@ -133,49 +134,101 @@ internal fun ListenOfferBar(
             // is the playing pill's lockup, and the size stands with the
             // voice it prices, so the surah and the size are both whole
             // (owner report, 18.4).
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = PillEndAir,
-                        end = PillAir,
-                        top = PillAir,
-                        bottom = PillAir,
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                PlayingWordsBlock(
-                    placeName = failure ?: offer.surahName,
-                    reciter = contentPackName(offer.reciterName, offer.reciterNameBn),
-                    reference = "",
-                    speed = 1f,
-                    price = price,
-                    onOpen = if (offer.options.isEmpty()) {
-                        null
-                    } else {
-                        { chooser = true }
-                    },
-                    expanded = chooser,
-                    announce = offer.failed,
+            if (largeText) {
+                Column(
                     modifier = Modifier
-                        .weight(1f, fill = true)
-                        .testTag("offer-words"),
-                )
-                TextButton(
-                    label = stringResource(
-                        if (offer.failed) {
-                            R.string.playback_retry
+                        .fillMaxWidth()
+                        .padding(
+                            start = PillEndAir,
+                            end = PillAir,
+                            top = PillAir,
+                            bottom = PillAir,
+                        ),
+                ) {
+                    PlayingWordsBlock(
+                        placeName = failure ?: offer.surahName,
+                        reciter = contentPackName(offer.reciterName, offer.reciterNameBn),
+                        reference = "",
+                        speed = 1f,
+                        price = price,
+                        onOpen = if (offer.options.isEmpty()) {
+                            null
                         } else {
-                            R.string.playback_download
+                            { chooser = true }
                         },
-                    ),
-                    onClick = onConfirm,
-                    // The bar exists for this one answer, so it is the
-                    // prominent shape on both paths (owner decision, 17.2).
-                    prominent = true,
-                    pillTag = "offer-answer",
-                    modifier = Modifier.padding(start = WordsGap),
-                )
+                        expanded = chooser,
+                        announce = offer.failed,
+                        placeMaxLines = 2,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("offer-words"),
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = PillAir),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        TextButton(
+                            label = stringResource(
+                                if (offer.failed) {
+                                    R.string.playback_retry
+                                } else {
+                                    R.string.playback_download
+                                },
+                            ),
+                            onClick = onConfirm,
+                            prominent = true,
+                            pillTag = "offer-answer",
+                        )
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = PillEndAir,
+                            end = PillAir,
+                            top = PillAir,
+                            bottom = PillAir,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PlayingWordsBlock(
+                        placeName = failure ?: offer.surahName,
+                        reciter = contentPackName(offer.reciterName, offer.reciterNameBn),
+                        reference = "",
+                        speed = 1f,
+                        price = price,
+                        onOpen = if (offer.options.isEmpty()) {
+                            null
+                        } else {
+                            { chooser = true }
+                        },
+                        expanded = chooser,
+                        announce = offer.failed,
+                        modifier = Modifier
+                            .weight(1f, fill = true)
+                            .testTag("offer-words"),
+                    )
+                    TextButton(
+                        label = stringResource(
+                            if (offer.failed) {
+                                R.string.playback_retry
+                            } else {
+                                R.string.playback_download
+                            },
+                        ),
+                        onClick = onConfirm,
+                        // The bar exists for this one answer, so it is the
+                        // prominent shape on both paths (owner decision, 17.2).
+                        prominent = true,
+                        pillTag = "offer-answer",
+                        modifier = Modifier.padding(start = WordsGap),
+                    )
+                }
             }
         } else {
             // The transfer keeps its one row: the words, the percent, and the
@@ -186,37 +239,75 @@ internal fun ListenOfferBar(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(bottom = ProgressRoom),
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = PillEndAir,
-                            end = PillAir,
-                            top = PillAir,
-                            bottom = PillAir,
-                        ),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TransferWordsBlock(
-                        name = contentPackName(offer.reciterName, offer.reciterNameBn),
-                        title = stringResource(
-                            R.string.playback_downloading,
-                            (progress * 100).toInt(),
-                        ),
+                if (largeText) {
+                    Column(
                         modifier = Modifier
-                            .weight(1f, fill = true)
-                            .testTag("offer-words"),
-                    )
+                            .fillMaxWidth()
+                            .padding(
+                                start = PillEndAir,
+                                end = PillAir,
+                                top = PillAir,
+                                bottom = PillAir,
+                            ),
+                    ) {
+                        TransferWordsBlock(
+                            name = contentPackName(offer.reciterName, offer.reciterNameBn),
+                            title = stringResource(
+                                R.string.playback_downloading,
+                                (progress * 100).toInt(),
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("offer-words"),
+                            titleMaxLines = 2,
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = PillAir),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            TransportButton(
+                                Transport.Close,
+                                stringResource(R.string.playback_cancel_download),
+                                onCancelDownload,
+                            )
+                        }
+                    }
+                } else {
                     Row(
-                        modifier = Modifier.padding(start = GlyphLead),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = PillEndAir,
+                                end = PillAir,
+                                top = PillAir,
+                                bottom = PillAir,
+                            ),
+                        horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        TransportButton(
-                            Transport.Close,
-                            stringResource(R.string.playback_cancel_download),
-                            onCancelDownload,
+                        TransferWordsBlock(
+                            name = contentPackName(offer.reciterName, offer.reciterNameBn),
+                            title = stringResource(
+                                R.string.playback_downloading,
+                                (progress * 100).toInt(),
+                            ),
+                            modifier = Modifier
+                                .weight(1f, fill = true)
+                                .testTag("offer-words"),
                         )
+                        Row(
+                            modifier = Modifier.padding(start = GlyphLead),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            TransportButton(
+                                Transport.Close,
+                                stringResource(R.string.playback_cancel_download),
+                                onCancelDownload,
+                            )
+                        }
                     }
                 }
             }

@@ -768,13 +768,80 @@ class PlaybackPillTest {
     }
 
     /**
-     * The place and the key are whole at the pill's capped type (owner
-     * decision, 16.2). The pill's type follows the system scale only
-     * up to the app's largest step, 1.2, and stops there. The place's line is
-     * the room the answer's one 48 dp target leaves, less the shoulder and
-     * the block's own inset; the place and the key never give way, so they are
-     * whole at every system scale and the voice is the part an ellipsis would
-     * take.
+     * The text grows when the reader asks the phone for larger type, and the
+     * pill reflows instead of hiding the setting behind a cap (owner decision,
+     * 23.0). The same text is measured before and after the scale changes, so
+     * the leg proves growth rather than the mere presence of a node.
+     */
+    @Test
+    fun thePillFollowsTheSystemTextScaleAtTwoHundredPercent() {
+        val scale = mutableStateOf(1f)
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light, language = UiLanguage.English) {
+                AtFontScale(scale.value) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        PlaybackBar(
+                            state = PlaybackUiState(
+                                connected = true,
+                                isPlaying = true,
+                                recitation = "husary",
+                                ayahNumber = 5_000,
+                                surah = 60,
+                                ayahInSurah = 13,
+                                reference = "60:13",
+                                placeName = "Al-Mumtahanah",
+                            ),
+                            offer = null,
+                            offerPrice = "",
+                            reciterName = "Husary",
+                            reciterId = "husary",
+                            reciterOptions = emptyList(),
+                            reference = "60:13",
+                            placeName = "Al-Mumtahanah",
+                            ayahInSurah = 13,
+                            pendingLabel = null,
+                            onToggle = {},
+                            onNext = {},
+                            onPrevious = {},
+                            onReciter = {},
+                            onDownload = {},
+                            onStop = {},
+                            onCancelDownload = {},
+                        )
+                    }
+                }
+            }
+        }
+        val smallText = layoutOf("Al-Mumtahanah").size.height
+        val smallPill = compose.onNodeWithTag("playback-bar")
+            .getUnclippedBoundsInRoot().let { it.bottom - it.top }
+        compose.runOnIdle { scale.value = 2f }
+        compose.waitForIdle()
+        val largeText = layoutOf("Al-Mumtahanah").size.height
+        val largePill = compose.onNodeWithTag("playback-bar")
+            .getUnclippedBoundsInRoot().let { it.bottom - it.top }
+        assertTrue(
+            "the place must grow with the phone's text scale: $smallText to $largeText",
+            largeText > smallText * 1.5f,
+        )
+        assertTrue(
+            "the pill must make room for the larger type: $smallPill to $largePill",
+            largePill > smallPill,
+        )
+        assertFalse(
+            "the place must stay whole: ${layoutOf("Al-Mumtahanah")}",
+            layoutOf("Al-Mumtahanah").isLineEllipsized(0),
+        )
+        compose.onNodeWithContentDescription("Play or pause").assertIsDisplayed()
+    }
+
+    /**
+     * The place and the key are whole at the pill's larger type. Each line is
+     * its own row, so the place and the key keep their ends, the pace keeps the
+     * voice's line, and the voice is the only part an ellipsis can take.
      */
     @Test
     fun thePlaceAndTheKeyStayWholeAtTheLargestStep() {
@@ -811,6 +878,67 @@ class PlaybackPillTest {
         assertFalse("the place must be whole at 1.3: $place", place.isLineEllipsized(0))
         val key = layoutOf("৮৩:৩৬")
         assertFalse("the ayah key must be whole at 1.3: $key", key.isLineEllipsized(0))
+    }
+
+    /**
+     * The Bangla place grows and reflows too, and its key stays whole at the
+     * largest system scale (owner decision, 23.0).
+     */
+    @Test
+    fun theLongestBanglaPlaceGrowsAtTwoHundredPercent() {
+        val scale = mutableStateOf(1f)
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light, language = UiLanguage.Bangla) {
+                AtFontScale(scale.value) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        PlaybackBar(
+                            state = PlaybackUiState(
+                                connected = true,
+                                isPlaying = true,
+                                recitation = "husary",
+                                ayahNumber = 5_000,
+                                surah = 83,
+                                ayahInSurah = 36,
+                                reference = "83:36",
+                                placeName = "আল-মুতাফফিফীন",
+                            ),
+                            offer = null,
+                            offerPrice = "",
+                            reciterName = "Husary",
+                            reciterId = "husary",
+                            reciterOptions = emptyList(),
+                            reference = "৮৩:৩৬",
+                            placeName = "আল-মুতাফফিফীন",
+                            ayahInSurah = 36,
+                            pendingLabel = null,
+                            onToggle = {},
+                            onNext = {},
+                            onPrevious = {},
+                            onReciter = {},
+                            onDownload = {},
+                            onStop = {},
+                            onCancelDownload = {},
+                        )
+                    }
+                }
+            }
+        }
+        val small = layoutOf("আল-মুতাফফিফীন").size.height
+        compose.runOnIdle { scale.value = 2f }
+        compose.waitForIdle()
+        val large = layoutOf("আল-মুতাফফিফীন").size.height
+        assertTrue("the Bangla place must grow: $small to $large", large > small * 1.5f)
+        assertFalse(
+            "the Bangla place must stay whole: ${layoutOf("আল-মুতাফফিফীন")}",
+            layoutOf("আল-মুতাফফিফীন").isLineEllipsized(0),
+        )
+        assertFalse(
+            "the Bangla key must stay whole: ${layoutOf("৮৩:৩৬")}",
+            layoutOf("৮৩:৩৬").isLineEllipsized(0),
+        )
     }
 
     /**
@@ -1164,6 +1292,38 @@ class PlaybackPillTest {
      * `আল-মুতাফফিফীন` at ৫.৮ এমবি. The pill is measured at the 360 dp
      * phone's own width, the tightest glass the app draws an offer on.
      */
+    /**
+     * At 200 percent the offer's words take the first row and Download the
+     * second, so the reader's larger type does not cut the answer. The size
+     * stays whole beside the voice it prices (owner decision, 23.0).
+     */
+    @Test
+    fun theOfferKeepsItsAnswerAtTwoHundredPercent() {
+        showPill(
+            pillWidth = Modifier.width(360.dp),
+            fontScale = 2f,
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 60,
+                surahName = "Al-Mumtahanah",
+                ayah = 1,
+                bytes = 9_395_684L,
+                options = offerOptions(),
+            ),
+            offerPrice = "9.0 MB",
+        )
+        compose.onNodeWithText("Download").assertIsDisplayed()
+        assertFalse(
+            "the offer's place must stay whole: ${layoutOf("Al-Mumtahanah")}",
+            layoutOf("Al-Mumtahanah").isLineEllipsized(0),
+        )
+        assertFalse(
+            "the size must stay whole: ${layoutOf("9.0 MB")}",
+            layoutOf("9.0 MB").isLineEllipsized(0),
+        )
+    }
+
     @Test
     fun theOfferPrintsTheLongestEnglishNameWhole() {
         showPill(

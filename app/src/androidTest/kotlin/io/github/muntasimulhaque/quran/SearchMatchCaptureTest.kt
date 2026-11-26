@@ -10,6 +10,12 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.UiLanguage
+import kotlinx.coroutines.runBlocking
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,6 +43,37 @@ class SearchMatchCaptureTest {
 
     private val context: Context
         get() = ApplicationProvider.getApplicationContext()
+
+    private val review = ReviewState(context)
+
+    /**
+     * The prose path reads the reader's translation, so the class states that
+     * library itself: a clean install has no tafsir or word list installed by
+     * the catalog's defaults, and a capture that trusted the previous class
+     * passed or failed on the run order (owner decision, 23.0).
+     */
+    @Before
+    fun prepareTheLibrary() {
+        review.save()
+        review.install("translation-saheeh-en")
+        runBlocking {
+            SettingsStore(context).apply {
+                setUiLanguage(UiLanguage.English.tag)
+                setTheme(AppTheme.Light)
+                setTranslationPacks(setOf("translation-saheeh-en"))
+                setTafsirPacks(emptySet())
+                setShowTranslation(true)
+                setWordByWord(false)
+                setAyah(1)
+            }
+        }
+        Thread.sleep(300)
+    }
+
+    @After
+    fun handThePhoneBack() {
+        review.restore()
+    }
 
     @Test
     fun captureTheFoundWordInTheProsePath() {

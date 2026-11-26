@@ -15,7 +15,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
@@ -74,9 +73,8 @@ class BanglaCaptureTest {
 
     @Test
     fun theBanglaInterface() {
-        val original = runBlocking {
-            SettingsStore(context).settings.first()
-        }
+        val review = ReviewState(context)
+        review.save()
         try {
             prepareTheBanglaReading()
             ActivityScenario.launch(MainActivity::class.java).use {
@@ -98,7 +96,7 @@ class BanglaCaptureTest {
                 captureTheScreen("bn-02-settings")
             }
         } finally {
-            restore(original)
+            review.restore()
         }
     }
 
@@ -126,24 +124,6 @@ class BanglaCaptureTest {
             }
         }
         Thread.sleep(500)
-    }
-
-    private fun restore(original: AppSettings) {
-        runBlocking {
-            SettingsStore(context).apply {
-                setUiLanguage(original.uiLanguage ?: UiLanguage.English.tag)
-                setTheme(original.theme)
-                setTranslationPacks(original.translationPacks)
-                setTafsirPacks(original.tafsirPacks)
-                setShowTranslation(original.showTranslation)
-                setWordByWord(original.wordByWord)
-                setTajweed(original.tajweed)
-                setAyah(original.ayah)
-                setTypeSize(TypeRole.Arabic, original.arabicSize)
-                setTypeSize(TypeRole.Translation, original.translationSize)
-                setTypeSize(TypeRole.Tafsir, original.tafsirSize)
-            }
-        }
     }
 
     private fun waitForAReading() {

@@ -20,14 +20,14 @@ no network beyond the project's own release page.
 <p align="center">
   <img src="play-store/screenshots/phone/01-reading.png" width="180" alt="The reading: al-Kursi in the QPC Hafs print with tajweed colors and Saheeh International under it">
   <img src="play-store/screenshots/phone/02-tafsir.png" width="180" alt="The ayah card: Tafsir Ibn Kathir for 2:255">
-  <img src="play-store/screenshots/phone/03-search.png" width="180" alt="Search: kahf 10 goes straight to 18:10">
+  <img src="play-store/screenshots/phone/03-search.png" width="180" alt="Search: a real match with the found word washed in the translation">
   <img src="play-store/screenshots/phone/04-saved.png" width="180" alt="Saved ayahs with the notes written on them">
 </p>
 <p align="center">
   <img src="play-store/screenshots/phone/05-tajweed.png" width="180" alt="Tajweed colors: each rule family explained on a word from the reading">
   <img src="play-store/screenshots/phone/06-dark-reading.png" width="180" alt="The night page">
   <img src="play-store/screenshots/phone/07-share-card.png" width="180" alt="An ayah rendered as one shareable card">
-  <img src="play-store/screenshots/phone/08-listen-offer.png" width="180" alt="The listening offer, naming the reciter, the surah, and its size">
+  <img src="play-store/screenshots/phone/08-listen-offer.png" width="180" alt="Recitation playing with the pill at the foot and the recited word washed">
 </p>
 
 The same reading on a 7 inch and a 10 inch tablet:
@@ -205,49 +205,46 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**22.9 (versionCode 231).** The store graphic is the page now (owner decision,
-22.9). The whole JVM suite, `checkdb`, `search`, `storecards --check`, lint,
-and `assembleDebug` were green on this machine. The feature graphic is the
-Book's own mark and name at the head and the whole Ayat al-Kursi beneath it,
-set from the committed ten inch capture in the theme's ink on the theme's
-paper: no gradient, panel, device, or slogan, and no line of the verse outside
-the width Play's 16:9 crop keeps. The icon surfaces are byte-identical to
-22.8's, so no capture leg was owed and the three committed store sets stand.
-`content/quran.db` hashes
+**23.0 (versionCode 232).** Playback follows the phone's text size now (owner
+decision, 23.0). The whole JVM suite, `checkdb`, `search`, `storecards --check`,
+lint, and `assembleDebug` were green on this machine. The pill no longer caps
+its type: through the app's own largest step it keeps the one row it had, and
+above it the words take the pill's full width while Play or pause, Download,
+Retry, and Cancel move to a row of their own, so a reader who enlarges the
+phone's text is never handed controls they cannot see. No control was added and
+none was taken away. The store set is captured again from this build on
+`quran_phone`, `quran_tablet7` at 1200 x 1920 and 320 dpi, and `quran_tablet10`
+at its own 2560 x 1800, and all twenty-four cards were recomposed: the first
+frame opens on 2:256 where the translation ends clear of the gesture bar,
+search shows a real highlighted match, and the last frame is recitation
+playing with the recited word washed on the verse. The demo status bar no
+longer repeats the mobile group. `content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
-The signed bundle comes from `build` run 45673606017, green on `main` for
-the commit `1bc56958`: the whole JVM suite, `checkdb`, `search`, `storecards
+The signed bundle comes from `build` run RUN_ID, green on `main` for
+the commit COMMIT_HASH: the whole JVM suite, `checkdb`, `search`, `storecards
 --check`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-22.9-vc231.aab` has SHA-256
-`126f64a1f7705b36e2239ac625e23dc147bc8a4cd5960777698782c90d7cf538`.
+`quran-23.0-vc232.aab` has SHA-256 BUNDLE_SHA256.
 `jarsigner` reads `jar verified`, and the upload certificate is the same key
-21.4 through 22.8 shipped under, SHA-256
+21.4 through 22.9 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
 No dataset moved, so nothing was published to the project's releases and the
-run fetched the database 22.8 published. The 22.9 bundle was submitted for
-Play review, and the hand-off copy in `play-store/aab/` was deleted once Play
-had it.
+run fetched the database 22.8 published.
 
-**What changed in 22.9.** The store graphic is the page itself (owner decision,
-22.9). It replaces the enlarged mark on the night gold: the graphic is one
-printed page of the theme's paper, its head the colophon of the app's own mark
-beside its own name in Literata, the book's name tracked beneath, and one flat
-gold rule, its body the whole Ayat al-Kursi lifted from the committed ten inch
-capture by its own luminance so no glyph is moved or re-set. The verse is held
-inside the 856 pixels Play's commonest crop keeps, so no line is ever cut, and
-the mark and the verse both survive the square crop. The banner has no
-gradient, panel, or device, because a printed page has none. Two smaller
-decisions come with it: the store icon and the five legacy tiles now put the
-mark at 64 percent, up from 60, which reaches the adaptive foreground's
-presence; and the themed silhouette is a clean scaled cutout rather than a
-stair-stepped offset, which took its path from 41 KB to 4.3 KB and smoothed
-the book's edges at 24 dp. The icon rasters draw their round joins explicitly,
-so the page's long sail arcs no longer carry a hairline of notches. The Quran
-text, both translations, both tafsirs, the word lists, and the recitations are
-unchanged.
-
+**What changed in 23.0.** Playback follows the phone's text size now (owner
+decision, 23.0). The pill's words were held at the app's largest step, 1.2,
+whatever the phone asked for: at 200 percent the reader who needed larger
+type most got a control that ignored the setting. The cap is gone. Through 1.2
+the pill is the row it has always been, so the shipped look is untouched; above
+it the words take the full width and the place may use two lines, and the one
+answer in each voice follows on a row of its own, so the reference, the surah,
+the size, and the control all stay whole. The same reflow reaches the offer, the
+transfer, a failure, and the answer that says a surah is not there. The tests
+measure the same text before and after the scale changes, so this is growth
+rather than the presence of a node. The store set was captured again on the
+three form factors and the cards recomposed. The Quran text, both translations,
+both tafsirs, the recitations, and the word lists are unchanged.
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a
 different edit of the recordings than the files the app plays: on 284 Husary and
