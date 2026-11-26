@@ -92,6 +92,27 @@
 
     <string name="settings_version">Version</string>
 
+    <!-- The storage page: what the downloads weigh, and the two acts that
+         take the large ones back. The content packs keep their own pages. -->
+    <string name="settings_title_storage">Storage</string>
+    <string name="settings_storage_reading">Reading the storage…</string>
+    <string name="settings_storage_free">Free space</string>
+    <string name="settings_storage_on_phone">On this phone</string>
+    <string name="settings_storage_content">Quran text and content packs</string>
+    <string name="settings_storage_partial">Partial downloads</string>
+    <string name="settings_storage_downloads">Downloads</string>
+    <string name="settings_storage_recitations">Recitations</string>
+    <string name="settings_storage_pronunciation">Word pronunciation</string>
+    <string name="settings_storage_remove_all">Remove all</string>
+    <string name="settings_storage_keep">Keep</string>
+    <string name="settings_storage_note">A translation, a tafsir, or a word list is removed on its own page, where its name and its terms are.</string>
+    <string name="settings_storage_remove_recitations_name">Remove all recitations</string>
+    <string name="settings_storage_remove_recitations_title">Remove every downloaded recitation?</string>
+    <string name="settings_storage_remove_recitations_body">This removes the audio for every surah you downloaded. The reciters’ timings stay, and Al-Fatiha stays in the app.</string>
+    <string name="settings_storage_remove_pronunciation_name">Remove all pronunciation</string>
+    <string name="settings_storage_remove_pronunciation_title">Remove every downloaded pronunciation?</string>
+    <string name="settings_storage_remove_pronunciation_body">This removes the word pronunciation you downloaded. Al-Fatiha’s bundled words stay.</string>
+
     <string name="about_group_content">Content</string>
     <string name="about_group_fonts">Fonts</string>
     <string name="about_group_recitations">Recitations</string>

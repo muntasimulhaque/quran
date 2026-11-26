@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The download service's own words. The notification is the only place
+         these are read; the reading and Settings keep their own progress
+         lines. -->
+    <string name="download_channel_name">Downloads</string>
+    <string name="download_channel_description">Content and recitation downloads.</string>
+    <string name="download_notification_title">Downloading</string>
+    <string name="download_notification_progress">%1$s · %2$d%%</string>
+    <string name="download_notification_preparing">Preparing %1$s…</string>
+    <string name="download_notification_cancel">Cancel</string>
+    <string name="download_recitation_title">Surah %1$d recitation</string>
+    <string name="download_word_title">Surah %1$d pronunciation</string>
+</resources>

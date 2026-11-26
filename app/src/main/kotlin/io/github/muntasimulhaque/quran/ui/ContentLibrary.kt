@@ -11,7 +11,10 @@ import io.github.muntasimulhaque.quran.core.Attachments
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.DownloadCenter
 import io.github.muntasimulhaque.quran.data.DownloadError
+import io.github.muntasimulhaque.quran.data.DownloadJob
+import io.github.muntasimulhaque.quran.data.DownloadStorage
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.data.PackCatalog
@@ -26,6 +29,7 @@ import io.github.muntasimulhaque.quran.data.RecitationPackage
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.StorageSummary
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.CatalogContent
@@ -36,6 +40,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -153,6 +158,9 @@ class ContentLibrary(
      * cancelling it stops one install and nothing else.
      */
     private var packJob: Job? = null
+
+    /** The service's handle for the pack on its way, so Cancel can stop it. */
+    private var packDownloadId: String? = null
 
     /** One install at a time: two taps must not fill one progress line. */
     private val installGate = Mutex()
@@ -564,23 +572,34 @@ class ContentLibrary(
             false
         }
         if (fromAssets) return@withLock true
-        val result = downloader.download(pack) { read, total ->
-            // A chunk that lands after the reader's Cancel must not put the
-            // line back. The job is cancelled before the line is cleared, so
-            // the line only ever follows a transfer that is still on.
-            if (job.isActive) {
-                packSetup = PackSetup(
-                    pack,
-                    progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
-                )
+        val id = DownloadCenter.enqueue(application, DownloadJob.Pack(pack))
+        packDownloadId = id
+        val progress = scope.launch {
+            DownloadCenter.state.collect { state ->
+                // A chunk that lands after the reader's Cancel must not put
+                // the line back. The job is cancelled before the line is
+                // cleared, so the line only ever follows a transfer that is
+                // still on.
+                if (state.id == id && job.isActive) {
+                    packSetup = PackSetup(
+                        pack,
+                        progress = state.fraction,
+                    )
+                }
             }
         }
-        if (result.isSuccess) return@withLock true
+        val result = try {
+            DownloadCenter.await(id)
+        } finally {
+            progress.cancel()
+            packDownloadId = null
+        }
+        if (result.success) return@withLock true
         if (job.isActive) {
             packSetup = PackSetup(
                 pack,
                 progress = null,
-                failure = result.exceptionOrNull()?.downloadError() ?: DownloadError.Other,
+                failure = result.failure ?: DownloadError.Other,
             )
         }
         false
@@ -588,6 +607,7 @@ class ContentLibrary(
 
     private suspend fun finishInstall(pack: ContentPack, select: Boolean) {
         packJob = null
+        packDownloadId = null
         packSetup = null
         // The pack becomes the reader's choice before the library reopens,
         // so the search index that warms behind the reopen knows about it.
@@ -658,6 +678,8 @@ class ContentLibrary(
     fun cancelPackSetup() {
         packJob?.cancel()
         packJob = null
+        packDownloadId?.let { DownloadCenter.cancel(application, it) }
+        packDownloadId = null
         packSetup = null
     }
 
@@ -807,6 +829,29 @@ class ContentLibrary(
     suspend fun removeDownloads(recitation: String, surah: Int): Boolean = withContext(Dispatchers.IO) {
         val folder = reciterFolder(recitation) ?: return@withContext false
         recitationStore.removeSurah(folder, surah) > 0
+    }
+
+    /**
+     * Every downloaded surah's audio, across every reciter. The timing packs
+     * stay: they are small, they are what makes a voice ready offline, and a
+     * reader who clears the audio has not said they want the voice forgotten.
+     * The bundled Al-Fatiha is an asset and is never touched.
+     */
+    suspend fun removeAllRecitationAudio(): Int = withContext(Dispatchers.IO) {
+        var removed = 0
+        for (recitation in recitations) {
+            val folder = reciterFolder(recitation.id) ?: continue
+            removed += recitationStore.removeAll(folder)
+        }
+        removed
+    }
+
+    /** The storage page's numbers, read on a worker. */
+    suspend fun storageSummary(): StorageSummary = withContext(Dispatchers.IO) {
+        DownloadStorage.summary(
+            application,
+            packs.filter { it.installed || it.id == PackCatalog.CORE_ID },
+        )
     }
 
     private fun reciterFolder(recitation: String): String? = database?.recitationFolder(recitation)

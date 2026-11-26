@@ -5,6 +5,52 @@ summarized on the [front page](README.md); the releases before it are written
 in full below. The reason a decision was made lives in the KDoc beside the code
 it decided, tagged `owner decision`, and in `git log`.
 
+## 23.0
+
+**23.0 (versionCode 232).** Playback follows the phone's text size now (owner
+decision, 23.0). The whole JVM suite, `checkdb`, `search`, `storecards --check`,
+lint, and `assembleDebug` were green on this machine. The pill no longer caps
+its type: through the app's own largest step it keeps the one row it had, and
+above it the words take the pill's full width while Play or pause, Download,
+Retry, and Cancel move to a row of their own, so a reader who enlarges the
+phone's text is never handed controls they cannot see. No control was added and
+none was taken away. The store set is captured again from this build on
+`quran_phone`, `quran_tablet7` at 1200 x 1920 and 320 dpi, and `quran_tablet10`
+at its own 2560 x 1800, and all twenty-four cards were recomposed: the first
+frame opens on 2:256 where the translation ends clear of the gesture bar,
+search shows a real highlighted match, and the last frame is recitation
+playing with the recited word washed on the verse. The demo status bar no
+longer repeats the mobile group. `content/quran.db` hashes
+`0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
+and `checkdb` verified it; no dataset moved, so no pack changed.
+
+The signed bundle comes from `build` run 45795248842, green on `main` for
+the commit `bd0e941d`: the whole JVM suite, `checkdb`, `search`, `storecards
+--check`, lint, and `assembleDebug` passed, and the signed bundle
+`quran-23.0-vc232.aab` has SHA-256
+`08268e7a99e4af489b92428433741a2337daba4d10430cd48e832a346448bb5e`.
+`jarsigner` reads `jar verified`, and the upload certificate is the same key
+21.4 through 22.9 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+No dataset moved, so nothing was published to the project's releases and the
+run fetched the database 22.8 published. The 23.0 bundle was submitted for
+Play review, and the hand-off copy in `play-store/aab/` was deleted once Play
+had it.
+
+**What changed in 23.0.** Playback follows the phone's text size now (owner
+decision, 23.0). The pill's words were held at the app's largest step, 1.2,
+whatever the phone asked for: at 200 percent the reader who needed larger
+type most got a control that ignored the setting. The cap is gone. Through 1.2
+the pill is the row it has always been, so the shipped look is untouched; above
+it the words take the full width and the place may use two lines, and the one
+answer in each voice follows on a row of its own, so the reference, the surah,
+the size, and the control all stay whole. The same reflow reaches the offer, the
+transfer, a failure, and the answer that says a surah is not there. The tests
+measure the same text before and after the scale changes, so this is growth
+rather than the presence of a node. The store set was captured again on the
+three form factors and the cards recomposed. The Quran text, both translations,
+both tafsirs, the recitations, and the word lists are unchanged.
+
 ## 22.9
 
 **22.9 (versionCode 231).** The store graphic is the page now (owner decision,

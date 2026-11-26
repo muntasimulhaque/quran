@@ -101,7 +101,11 @@ ask for it:
 
 A pack you already hold refreshes quietly when a newer version of the app ships,
 on an unmetered connection only, and only after the first page is readable.
-Nothing is ever streamed: a downloaded surah works offline forever after.
+Nothing is ever streamed: a downloaded surah works offline forever after. A
+download that is in progress continues while you read or switch apps, and a
+dropped connection resumes from the part already here. The app checks the
+phone's free space before it starts and asks before a recitation spends mobile
+data.
 
 ## Private by construction
 
@@ -110,14 +114,16 @@ Nothing is ever streamed: a downloaded surah works offline forever after.
   the reading place, never leaves the phone.
 - **No backup, no export, no import.** The app asks the platform not to copy its
   data, on old and new Android alike.
-- **Six permissions, each with one reason.** `INTERNET` for content from this
-  project's releases, `POST_NOTIFICATIONS` for the daily ayah, the two
-  foreground-service permissions for recitation, `SCHEDULE_EXACT_ALARM` for a
-  reminder at the minute you chose, and `RECEIVE_BOOT_COMPLETED` to put that
+- **Seven permissions, each with one reason.** `INTERNET` for content from this
+  project's releases, `POST_NOTIFICATIONS` for the daily ayah, the media
+  foreground-service permission for recitation, the data-sync foreground-service
+  permission for a download that outlives the window, `SCHEDULE_EXACT_ALARM` for
+  a reminder at the minute you chose, and `RECEIVE_BOOT_COMPLETED` to put that
   reminder back after a restart. `USE_EXACT_ALARM` is deliberately not declared.
   The app asks for the notification once, at the reminder card; it asks for the
   exact time only where the phone withholds it, at the two moments the reminder
-  is set.
+  is set. The download service starts only from a download the reader asked
+  for, and its notification carries progress and Cancel.
 - **One host.** Every request goes to this project's own GitHub Releases page,
   and to the storage GitHub redirects it to, over HTTPS, carrying nothing but
   the request itself. See the [privacy policy](docs/privacy.html).
@@ -205,49 +211,44 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**23.0 (versionCode 232).** Playback follows the phone's text size now (owner
-decision, 23.0). The whole JVM suite, `checkdb`, `search`, `storecards --check`,
-lint, and `assembleDebug` were green on this machine. The pill no longer caps
-its type: through the app's own largest step it keeps the one row it had, and
-above it the words take the pill's full width while Play or pause, Download,
-Retry, and Cancel move to a row of their own, so a reader who enlarges the
-phone's text is never handed controls they cannot see. No control was added and
-none was taken away. The store set is captured again from this build on
-`quran_phone`, `quran_tablet7` at 1200 x 1920 and 320 dpi, and `quran_tablet10`
-at its own 2560 x 1800, and all twenty-four cards were recomposed: the first
-frame opens on 2:256 where the translation ends clear of the gesture bar,
-search shows a real highlighted match, and the last frame is recitation
-playing with the recited word washed on the verse. The demo status bar no
-longer repeats the mobile group. `content/quran.db` hashes
+**23.1 (versionCode 233).** Downloads survive the window now (owner
+decision, 23.1). The whole JVM suite, `checkdb`, `search`, `storecards --check`,
+lint, and `assembleDebug` were green on this machine. The accessibility
+classes, the settings and playback legs, the storage page, and the library
+controller ran on `quran_phone` as a clean install, and a real word package and
+a real Husary surah arrived through the service. A content pack you add, a
+surah's recitation, or a surah's pronunciation now runs in a dataSync foreground service with a progress
+notification and Cancel, so a reader who leaves the app does not lose a 186 MB
+surah. Recitation and word-audio packages keep a stable part and resume with a
+Range request; a dropped connection no longer starts the whole transfer again.
+The service checks free space before the first byte, asks before spending
+mobile data, and the new Storage page adds the library up and can take back all
+downloaded recitations or pronunciation. The app declares one new permission,
+`FOREGROUND_SERVICE_DATA_SYNC`; there is no analytics, telemetry, account, or
+new host. The accessibility tree, the app links, the content, and the store
+listing are otherwise as they were. The app remains in closed testing, so no
+public launch work was done. The three committed store sets stand; neither the
+Storage row nor the mobile-data question is one of the eight cards.
+`content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
-The signed bundle comes from `build` run 45795248842, green on `main` for
-the commit `bd0e941d`: the whole JVM suite, `checkdb`, `search`, `storecards
---check`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-23.0-vc232.aab` has SHA-256
-`08268e7a99e4af489b92428433741a2337daba4d10430cd48e832a346448bb5e`.
-`jarsigner` reads `jar verified`, and the upload certificate is the same key
-21.4 through 22.9 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-No dataset moved, so nothing was published to the project's releases and the
-run fetched the database 22.8 published. The 23.0 bundle was submitted for
-Play review, and the hand-off copy in `play-store/aab/` was deleted once Play
-had it.
+The signed bundle for 23.1 will be produced by the build run on this commit,
+and the hand-off record follows that run. The hand-off is for closed testing,
+not a public listing.
 
-**What changed in 23.0.** Playback follows the phone's text size now (owner
-decision, 23.0). The pill's words were held at the app's largest step, 1.2,
-whatever the phone asked for: at 200 percent the reader who needed larger
-type most got a control that ignored the setting. The cap is gone. Through 1.2
-the pill is the row it has always been, so the shipped look is untouched; above
-it the words take the full width and the place may use two lines, and the one
-answer in each voice follows on a row of its own, so the reference, the surah,
-the size, and the control all stay whole. The same reflow reaches the offer, the
-transfer, a failure, and the answer that says a surah is not there. The tests
-measure the same text before and after the scale changes, so this is growth
-rather than the presence of a node. The store set was captured again on the
-three form factors and the cards recomposed. The Quran text, both translations,
-both tafsirs, the recitations, and the word lists are unchanged.
+**What changed in 23.1.** The download is the feature (owner decision, 23.1).
+A content pack, a surah's recitation, and a surah's pronunciation used to live
+in the window's own scope. The phone could take the process back when the
+reader switched to another app, and the recitation and word-audio downloaders
+began a dropped package at zero. The service keeps the transfer alive with a
+notification, the two package downloaders keep a stable part and ask for the
+rest, and the storage page shows what the library weighs. The reader sees a
+download survive a backgrounding, a resumed transfer after a drop, a free-space
+answer before the first byte, and a mobile-data question before a cellular
+transfer. The Quran text, both translations, both tafsirs, the recitations, and
+the word lists are unchanged.
+
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a
 different edit of the recordings than the files the app plays: on 284 Husary and

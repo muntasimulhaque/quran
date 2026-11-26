@@ -22,6 +22,7 @@ import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.ReadingRow
+import io.github.muntasimulhaque.quran.data.StorageSummary
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.AppTheme
@@ -59,6 +60,9 @@ data class SettingsActions(
     val onRemoveDownloads: suspend (String, Int) -> Unit = { _, _ -> },
     /** The reader's ask to take back one surah's word voices. */
     val onRemoveWordVoice: suspend (Int) -> Unit = {},
+    /** The storage page's two large acts. */
+    val onRemoveAllRecitations: suspend () -> Unit = {},
+    val onRemoveAllWordAudio: suspend () -> Unit = {},
 )
 
 /** A pack the reader asked for, while it downloads. */
@@ -94,6 +98,8 @@ fun SettingsSheet(
     preview: suspend () -> ReadingRow?,
     tajweedSample: suspend () -> Ayah?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
+    /** The storage page's numbers, read when the page opens. */
+    storage: suspend () -> StorageSummary,
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
     /**
@@ -240,6 +246,11 @@ fun SettingsSheet(
                         wordVoices = wordVoices,
                     )
                     SettingsPage.Tajweed -> TajweedPage(sample = tajweedSample)
+                    SettingsPage.Storage -> StoragePage(
+                        summary = storage,
+                        onRemoveAllRecitations = actions.onRemoveAllRecitations,
+                        onRemoveAllWordAudio = actions.onRemoveAllWordAudio,
+                    )
                     SettingsPage.About -> AboutPage(
                         packs = packs,
                         version = version,

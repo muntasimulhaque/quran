@@ -166,6 +166,7 @@ internal fun ReaderSheets(
             preview = { viewModel.sizePreviewRow() },
             tajweedSample = { viewModel.tajweedSampleAyah() },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
+            storage = { viewModel.storageSummary() },
             // Read where it is drawn, so the Daily page tells the truth about
             // the phone's own switch even when the reader comes back from the
             // system settings without the app restarting.
@@ -228,6 +229,8 @@ internal fun ReaderSheets(
                     viewModel.removeDownloads(recitation, surah)
                 },
                 onRemoveWordVoice = { surah -> viewModel.removeWordAudio(surah) },
+                onRemoveAllRecitations = { viewModel.removeAllRecitations() },
+                onRemoveAllWordAudio = viewModel::removeAllWordAudio,
             ),
             onDismiss = onDismiss,
             initialPage = settingsPage,

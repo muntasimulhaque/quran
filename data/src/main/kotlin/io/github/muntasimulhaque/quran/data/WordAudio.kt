@@ -11,7 +11,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.security.MessageDigest
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.ZipInputStream
@@ -224,10 +223,11 @@ class WordAudioStore(private val context: Context) {
  * Downloads one surah's word pronunciation package and unpacks it whole.
  *
  * The network and commit rules are the recitation package's, because they are
- * the rules this app has already paid for: the hash is checked before a file
- * is unpacked, the set lands in a staging folder, and one directory rename
- * makes it visible. A cancel stops the transfer itself and leaves nothing
- * behind.
+ * the rules this app has already paid for: the file is appended to a stable
+ * part, the hash is checked before a file is unpacked, the set lands in a
+ * staging folder, and one directory rename makes it visible. A cancel stops
+ * the transfer itself and keeps the part for the next attempt (owner decision,
+ * 23.1).
  */
 class WordAudioDownloader(private val context: Context) {
 
@@ -243,76 +243,44 @@ class WordAudioDownloader(private val context: Context) {
                 IllegalStateException("the word audio package has no valid identity"),
             )
         }
-        val temporary = runCatching {
-            File.createTempFile("word-audio-${packageToFetch.surah}-", ".part", context.cacheDir)
-        }.getOrNull() ?: return@withContext Result.failure(
+        val part = DownloadParts.part(
+            context,
+            "word-${packageToFetch.surah}.zip",
+        ) ?: return@withContext Result.failure(
             IllegalStateException("the word audio part could not be created"),
         )
-        var connection: java.net.HttpURLConnection? = null
+        val fetched = ResumableDownload.download(
+            part = part,
+            spec = ResumableDownload.Spec(
+                url = packageToFetch.url,
+                bytes = packageToFetch.bytes,
+                sha256 = packageToFetch.sha256,
+                maxBytes = MAX_UNCOMPRESSED_BYTES,
+                maxMillis = MAX_DOWNLOAD_MILLIS,
+            ),
+            onProgress = onProgress,
+        )
+        if (fetched.isFailure) {
+            return@withContext Result.failure(
+                fetched.exceptionOrNull() ?: IllegalStateException("the word audio did not arrive"),
+            )
+        }
+        // The hash is checked before anything becomes a word file, and the
+        // job is checked again here: a cancel that landed during the last
+        // chunk must not unpack what it cancelled.
+        coroutineContext.ensureActive()
         try {
-            connection = ReleaseHttp.open(packageToFetch.url)
-            if (connection.responseCode !in 200..299) {
-                return@withContext Result.failure(IllegalStateException("HTTP ${connection.responseCode}"))
-            }
-            val type = connection.contentType?.substringBefore(';')?.trim()?.lowercase()
-            if (!type.isNullOrEmpty() && type !in ALLOWED_CONTENT_TYPES) {
-                return@withContext Result.failure(IllegalStateException("the word audio is not a zip"))
-            }
-            val contentLength = connection.contentLengthLong
-            if (contentLength >= 0 && contentLength > packageToFetch.bytes) {
-                return@withContext Result.failure(
-                    IllegalStateException("the word audio is larger than the manifest says"),
-                )
-            }
-            val total = packageToFetch.bytes
-            val digest = MessageDigest.getInstance("SHA-256")
-            val deadline = System.nanoTime() + MAX_DOWNLOAD_MILLIS * 1_000_000L
-            var read = 0L
-            connection.inputStream.use { input ->
-                temporary.outputStream().buffered().use { output ->
-                    val buffer = ByteArray(1 shl 16)
-                    while (true) {
-                        coroutineContext.ensureActive()
-                        if (System.nanoTime() > deadline) {
-                            return@withContext Result.failure(
-                                IllegalStateException("the word audio took too long"),
-                            )
-                        }
-                        val count = input.read(buffer)
-                        if (count < 0) break
-                        read += count
-                        if (read > total) {
-                            return@withContext Result.failure(
-                                IllegalStateException("the word audio is larger than the manifest says"),
-                            )
-                        }
-                        digest.update(buffer, 0, count)
-                        output.write(buffer, 0, count)
-                        onProgress(read, total)
-                    }
-                }
-            }
-            connection.disconnect()
-            connection = null
-            if (read != packageToFetch.bytes) {
-                return@withContext Result.failure(
-                    IllegalStateException("the word audio ended at $read bytes"),
-                )
-            }
-            val actual = digest.digest().joinToString("") { "%02x".format(it) }
-            if (!actual.equals(packageToFetch.sha256, ignoreCase = true)) {
-                return@withContext Result.failure(IllegalStateException("checksum mismatch"))
-            }
-            coroutineContext.ensureActive()
-            unpack(temporary, packageToFetch.surah)
+            unpack(part, packageToFetch.surah)
+            part.delete()
             Result.success(Unit)
         } catch (cancelled: CancellationException) {
+            // The part is verified, so a cancel during unpack keeps it for
+            // the next tap rather than making the reader fetch it again.
             throw cancelled
         } catch (error: Exception) {
+            // A package that cannot be read is not made better by keeping it.
+            part.delete()
             Result.failure(error)
-        } finally {
-            connection?.disconnect()
-            temporary.delete()
         }
     }
 

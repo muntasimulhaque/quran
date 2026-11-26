@@ -3,7 +3,8 @@ package io.github.muntasimulhaque.quran.ui
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import io.github.muntasimulhaque.quran.data.WordAudioDownloader
+import io.github.muntasimulhaque.quran.data.DownloadCenter
+import io.github.muntasimulhaque.quran.data.DownloadJob
 import io.github.muntasimulhaque.quran.data.WordAudioManifest
 import io.github.muntasimulhaque.quran.data.WordAudioOnDevice
 import io.github.muntasimulhaque.quran.data.WordAudioPackage
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,16 +54,17 @@ internal class WordAudioDownloads(
      * The one transfer. It is a value and not a call to the downloader so a
      * test can hand in a pack it writes itself, and the tap's whole path
      * (fetch, commit, publish, hand back) is measured with no network (owner
-     * decision, 18.7).
+     * decision, 18.7). A null fetch is the app's own path: the download
+     * service. A test may hand in a fetch and bypass the service entirely.
      */
-    private val fetch: suspend (WordAudioPackage, (Long, Long) -> Unit) -> Result<Unit> =
-        { pack, onProgress -> WordAudioDownloader(context).download(pack, onProgress) },
+    private val fetch: (suspend (WordAudioPackage, (Long, Long) -> Unit) -> Result<Unit>)? = null,
 ) {
 
     private val _state = MutableStateFlow(WordAudioState())
     val state: StateFlow<WordAudioState> = _state.asStateFlow()
 
     private var job: Job? = null
+    private var downloadId: String? = null
     private var pendingSurah: Int? = null
     private var current = 0
     private var enabled = false
@@ -106,6 +109,8 @@ internal class WordAudioDownloads(
         if (!enabled) {
             job?.cancel()
             job = null
+            downloadId?.let { DownloadCenter.cancel(context, it) }
+            downloadId = null
             pendingSurah = null
             refresh(current)
             return
@@ -142,6 +147,8 @@ internal class WordAudioDownloads(
             return
         }
         job?.cancel()
+        downloadId?.let { DownloadCenter.cancel(context, it) }
+        downloadId = null
         pendingSurah = surah
         job = scope.launch {
             val installed = withContext(Dispatchers.IO) { store.isInstalled(surah) }
@@ -159,7 +166,7 @@ internal class WordAudioDownloads(
             // reading stands behind it, so the transfer publishes one state
             // per percent rather than one per socket read
             // (owner decision, 18.7).
-            val result = fetch(pack) { read, total ->
+            fun publish(read: Long, total: Long) {
                 val step = (total / 100).coerceAtLeast(1L)
                 _state.update { previous ->
                     val counting = previous.surah == surah && previous.read > 0
@@ -175,6 +182,30 @@ internal class WordAudioDownloads(
                             waiting = false,
                         )
                     }
+                }
+            }
+            val result = if (fetch != null) {
+                fetch.invoke(pack, ::publish)
+            } else {
+                val id = DownloadCenter.enqueue(context, DownloadJob.WordAudio(pack))
+                downloadId = id
+                val progress = launch {
+                    DownloadCenter.state.collect { state ->
+                        if (state.id == id) publish(state.read, state.total)
+                    }
+                }
+                val answer = try {
+                    DownloadCenter.await(id)
+                } finally {
+                    progress.cancel()
+                    downloadId = null
+                }
+                if (answer.success) {
+                    Result.success(Unit)
+                } else if (answer.cancelled) {
+                    throw CancellationException("the word audio was cancelled")
+                } else {
+                    Result.failure(IllegalStateException("the word audio did not arrive"))
                 }
             }
             pendingSurah = null
@@ -193,6 +224,8 @@ internal class WordAudioDownloads(
     fun cancel() {
         job?.cancel()
         job = null
+        downloadId?.let { DownloadCenter.cancel(context, it) }
+        downloadId = null
         pendingSurah = null
         refresh(current)
     }
@@ -222,6 +255,12 @@ internal class WordAudioDownloads(
      */
     fun remove(surah: Int) {
         store.remove(surah)
+        refresh(current)
+    }
+
+    /** The storage page's one act: take back every downloaded surah's voices. */
+    suspend fun removeAll() = withContext(Dispatchers.IO) {
+        store.onDevice().rows.forEach { row -> store.remove(row.surah) }
         refresh(current)
     }
 

@@ -62,6 +62,12 @@
 
     <string name="playback_offer">%1$s · %2$s</string>
 
+    <string name="download_metered_sheet_name">মোবাইল ডেটায় ডাউনলোড</string>
+    <string name="download_metered_title">মোবাইল ডেটায় ডাউনলোড করবেন?</string>
+    <string name="download_metered_body">%1$s %2$s। আপনার ফোন মোবাইল ডেটায় আছে।</string>
+    <string name="download_metered_confirm">তবু ডাউনলোড</string>
+    <string name="download_metered_wait">ওয়াই-ফাইয়ের জন্য অপেক্ষা</string>
+
     <string name="content_problem_title">কুরআনের লেখা খোলা যায়নি</string>
     <string name="content_problem_storage_title">কুরআনের লেখা খোলার জায়গা নেই</string>
     <string name="content_problem_body">কিছুই হারিয়ে যায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে। বারবার এমন হলে অ্যাপটি বন্ধ করে আবার খুলুন।</string>

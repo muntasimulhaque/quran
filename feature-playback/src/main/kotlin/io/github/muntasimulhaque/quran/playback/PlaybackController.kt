@@ -25,13 +25,15 @@ import io.github.muntasimulhaque.quran.core.RecitationQueue
 import io.github.muntasimulhaque.quran.core.SurahEnding
 import io.github.muntasimulhaque.quran.core.surahEnding
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.DownloadCenter
 import io.github.muntasimulhaque.quran.data.DownloadError
+import io.github.muntasimulhaque.quran.data.DownloadJob
+import io.github.muntasimulhaque.quran.data.DownloadNetwork
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PlaybackPosition
 import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.data.RecitationAyah
-import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.RecitedWord
@@ -39,7 +41,6 @@ import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.WordAudioStore
 import io.github.muntasimulhaque.quran.data.WordSegment
 import io.github.muntasimulhaque.quran.data.displayName
-import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import java.io.ByteArrayOutputStream
@@ -52,6 +53,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -92,7 +94,6 @@ class PlaybackController(
 
     private val store = RecitationStore(context)
     private val manifest = RecitationManifest.load(context)
-    private val downloader = RecitationDownloader(context)
     private var content: ContentDatabase? = null
     private var controller: MediaController? = null
     private val queue = RecitationQueue()
@@ -113,6 +114,7 @@ class PlaybackController(
 
     private var checkpoint: Job? = null
     private var downloadJob: Job? = null
+    private var downloadId: String? = null
     private var requestedAyah: Int? = null
 
     /**
@@ -286,6 +288,8 @@ class PlaybackController(
         finishSample(resume = false)
         downloadJob?.cancel()
         downloadJob = null
+        downloadId?.let { DownloadCenter.cancel(context, it) }
+        downloadId = null
         // The pill's download voice goes at once, not at the end of the
         // connect: the progress writes are gated on the pending surah, so
         // clearing it here is what keeps a chunk from painting over the ayah
@@ -293,6 +297,7 @@ class PlaybackController(
         _state.value = _state.value.copy(
             pendingDownloadSurah = null,
             pendingIsContinuation = false,
+            pendingMetered = false,
             downloadProgress = null,
             downloadFailed = false,
             downloadFailure = null,
@@ -444,10 +449,21 @@ class PlaybackController(
     ): DownloadError? {
         val packageToFetch = manifest.packageFor(recitation, surah) ?: return DownloadError.Other
         val folder = withContext(Dispatchers.IO) { folderFor(recitation, surah) } ?: return DownloadError.Other
-        val result = downloader.download(packageToFetch, folder) { read, total ->
-            onProgress(if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f)
+        val id = DownloadCenter.enqueue(
+            context,
+            DownloadJob.Recitation(packageToFetch, folder),
+        )
+        val progress = scope.launch {
+            DownloadCenter.state.collect { state ->
+                if (state.id == id) onProgress(state.fraction ?: 0f)
+            }
         }
-        return result.exceptionOrNull()?.downloadError()
+        val result = try {
+            DownloadCenter.await(id)
+        } finally {
+            progress.cancel()
+        }
+        return if (result.success) null else result.failure ?: DownloadError.Other
     }
 
     /**
@@ -460,12 +476,34 @@ class PlaybackController(
      * pill again with a transfer that is no longer anyone's
      * (owner report, 9.3).
      */
-    fun confirmDownload() {
+    fun confirmDownload() = startDownload(force = false)
+
+    /** The reader answered the mobile-data question with "Download anyway". */
+    fun confirmDownloadAnyway() = startDownload(force = true)
+
+    /** The reader answered the mobile-data question with "Wait for Wi-Fi". */
+    fun waitForWifi() {
+        _state.update { it.copy(pendingMetered = false) }
+    }
+
+    private fun startDownload(force: Boolean) {
         val recitation = _state.value.recitation ?: recitationId ?: return
         val surah = _state.value.pendingDownloadSurah ?: return
         val ayah = requestedAyah ?: return
         val packageToFetch = manifest.packageFor(recitation, surah) ?: return
+        if (!force && DownloadNetwork.isMetered(context)) {
+            _state.update { current ->
+                if (current.pendingDownloadSurah == surah) {
+                    current.copy(pendingMetered = true)
+                } else {
+                    current
+                }
+            }
+            return
+        }
+        _state.update { it.copy(pendingMetered = false) }
         downloadJob?.cancel()
+        downloadId?.let { DownloadCenter.cancel(context, it) }
         downloadJob = scope.launch {
             _state.update { current ->
                 if (current.pendingDownloadSurah == surah) {
@@ -479,22 +517,35 @@ class PlaybackController(
                 failDownload(surah, DownloadError.Other)
                 return@launch
             }
-            val result = downloader.download(packageToFetch, folder) { read, total ->
-                val progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null
-                _state.update { current ->
-                    if (current.pendingDownloadSurah == surah) {
-                        current.copy(downloadProgress = progress)
-                    } else {
-                        current
+            val id = DownloadCenter.enqueue(
+                context,
+                DownloadJob.Recitation(packageToFetch, folder),
+            )
+            downloadId = id
+            val progress = launch {
+                DownloadCenter.state.collect { state ->
+                    if (state.id == id) {
+                        _state.update { current ->
+                            if (current.pendingDownloadSurah == surah) {
+                                current.copy(downloadProgress = state.fraction ?: 0f)
+                            } else {
+                                current
+                            }
+                        }
                     }
                 }
             }
-            if (result.isSuccess) {
-                // The reader's Cancel cancels this coroutine and the
-                // downloader passes that on, so this branch is only reached
-                // while the request is still the one on screen. The check is
-                // belt and braces for the one frame between a cancel and the
-                // job noticing it.
+            val result = try {
+                DownloadCenter.await(id)
+            } finally {
+                progress.cancel()
+            }
+            downloadId = null
+            if (result.success) {
+                // The reader's Cancel cancels this coroutine and the service,
+                // so this branch is only reached while the request is still
+                // the one on screen. The check is belt and braces for the one
+                // frame between a cancel and the job noticing it.
                 if (_state.value.pendingDownloadSurah != surah) return@launch
                 _state.update {
                     it.copy(pendingDownloadSurah = null, downloadProgress = null)
@@ -502,8 +553,8 @@ class PlaybackController(
                 // The audio has just been fetched, so the reader hears it from
                 // its beginning and not from wherever they were last heard.
                 startPlayback(recitation, ayah, resume = false)
-            } else {
-                failDownload(surah, result.exceptionOrNull()?.downloadError() ?: DownloadError.Other)
+            } else if (!result.cancelled) {
+                failDownload(surah, result.failure ?: DownloadError.Other)
             }
         }
     }
@@ -540,10 +591,13 @@ class PlaybackController(
     fun cancelDownload() {
         downloadJob?.cancel()
         downloadJob = null
+        downloadId?.let { DownloadCenter.cancel(context, it) }
+        downloadId = null
         _state.update { current ->
             current.copy(
                 pendingDownloadSurah = null,
                 pendingIsContinuation = false,
+                pendingMetered = false,
                 downloadProgress = null,
                 downloadFailed = false,
                 downloadFailure = null,
@@ -840,6 +894,8 @@ class PlaybackController(
         // surfacing later as a surah that starts playing on its own.
         downloadJob?.cancel()
         downloadJob = null
+        downloadId?.let { DownloadCenter.cancel(context, it) }
+        downloadId = null
         // A player that never connected is a pill with no transport to stop,
         // and the pill still has to go: the state is cleared whatever the
         // player is, because a failed connect is otherwise a line the reader

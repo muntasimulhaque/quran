@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 23.0 (versionCode 232)
+Version: 23.1 (versionCode 233)
 
 ## Listing
 
@@ -85,7 +85,9 @@ status from the content manifest. The source code is MIT.
 - Data security: no account, no identifiers, nothing stored off the
   device.
 - The app declares `INTERNET` for content from the project's own GitHub
-  Releases: the tafsir of the language the reader chose, on an unmetered
+  Releases. A download can continue in a foreground service with a progress
+  notification and Cancel; the service sends nothing but the request. It
+  fetches the tafsir of the language the reader chose, on an unmetered
   connection; a word list when word by word is turned on; a word
   pronunciation pack for the surah being read, when the reader presses a
   word's speaker or quietly on an unmetered connection; a recitation
@@ -243,6 +245,9 @@ What each set shows, in order:
 The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
+
+## Release notes (23.1, 430 characters)
+23.1 keeps a download moving when you leave the app. A surah, a word set, or a content pack carries on with a progress notification and Cancel, resumes after a dropped connection, and checks free space before it starts. A recitation now asks before it uses mobile data, and Storage shows what your downloads weigh. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.0, 381 characters)
 23.0 makes playback easier to read at large text sizes. The listening pill now grows and reflows with the phone's font setting, while the reading and its controls stay familiar. The store set now shows a real search match and live recitation, with clearer captions. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.

@@ -51,12 +51,15 @@ as a dead letter.
    word is decided beside the downloader, tagged `owner decision`.
 2. **Permissions: exactly `INTERNET`, `POST_NOTIFICATIONS`,
    `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`,
-   `SCHEDULE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, and never
-   `USE_EXACT_ALARM`**: Play accepts that one for an alarm clock or a calendar
-   only, and it rejected 3.9 over it. Where the app asks is decided beside the
-   code that asks, tagged `owner decision`. Library-merged permissions are
-   documented, not fought. A new permission needs the owner's sign-off
-   written here first.
+   `FOREGROUND_SERVICE_DATA_SYNC`, `SCHEDULE_EXACT_ALARM`,
+   `RECEIVE_BOOT_COMPLETED`, and never `USE_EXACT_ALARM`**: Play accepts that
+   one for an alarm clock or a calendar only, and it rejected 3.9 over it. The
+   dataSync service is the one transfer that outlives the window: a content
+   pack, a surah's recitation, or a surah's word audio, started by the reader's
+   tap and shown with progress and Cancel (owner decision, 23.1). Where the app
+   asks is decided beside the code that asks, tagged `owner decision`.
+   Library-merged permissions are documented, not fought. A new permission
+   needs the owner's sign-off written here first.
 3. **No ads, trackers, analytics, or accounts.** AndroidX, Kotlin, Media3, and
    DataStore only, with kotlinx.serialization in `tools/` alone; the
    accessibility test's framework is test-only and never ships. The reader's
@@ -132,7 +135,7 @@ as a dead letter.
 | Path | What is there |
 | --- | --- |
 | `core/` | pure JVM Kotlin, no `android.*`: references, search normalization, rich text, models |
-| `data/` | read-only content access, the downloads that fetch a pack from the project's Releases, the saved-ayah and last-read databases, preferences |
+| `data/` | read-only content access, the downloads that fetch a pack from the project's Releases, the foreground download service, the saved-ayah and last-read databases, preferences |
 | `app/` | the shell: activity, view model, the reading's screen and chrome (the bar, the top bar, the sheets, the ayah menu, the share card), the screen that composes the features, the daily ayah's scheduler and notification |
 | `feature-reading/` | the reading's rows and blocks: the ayah and its door, the word sheet, the surah frames, the footnotes |
 | `feature-search/` | the search sheet |

@@ -9,17 +9,18 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 import java.io.File
-import java.security.MessageDigest
 import java.util.zip.ZipInputStream
 
 /**
  * Downloads one recitation package and unpacks it into the app's own storage.
  *
- * The file is streamed to a temporary name while its SHA-256 is computed, and
- * it is only unpacked when the hash matches the manifest. The temporary file
- * never becomes an ayah file, and a cancelled download leaves nothing behind.
- * This is the app's only network use, and it only happens when the reader asks
- * for a surah.
+ * The file is streamed to a stable part name while its SHA-256 is computed,
+ * and it is only unpacked when the hash matches the manifest. The part is
+ * kept across a dropped connection or a process death, so the next attempt
+ * asks for the rest instead of the whole package (owner decision, 23.1). A
+ * completed package is deleted after it is unpacked; a cancelled unpack keeps
+ * it, because the bytes were already verified. This is the app's only network
+ * use, and it only happens when the reader asks for a surah.
  *
  * A cancel is the reader's own word, so it has to stop the transfer itself.
  * The read loop below is blocking, and a blocking read is not a suspension
@@ -46,106 +47,51 @@ class RecitationDownloader(private val context: Context) {
         if (!SafePaths.validId(packageToFetch.recitation) ||
             packageToFetch.surah !in 1..114 ||
             !SafePaths.validHash(packageToFetch.sha256) ||
-            packageToFetch.bytes < 0 ||
+            packageToFetch.bytes <= 0 ||
             !SafePaths.validFolder(folder)
         ) {
             return@withContext Result.failure(
                 IllegalStateException("the recitation package has no valid identity"),
             )
         }
-        // A unique temporary name per attempt: a part left by a process that
-        // died is the cache's to clear, and no two attempts share it.
-        val temporary = runCatching {
-            File.createTempFile("recitation-${packageToFetch.recitation}-", ".part", context.cacheDir)
-        }.getOrNull() ?: return@withContext Result.failure(
+        val part = DownloadParts.part(
+            context,
+            "recitation-${packageToFetch.recitation}-${packageToFetch.surah}.zip",
+        ) ?: return@withContext Result.failure(
             IllegalStateException("the recitation part could not be created"),
         )
-        // Kept outside the try so every way out closes the socket: a cancel
-        // throws from the read loop, and the connection is what holds the
-        // transfer open.
-        var connection: java.net.HttpURLConnection? = null
+        val fetched = ResumableDownload.download(
+            part = part,
+            spec = ResumableDownload.Spec(
+                url = packageToFetch.url,
+                bytes = packageToFetch.bytes,
+                sha256 = packageToFetch.sha256,
+                maxBytes = MAX_RECITATION_BYTES,
+                maxMillis = MAX_DOWNLOAD_MILLIS,
+            ),
+            onProgress = onProgress,
+        )
+        if (fetched.isFailure) {
+            return@withContext Result.failure(
+                fetched.exceptionOrNull() ?: IllegalStateException("the recitation did not arrive"),
+            )
+        }
+        // The hash is checked before anything becomes an ayah file, and the
+        // job is checked again here: a cancel that landed during the last
+        // chunk must not unpack what it cancelled.
+        coroutineContext.ensureActive()
         try {
-            // Every redirect is checked before the connection that would use
-            // it is opened, not after the request has already been sent.
-            connection = ReleaseHttp.open(packageToFetch.url)
-            if (connection.responseCode !in 200..299) {
-                return@withContext Result.failure(IllegalStateException("HTTP ${connection.responseCode}"))
-            }
-            val type = connection.contentType?.substringBefore(';')?.trim()?.lowercase()
-            if (!type.isNullOrEmpty() && type !in ALLOWED_CONTENT_TYPES) {
-                return@withContext Result.failure(IllegalStateException("the recitation is not a zip"))
-            }
-            val maxBytes = if (packageToFetch.bytes > 0) {
-                packageToFetch.bytes
-            } else {
-                MAX_RECITATION_BYTES
-            }
-            val contentLength = connection.contentLengthLong
-            if (contentLength >= 0 && contentLength > maxBytes) {
-                return@withContext Result.failure(
-                    IllegalStateException("the recitation is larger than the manifest says"),
-                )
-            }
-            val total = when {
-                packageToFetch.bytes > 0 -> packageToFetch.bytes
-                contentLength >= 0 -> contentLength
-                else -> 0L
-            }
-            val digest = MessageDigest.getInstance("SHA-256")
-            val deadline = System.nanoTime() + MAX_DOWNLOAD_MILLIS * 1_000_000L
-            var read = 0L
-            connection.inputStream.use { input ->
-                temporary.outputStream().buffered().use { output ->
-                    val buffer = ByteArray(1 shl 16)
-                    while (true) {
-                        // The reader's Cancel, read between chunks. A chunk is
-                        // 64 KB, so the transfer stops within one read of it.
-                        coroutineContext.ensureActive()
-                        if (System.nanoTime() > deadline) {
-                            return@withContext Result.failure(
-                                IllegalStateException("the recitation took too long"),
-                            )
-                        }
-                        val count = input.read(buffer)
-                        if (count < 0) break
-                        read += count
-                        if (read > maxBytes) {
-                            return@withContext Result.failure(
-                                IllegalStateException("the recitation is larger than the manifest says"),
-                            )
-                        }
-                        digest.update(buffer, 0, count)
-                        output.write(buffer, 0, count)
-                        onProgress(read, total)
-                    }
-                }
-            }
-            connection.disconnect()
-            connection = null
-            if (packageToFetch.bytes > 0 && read != packageToFetch.bytes) {
-                return@withContext Result.failure(
-                    IllegalStateException("the recitation ended at $read bytes"),
-                )
-            }
-            val actual = digest.digest().joinToString("") { "%02x".format(it) }
-            if (!actual.equals(packageToFetch.sha256, ignoreCase = true)) {
-                return@withContext Result.failure(IllegalStateException("checksum mismatch"))
-            }
-            // The hash is checked before anything becomes an ayah file, and
-            // the job is checked again here: a cancel that landed during the
-            // last chunk must not unpack what it cancelled.
-            coroutineContext.ensureActive()
-            unpack(temporary, folder, packageToFetch.surah)
+            unpack(part, folder, packageToFetch.surah)
+            part.delete()
             Result.success(Unit)
         } catch (cancelled: CancellationException) {
-            // A cancel is not a failure the pill should report: it is the
-            // reader's word, and it travels as itself.
+            // The part is verified, so a cancel during unpack keeps it for
+            // the next tap rather than making the reader fetch it again.
             throw cancelled
         } catch (error: Exception) {
+            // A package that cannot be read is not made better by keeping it.
+            part.delete()
             Result.failure(error)
-        } finally {
-            connection?.disconnect()
-            temporary.delete()
         }
     }
 

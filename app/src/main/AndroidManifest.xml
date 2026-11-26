@@ -12,6 +12,12 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- A content pack, a surah's recitation, or a surah's word audio can
+         outlive the window. The reader's tap starts the dataSync service, the
+         notification carries its progress and Cancel, and it stops when the
+         queue is empty. The download is the one other foreground service the
+         app owns (owner decision, 23.1). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <!-- The daily reminder, and the only reason for an exact alarm in this
          app: the reader chooses a minute, and the reminder is a promise that
          it arrives at that minute even on a phone that is locked and idle

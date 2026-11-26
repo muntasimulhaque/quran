@@ -29,6 +29,7 @@ import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.StorageSummary
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
@@ -1497,6 +1498,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         withContext(Dispatchers.IO) { wordAudio.remove(surah) }
     }
 
+    /** The storage page's one act for the pronunciation. */
+    suspend fun removeAllWordAudio() {
+        pendingWord = null
+        wordVoice = WordVoice.Ready
+        wordAudio.removeAll()
+    }
+
+    /** The storage page's one act for the recitations. */
+    suspend fun removeAllRecitations(): Int = library.removeAllRecitationAudio()
+
+    /** The storage page's numbers. */
+    suspend fun storageSummary(): StorageSummary = library.storageSummary()
+
     private data class PendingWord(val ayah: Int, val position: Int, val surah: Int)
 
     private data class WordAsk(
@@ -1515,6 +1529,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun stopPlayback() = playback.stop()
 
     fun confirmDownload() = playback.confirmDownload()
+
+    /** The reader answered the mobile-data question with "Download anyway". */
+    fun confirmMeteredDownload() = playback.confirmDownloadAnyway()
+
+    /** The reader answered the mobile-data question with "Wait for Wi-Fi". */
+    fun waitForWifi() = playback.waitForWifi()
 
     fun cancelDownload() = playback.cancelDownload()
 

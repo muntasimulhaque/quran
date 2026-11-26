@@ -80,6 +80,14 @@
 
     <string name="playback_offer">%1$s · %2$s</string>
 
+    <!-- The recitation's mobile-data question. The transfer starts only after
+         the reader answers it; Wait for Wi-Fi leaves the offer standing. -->
+    <string name="download_metered_sheet_name">Mobile data download</string>
+    <string name="download_metered_title">Download on mobile data?</string>
+    <string name="download_metered_body">%1$s is %2$s. Your phone is on mobile data.</string>
+    <string name="download_metered_confirm">Download anyway</string>
+    <string name="download_metered_wait">Wait for Wi-Fi</string>
+
     <string name="content_problem_title">The Quran text could not be opened</string>
     <string name="content_problem_storage_title">Not enough space to open the Quran text</string>
     <!-- The body says the one thing the title cannot: what is safe, and the

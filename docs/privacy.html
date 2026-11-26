@@ -14,7 +14,7 @@
 </head>
 <body>
 <h1>Privacy Policy: Quran: The Noble Book</h1>
-<p class="updated">Last updated: November 17, 2026</p>
+<p class="updated">Last updated: November 26, 2026</p>
 
 <p>Quran: The Noble Book is a reader for the Quran. It collects nothing. There
 are no accounts, no ads, no trackers, no analytics, and no crash reporting. It
@@ -83,9 +83,13 @@ connection at all.</p>
       notification is a media-session notification, which Android 13 and later
       exempt from this permission; the app asks for it only where the reminder
       needs it.</li>
-  <li><code>FOREGROUND_SERVICE</code> and
-      <code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code>: keeping recitation
-      playing with the screen off.</li>
+  <li><code>FOREGROUND_SERVICE</code>,
+      <code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code>, and
+      <code>FOREGROUND_SERVICE_DATA_SYNC</code>: keeping recitation playing
+      with the screen off, and finishing a content pack, a surah's recitation,
+      or a surah's word audio after the window is gone. The download service
+      starts only from a download the reader asked for; its notification
+      carries progress and Cancel.</li>
   <li><code>SCHEDULE_EXACT_ALARM</code>: the daily ayah reminder, and nothing
       else. Before Android 12 exact alarms were never gated, so on those
       releases the app uses them and there is nothing for the reader to grant.
@@ -101,7 +105,7 @@ connection at all.</p>
       zone. It is used only to re-arm the reminder the reader already set.</li>
 </ul>
 
-<p>The app declares those six permissions. The player's library also merges in
+<p>The app declares those seven permissions. The player's library also merges in
 <code>ACCESS_NETWORK_STATE</code>, <code>WAKE_LOCK</code>, and
 <code>DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION</code>, which the app does not
 declare. <code>ACCESS_NETWORK_STATE</code> is what the quiet refresh reads to

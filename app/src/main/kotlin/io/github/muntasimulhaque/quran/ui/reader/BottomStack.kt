@@ -26,6 +26,7 @@ import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.kit.ConfirmSheet
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
@@ -87,7 +88,11 @@ internal fun BottomStack(
     // composed until the reader asks for a recitation or a pack, so its
     // measured height is zero and the reading keeps only its own foot
     // (owner decision, 16.0).
-    if (!showPlayback && viewModel.packSetup == null) return
+    if (!showPlayback && viewModel.packSetup == null && !playback.pendingMetered) return
+    val pendingSurahName = playback.pendingDownloadSurah?.let { surah ->
+        viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
+            ?: stringResource(R.string.surah_fallback_name, surah)
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -181,10 +186,6 @@ internal fun BottomStack(
         }
         val offer = viewModel.listenOffer
         if (showPlayback) {
-            val pendingSurahName = playback.pendingDownloadSurah?.let { surah ->
-                viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
-                    ?: stringResource(R.string.surah_fallback_name, surah)
-            }
             PlaybackBar(
                 state = playback,
                 offer = offer,
@@ -229,6 +230,22 @@ internal fun BottomStack(
                 onEndOfAudio = { viewModel.setEndOfAudio(it) },
             )
         }
+    }
+    if (playback.pendingMetered && playback.pendingDownloadSurah != null) {
+        ConfirmSheet(
+            name = stringResource(R.string.download_metered_sheet_name),
+            title = stringResource(R.string.download_metered_title),
+            body = stringResource(
+                R.string.download_metered_body,
+                pendingSurahName.orEmpty(),
+                formatBytes(playback.pendingDownloadBytes),
+            ),
+            confirm = stringResource(R.string.download_metered_confirm),
+            keep = stringResource(R.string.download_metered_wait),
+            onConfirm = { viewModel.confirmMeteredDownload() },
+            onDismiss = { viewModel.waitForWifi() },
+            tag = "download-metered",
+        )
     }
 }
 
