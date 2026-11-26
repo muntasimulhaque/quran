@@ -222,10 +222,11 @@ longer repeats the mobile group. `content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
-The signed bundle comes from `build` run RUN_ID, green on `main` for
-the commit COMMIT_HASH: the whole JVM suite, `checkdb`, `search`, `storecards
+The signed bundle comes from `build` run 45795248842, green on `main` for
+the commit `bd0e941d`: the whole JVM suite, `checkdb`, `search`, `storecards
 --check`, lint, and `assembleDebug` passed, and the signed bundle
-`quran-23.0-vc232.aab` has SHA-256 BUNDLE_SHA256.
+`quran-23.0-vc232.aab` has SHA-256
+`08268e7a99e4af489b92428433741a2337daba4d10430cd48e832a346448bb5e`.
 `jarsigner` reads `jar verified`, and the upload certificate is the same key
 21.4 through 22.9 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
