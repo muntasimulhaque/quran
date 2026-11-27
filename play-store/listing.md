@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 23.2 (versionCode 234)
+Version: 23.3 (versionCode 235)
 
 ## Listing
 
@@ -245,6 +245,9 @@ What each set shows, in order:
 The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
+
+## Release notes (23.3, 481 characters)
+Closing About this surah now returns you to the surah's head. Read one screen or ten into it, and the tap puts the document away with the page back at the door under the basmalah and the first ayah below it, not at the ayah the document had scrolled past. If you have already scrolled past the introduction into the ayahs, the tap leaves the ayah you reached. The Quran text, translations, tafsirs, recitations, and content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.2, 404 characters)
 The surah introduction now closes with a tap anywhere on it. The Hide button at its foot is gone, and the door under the basmalah appears only while the introduction is closed. A drag still scrolls the page, so a long introduction is not lost to a stray press. The basmalah, the Quran text, the translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.

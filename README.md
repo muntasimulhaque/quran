@@ -211,48 +211,43 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**23.2 (versionCode 234).** The surah introduction is its own way out now
-(owner decision, 23.2). The whole JVM suite, `checkdb`, `search`,
+**23.3 (versionCode 235).** The surah introduction closes back to the head
+(owner decision, 23.3). The whole JVM suite, `checkdb`, `search`,
 `storecards --check`, lint, and `assembleDebug` were green on this machine.
-The Hide button at the introduction's foot is gone. Opened, the door that
-opened it is gone too, and a tap anywhere on the introduction puts it away;
-a drag belongs to the reading and scrolls it, so a long introduction is not
-lost to a stray press. The click carries the label Hide, so TalkBack says what
-its double tap does. `SurahIntroTest` ran on `quran_phone` as a clean install,
-and `AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`, and
-`KeyboardFocusTest` ran beside it: the tap closes, the drag does not, and the
-spoken action is there. The basmalah is unchanged, as is the Quran text, both
-translations, both tafsirs, the recitations, and the word lists. No permission,
-service, host, dataset, or store frame moved, and Play's foreground service
-declaration and its two recordings are unchanged. The app remains in closed
-testing, so no public launch work was done. The three committed store sets
-stand; the surah opening is not one of the eight cards. `content/quran.db`
-hashes
+A reader who opens the introduction from the door under the basmalah and
+reads several screens into it now closes it and is handed the surah's head,
+the door under the basmalah and the first ayah below it, not the ayah the
+document had scrolled past. The close asks the list for the opening in the
+same measure that drops the document, so no frame shows the wrong ayah. Once
+the reader has scrolled past the introduction into the ayahs, the close
+leaves the ayah where they reached it, so a reference followed from the
+introduction is not undone by a later tap. `SurahIntroTest` ran on
+`quran_phone` as a clean install, and `AccessibilityTest`, `LargeTextTest`,
+`ReadingSemanticsTest`, and `KeyboardFocusTest` ran beside it; the deep
+close and the head it hands back are measured. The basmalah is unchanged, as
+is the Quran text, both translations, both tafsirs, the recitations, and the
+word lists. No permission, service, host, dataset, or store frame moved, and
+Play's foreground service declaration and its two recordings are unchanged.
+The app remains in closed testing, so no public launch work was done. The
+three committed store sets stand; the surah opening is not one of the eight
+cards. `content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
-The signed bundle comes from `build` run 45949731861, green on `main` for
-the commit `0e8d81a4`: the whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
-`quran-23.2-vc234.aab` has SHA-256
-`c7853a5a0bb3caae208b7b8f8d8afa70e31774e2138d1dc82a333749cf5f2deb`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 23.2` and `versionCode 234`, and the upload certificate is the
-same key 21.4 through 23.1 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 23.2 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+The signed bundle for 23.3 will be produced by the build run on this commit,
+and the hand-off record follows that run. The hand-off is for closed testing,
+not a public listing.
 
-**What changed in 23.2.** The introduction closes on itself (owner decision,
-23.2). The Hide button stood at the foot of a document that can run longer
-than a screen: at the beginning or middle it was off-screen, and at the end a
-tap outside already closed it. It is gone. The door under the basmalah is
-drawn only while the introduction is closed; opened, the introduction is the
-whole of what stands there, and a tap anywhere on it puts it away. The tap is
-the reading's standard click, so a drag starting on the introduction scrolls
-the page and does not close it. The click's label is Hide, so a screen reader
-hears the one exit. The basmalah is unchanged, and so are the Quran text, both
-translations, both tafsirs, the recitations, and the word lists.
+**What changed in 23.3.** The close of the surah introduction is a return
+(owner decision, 23.3). The introduction is the list's first item, so reading
+down it spent the list's own scroll offset; closing left the offset behind and
+the shrinking item handed back the ayah ten or fourteen rows down. The close
+now asks for the head while the opening is what the glass shows, in the same
+measure that drops the document, and leaves the ayah alone once the reader has
+scrolled past it. The head is an item, not a pixel depth, so a rotation or a
+text size change while the document is open cannot make the return stale. The
+basmalah is unchanged, and so are the Quran text, both translations, both
+tafsirs, the recitations, and the word lists.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a

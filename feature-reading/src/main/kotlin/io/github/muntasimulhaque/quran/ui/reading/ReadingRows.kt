@@ -207,8 +207,30 @@ internal fun ReadingRows(
     // decision, 23.2). The state lives here rather than inside the opening
     // item because the taps that dismiss it land outside that item.
     var aboutOpen by rememberSaveable(surah.number) { mutableStateOf(false) }
+    // The introduction is the list's first item, so reading down it spends
+    // the list's own scroll offset: the index stays 0 while the document
+    // fills the glass. Closing used to leave that offset behind, and the
+    // shrink of the item spent it on the ayahs below, handing the reader
+    // the ayah ten or fourteen rows down instead of the head they opened
+    // from. The head is now asked for in the measure that drops the
+    // introduction, and only while the opening is what the glass shows:
+    // once the reader has scrolled past the introduction into the ayahs,
+    // the item is above the anchor and its collapse moves nothing, so the
+    // close leaves the ayah where they reached it, and a reference
+    // followed from the introduction is not undone by a later tap. A pixel
+    // offset would go stale on a rotation or a text size change while the
+    // document is open, which is why the head is an item and not a depth
+    // (owner decision, 23.3).
+    val closeAbout: () -> Unit = {
+        if (aboutOpen) {
+            if (listState.firstVisibleItemIndex == 0) {
+                listState.requestScrollToItem(0)
+            }
+            aboutOpen = false
+        }
+    }
     val dismissAbout: () -> Unit = {
-        if (aboutOpen) aboutOpen = false else onBackgroundTap()
+        if (aboutOpen) closeAbout() else onBackgroundTap()
     }
 
     // The reader's place is written down when a drag of their own ends, and
@@ -396,7 +418,7 @@ internal fun ReadingRows(
                 content = content,
                 language = contentLanguage,
                 expanded = aboutOpen,
-                onExpandedChange = { aboutOpen = it },
+                onExpandedChange = { open -> if (open) aboutOpen = true else closeAbout() },
                 onOpenReference = onOpenReference,
                 metrics = metrics,
             )
