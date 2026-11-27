@@ -278,7 +278,10 @@ is one hour tape. The word sheet's counts stop being doors: a root and a
 dictionary form say how often they stand in the Book, and the places page
 and its data leave with them. The verse link, which no screen could produce,
 leaves the manifest and the README; the benchmark uses the reminder's own
-extra. The Quran text, every dataset, and every pack are unchanged.
+extra. The Quran text, every dataset, and every pack are unchanged. The
+first `build` run on the version commit was red on `UnusedResourcesTest`:
+the picker's keyboard mark had no surface, so the mark left the set. The
+rerun is green.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a
