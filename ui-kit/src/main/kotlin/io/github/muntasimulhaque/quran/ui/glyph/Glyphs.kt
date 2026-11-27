@@ -316,23 +316,6 @@ object Glyphs {
             poly(14.75f, 3.25f, 14.75f, 7.75f, 19.25f, 7.75f),
             line(8.25f, 13.75f, 16.25f, 13.75f),
         ),
-
-        // The frame, two rows of keys, and the space bar under them. A key is
-        // a short round-capped dash, so it reads as a keycap, and the whole
-        // mark is drawn with the set's one stroke and needs no third dot size.
-        // The key field is the frame's center: the rows began a quarter unit
-        // high, which put the keys nearer the frame's top than its foot
-        // (owner decision, 22.8: the keyline audit).
-        Icon.Keyboard to listOf(
-            frame(3.25f, 4.75f, 20.75f, 19.25f, 2.5f),
-            line(6.4f, 8.75f, 7.4f, 8.75f),
-            line(11.5f, 8.75f, 12.5f, 8.75f),
-            line(16.6f, 8.75f, 17.6f, 8.75f),
-            line(6.4f, 12.05f, 7.4f, 12.05f),
-            line(11.5f, 12.05f, 12.5f, 12.05f),
-            line(16.6f, 12.05f, 17.6f, 12.05f),
-            line(9.25f, 15.25f, 14.75f, 15.25f),
-        ),
     )
 }
 

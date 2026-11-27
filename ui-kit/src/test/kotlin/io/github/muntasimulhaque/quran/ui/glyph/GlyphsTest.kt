@@ -207,7 +207,6 @@ class GlyphsTest {
             Icon.Note to Ink(3.75f, 2.25f, 20.25f, 21.75f),
             Icon.Tafsir to Ink(3.75f, 2.25f, 20.25f, 21.75f),
             Icon.Settings to Ink(2.25f, 3.75f, 21.75f, 20.25f),
-            Icon.Keyboard to Ink(2.25f, 3.75f, 21.75f, 20.25f),
             // The dots keep their own left air, which the drawing argues.
             Icon.Browse to Ink(3.15f, 3.75f, 21.75f, 20.25f),
             Icon.Speaker to Ink(2.25f, 3.25f, 21.75f, 20.75f),

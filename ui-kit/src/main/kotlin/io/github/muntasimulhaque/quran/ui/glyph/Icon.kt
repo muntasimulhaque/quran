@@ -76,7 +76,4 @@ enum class Icon {
 
     /** The page with its turned corner: what the reader writes. */
     Note,
-
-    /** The keys that type the time instead. */
-    Keyboard,
 }
