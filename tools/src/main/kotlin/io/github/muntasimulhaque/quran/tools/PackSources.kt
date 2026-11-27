@@ -87,7 +87,11 @@ object PackSources {
             // Version 8 narrows the map to the two voices the catalog
             // offers, Husary and Minshawi, so the map names no voice the
             // reader cannot choose (owner decision, 22.6).
-            version = "8",
+            // Version 9 opens the introductions' references and expands their
+            // verse labels, so the door the reader meets in About this surah
+            // answers and the words behind it keep one vocabulary
+            // (owner decision, 23.5).
+            version = "9",
             shipped = true,
             ayahs = 6236,
             datasets = listOf(

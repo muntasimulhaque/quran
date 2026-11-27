@@ -28,6 +28,15 @@ data class Dataset(
     val licenseBn: String? = null,
     val credit: String,
     @SerialName("usedFor") val usedFor: String,
+    /**
+     * The one presentation transform this build applies to the source's
+     * words, when it applies one: the introductions expand `v.` and `vv.` to
+     * `verse` and `verses` and drop a reference the reading cannot open. Null
+     * when a dataset is drawn as the source wrote it. It lives here so the
+     * manifest and the build tell one story about a dataset's provenance
+     * (owner decision, 23.5).
+     */
+    val presentation: String? = null,
     val path: String,
     val bytes: Long,
     val sha256: String,

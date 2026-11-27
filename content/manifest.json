@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.9.0",
+  "contentVersion": "1.9.1",
   "note": "Machine-readable source of truth for bundled content.",
   "datasets": [
     {
@@ -125,6 +125,7 @@
       "licenseBn": "QUL এই ভূমিকার কোনো লাইসেন্স উল্লেখ করেনি; এর উৎসের স্বত্ব যাচাই করা হয়নি।",
       "credit": "Quranic Universal Library (QUL) by Tarteel",
       "usedFor": "Surah introductions",
+      "presentation": "Verse references written v. and vv. are expanded to verse and verses; a link the reading cannot open keeps its words and loses its target; Surah 17's Night Journey reference opens 17:1, the verse its sentence names, not the source's stale 17:4.",
       "path": "content/raw/qul/surah-info-english.json",
       "bytes": 301035,
       "sha256": "70914e97c5514fe589f5641489bbb6248bc90e66c330707dbf117b75294f522e",

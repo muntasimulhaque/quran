@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.9.0",
+  "contentVersion": "1.9.1",
   "ayahs": 6236,
   "words": 77429,
   "markers": 6235,
@@ -9,6 +9,6 @@
   "recitationRegionSpans": 34,
   "recitationUncoveredWords": 94,
   "problems": 0,
-  "databaseBytes": 114155520,
-  "databaseSha256": "0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e"
+  "databaseBytes": 114167808,
+  "databaseSha256": "15e4ac4a25388ddd7714b0c0b28522b6fa91f5fe7587581f25b8a5263f954208"
 }

@@ -5,6 +5,50 @@ summarized on the [front page](README.md); the releases before it are written
 in full below. The reason a decision was made lives in the KDoc beside the code
 it decided, tagged `owner decision`, and in `git log`.
 
+## 23.4
+
+**23.4 (versionCode 236).** The settings hub keeps no storage page
+(owner decision, 23.4). The whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` were green on this machine,
+and `AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`, and
+`KeyboardFocusTest` ran on `quran_phone` as a clean install. The hub's
+Storage row is gone, and with it the page that added the library up, showed
+the phone's free space, and could clear every recitation or every
+pronunciation in one tap. The free-space check that runs before a download
+starts is untouched, as is the sentence that says the phone has no room, and
+a transfer still resumes from its part. Every download is removed where it
+is named: a pack on its own page, a surah on its reciter's list, a
+pronunciation surah on the words page, each with the question a large file
+raises. The Quran text, both translations, both tafsirs, the recitations,
+and the word lists are unchanged. No permission, service, host, dataset, or
+store frame moved, and Play's foreground service declaration and its two
+recordings are unchanged. The app remains in closed testing, so no public
+launch work was done. The three committed store sets stand; settings is not
+one of the eight cards. `content/quran.db` hashes
+`0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
+and `checkdb` verified it; no dataset moved, so no pack changed.
+
+The signed bundle comes from `build` run 45990506795, green on `main` for
+the commit `3d650a45`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.4-vc236.aab` has SHA-256
+`64c890f98fdd147045c0b188d5b987f54d2fde99854009ebd14177bac14ab336`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.4` and `versionCode 236`, and the upload certificate is
+the same key 21.4 through 23.3 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 23.4 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
+
+**What changed in 23.4.** The settings hub is ten rows (owner decision,
+23.4). The Storage page was a report: it added the downloads up, showed the
+phone's free space, and offered two doors that cleared every recitation or
+every pronunciation. A reader could not free a byte from its numbers, and
+every act that removes a download already stands where the download is
+named, so the page was a second way to the same removals and the only hub
+row that led nowhere a reader had not been. The free-space check before a
+transfer, its refusal, and the resumable parts stay exactly as they were.
+
 ## 23.3
 
 **23.3 (versionCode 235).** The surah introduction closes back to the head

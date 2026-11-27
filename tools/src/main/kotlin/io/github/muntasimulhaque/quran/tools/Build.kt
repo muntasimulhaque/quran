@@ -339,7 +339,7 @@ class Build(private val root: File) {
         val out = HashMap<Int, Translation>(7000)
         for ((key, raw) in rows) {
             val parsed = bayanAyah(
-                raw = sanitize(raw),
+                raw = ContentHtml.sanitize(raw),
                 sourceNotes = notes?.byAyah?.get(key),
                 allSourceNotes = notes?.allTexts.orEmpty(),
                 anchorAfter = bayanAnchors[key],
@@ -1200,8 +1200,9 @@ class Build(private val root: File) {
                         insertPassage.setInt(3, row.from.substringBefore(':').toInt())
                         insertPassage.setInt(4, row.from.substringAfter(':').toInt())
                         insertPassage.setInt(5, row.to.substringAfter(':').toInt())
-                        insertPassage.setString(6, sanitize(row.text))
-                        insertPassage.setString(7, Search.normalizeForIndex(sanitize(row.text)))
+                        val text = ContentHtml.sanitize(row.text)
+                        insertPassage.setString(6, text)
+                        insertPassage.setString(7, Search.normalizeForIndex(text))
                         insertPassage.addBatch()
                     }
                     insertPassage.executeBatch()
@@ -1384,6 +1385,11 @@ class Build(private val root: File) {
         return QuranAlignSegments.json(measured)
     }
 
+    /**
+     * The introductions, read through [SurahInfo] so the links the reading
+     * can open arrive as doors and the verse labels keep one vocabulary
+     * (owner decision, 23.5).
+     */
     private fun insertSurahInfo(connection: Connection) {
         val file = sourceDir("surah-info-en").firstWithExtension(".json") ?: return fail("no surah info")
         val json = Json.parseToJsonElement(file.readText()).jsonObject
@@ -1391,59 +1397,13 @@ class Build(private val root: File) {
             for (entry in json.values) {
                 val o = entry.jsonObject
                 val surah = o["surah_number"]?.jsonPrimitive?.intOrNull ?: continue
+                val text = o["text"]?.jsonPrimitive?.contentOrNull ?: ""
                 statement.setInt(1, surah)
-                statement.setString(2, sanitize(o["text"]?.jsonPrimitive?.contentOrNull ?: ""))
+                statement.setString(2, SurahInfo.drawn(surah, text))
                 statement.addBatch()
             }
             statement.executeBatch()
         }
-    }
-
-    /**
-     * Keeps the structure the app renders, drops every attribute except a link
-     * target, and turns the Arabic quote spans into `q` elements. Letters are
-     * never touched; gray spans in Ibn Kathir are parenthetical inline text and
-     * keep their content with the span dropped.
-     */
-    private val decodeEntities = mapOf(
-        "&amp;" to "&",
-        "&lt;" to "<",
-        "&gt;" to ">",
-        "&quot;" to "\"",
-        "&#39;" to "'",
-        "&nbsp;" to " ",
-    )
-
-    private fun sanitize(html: String): String {
-        var out = html
-        val span = Regex("<span([^>]*)>(.*?)</span>", RegexOption.DOT_MATCHES_ALL)
-        while (true) {
-            val next = span.replace(out) { match ->
-                val attributes = match.groupValues[1]
-                val content = match.groupValues[2]
-                if (attributes.contains("arabic")) "<q>$content</q>" else content
-            }
-            if (next == out) break
-            out = next
-        }
-        out = out.replace(Regex("<(div|span)[^>]*>"), "")
-        out = out.replace("</div>", "").replace("</span>", "")
-        val tag = Regex("<(/?)([a-zA-Z0-9]+)([^>]*)>")
-        val keep = setOf("p", "br", "h1", "h2", "h3", "h4", "strong", "b", "em", "i", "q", "a")
-        out = tag.replace(out) { match ->
-            val closing = match.groupValues[1]
-            val name = match.groupValues[2].lowercase()
-            val attributes = match.groupValues[3]
-            if (name !in keep) return@replace ""
-            if (name == "a" && closing.isEmpty()) {
-                val href = Regex("href=\"([^\"]*)\"").find(attributes)?.groupValues?.get(1)
-                if (href != null) "<a href=\"$href\">" else "<a>"
-            } else {
-                "<$closing$name>"
-            }
-        }
-        for ((entity, character) in decodeEntities) out = out.replace(entity, character)
-        return out
     }
 
     private fun report(

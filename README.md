@@ -211,47 +211,46 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**23.4 (versionCode 236).** The settings hub keeps no storage page
-(owner decision, 23.4). The whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` were green on this machine,
-and `AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`, and
-`KeyboardFocusTest` ran on `quran_phone` as a clean install. The hub's
-Storage row is gone, and with it the page that added the library up, showed
-the phone's free space, and could clear every recitation or every
-pronunciation in one tap. The free-space check that runs before a download
-starts is untouched, as is the sentence that says the phone has no room, and
-a transfer still resumes from its part. Every download is removed where it
-is named: a pack on its own page, a surah on its reciter's list, a
-pronunciation surah on the words page, each with the question a large file
-raises. The Quran text, both translations, both tafsirs, the recitations,
-and the word lists are unchanged. No permission, service, host, dataset, or
-store frame moved, and Play's foreground service declaration and its two
-recordings are unchanged. The app remains in closed testing, so no public
-launch work was done. The three committed store sets stand; settings is not
-one of the eight cards. `content/quran.db` hashes
-`0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
-and `checkdb` verified it; no dataset moved, so no pack changed.
+**23.5 (versionCode 237).** About this surah opens every verse it names
+(owner decision, 23.5). The whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` were green on this machine.
+The introductions carried 446 references, and 261 of them were written with
+an unquoted `href` the old normalizer dropped, so most of the doors the
+source meant were plain words; four more were quran.com footnote links no
+reading surface can open. Those 261 now open, the four keep their words and
+lose the dead door, and the one wrong target, Al-Isra's Night Journey link
+that said v. 1 and opened 17:4, now opens 17:1. The source's two verse
+abbreviations read as words everywhere, `v.` to `verse` and `vv.` to
+`verses`, including the linked and doubled forms, so Al-Kahf's "v. 9" is
+"verse 9" and Al-A'raf's "vv. 46-47" is "verses 46-47". The printed
+introduction to Ar-Ra'd names 34-48 where the surah ends at 43; the link
+opens 34 and the content gate reports the overrun without failing. The
+source's letters are otherwise untouched. `contentVersion` is 1.9.1, the
+core pack is version 9, and the words-en pack's hash moves with the core,
+because both carry the introductions; no other pack changed. The raw export
+and every other dataset are unchanged. `content/quran.db` hashes
+`15e4ac4a25388ddd7714b0c0b28522b6fa91f5fe7587581f25b8a5263f954208`
+and `checkdb` verified it. No permission, service, host, or store frame
+moved, and Play's foreground service declaration and its two recordings are
+unchanged. The app remains in closed testing, so no public launch work was
+done. The three committed store sets stand; About this surah is not one of
+the eight cards. The instrumented accessibility classes were not owed: the
+diff touches `tools/` and `content/`, and no path the trigger names.
 
-The signed bundle comes from `build` run 45990506795, green on `main` for
-the commit `3d650a45`: the whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
-`quran-23.4-vc236.aab` has SHA-256
-`64c890f98fdd147045c0b188d5b987f54d2fde99854009ebd14177bac14ab336`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 23.4` and `versionCode 236`, and the upload certificate is
-the same key 21.4 through 23.3 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 23.4 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
-
-**What changed in 23.4.** The settings hub is ten rows (owner decision,
-23.4). The Storage page was a report: it added the downloads up, showed the
-phone's free space, and offered two doors that cleared every recitation or
-every pronunciation. A reader could not free a byte from its numbers, and
-every act that removes a download already stands where the download is
-named, so the page was a second way to the same removals and the only hub
-row that led nowhere a reader had not been. The free-space check before a
-transfer, its refusal, and the resumable parts stay exactly as they were.
+**What changed in 23.5.** The introductions were a document with dead
+references (owner decision, 23.5). The source wrote most of its targets
+without quotes, and the build kept only a quoted target, so 261 of its 446
+references rendered as plain text while Al-Kahf's odd "v. 9" was one of the
+few that worked. The build now accepts either shape, keeps a link only when
+`ReferenceLink` can open it, and unwraps the rest to their words. The four
+quran.com footnote references are plain words now. Al-Isra's "v. 1" opened
+17:4 because the sentence was updated and the old Bani Israil target was
+left behind; it opens 17:1. `v.` and `vv.` are expanded to `verse` and
+`verses` across the document, so the reader meets one vocabulary, and the
+build fails if the source moves out from under its one correction. The
+audit reads every built introduction as the app would and refuses a missing
+target, an unopenable target, a verse that does not exist, or a label that
+disagrees with the verse it opens.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a

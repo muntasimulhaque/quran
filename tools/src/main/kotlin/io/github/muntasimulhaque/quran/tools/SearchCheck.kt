@@ -5,6 +5,7 @@ import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.Search
 import java.io.File
 import java.sql.Connection
+import java.util.HashMap
 import java.util.TreeMap
 
 /**
@@ -21,8 +22,12 @@ import java.util.TreeMap
  * Readable: a tafsir is stored as a small HTML subset for its own panels to
  * parse, and a search result has no parser behind it, so every excerpt the
  * reader can be shown is checked for markup and for a highlight that lands on
- * words they can see. A surah's introduction is checked the same way. This is
- * the gate that would have caught raw `</p><h2>` in a tafsir result.
+ * words they can see. A surah's introduction is checked the same way, and
+ * every reference it carries must open: an anchor has a target the reading
+ * parses, the verse exists, and a label that states a verse states the verse
+ * it opens. This is the gate that would have caught raw `</p><h2>` in a tafsir
+ * result, and the 261 references the introductions wrote without quotes
+ * (owner decision, 23.5).
  */
 class SearchCheck(private val root: File) {
 
@@ -41,8 +46,15 @@ class SearchCheck(private val root: File) {
         var arabicChecked = 0
         val translations = ArrayList<Pair<Int, String>>(6236)
         val nonAscii = TreeMap<Int, Int>()
+        // The introductions name verses by surah and number, and the packs
+        // that carry them do not carry the surah table. The Book's own counts
+        // are read once here and handed to the introduction audit.
+        val verseCounts = HashMap<Int, Int>()
 
         openSqlite(database).use { connection ->
+            connection.each("SELECT number, verses_count FROM surah ORDER BY number") { rs ->
+                verseCounts[rs.getInt(1)] = rs.getInt(2)
+            }
             connection.each("SELECT ayah_number, text FROM translation ORDER BY ayah_number") { rs ->
                 val raw = rs.getString(2) ?: ""
                 for (codepoint in raw.codePoints()) {
@@ -78,13 +90,14 @@ class SearchCheck(private val root: File) {
         auditScriptRoundTrip("content/quran.db", "bn")
         auditPackIndex()
         auditPlainWords(translations)
-        auditReadableText()
+        auditReadableText(verseCounts)
 
         if (problems.isEmpty()) {
             println("search: $arabicChecked arabic round trips passed")
             println("search: ${nonAscii.size} distinct non-ASCII translation codepoints fold cleanly")
             println("search: the Quran's indexed text is words only")
             println("search: plain english words match")
+            println("search: every introduction reference opens and states its verse")
             println("search: ${readableChecked} readable excerpts carry no markup")
             return 0
         }
@@ -408,7 +421,7 @@ class SearchCheck(private val root: File) {
      * differently from the stored column and report a missing highlight that
      * the reader would never meet.
      */
-    private fun auditReadableText() {
+    private fun auditReadableText(verses: Map<Int, Int>) {
         val packs = File(root, "content/packs")
         if (!packs.isDirectory) return
         val probes = listOf(
@@ -458,18 +471,32 @@ class SearchCheck(private val root: File) {
 
         // A surah's introduction is drawn block by block, heading over its
         // own paragraph, so it must read as prose: no tag survives into the
-        // reading's "About this surah".
-        val infoPack = File(packs, "words-en.db")
-        if (infoPack.isFile) {
+        // reading's "About this surah". Every reference it carries must also
+        // open: the target is one the reading parses, the verse exists, and
+        // a label that states its verse states the verse the target opens.
+        // The introduction travels in two packs, the shipped core and the
+        // English word list, and the two are checked alike so neither can
+        // drift from the other (owner decision, 23.5).
+        for (id in listOf("core", "words-en")) {
+            val infoPack = File(packs, "$id.db")
+            if (!infoPack.isFile) {
+                println("search: $id is not built; introduction check skipped for it")
+                continue
+            }
             openSqlite(infoPack).use { connection ->
-                connection.each("SELECT surah, text FROM surah_info") { rs ->
-                    val drawn = RichText.paragraphs(rs.getString(2) ?: "")
+                connection.each("SELECT surah, text FROM surah_info ORDER BY surah") { rs ->
+                    val surah = rs.getInt(1)
+                    val html = rs.getString(2) ?: ""
+                    val drawn = RichText.paragraphs(html)
                     readableChecked++
                     if (RichText.hasMarkup(drawn)) {
-                        problems += "surah ${rs.getInt(1)} introduction leaked markup: " +
+                        problems += "$id: surah $surah introduction leaked markup: " +
                             drawn.take(90)
                     }
-                    if (drawn.isBlank()) problems += "surah ${rs.getInt(1)} introduction is empty"
+                    if (drawn.isBlank()) problems += "$id: surah $surah introduction is empty"
+                    val audit = SurahInfo.audit(surah, html, verses)
+                    for (problem in audit.problems) problems += "$id: $problem"
+                    for (note in audit.notes) println("search: $id: $note")
                 }
             }
         }

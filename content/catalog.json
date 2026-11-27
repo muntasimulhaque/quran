@@ -24,13 +24,13 @@
             "creditBn": "QPC হাফস, শব্দে শব্দে, তাজবীদসহ; QUL-এর QPC লেখার সাথে যাচাইকৃত",
             "license": "QPC Hafs text and tajweed annotation, distributed via QUL; free for Islamic use · KFGQPC fonts: use, copy and distribute unmodified · Quran metadata via QUL; QUL lists no license. · Names compiled and reviewed for this app from the published Bangla index; no verse text is copied",
             "licenseBn": "QPC হাফস লেখা ও তাজবীদ নির্দেশনা, QUL-এর মাধ্যমে বিতরণ; ইসলামী ব্যবহারের জন্য অবাধ · KFGQPC ফন্ট: অপরিবর্তিত অবস্থায় ব্যবহার, কপি ও বিতরণ · QUL-এর কুরআন মেটাডেটা; QUL কোনো লাইসেন্স উল্লেখ করেনি। · প্রকাশিত বাংলা সূচি থেকে এই অ্যাপের জন্য নাম সংকলিত ও পুনর্বিবেচিত; কোনো আয়াতের লেখা নকল করা হয়নি",
-            "version": "8",
+            "version": "9",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 11534336,
-            "sha256": "d7407645a96b943cfd905dcdbbf5d89b4ba706e33eaa7c3460d4ace4eca88bf7",
-            "tag": "pack-core-d7407645",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-d7407645/core.db"
+            "bytes": 11546624,
+            "sha256": "5c8c0b277c7a450ce280b314a75e45578a8e2443546e9457c2f5f775bb757823",
+            "tag": "pack-core-5c8c0b27",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-5c8c0b27/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -153,10 +153,10 @@
             "version": "QUL 3",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 10555392,
-            "sha256": "e1fa6684f2f07db19df013c0da553b67c10c3f152a5aff067c29a69359076e85",
-            "tag": "pack-words-en-e1fa6684",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-e1fa6684/words-en.db"
+            "bytes": 10567680,
+            "sha256": "a2955b884bb0bd7bffbc70696d9a70f6ce35b8290314c8f16656958029a77a50",
+            "tag": "pack-words-en-a2955b88",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-a2955b88/words-en.db"
         },
         {
             "id": "words-bn",

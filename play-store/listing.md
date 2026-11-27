@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 23.4 (versionCode 236)
+Version: 23.5 (versionCode 237)
 
 ## Listing
 
@@ -245,6 +245,9 @@ What each set shows, in order:
 The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
+
+## Release notes (23.5, 447 characters)
+About this surah now opens the verses it names. References that were plain text, including the common v. and vv. forms, are links now, and each reads verse 9 or verses 46-47 rather than an abbreviation. Tapping one takes you to its first verse, and Al-Isra's Night Journey reference now opens 17:1, the verse its sentence names. The Quran text, translations, tafsirs, recitations, and word meanings are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.4, 465 characters)
 23.4 removes the Storage page from Settings. It added your downloads up and offered to clear every recitation at once, but it could not free a byte by itself, and every download is already removed where it is named: on the reciter's list, the words page, or the pack's own page. The check that refuses a download when the phone is full is unchanged. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
