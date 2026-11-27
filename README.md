@@ -241,8 +241,8 @@ the commit `3d650a45`: the whole JVM suite, `checkdb`, `search`,
 `versionName 23.4` and `versionCode 236`, and the upload certificate is
 the same key 21.4 through 23.3 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 23.4 bundle is in `play-store/aab/` for the upload, and that copy is
-deleted once Play has it.
+The 23.4 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
 
 **What changed in 23.4.** The settings hub is ten rows (owner decision,
 23.4). The Storage page was a report: it added the downloads up, showed the
