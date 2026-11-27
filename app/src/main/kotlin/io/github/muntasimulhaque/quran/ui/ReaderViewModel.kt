@@ -29,7 +29,6 @@ import io.github.muntasimulhaque.quran.data.RecitedWord
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
-import io.github.muntasimulhaque.quran.data.StorageSummary
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
@@ -1497,19 +1496,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         wordVoice = WordVoice.Ready
         withContext(Dispatchers.IO) { wordAudio.remove(surah) }
     }
-
-    /** The storage page's one act for the pronunciation. */
-    suspend fun removeAllWordAudio() {
-        pendingWord = null
-        wordVoice = WordVoice.Ready
-        wordAudio.removeAll()
-    }
-
-    /** The storage page's one act for the recitations. */
-    suspend fun removeAllRecitations(): Int = library.removeAllRecitationAudio()
-
-    /** The storage page's numbers. */
-    suspend fun storageSummary(): StorageSummary = library.storageSummary()
 
     private data class PendingWord(val ayah: Int, val position: Int, val surah: Int)
 

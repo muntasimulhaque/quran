@@ -86,10 +86,6 @@ object DownloadParts {
         val root = root(context).apply { mkdirs() }
         return SafePaths.childUnder(root, name)
     }
-
-    /** The bytes held by parts that have not completed yet. */
-    fun bytes(context: Context): Long =
-        root(context).listFiles { file -> file.isFile }?.sumOf { it.length() } ?: 0L
 }
 
 /**

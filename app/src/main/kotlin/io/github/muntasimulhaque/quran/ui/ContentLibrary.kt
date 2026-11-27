@@ -14,7 +14,6 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadCenter
 import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.DownloadJob
-import io.github.muntasimulhaque.quran.data.DownloadStorage
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.data.PackCatalog
@@ -29,7 +28,6 @@ import io.github.muntasimulhaque.quran.data.RecitationPackage
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.SettingsStore
-import io.github.muntasimulhaque.quran.data.StorageSummary
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.CatalogContent
@@ -829,29 +827,6 @@ class ContentLibrary(
     suspend fun removeDownloads(recitation: String, surah: Int): Boolean = withContext(Dispatchers.IO) {
         val folder = reciterFolder(recitation) ?: return@withContext false
         recitationStore.removeSurah(folder, surah) > 0
-    }
-
-    /**
-     * Every downloaded surah's audio, across every reciter. The timing packs
-     * stay: they are small, they are what makes a voice ready offline, and a
-     * reader who clears the audio has not said they want the voice forgotten.
-     * The bundled Al-Fatiha is an asset and is never touched.
-     */
-    suspend fun removeAllRecitationAudio(): Int = withContext(Dispatchers.IO) {
-        var removed = 0
-        for (recitation in recitations) {
-            val folder = reciterFolder(recitation.id) ?: continue
-            removed += recitationStore.removeAll(folder)
-        }
-        removed
-    }
-
-    /** The storage page's numbers, read on a worker. */
-    suspend fun storageSummary(): StorageSummary = withContext(Dispatchers.IO) {
-        DownloadStorage.summary(
-            application,
-            packs.filter { it.installed || it.id == PackCatalog.CORE_ID },
-        )
     }
 
     private fun reciterFolder(recitation: String): String? = database?.recitationFolder(recitation)

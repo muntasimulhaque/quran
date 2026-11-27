@@ -211,51 +211,35 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**23.3 (versionCode 235).** The surah introduction closes back to the head
-(owner decision, 23.3). The whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` were green on this machine.
-A reader who opens the introduction from the door under the basmalah and
-reads several screens into it now closes it and is handed the surah's head,
-the door under the basmalah and the first ayah below it, not the ayah the
-document had scrolled past. The close asks the list for the opening in the
-same measure that drops the document, so no frame shows the wrong ayah. Once
-the reader has scrolled past the introduction into the ayahs, the close
-leaves the ayah where they reached it, so a reference followed from the
-introduction is not undone by a later tap. `SurahIntroTest` ran on
-`quran_phone` as a clean install, and `AccessibilityTest`, `LargeTextTest`,
-`ReadingSemanticsTest`, and `KeyboardFocusTest` ran beside it; the deep
-close and the head it hands back are measured. The basmalah is unchanged, as
-is the Quran text, both translations, both tafsirs, the recitations, and the
-word lists. No permission, service, host, dataset, or store frame moved, and
-Play's foreground service declaration and its two recordings are unchanged.
-The app remains in closed testing, so no public launch work was done. The
-three committed store sets stand; the surah opening is not one of the eight
-cards. `content/quran.db` hashes
+**23.4 (versionCode 236).** The settings hub keeps no storage page
+(owner decision, 23.4). The whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` were green on this machine,
+and `AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`, and
+`KeyboardFocusTest` ran on `quran_phone` as a clean install. The hub's
+Storage row is gone, and with it the page that added the library up, showed
+the phone's free space, and could clear every recitation or every
+pronunciation in one tap. The free-space check that runs before a download
+starts is untouched, as is the sentence that says the phone has no room, and
+a transfer still resumes from its part. Every download is removed where it
+is named: a pack on its own page, a surah on its reciter's list, a
+pronunciation surah on the words page, each with the question a large file
+raises. The Quran text, both translations, both tafsirs, the recitations,
+and the word lists are unchanged. No permission, service, host, dataset, or
+store frame moved, and Play's foreground service declaration and its two
+recordings are unchanged. The app remains in closed testing, so no public
+launch work was done. The three committed store sets stand; settings is not
+one of the eight cards. `content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
-The signed bundle comes from `build` run 45968593083, green on `main` for
-the commit `e0639328`: the whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
-`quran-23.3-vc235.aab` has SHA-256
-`3aab44a28770ac535c08981e3791f6641d4ad82bd4d272bc48fec44c3d94b4b4`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 23.3` and `versionCode 235`, and the upload certificate is
-the same key 21.4 through 23.2 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 23.3 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
-
-**What changed in 23.3.** The close of the surah introduction is a return
-(owner decision, 23.3). The introduction is the list's first item, so reading
-down it spent the list's own scroll offset; closing left the offset behind and
-the shrinking item handed back the ayah ten or fourteen rows down. The close
-now asks for the head while the opening is what the glass shows, in the same
-measure that drops the document, and leaves the ayah alone once the reader has
-scrolled past it. The head is an item, not a pixel depth, so a rotation or a
-text size change while the document is open cannot make the return stale. The
-basmalah is unchanged, and so are the Quran text, both translations, both
-tafsirs, the recitations, and the word lists.
+**What changed in 23.4.** The settings hub is ten rows (owner decision,
+23.4). The Storage page was a report: it added the downloads up, showed the
+phone's free space, and offered two doors that cleared every recitation or
+every pronunciation. A reader could not free a byte from its numbers, and
+every act that removes a download already stands where the download is
+named, so the page was a second way to the same removals and the only hub
+row that led nowhere a reader had not been. The free-space check before a
+transfer, its refusal, and the resumable parts stay exactly as they were.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a

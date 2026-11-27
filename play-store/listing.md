@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 23.3 (versionCode 235)
+Version: 23.4 (versionCode 236)
 
 ## Listing
 
@@ -245,6 +245,9 @@ What each set shows, in order:
 The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
+
+## Release notes (23.4, 465 characters)
+23.4 removes the Storage page from Settings. It added your downloads up and offered to clear every recitation at once, but it could not free a byte by itself, and every download is already removed where it is named: on the reciter's list, the words page, or the pack's own page. The check that refuses a download when the phone is full is unchanged. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.3, 481 characters)
 Closing About this surah now returns you to the surah's head. Read one screen or ten into it, and the tap puts the document away with the page back at the door under the basmalah and the first ayah below it, not at the ayah the document had scrolled past. If you have already scrolled past the introduction into the ayahs, the tap leaves the ayah you reached. The Quran text, translations, tafsirs, recitations, and content database are unchanged. No ads, no trackers, no accounts.

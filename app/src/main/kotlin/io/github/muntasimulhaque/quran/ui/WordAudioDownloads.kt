@@ -258,12 +258,6 @@ internal class WordAudioDownloads(
         refresh(current)
     }
 
-    /** The storage page's one act: take back every downloaded surah's voices. */
-    suspend fun removeAll() = withContext(Dispatchers.IO) {
-        store.onDevice().rows.forEach { row -> store.remove(row.surah) }
-        refresh(current)
-    }
-
     /** Reads the current surah's state off the frame and publishes it. */
     private fun refresh(surah: Int) {
         scope.launch {

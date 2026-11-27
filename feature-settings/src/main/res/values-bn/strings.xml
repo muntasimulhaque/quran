@@ -70,25 +70,6 @@
 
     <string name="settings_version">সংস্করণ</string>
 
-    <string name="settings_title_storage">স্টোরেজ</string>
-    <string name="settings_storage_reading">স্টোরেজ পড়া হচ্ছে…</string>
-    <string name="settings_storage_free">খালি জায়গা</string>
-    <string name="settings_storage_on_phone">এই ফোনে</string>
-    <string name="settings_storage_content">কুরআনের লেখা ও কনটেন্ট প্যাক</string>
-    <string name="settings_storage_partial">অসম্পূর্ণ ডাউনলোড</string>
-    <string name="settings_storage_downloads">ডাউনলোড</string>
-    <string name="settings_storage_recitations">তিলাওয়াত</string>
-    <string name="settings_storage_pronunciation">শব্দের উচ্চারণ</string>
-    <string name="settings_storage_remove_all">সব সরান</string>
-    <string name="settings_storage_keep">রাখুন</string>
-    <string name="settings_storage_note">অনুবাদ, তাফসীর বা শব্দের তালিকা তার নিজের পাতায় সরানো হয়, যেখানে তার নাম ও শর্ত আছে।</string>
-    <string name="settings_storage_remove_recitations_name">সব তিলাওয়াত সরান</string>
-    <string name="settings_storage_remove_recitations_title">সব ডাউনলোড করা তিলাওয়াত সরাবেন?</string>
-    <string name="settings_storage_remove_recitations_body">এতে আপনার ডাউনলোড করা প্রতিটি সূরার অডিও মুছে যাবে। তিলাওয়াতকারীদের সময়সূচি থাকবে, এবং আল-ফাতিহা অ্যাপে থাকবে।</string>
-    <string name="settings_storage_remove_pronunciation_name">সব উচ্চারণ সরান</string>
-    <string name="settings_storage_remove_pronunciation_title">সব ডাউনলোড করা উচ্চারণ সরাবেন?</string>
-    <string name="settings_storage_remove_pronunciation_body">এতে আপনার ডাউনলোড করা শব্দের উচ্চারণ মুছে যাবে। আল-ফাতিহার অন্তর্ভুক্ত শব্দগুলো থাকবে।</string>
-
     <string name="about_group_content">বিষয়বস্তু</string>
     <string name="about_group_fonts">ফন্ট</string>
     <string name="about_group_recitations">তিলাওয়াত</string>

@@ -27,7 +27,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Literata
 
 /** The pages the settings hub opens, one at a time. */
 enum class SettingsPage {
-    Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Words, Tajweed, About, Storage,
+    Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Words, Tajweed, About,
 }
 
 @Composable
@@ -43,7 +43,6 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Words -> R.string.settings_title_words
         SettingsPage.Tajweed -> R.string.settings_title_tajweed
         SettingsPage.About -> R.string.settings_title_about
-        SettingsPage.Storage -> R.string.settings_title_storage
     },
 )
 
@@ -60,10 +59,10 @@ private fun themeSummary(settings: AppSettings): String = settings.theme.name()
  * The hub: one row per setting, each carrying where it stands, so a reader
  * can see their own setup at a glance and open only what they came to change.
  *
- * The eleven rows read as one list, ordered by what a reader comes to change:
+ * The ten rows read as one list, ordered by what a reader comes to change:
  * the size of the text first, because that is the row this list is opened
  * for most, then the ground and the language, then the reading's own choices,
- * the voice, the reminder, the storage, and the app. It used to lead with the app's own
+ * the voice, the reminder, and the app. It used to lead with the app's own
  * surfaces on the reasoning that they are the words everything else is read
  * in; that is a designer's reason and not a reader's (owner decision, this
  * build). About is the list's last row like any other. Every row keeps the
@@ -153,11 +152,6 @@ fun SettingsHub(
             summary = dailySubtitle(settings, notificationsBlocked, exactGrantWithheld),
             modifier = Modifier.testTag("row-daily"),
         ) { onOpen(SettingsPage.Daily) }
-        PageRow(
-            title = stringResource(R.string.settings_title_storage),
-            summary = null,
-            modifier = Modifier.testTag("row-storage"),
-        ) { onOpen(SettingsPage.Storage) }
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, localizedDigits(version)),
