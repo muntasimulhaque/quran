@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -79,7 +78,6 @@ internal fun SurahOpening(
     language: String,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
-    onPaperTap: () -> Unit,
     /** Opens an internal reference the introduction links to, when it does. */
     onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
     metrics: ReadingMetrics,
@@ -185,9 +183,11 @@ internal fun SurahOpening(
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
             // chosen thing on the page, on the same ground a chosen ayah
-            // leaves behind. A press on it answers in the accent rather than
-            // the gray an unstyled ripple would flash.
-            val wash = if (expanded) palette.selected else Color.Transparent
+            // leaves behind. It is also its own way out: the door that
+            // opened it is gone while it is up, so a tap anywhere on it
+            // puts it away, and the accent ripple is the press answering.
+            // The click's label is the word a screen reader hears, so the
+            // one exit is spoken as Hide (owner decision, 23.2).
             val press = remember { MutableInteractionSource() }
             Box(
                 // The introduction is a document, not one paragraph: it is
@@ -200,13 +200,21 @@ internal fun SurahOpening(
                 modifier = Modifier
                     .padding(top = Space.Block)
                     .clip(Radii.Card)
-                    .background(wash)
+                    .background(palette.selected)
                     .focusRing(press, Radii.Card)
+                    // A tap puts it away and a drag is the list's: the
+                    // standard click cancels its press when the scroll takes
+                    // over, so a reader who drags the introduction reads on
+                    // and does not lose it to a stray tap. The label is what
+                    // TalkBack says the double tap does (owner decision,
+                    // 23.2).
                     .clickable(
                         interactionSource = press,
                         indication = ripple(color = MaterialTheme.colorScheme.primary),
-                        onClick = onPaperTap,
+                        onClickLabel = stringResource(R.string.reading_hide),
+                        onClick = { onExpandedChange(false) },
                     )
+                    .testTag("surah-about")
                     .padding(horizontal = Space.WashInset, vertical = Space.Row),
             ) {
                 RichBlocks(
@@ -227,17 +235,17 @@ internal fun SurahOpening(
             }
         }
         // The door itself is a button like every other action in the app,
-        // so a word that answers a tap never reads as plain type. It sits
-        // under the introduction: closed, it is the whole of what is shown;
-        // opened, it is the Hide that puts the introduction away again. The
-        // door exists only where the introduction does: a language with no
-        // introduction is not offered a button that opens nothing.
-        if (info != null) {
+        // so a word that answers a tap never reads as plain type. It is
+        // drawn only while the introduction is closed: opened, the
+        // introduction is the whole of what stands under the basmalah, and
+        // its own tap puts it away, so there is no second button at the
+        // foot to scroll to. The door exists only where the introduction
+        // does: a language with no introduction is not offered a button
+        // that opens nothing (owner decision, 23.2).
+        if (!expanded && info != null) {
             TextButton(
-                label = stringResource(
-                    if (expanded) R.string.reading_hide else R.string.reading_about_surah,
-                ),
-                onClick = { onExpandedChange(!expanded) },
+                label = stringResource(R.string.reading_about_surah),
+                onClick = { onExpandedChange(true) },
                 modifier = Modifier.padding(top = 10.dp),
             )
         }

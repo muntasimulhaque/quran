@@ -5,6 +5,64 @@ summarized on the [front page](README.md); the releases before it are written
 in full below. The reason a decision was made lives in the KDoc beside the code
 it decided, tagged `owner decision`, and in `git log`.
 
+## 23.1
+
+**23.1 (versionCode 233).** Downloads survive the window now (owner
+decision, 23.1). The whole JVM suite, `checkdb`, `search`, `storecards --check`,
+lint, and `assembleDebug` were green on this machine. The accessibility
+classes, the settings and playback legs, the storage page, and the library
+controller ran on `quran_phone` as a clean install, and a real word package and
+a real Husary surah arrived through the service. A content pack you add, a
+surah's recitation, or a surah's pronunciation now runs in a dataSync foreground service with a progress
+notification and Cancel, so a reader who leaves the app does not lose a 186 MB
+surah. Recitation and word-audio packages keep a stable part and resume with a
+Range request; a dropped connection no longer starts the whole transfer again.
+The service checks free space before the first byte, asks before spending
+mobile data, and the new Storage page adds the library up and can take back all
+downloaded recitations or pronunciation. The app declares one new permission,
+`FOREGROUND_SERVICE_DATA_SYNC`; there is no analytics, telemetry, account, or
+new host. The accessibility tree, the app links, the content, and the store
+listing are otherwise as they were. The app remains in closed testing, so no
+public launch work was done. The three committed store sets stand; neither the
+Storage row nor the mobile-data question is one of the eight cards.
+`content/quran.db` hashes
+`0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
+and `checkdb` verified it; no dataset moved, so no pack changed.
+
+Play's foreground service declaration for 23.1 is answered, not pending. The
+data sync service is declared as network processing, other, and the media
+playback service as media playback, each with its own sentence saying it runs
+only on the reader's word. Two screen recordings back the declaration, the
+download with its notification and Cancel and the recitation playing behind
+the lock screen, and they live in `docs/demos/` so the links are stable:
+
+- https://muntasimulhaque.github.io/quran/demos/quran-fgs-data-sync.mp4
+- https://muntasimulhaque.github.io/quran/demos/quran-fgs-media-playback.mp4
+
+The signed bundle comes from `build` run 45879466662, green on `main` for
+the commit `d1ebcce0`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.1-vc233.aab` has SHA-256
+`65a982987613dc74d30c287f23b6eac86f228572429cb64a6ffb52b556283757`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.1` and `versionCode 233`, and the upload certificate is the
+same key 21.4 through 23.0 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 23.1 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
+
+**What changed in 23.1.** The download is the feature (owner decision, 23.1).
+A content pack, a surah's recitation, and a surah's pronunciation used to live
+in the window's own scope. The phone could take the process back when the
+reader switched to another app, and the recitation and word-audio downloaders
+began a dropped package at zero. The service keeps the transfer alive with a
+notification, the two package downloaders keep a stable part and ask for the
+rest, and the storage page shows what the library weighs. The reader sees a
+download survive a backgrounding, a resumed transfer after a drop, a free-space
+answer before the first byte, and a mobile-data question before a cellular
+transfer. The Quran text, both translations, both tafsirs, the recitations, and
+the word lists are unchanged.
+
 ## 23.0
 
 **23.0 (versionCode 232).** Playback follows the phone's text size now (owner

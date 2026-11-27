@@ -199,11 +199,13 @@ internal fun ReadingRows(
     val jumpFocus = remember { FocusRequester() }
     var jumpAyah by remember { mutableStateOf<Int?>(null) }
 
-    // The surah's introduction opens from its quiet door; once it is open, a
-    // tap anywhere on the paper, the ayahs, or the closing line puts it away
-    // again, exactly as the Hide action does, so the reader is never left
-    // looking for the way out. The state lives here rather than inside the
-    // opening item because the taps that dismiss it land outside that item.
+    // The surah's introduction opens from its quiet door; once it is open,
+    // a tap anywhere on the introduction itself, the paper, the ayahs, or
+    // the closing line puts it away again, so the reader is never left
+    // looking for the way out. Opened, the door is gone and the
+    // introduction is its own close, spoken as Hide to TalkBack (owner
+    // decision, 23.2). The state lives here rather than inside the opening
+    // item because the taps that dismiss it land outside that item.
     var aboutOpen by rememberSaveable(surah.number) { mutableStateOf(false) }
     val dismissAbout: () -> Unit = {
         if (aboutOpen) aboutOpen = false else onBackgroundTap()
@@ -395,7 +397,6 @@ internal fun ReadingRows(
                 language = contentLanguage,
                 expanded = aboutOpen,
                 onExpandedChange = { aboutOpen = it },
-                onPaperTap = { if (!aboutOpen) onBackgroundTap() },
                 onOpenReference = onOpenReference,
                 metrics = metrics,
             )

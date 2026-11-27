@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 23.1 (versionCode 233)
+Version: 23.2 (versionCode 234)
 
 ## Listing
 
@@ -245,6 +245,9 @@ What each set shows, in order:
 The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
+
+## Release notes (23.2, 404 characters)
+The surah introduction now closes with a tap anywhere on it. The Hide button at its foot is gone, and the door under the basmalah appears only while the introduction is closed. A drag still scrolls the page, so a long introduction is not lost to a stray press. The basmalah, the Quran text, the translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.1, 430 characters)
 23.1 keeps a download moving when you leave the app. A surah, a word set, or a content pack carries on with a progress notification and Cancel, resumes after a dropped connection, and checks free space before it starts. A recitation now asks before it uses mobile data, and Storage shows what your downloads weigh. Text, translations, tafsirs, recitations, and the content database are unchanged. No ads, no trackers, no accounts.
