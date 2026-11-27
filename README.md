@@ -258,8 +258,17 @@ the word sheet's plain counts. None of the eight store cards shows the
 picker, the Daily page, or the word sheet, so the three committed store
 sets stand, and `storecards --check` says the cards are current.
 
-The signed bundle comes from the newest green `build` run on `main`; this
-record is completed with its run number and hash after the run.
+The signed bundle comes from `build` run 46056908566, green on `main` for
+the commit `d776fd00`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.8-vc240.aab` has SHA-256
+`18dbddaef74e4547d3f7db12444d0bffe204bc01c6b10ae4c9699298e0d2ab00`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.8` and `versionCode 240`, and the upload certificate is
+the same key 21.4 through 23.7 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 23.8 bundle is ready to submit to Play, and the hand-off copy in
+`play-store/aab/` is kept until Play has it.
 
 **What changed in 23.8.** The daily ayah stops promising a minute (owner
 decision, 23.8). The exact alarm and its permission were the app's one trip

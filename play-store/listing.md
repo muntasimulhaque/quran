@@ -246,8 +246,8 @@ The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
 
-## Release notes (23.8, 435 characters)
-The daily ayah is a quiet nudge at an hour you choose, and it arrives around that hour: the exact-alarm permission and its system screen are gone, and the picker is a single hour tape. A word's root and dictionary form now say how often they stand in the Book, as plain facts; the places list is gone. The verse link is gone too. Text, translations, tafsirs, recitations, and word lists are unchanged. No ads, no trackers, no accounts.
+## Release notes (23.8, 355 characters)
+The daily ayah is a quiet nudge at an hour you choose, and it arrives around that hour. The picker is now one hour tape, so setting it is one swipe and two taps. A word's root and dictionary form say how often they stand in the Book, as plain facts. Text, translations, tafsirs, recitations, and word lists are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.7, 497 characters)
 Word meanings are now offered above the basmalah, in the surah's head, so nothing stands between the Quran's first line and its verse. The invitation keeps its shape and goes away once the word list is on your device. The translation ask is gone: both translations ship with the app, so it only appeared when you turned yours off. A tafsir you switched off is offered again in the ayah card. Text, translations, tafsirs, recitations, and word lists are unchanged. No ads, no trackers, no accounts.
