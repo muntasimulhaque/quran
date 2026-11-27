@@ -243,7 +243,8 @@ the commit `e0639328`: the whole JVM suite, `checkdb`, `search`,
 `versionName 23.3` and `versionCode 235`, and the upload certificate is
 the same key 21.4 through 23.2 shipped under, SHA-256
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The hand-off copy is in `play-store/aab/` for Play's closed testing.
+The 23.3 bundle was submitted for Play review, and the hand-off copy in
+`play-store/aab/` was deleted once Play had it.
 
 **What changed in 23.3.** The close of the surah introduction is a return
 (owner decision, 23.3). The introduction is the list's first item, so reading
