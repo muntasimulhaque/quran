@@ -233,6 +233,16 @@ Storage row nor the mobile-data question is one of the eight cards.
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
+Play's foreground service declaration for 23.1 is answered, not pending. The
+data sync service is declared as network processing, other, and the media
+playback service as media playback, each with its own sentence saying it runs
+only on the reader's word. Two screen recordings back the declaration, the
+download with its notification and Cancel and the recitation playing behind
+the lock screen, and they live in `docs/demos/` so the links are stable:
+
+- https://muntasimulhaque.github.io/quran/demos/quran-fgs-data-sync.mp4
+- https://muntasimulhaque.github.io/quran/demos/quran-fgs-media-playback.mp4
+
 The signed bundle comes from `build` run 45879466662, green on `main` for
 the commit `d1ebcce0`: the whole JVM suite, `checkdb`, `search`,
 `storecards --check`, lint, and `assembleDebug` passed. The signed bundle

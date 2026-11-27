@@ -149,7 +149,7 @@ as a dead letter.
 | `licenses/` | the SIL Open Font License the six open faces ship under, wired into the app's assets |
 | `play-store/` | the listing, the store cards per form factor and the frames they are composed from, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
-| `docs/` | the Pages site and the privacy policy Play links to |
+| `docs/` | the Pages site, the privacy policy Play links to, and `demos/`, the two screen recordings that answer Play's foreground service declaration |
 | `.github/workflows/` | `build.yml` (gates, signed bundle), `instrumented.yml` (dispatch-only data and app tests, signal only), `screenshots.yml` (dispatch-only capture signal; the store set is local) |
 
 ## Where the rest lives
