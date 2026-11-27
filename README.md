@@ -244,6 +244,18 @@ frames are evidence, not store frames. The head is not one of the eight
 store cards, so the three committed store sets stand, and the
 `storecards --check` command says the cards are current.
 
+The signed bundle comes from `build` run 46022157549, green on `main` for
+the commit `6169a3fb`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.6-vc238.aab` has SHA-256
+`baffc583638d1e53c73a720846ad8edb843bb44b1c410b3ca673df3b515d645c`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.6` and `versionCode 238`, and the upload certificate is
+the same key 21.4 through 23.5 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 23.6 bundle is in `play-store/aab/` for the upload, and that copy is
+deleted once Play has it.
+
 **What changed in 23.6.** The introduction's door stood between the
 basmalah and the first ayah (owner decision, 23.6). The basmalah is read
 from the content and is the text's first line, so an app door there split
