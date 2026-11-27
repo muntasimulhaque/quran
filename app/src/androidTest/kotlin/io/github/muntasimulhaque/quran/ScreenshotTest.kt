@@ -471,11 +471,6 @@ class ScreenshotTest {
                 )
             }
         }
-        runCatching {
-            instrumentation.uiAutomation
-                .executeShellCommand("appops set ${context.packageName} SCHEDULE_EXACT_ALARM allow")
-                .close()
-        }
         val store = PackStore(context)
         store.install("translation-saheeh-en")
         store.install("words-en")

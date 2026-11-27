@@ -9,8 +9,9 @@ import java.io.File
  * The law names the exact permissions the app may declare: INTERNET
  * for content from the project's own Releases, POST_NOTIFICATIONS,
  * the foreground service flags for the recitation and the download
- * service, the exact alarm for the daily reminder's time, and
- * RECEIVE_BOOT_COMPLETED to re-arm that reminder after a reboot. The source manifest is what
+ * service, and RECEIVE_BOOT_COMPLETED to re-arm the daily reminder after a
+ * reboot. The daily reminder is an inexact nudge and declares no exact alarm
+ * (owner decision, 23.8). The source manifest is what
  * this app asks for on its own; a library may merge more in later,
  * and those are documented rather than fought. A dependency that
  * merges a permission changes the set silently, so the set is pinned
@@ -32,7 +33,6 @@ class ManifestPermissionsTest {
                 "android.permission.FOREGROUND_SERVICE",
                 "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
                 "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
-                "android.permission.SCHEDULE_EXACT_ALARM",
                 "android.permission.RECEIVE_BOOT_COMPLETED",
             ),
             declared,
@@ -56,7 +56,6 @@ class ManifestPermissionsTest {
                 "android.permission.FOREGROUND_SERVICE",
                 "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
                 "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
-                "android.permission.SCHEDULE_EXACT_ALARM",
                 "android.permission.RECEIVE_BOOT_COMPLETED",
                 // Media3 and AndroidX merge these in; the privacy policy
                 // names them. A new one is a change the law requires the

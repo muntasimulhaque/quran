@@ -126,13 +126,4 @@
         <item quantity="other">%1$sটি রূপে</item>
     </plurals>
     <string name="reading_word_lemma_count">%1$s, %2$s</string>
-    <string name="reading_word_places_back">শব্দে ফিরুন</string>
-    <string name="reading_word_places_current">আপনার স্থান</string>
-    <string name="reading_word_places_empty">এই ডিভাইসের শব্দ তালিকায় এই শব্দের স্থানগুলো নেই।</string>
-    <string name="reading_word_places_failed">শব্দ তালিকা থেকে স্থানগুলো পড়া যায়নি।</string>
-    <string name="reading_word_places_retry">আবার চেষ্টা করুন</string>
-    <plurals name="reading_word_places_count">
-        <item quantity="one">%1$sটি স্থান</item>
-        <item quantity="other">%1$sটি স্থান</item>
-    </plurals>
 </resources>

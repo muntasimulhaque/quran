@@ -1,7 +1,5 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +7,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,8 +48,6 @@ data class SettingsActions(
     val onDailyAyah: (Boolean) -> Unit = {},
     val onDailyAyahTime: (Int) -> Unit = {},
     val onOpenNotificationSettings: () -> Unit = {},
-    /** The phone's own screen for the exact alarm, when it is still withheld. */
-    val onAskExactAlarm: () -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onToggleTafsir: (String) -> Unit = {},
     val onToggleTranslation: (String) -> Unit = {},
@@ -95,15 +93,12 @@ fun SettingsSheet(
     tajweedSample: suspend () -> Ayah?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     notificationsBlocked: () -> Boolean,
-    exactGrantWithheld: () -> Boolean,
     /**
-     * Whether this phone has no screen for the notification settings, or for
-     * the exact alarm, at all. The Daily page draws that as a state line with
-     * no door, because a word that opens nothing is worse than a sentence
-     * (owner decision, 19.3).
+     * Whether this phone has no screen for the notification settings at all.
+     * The Daily page draws that as a state line with no door, because a word
+     * that opens nothing is worse than a sentence (owner decision, 19.3).
      */
     notificationScreenMissing: () -> Boolean = { false },
-    alarmScreenMissing: () -> Boolean = { false },
     actions: SettingsActions,
     onDismiss: () -> Unit,
     /**
@@ -166,7 +161,6 @@ fun SettingsSheet(
                         recitations = recitations,
                         version = version,
                         notificationsBlocked = notificationsBlocked(),
-                        exactGrantWithheld = exactGrantWithheld(),
                         packSetup = packSetup,
                         onOpen = { page = it },
                     )
@@ -211,13 +205,10 @@ fun SettingsSheet(
                     SettingsPage.Daily -> DailyPage(
                         settings = settings,
                         notificationsBlocked = notificationsBlocked(),
-                        exactGrantWithheld = exactGrantWithheld(),
                         notificationScreenMissing = notificationScreenMissing(),
-                        alarmScreenMissing = alarmScreenMissing(),
                         onDailyAyah = actions.onDailyAyah,
                         onDailyAyahTime = actions.onDailyAyahTime,
                         onOpenNotificationSettings = actions.onOpenNotificationSettings,
-                        onAskExactAlarm = actions.onAskExactAlarm,
                     )
                     SettingsPage.Translations -> TranslationsPage(
                         settings = settings,

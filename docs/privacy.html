@@ -90,22 +90,12 @@ connection at all.</p>
       or a surah's word audio after the window is gone. The download service
       starts only from a download the reader asked for; its notification
       carries progress and Cancel.</li>
-  <li><code>SCHEDULE_EXACT_ALARM</code>: the daily ayah reminder, and nothing
-      else. Before Android 12 exact alarms were never gated, so on those
-      releases the app uses them and there is nothing for the reader to grant.
-      From Android 12 the phone's special access decides: on many phones, and
-      from Android 14 on most new installs, it starts out withheld, and the
-      app asks for it in the phone's own screen at the two moments the reader
-      sets the reminder (turning it on, or moving its time). The Daily page
-      then says where it stands, with the one door the phone offers. Nothing
-      about this permission leaves the phone: it is a switch for when this
-      app's own reminder is due, and no other app's alarms are touched.</li>
   <li><code>RECEIVE_BOOT_COMPLETED</code>: putting the daily reminder back
       after a restart, an app update, or a change of the phone's clock or time
       zone. It is used only to re-arm the reminder the reader already set.</li>
 </ul>
 
-<p>The app declares those seven permissions. The player's library also merges in
+<p>The app declares those six permissions. The player's library also merges in
 <code>ACCESS_NETWORK_STATE</code>, <code>WAKE_LOCK</code>, and
 <code>DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION</code>, which the app does not
 declare. <code>ACCESS_NETWORK_STATE</code> is what the quiet refresh reads to

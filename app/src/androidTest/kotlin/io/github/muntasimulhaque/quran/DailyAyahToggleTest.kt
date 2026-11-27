@@ -6,14 +6,10 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -24,10 +20,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -49,17 +43,16 @@ import java.io.File
 
 /**
  * The daily reminder's own page: the switch is the switch, the row is the
- * door, and the moment is chosen on the app's own hour and minute tapes,
- * which reach every minute.
+ * door, and the hour is chosen on the app's own hour tape.
  *
  * The test follows the shape a reader meets, in the order a reader meets it.
  * The hub row's switch turns the reminder on and nothing else does; the rest
  * of the row opens the page; the page carries the same switch at its top and
- * the moment below it; and the time row opens the picker, whose Set writes the
- * moment where the alarm reads it. A tap on the row body that flipped the
- * switch would be the bug this pins, and so would a picker that could only
- * reach the top of the hour or a page switch that answered a different value
- * from the hub's.
+ * the hour below it; and the time row opens the picker, whose Set writes the
+ * hour where the alarm reads it. A tap on the row body that flipped the
+ * switch would be the bug this pins, and so would a page switch that answered
+ * a different value from the hub's, or a picker that promised a minute the
+ * batched alarm cannot keep (owner decision, 23.8).
  */
 @RunWith(AndroidJUnit4::class)
 class DailyAyahToggleTest {
@@ -80,14 +73,6 @@ class DailyAyahToggleTest {
                 instrumentation.targetContext.packageName,
                 android.Manifest.permission.POST_NOTIFICATIONS,
             )
-            // The same two acts also ask, in the phone's own screen, for the
-            // exact alarm, which Android 14 and later withhold until the
-            // reader allows it. That screen would cover the app and take the
-            // compose hierarchy with it, so the test answers it the way a
-            // reader who wants the reminder would: once, up front.
-            instrumentation.uiAutomation.executeShellCommand(
-                "appops set ${context.packageName} SCHEDULE_EXACT_ALARM allow",
-            ).close()
             LanguagePreference(context).set("en")
             runBlocking {
                 SettingsStore(context).apply {
@@ -106,11 +91,8 @@ class DailyAyahToggleTest {
                     setDailyAyahTime(8 * 60)
                 }
             }
-            // The reminder's own alarm goes when its switch does, so no exact
-            // alarm is left standing. The exact grant itself is left as the
-            // reader gave it: taking it back while this process is alive makes
-            // the system kill it, and the connected run uninstalls the app,
-            // which clears the grant anyway.
+            // The reminder's own alarm goes when its switch does, so none is
+            // left standing.
             io.github.muntasimulhaque.quran.daily.DailyAyahScheduler.apply(
                 context,
                 enabled = false,
@@ -186,7 +168,7 @@ class DailyAyahToggleTest {
         }
         back()
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithText("8:00", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText(hourText(), substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText(title).assertIsDisplayed()
     }
@@ -219,20 +201,20 @@ class DailyAyahToggleTest {
         back()
         compose.onNodeWithTag("row-daily")
             .performScrollTo()
-            .assert(hasText("8:00", substring = true))
+            .assert(hasText(hourText(), substring = true))
     }
 
     /**
-     * The moment can be typed, and the typing has a visible door.
+     * The hour tape is the whole time now, and Set writes the hour.
      *
-     * The big hour and minute answer a tap or a long press, but a gesture that
-     * has to be taught is not a signifier; the keyboard mark under the tapes
-     * is. This opens the picker, photographs it before the keyboard covers the
-     * page, then types 09:30 through the mark, the hour field, the IME's Next,
-     * and the minute field, and reads the stored minute back.
+     * The minute tape, the typed field, and the keyboard mark left with the
+     * exact alarm (owner decision, 23.8). This opens the picker, photographs
+     * it, moves the hour tape to nine, and reads the stored hour back. The
+     * phone's own 12 or 24 hour reading decides the digits, so the test moves
+     * the tape by value rather than by a number it reads on screen.
      */
     @Test
-    fun theMomentCanBeTypedAndTheKeyboardIsAVisibleDoor() {
+    fun theHourTapeSetsTheHour() {
         openSettings()
         val pageTitle = compose.activity.getString(SettingsR.string.settings_daily_title)
         compose.onNodeWithText(pageTitle).performClick()
@@ -253,91 +235,24 @@ class DailyAyahToggleTest {
             frame.compress(Bitmap.CompressFormat.PNG, 100, output)
         }
 
-        val typeName = compose.activity.getString(SettingsR.string.settings_daily_picker_type)
-        compose.onNodeWithContentDescription(typeName).performClick()
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNode(hasSetTextAction()).performTextInput("09")
-        compose.onNode(hasSetTextAction()).performImeAction()
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNode(hasSetTextAction()).performTextInput("30")
-        compose.onNode(hasSetTextAction()).performImeAction()
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isEmpty()
-        }
-        compose.onNodeWithText(compose.activity.getString(SettingsR.string.settings_set))
-            .performClick()
-        assertEquals(
-            "the typed 09:30 must be the minute the alarm reads",
-            9 * 60 + 30,
-            runBlocking { readSettings().dailyAyahMinute },
-        )
-    }
-
-    /**
-     * The tape and the field are one value while the field is open.
-     *
-     * The owner long-pressed the hour, moved the tape, and the tape did
-     * nothing: the draft the field held was written back on the next commit,
-     * so only the keyboard could change the time. This opens the editor,
-     * moves the hour tape and then the minute tape, and reads the stored
-     * moment after Set, which is the value the alarm actually keeps.
-     */
-    @Test
-    fun theTapeAndTheTypedFieldKeepOneValue() {
-        openSettings()
-        val pageTitle = compose.activity.getString(SettingsR.string.settings_daily_title)
-        compose.onNodeWithText(pageTitle).performClick()
-        compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText(compose.activity.getString(SettingsR.string.settings_daily_time_title))
-            .performScrollTo()
-            .performClick()
-        compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithTag("daily-time-picker", useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
         val hourName = compose.activity.getString(SettingsR.string.settings_daily_picker_hour)
-        val minuteName = compose.activity.getString(SettingsR.string.settings_daily_picker_minute)
-        val twentyFour = DateFormat.is24HourFormat(context)
-
-        // Long-press the big hour to open the field, then move the hour tape
-        // without touching the keyboard.
-        compose.onAllNodesWithContentDescription(hourName).onFirst()
-            .performTouchInput { longClick() }
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
-        }
+        // The tape speaks the phone's own clock: 1 to 12 with a period on a
+        // twelve hour phone, 0 to 23 on a twenty-four hour one. The progress
+        // is the index in that list, so nine o'clock is 8 or 9 by the clock.
+        val nine = if (DateFormat.is24HourFormat(context)) 9f else 8f
         compose.onAllNodesWithContentDescription(hourName).onLast()
-            .performSemanticsAction(SemanticsActions.SetProgress) {
-                it(if (twentyFour) 9f else 8f)
-            }
-        compose.onNode(hasSetTextAction()).assertTextContains("9")
-
-        // The minute's field is a second door to the same tape.
-        compose.onAllNodesWithContentDescription(minuteName).onFirst()
-            .performTouchInput { click() }
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithContentDescription(minuteName).onLast()
-            .performSemanticsAction(SemanticsActions.SetProgress) { it(30f) }
-        compose.onNode(hasSetTextAction()).assertTextContains("30")
-
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(nine) }
         compose.onNodeWithText(compose.activity.getString(SettingsR.string.settings_set))
             .performClick()
         assertEquals(
-            "the tape's hour and minute must be the moment Set writes",
-            9 * 60 + 30,
+            "the hour tape must be the hour Set writes",
+            9 * 60,
             runBlocking { readSettings().dailyAyahMinute },
         )
     }
+
+    private fun hourText(): String =
+        if (DateFormat.is24HourFormat(context)) "08:00" else "8 AM"
 
     private fun back() {
         InstrumentationRegistry.getInstrumentation()

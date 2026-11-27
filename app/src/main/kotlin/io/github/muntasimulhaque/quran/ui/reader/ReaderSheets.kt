@@ -1,7 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,11 +36,8 @@ internal fun ReaderSheets(
     saved: List<SavedAyah>,
     lastRead: List<ReadPlace>,
     notificationsBlocked: () -> Boolean,
-    exactGrantWithheld: () -> Boolean,
     notificationScreenMissing: () -> Boolean,
-    alarmScreenMissing: () -> Boolean,
     onOpenNotificationSettings: () -> Unit,
-    onAskExactAlarm: () -> Unit,
     onReminderPermission: () -> Unit,
     /** A touch inside a sheet is the reader still being here. */
     onInteraction: () -> Unit = {},
@@ -170,9 +167,7 @@ internal fun ReaderSheets(
             // the phone's own switch even when the reader comes back from the
             // system settings without the app restarting.
             notificationsBlocked = notificationsBlocked,
-            exactGrantWithheld = exactGrantWithheld,
             notificationScreenMissing = notificationScreenMissing,
-            alarmScreenMissing = alarmScreenMissing,
             actions = SettingsActions(
                 onLanguage = { tag ->
                     UiLanguage.of(tag)?.let { language ->
@@ -217,7 +212,6 @@ internal fun ReaderSheets(
                     viewModel.setDailyAyahTime(minute, onReminderPermission)
                 },
                 onOpenNotificationSettings = onOpenNotificationSettings,
-                onAskExactAlarm = onAskExactAlarm,
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onToggleTranslation = { viewModel.toggleTranslationPack(it) },
                 onToggleTafsir = { viewModel.toggleTafsirPack(it) },

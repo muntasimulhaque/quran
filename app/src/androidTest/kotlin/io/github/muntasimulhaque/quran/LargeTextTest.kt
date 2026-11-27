@@ -110,7 +110,6 @@ class LargeTextTest {
                             recitations = emptyList(),
                             version = "14.7",
                             notificationsBlocked = false,
-                            exactGrantWithheld = false,
                             packSetup = null,
                             onOpen = {},
                         )
@@ -178,11 +177,9 @@ class LargeTextTest {
                         DailyPage(
                             settings = AppSettings(dailyAyah = true),
                             notificationsBlocked = false,
-                            exactGrantWithheld = false,
                             onDailyAyah = {},
                             onDailyAyahTime = {},
                             onOpenNotificationSettings = {},
-                            onAskExactAlarm = {},
                         )
                     }
                 }

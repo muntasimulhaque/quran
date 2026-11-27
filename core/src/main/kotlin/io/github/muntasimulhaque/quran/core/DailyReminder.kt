@@ -4,109 +4,30 @@ import java.util.Calendar
 import java.util.TimeZone
 
 /**
- * When the daily reminder should arrive, as a moment and as a tolerance.
+ * When the daily reminder should arrive.
  *
- * The reminder is the only thing in the app with a life outside it, so the
- * moment it is promised for is a promise and not a preference. The alarm the
- * app arms used to be the system's most inexact one
- * (`AlarmManager.set`), which the platform is free to deliver at any time
- * after the trigger, with no upper bound: a reader who asked for ten o'clock
- * was told they had it, and the shade lit up at ten past, and the app had
- * kept the promise in the only sense the platform allowed (owner report, 2.9).
+ * The reminder is a quiet nudge, not an appointment: the reader picks an hour,
+ * and the ayah arrives around it. The alarm is the platform's own batched one,
+ * which needs no special access and can be late; the app says "around" and
+ * never promises a minute (owner decision, 23.8). The exact alarm and its
+ * permission were the old promise and were removed, because the one setup step
+ * this app had was a trip to the phone's settings for a nudge.
  *
- * A windowed alarm was tried as the answer and measured, and it is not one:
- * the platform has a floor for the window of ten minutes on Android 15, so
- * the app's one minute ask comes back as ten, and the windowed path would have
- * been no better than the one it replaced (found by `DailyReminderTest`
- * reading the phone's own alarm record, 37th session). What is left is the
- * honest pair: an exact alarm where the reader has granted the phone's own
- * exact time, which is the moment to the second even on a phone that is locked
- * and asleep, and the platform's own batched alarm where they have not, which
- * can still reach a sleeping phone and can be minutes late.
- *
- * The moment itself is the reader's minute to the second, in their own local
- * time, and a minute that has already passed today comes tomorrow. The wall
- * clock is the right clock here: a phone whose time or zone is changed gets
- * the reminder at the new local minute, and a change of zone is corrected on
- * the next launch of the app.
+ * The moment itself is a minute from midnight, in the reader's own local time,
+ * because the setting is still stored that way: a time set since 23.8 is the
+ * top of an hour, and a stored half hour from before is honored until the
+ * reader next sets it. A minute that has already passed today comes tomorrow.
+ * The wall clock is the right clock here: a phone whose time or zone is
+ * changed gets the reminder at the new local moment, and a change of zone is
+ * corrected on the next launch of the app.
  *
  * What comes back is a moment, and nothing here says what the app does with
  * an alarm it finds already pending for a moment that has passed: that is
  * settled where the alarm is armed, by giving each day its own pending
  * intent, so a launch can put tomorrow's alarm back without touching the one
  * the phone is still holding.
- *
- * Which of the two alarms is available is the reader's own setting in the
- * phone, never the app's to assume, so [plan] is where the choice is made and
- * it is a pure function: the JVM suite pins both halves, and the instrumented
- * suite pins the alarm the platform actually holds (owner decision).
  */
 object DailyReminder {
-
-    /**
-     * The window the app asks for when the phone will not give it an exact
-     * time: one minute, the narrowest ask the platform allows, and still a
-     * request and not a promise, because the platform's own floor is ten
-     * minutes on Android 15. The inexact path is therefore never described to
-     * the reader as arriving to the minute.
-     */
-    const val WINDOW_MILLIS = 60_000L
-
-    /**
-     * Which kind of alarm a reminder should be, and when. The two paths are
-     * the same moment asked for in two ways: the exact alarm lands at the
-     * minute the reader chose even on a phone that is locked and idle then,
-     * and the inexact one is the platform's own batched alarm, which can
-     * reach a phone that is asleep and can be minutes late. Which one is
-     * available is the reader's own setting in the phone, never the app's to
-     * assume.
-     */
-    data class AlarmPlan(
-        val kind: Kind,
-        /** The reader's minute, to the second, in their own local time. */
-        val triggerAtMillis: Long,
-        /** How late the platform was asked to be. Zero for an exact alarm. */
-        val windowMillis: Long,
-    )
-
-    /** The two shapes a daily reminder can take on a given phone. */
-    enum class Kind {
-        /** The minute itself, waking the device if it is asleep. */
-        Exact,
-
-        /**
-         * The platform's own batched alarm, delivered inside a window the
-         * phone decides, and able to reach a phone that is asleep.
-         */
-        Batched,
-    }
-
-    /**
-     * The alarm to arm: the reader's minute either way, and the best shape
-     * the phone will give us for it.
-     *
-     * [canScheduleExact] is the phone's own answer, read from
-     * `AlarmManager.canScheduleExactAlarms()` on Android 12 and later and
-     * always true before it, where exact alarms were never gated. The two
-     * kinds differ only in the window, never in the moment, so a reader who
-     * grants the permission and one who does not are both reminded at the
-     * minute they chose, with only the punctuality left to the phone
-     * (owner decision).
-     */
-    fun plan(
-        canScheduleExact: Boolean,
-        minuteOfDay: Int,
-        now: Long,
-        lastMinuteOfDay: Int,
-        timeZone: TimeZone = TimeZone.getDefault(),
-    ): AlarmPlan {
-        val at = nextOccurrence(minuteOfDay, now, lastMinuteOfDay, timeZone)
-        return if (canScheduleExact) {
-            AlarmPlan(Kind.Exact, at, 0L)
-        } else {
-            AlarmPlan(Kind.Batched, at, WINDOW_MILLIS)
-        }
-    }
 
     /**
      * The next moment the reminder should come: the reader's own minute today,

@@ -9,12 +9,11 @@ import java.util.TimeZone
 /**
  * The reminder's promise is a moment, and these are the numbers behind it.
  *
- * A reader who sets ten o'clock is owed ten o'clock, and the platform's own
- * inexact alarm is free to deliver whenever it likes, so the app arms a
- * windowed one instead: the trigger is the reader's minute to the second, and
- * the window is a minute. The JVM suite pins both halves here, where a test
- * can be exact, because the alternative was a reader being told they had set
- * an hour and the shade answering two minutes later (owner report, 2.9).
+ * A reader who sets ten o'clock is owed the next ten o'clock in their own
+ * local time; the platform's batched alarm decides how punctual it is, and the
+ * page says "around" for that reason. The JVM suite pins the moment, the day
+ * boundary, the late fire's anchor, and both ends of the day here, where a
+ * test can be exact (owner decision, 23.8).
  */
 class DailyReminderTest {
 
@@ -59,16 +58,6 @@ class DailyReminderTest {
         assertEquals("the next one is the reader's minute", 0, calendar.get(Calendar.MINUTE))
         assertEquals("at the reader's hour", 10, calendar.get(Calendar.HOUR_OF_DAY))
         assertEquals("a day after the moment that was due", due + 86_400_000L, next)
-    }
-
-    /** The window is the whole of the promise, and it is one minute. */
-    @Test
-    fun theWindowIsAMinute() {
-        assertEquals(
-            "the platform is held to the reader's minute, and no more",
-            60_000L,
-            DailyReminder.WINDOW_MILLIS,
-        )
     }
 
     /**
@@ -125,60 +114,6 @@ class DailyReminderTest {
                 calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE),
             )
         }
-    }
-
-    /**
-     * The two alarm shapes carry the same moment, and the phone chooses which
-     * one is on offer.
-     *
-     * An exact alarm is the one the owner asked for: it reaches a phone that
-     * is locked and idle at the chosen minute, which is exactly the moment a
-     * reader sets a time for. Android 12 and later gate it behind the
-     * reader's own grant, so a reader who declines, or a phone that never
-     * asks, gets the platform's own batched alarm instead: it needs nothing,
-     * it can still reach a phone that is asleep, and the platform decides how
-     * late it is. Neither is ever before the moment the reader chose.
-     */
-    @Test
-    fun bothAlarmShapesCarryTheSameMoment() {
-        val now = utc.millisOf(2026, Calendar.SEPTEMBER, 29, 9, 12)
-        val exact = DailyReminder.plan(
-            canScheduleExact = true,
-            minuteOfDay = 10 * 60,
-            now = now,
-            lastMinuteOfDay = lastMinute,
-            timeZone = utc,
-        )
-        val windowed = DailyReminder.plan(
-            canScheduleExact = false,
-            minuteOfDay = 10 * 60,
-            now = now,
-            lastMinuteOfDay = lastMinute,
-            timeZone = utc,
-        )
-        assertEquals("the exact alarm is the exact shape", DailyReminder.Kind.Exact, exact.kind)
-        assertEquals(
-            "and it is not a window at all",
-            0L,
-            exact.windowMillis,
-        )
-        assertEquals(
-            "the fallback is the platform's own batched alarm",
-            DailyReminder.Kind.Batched,
-            windowed.kind,
-        )
-        assertEquals(
-            "and the window it is asked for is the minute",
-            DailyReminder.WINDOW_MILLIS,
-            windowed.windowMillis,
-        )
-        assertEquals(
-            "and both are the reader's minute, to the second",
-            exact.triggerAtMillis,
-            windowed.triggerAtMillis,
-        )
-        val calendar = Calendar.getInstance(utc).apply { timeInMillis = exact.triggerAtMillis }
-        assertEquals("at ten o'clock", 10 * 60, calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE))
     }
 
     private fun TimeZone.millisOf(year: Int, month: Int, day: Int, hour: Int, minute: Int): Long =

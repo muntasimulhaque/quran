@@ -40,12 +40,10 @@ class DailyMissingScreenTest {
                     DailyPage(
                         settings = AppSettings(dailyAyah = true),
                         notificationsBlocked = true,
-                        exactGrantWithheld = false,
                         notificationScreenMissing = noNotificationScreen,
                         onDailyAyah = {},
                         onDailyAyahTime = {},
                         onOpenNotificationSettings = {},
-                        onAskExactAlarm = {},
                     )
                 }
             }

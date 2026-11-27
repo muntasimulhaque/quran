@@ -1,15 +1,14 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -159,10 +158,8 @@ internal fun ReadingRows(
     footnote: OpenFootnote?,
     onFootnote: (OpenFootnote?) -> Unit,
     /** The word the reader pressed and held, and the sheet that holds it. */
-    word: OpenWordSheet?,
-    onWord: (OpenWordSheet?) -> Unit,
-    /** The reader turned the word sheet to another of its pages. */
-    onWordPage: (WordSheetPage) -> Unit,
+    word: OpenWord?,
+    onWord: (OpenWord?) -> Unit,
     /** The word sheet's speaker: one word of the verse, in the reader's voice. */
     onHearWord: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     /** What the speaker's press has to say, and what its pack weighs. */
@@ -170,10 +167,8 @@ internal fun ReadingRows(
     wordAudio: WordAudioState? = null,
     /** The sheet closed: a press still waiting on a pack is forgotten. */
     onWordClosed: () -> Unit = {},
-    /** The surah's own name at a reference, for the places page's groups. */
+    /** The surah's own name at a reference, for the word sheet's head. */
     surahNameOf: (Int) -> String = { "" },
-    /** A place the reader chose on the word sheet: the reading jumps there. */
-    onOpenPlace: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     // The stored place is the ayah, so the list opens on it and needs nothing
@@ -474,14 +469,7 @@ internal fun ReadingRows(
                     }
                 },
                 onWord = { pressed ->
-                    onWord(
-                        OpenWordSheet(
-                            word = pressed,
-                            page = WordSheetPage.Word,
-                            currentAyah = pressed.ayahNumber,
-                            currentPosition = pressed.position,
-                        ),
-                    )
+                    onWord(pressed)
                 },
             )
         }
@@ -513,23 +501,17 @@ internal fun ReadingRows(
 
     word?.let { open ->
         WordSheet(
-            word = open.word,
-            page = open.page,
-            onPage = onWordPage,
-            currentAyah = open.currentAyah,
-            currentPosition = open.currentPosition,
+            word = open,
             surahNameOf = surahNameOf,
             metrics = metrics,
             hafs = hafs,
-            content = content,
             onDismiss = {
                 onWordClosed()
                 onWord(null)
             },
-            onOpenPlace = onOpenPlace,
-            onHear = { onHearWord(open.word.ayahNumber, open.word.position) },
-            hearing = open.word.ayahNumber == hearingAyah &&
-                open.word.position == hearingWord,
+            onHear = { onHearWord(open.ayahNumber, open.position) },
+            hearing = open.ayahNumber == hearingAyah &&
+                open.position == hearingWord,
             voice = wordVoice,
             voiceAudio = wordAudio,
         )

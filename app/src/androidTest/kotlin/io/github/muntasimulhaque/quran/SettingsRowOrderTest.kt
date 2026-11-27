@@ -52,7 +52,6 @@ class SettingsRowOrderTest {
                         recitations = emptyList(),
                         version = "1.0",
                         notificationsBlocked = false,
-                        exactGrantWithheld = false,
                         packSetup = null,
                         onOpen = {},
                     )

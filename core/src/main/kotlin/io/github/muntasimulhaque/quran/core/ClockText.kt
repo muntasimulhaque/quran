@@ -42,3 +42,21 @@ fun clockPeriodText(pm: Boolean, locale: Locale): String {
     }
     return SimpleDateFormat("a", locale).format(calendar.time)
 }
+
+/**
+ * The hour a stored minute falls in, as the reading names it: "8 AM" on a
+ * twelve hour phone and "08:00" on a twenty-four hour one, in the reader's
+ * own digits.
+ *
+ * The minute is not the reader's any more (owner decision, 23.8): the reminder
+ * names the hour it arrives around, and a stored half hour from before is
+ * named by the hour it falls in.
+ */
+fun clockHourOfDayText(minuteOfDay: Int, twentyFour: Boolean, locale: Locale): String {
+    val hour = minuteOfDay.coerceIn(0, 24 * 60 - 1) / 60
+    return if (twentyFour) {
+        clockHourText(hour, true, locale) + ":" + clockMinuteText(0, locale)
+    } else {
+        clockHourText(hour, false, locale) + " " + clockPeriodText(hour >= 12, locale)
+    }
+}

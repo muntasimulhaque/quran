@@ -17,10 +17,7 @@ import io.github.muntasimulhaque.quran.data.hasChosenTranslation
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.data.wantedWordsPack
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.clockText
-import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
-import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterName
 import io.github.muntasimulhaque.quran.ui.theme.Literata
@@ -72,7 +69,7 @@ private fun themeSummary(settings: AppSettings): String = settings.theme.name()
  * **The hub carries no leading icons** (owner decision, 18.2). The
  * value under each name is the row's sign: Aa is the text size, System is
  * the ground, English is the language, the pack names are the reading,
- * Minshawi is the voice, 8:00 is the reminder. A 20 dp leading mark would
+ * Minshawi is the voice, 8 AM is the reminder. A 20 dp leading mark would
  * take 32 dp from the words and move them off the page's gutter, and the
  * icon set is a vocabulary of controls and states, not categories. The row's
  * one mark is the chevron that says it opens.
@@ -84,7 +81,6 @@ fun SettingsHub(
     recitations: List<Recitation>,
     version: String,
     notificationsBlocked: Boolean,
-    exactGrantWithheld: Boolean,
     packSetup: PackSetupState?,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -144,12 +140,12 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterRowName(settings, packs, recitations),
         ) { onOpen(SettingsPage.Reciters) }
-        // The daily ayah: one ayah a day, at the reader's own moment. The time
+        // The daily ayah: one ayah a day, in the reader's own hour. The hour
         // is the row's value, and the page behind it is where the reminder is
         // turned on and the hour set.
         PageRow(
             title = stringResource(R.string.settings_daily_title),
-            summary = dailySubtitle(settings, notificationsBlocked, exactGrantWithheld),
+            summary = dailySubtitle(settings, notificationsBlocked),
             modifier = Modifier.testTag("row-daily"),
         ) { onOpen(SettingsPage.Daily) }
         PageRow(
@@ -197,28 +193,27 @@ private fun reciterRowName(
 }
 
 /**
- * Where the daily ayah stands, in one line: whether it will come, and when.
- * The moment is read from the same value the alarm is armed with, so the row
- * never promises a time the daily ayah does not keep, and it says the moment
- * whether the daily ayah is on or off, because the page stays live while it is
- * off and a reader who has set a time is owed to see it.
+ * Where the daily ayah stands, in one line: whether it will come, and the
+ * hour. The hour is read from the same value the alarm is armed with, so the
+ * row never promises a time the daily ayah does not keep, and it says the
+ * hour whether the daily ayah is on or off, because the page stays live while
+ * it is off and a reader who has set an hour is owed to see it.
  *
- * While the phone withholds notifications or the exact alarm, the row does not
- * promise the time at all: the daily ayah cannot arrive, or can arrive late,
- * and saying which is the honest line (owner decision, 9.1).
+ * While the phone withholds notifications, the row does not promise the hour
+ * at all: the daily ayah cannot arrive, and saying so is the honest line
+ * (owner decision, 9.1). The exact alarm used to be the other such line, and
+ * it left with its permission in 23.8.
  */
 @Composable
 private fun dailySubtitle(
     settings: AppSettings,
     notificationsBlocked: Boolean,
-    exactGrantWithheld: Boolean,
 ): String = when {
     !settings.dailyAyah -> stringResource(R.string.settings_state_off)
     notificationsBlocked -> stringResource(R.string.settings_daily_subtitle_blocked)
-    exactGrantWithheld -> stringResource(R.string.settings_daily_subtitle_late)
     else -> stringResource(
         R.string.settings_daily_subtitle_on,
-        clockText(settings.dailyAyahMinute),
+        hourOfDay(settings.dailyAyahMinute),
     )
 }
 

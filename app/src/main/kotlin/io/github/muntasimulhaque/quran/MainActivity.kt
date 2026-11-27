@@ -14,13 +14,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
-import io.github.muntasimulhaque.quran.daily.rememberExactGrantWithheld
 import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
 import io.github.muntasimulhaque.quran.daily.reminderChannelHidden
 import androidx.lifecycle.lifecycleScope
@@ -51,15 +50,14 @@ class MainActivity : ComponentActivity() {
     private var permissionNotice by mutableStateOf<PermissionNotice?>(null)
 
     /**
-     * The two screens this phone answered with nothing, kept for the window's
-     * life. Neither is a moment but a property of the phone, so it is said as
+     * The screen this phone answered with nothing, kept for the window's
+     * life. It is not a moment but a property of the phone, so it is said as
      * state where the switch that needs it is drawn, and once more on the
      * reading's own paper at the door that was tapped. It used to be a Toast,
      * which is the one thing on the glass a tap cannot put away, and the app
      * says nothing in the platform's bubble (owner decision, 19.3).
      */
     private var notificationScreenMissing by mutableStateOf(false)
-    private var alarmScreenMissing by mutableStateOf(false)
 
     /**
      * The reader's language belongs to every window of the app. A dialog, a
@@ -127,30 +125,16 @@ class MainActivity : ComponentActivity() {
     }
 
     // The notification permission, asked only from the acts that set the
-    // reminder: the reminder cannot arrive without it, so it goes first, and
-    // its answer leads on to the exact alarm's own screen. It is never asked
+    // reminder: the reminder cannot arrive without it. It is never asked
     // before the reader has read a page (owner decision, 15.5).
     private val askReminderNotifications =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
-                askExactAlarmIfNeeded()
-            } else {
+            if (!granted) {
                 permissionNotice = PermissionNotice(
                     text = R.string.permission_notifications_denied,
                     action = R.string.permission_notice_settings,
-                    kind = PermissionNotice.Kind.Notifications,
                 )
             }
-        }
-
-    // The exact alarm, asked once in the phone's own screen, at each of those
-    // two acts, on the phones that withhold it from Android 14 on (owner
-    // decision, after Play rejected USE_EXACT_ALARM). Whatever the answer
-    // was, the alarm is armed again from the reader's own settings, so an
-    // exact one replaces the batched one within the minute.
-    private val askExactAlarm =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            DailyAyahScheduler.rearm(this)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -193,23 +177,17 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             // What this launch was asked for, read once: the reminder's ayah,
-            // a daily-ayah shortcut, a search shortcut, or a link to one
-            // verse. A plain launch asks for none of them and leaves the
-            // reader where they were.
+            // a daily-ayah shortcut, or a search shortcut. A plain launch asks
+            // for none of them and leaves the reader where they were.
             val launch = intent
             val open = launch?.getStringExtra(EXTRA_OPEN)
             val sharedAyah = launch?.getIntExtra(EXTRA_AYAH, 0)?.takeIf { it > 0 }
-            val reference = referenceOf(launch?.data)
             // Whether the phone will show this app's notifications is the one
             // thing about the daily reminder the app does not own, so it is
             // read from the phone and refreshed every time the app comes back
             // to the foreground: the reader can change it in the system
             // settings and return without a restart.
             val notificationsBlocked = rememberNotificationsBlocked()
-            // And the second thing the phone can withhold, read the same way:
-            // the Daily page says whether the exact time is still being held
-            // back, and the answer changes in the phone's own screen, not here.
-            val exactGrantWithheld = rememberExactGrantWithheld()
             QuranApp(
                 initialAyah = sharedAyah
                     ?: if (open == OPEN_DAILY) {
@@ -222,17 +200,13 @@ class MainActivity : ComponentActivity() {
                         // reader where they were, which is the app's promise.
                         null
                     },
-                initialReference = reference,
                 openSearch = open == OPEN_SEARCH,
                 onReminderPermission = ::ensureReminderPermissions,
                 permissionNotice = permissionNotice,
                 onPermissionNoticeShown = { permissionNotice = null },
                 notificationsBlocked = { notificationsBlocked.value },
-                exactGrantWithheld = { exactGrantWithheld.value },
                 notificationScreenMissing = { notificationScreenMissing },
-                alarmScreenMissing = { alarmScreenMissing },
                 onOpenNotificationSettings = ::openNotificationSettings,
-                onAskExactAlarm = { askExactAlarmIfNeeded() },
                 languageTag = resolvedLanguageTag,
             )
         }
@@ -278,43 +252,13 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * What the two acts that set the reminder ask for: the notification
-     * first, since nothing can arrive without it, and then the phone's own
-     * screen for the exact time. Neither is asked twice: each is asked only
-     * while it is missing, so a reader who has already granted both hears
-     * nothing at all.
+     * What the two acts that set the reminder ask for: the notification,
+     * since nothing can arrive without it. It is asked only while it is
+     * missing, so a reader who has already granted it hears nothing at all.
      */
     private fun ensureReminderPermissions() {
         if (needsNotificationPermission()) {
             askReminderNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            askExactAlarmIfNeeded()
-        }
-    }
-
-    /**
-     * The phone's own screen for the exact alarm, on the phones that are
-     * withholding it. A phone with no such screen keeps the batched alarm,
-     * and the Daily page still says the exact time is being held back, which
-     * is the truth rather than a promise the phone cannot keep.
-     *
-     * The Daily page says when the phone still withholds the exact time, so
-     * the answer is read where the switch is, not announced over the reading.
-     * A phone with no such screen at all keeps the line and loses the door:
-     * the fact is a property of the phone, so it is kept as state and not
-     * said in a bubble (owner decision, 19.3).
-     */
-    private fun askExactAlarmIfNeeded() {
-        // Without the notification granted, an exact alarm fires into a shade
-        // that shows nothing, so the exact-time screen waits for a reader who
-        // will actually hear the reminder.
-        if (needsNotificationPermission()) return
-        val request = DailyAyahScheduler.exactGrantRequest(this) ?: return
-        try {
-            askExactAlarm.launch(request)
-        } catch (notFound: ActivityNotFoundException) {
-            alarmScreenMissing = true
-            permissionNotice = PermissionNotice(text = R.string.exact_alarm_settings_unavailable)
         }
     }
 
@@ -324,10 +268,10 @@ class MainActivity : ComponentActivity() {
             PackageManager.PERMISSION_GRANTED
 
     /**
-     * A second launch while the reading is already up, from a shortcut or a
-     * link: the new intent replaces the one the window was built from, and
-     * the window is rebuilt so the composition reads it. The view model
-     * survives the recreation, so the reader's place and playback are kept.
+     * A second launch while the reading is already up, from a shortcut: the
+     * new intent replaces the one the window was built from, and the window
+     * is rebuilt so the composition reads it. The view model survives the
+     * recreation, so the reader's place and playback are kept.
      */
     override fun onNewIntent(intent: Intent) {
         val previous = this.intent
@@ -345,31 +289,8 @@ class MainActivity : ComponentActivity() {
     private fun sameRequest(previous: Intent?, next: Intent): Boolean =
         previous != null &&
             previous.action == next.action &&
-            previous.data == next.data &&
             previous.getStringExtra(EXTRA_OPEN) == next.getStringExtra(EXTRA_OPEN) &&
             previous.getIntExtra(EXTRA_AYAH, 0) == next.getIntExtra(EXTRA_AYAH, 0)
-
-    /**
-     * The verse a `quran://ayah/2:255` link names, or null when the link is
-     * not one. Both the colon form and the two-segment form are accepted,
-     * because a link typed by hand may take either, and a link that names
-     * nothing is ignored rather than guessed at.
-     */
-    private fun referenceOf(link: android.net.Uri?): Pair<Int, Int>? {
-        if (link == null || link.scheme != "quran" || link.host != "ayah") return null
-        val segments = link.pathSegments.filter { !it.isNullOrBlank() }
-        val pair = when {
-            segments.size >= 2 -> segments[0].toIntOrNull() to segments[1].toIntOrNull()
-            segments.size == 1 -> segments[0].split(':')
-                .takeIf { it.size == 2 }
-                ?.let { it[0].toIntOrNull() to it[1].toIntOrNull() }
-            else -> null
-        } ?: return null
-        val surah = pair.first ?: return null
-        val ayah = pair.second ?: return null
-        if (surah !in 1..114 || ayah < 1) return null
-        return surah to ayah
-    }
 
     companion object {
         /**

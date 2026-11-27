@@ -135,14 +135,4 @@
         <item quantity="other">%1$s forms</item>
     </plurals>
     <string name="reading_word_lemma_count">%1$s in %2$s</string>
-    <!-- The places page: the count's answer, in the word sheet's own window. -->
-    <string name="reading_word_places_back">Back to the word</string>
-    <string name="reading_word_places_current">Your place</string>
-    <string name="reading_word_places_empty">The word list on this device does not carry the places of this word.</string>
-    <string name="reading_word_places_failed">The places could not be read from the word list.</string>
-    <string name="reading_word_places_retry">Retry</string>
-    <plurals name="reading_word_places_count">
-        <item quantity="one">%1$s place</item>
-        <item quantity="other">%1$s places</item>
-    </plurals>
 </resources>

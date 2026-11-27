@@ -1,7 +1,6 @@
 package io.github.muntasimulhaque.quran.daily
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,13 +11,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
-import android.provider.Settings
 import android.text.Layout
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.AlignmentSpan
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.github.muntasimulhaque.quran.MainActivity
@@ -40,20 +37,18 @@ import java.util.TimeZone
  * Book and, when the reader reads with a translation, its first translation.
  *
  * The reminder is the only thing in the app that has a life outside it, so it
- * is built to be counted, not trusted. It schedules itself with the exact
- * alarm: `SCHEDULE_EXACT_ALARM` is granted at install before Android 14, and
- * from Android 14 it starts out denied, so the app asks for it once in the
- * phone's own screen, at the two moments a reader sets the reminder, and the
- * reminder then arrives at that minute even on a phone that is locked and
- * idle then. `USE_EXACT_ALARM` is not declared: Play accepts it for an alarm
- * clock or a calendar, and rejected this app's 3.9 build over it (owner
- * decision), and the reminder wears no alarm icon, because an alarm mark
+ * is built to be counted, not trusted. It schedules itself with the phone's
+ * own batched alarm, the one that needs no special access: the reader picks an
+ * hour, the ayah arrives around it, and the page says so. The exact alarm and
+ * its permission were removed in 23.8 (owner decision): a nudge is not an
+ * appointment, and asking a reader to leave the app for a system screen was
+ * the one setup step this app had. `USE_EXACT_ALARM` was never declared; Play
+ * accepts it for an alarm clock or a calendar, and rejected this app's 3.9
+ * build over it. The reminder wears no alarm icon, because an alarm mark
  * standing in every status bar is the reader's own grievance (owner report).
- * The phone's batched alarm is left for the reader who says no, so a
- * reminder still comes, late, rather than not at all. Nothing here fetches
- * anything: the ayah is read from the content database that already ships on
- * the device, and the translation from a pack the reader installed
- * themselves.
+ * Nothing here fetches anything: the ayah is read from the content database
+ * that already ships on the device, and the translation from a pack the
+ * reader installed themselves.
  *
  * An alarm is a one-shot, so the next one is armed in the same breath the
  * current one fires, and it is armed *before* the ayah is read: a receiver
@@ -138,14 +133,12 @@ object DailyAyahScheduler {
      * for a moment already past belongs to a day that is over, so arming
      * tomorrow leaves it where the platform is holding it.
      *
-     * The shape of the alarm is the phone's answer and not the app's: the
-     * exact alarm, which every phone in the app's own support range grants at
-     * install, and which is the only kind that arrives at the chosen minute on
-     * a phone that is locked and idle then; the phone's own batched alarm
-     * only when the exact grant is gone, which is a reader who has turned the
-     * phone's special access off themselves. Either way the moment is the
-     * reader's, and the choice itself is the pure `plan` in `core`, which the
-     * JVM suite pins (owner decision).
+     * The alarm is the platform's own batched one, the shape that needs no
+     * special access. It can reach a phone that is asleep and can be late; the
+     * page says "around" for that reason. The moment is the reader's stored
+     * minute, which is the top of the hour for a time set since 23.8 and may
+     * be a legacy half hour; the arithmetic lives in `core`, and the JVM suite
+     * pins it (owner decision).
      */
     fun apply(context: Context, enabled: Boolean, minuteOfDay: Int) {
         val alarm = context.getSystemService(AlarmManager::class.java) ?: return
@@ -161,13 +154,8 @@ object DailyAyahScheduler {
             cancelAround(context, alarm, localDay(now))
             return
         }
-        val plan = DailyReminder.plan(
-            canScheduleExact = canScheduleExact(alarm),
-            minuteOfDay = minuteOfDay,
-            now = now,
-            lastMinuteOfDay = LAST_MINUTE_OF_DAY,
-        )
-        val day = localDay(plan.triggerAtMillis)
+        val at = DailyReminder.nextOccurrence(minuteOfDay, now, LAST_MINUTE_OF_DAY)
+        val day = localDay(at)
         // The sweep runs on this path too: a clock or a time zone that moved
         // after an earlier arm leaves a slot under a day number the new clock
         // never produces, and arming today's beside it would speak twice. It
@@ -175,28 +163,16 @@ object DailyAyahScheduler {
         // the later one's arm standing.
         cancelAround(context, alarm, day)
         val pending = pendingIntent(context, day)
-        // RTC_WAKEUP, not RTC: an exact alarm that does not wake the phone
-        // can be held until the reader next touches it, which is the one
-        // thing a morning reminder must not do. The exact grant changes when
-        // the alarm is delivered, not whether it wakes the device.
+        // RTC_WAKEUP, not RTC: an alarm that does not wake the phone can be held
+        // until the reader next touches it, which is the one thing a morning
+        // reminder must not do. The batched alarm is still allowed to wake the
+        // device; it is only the punctuality that is the platform's.
         //
-        // The set can throw if the reader takes the exact grant back between
-        // the check above and this line. A reminder that cannot be armed is
-        // left for the next launch; it must never take the process down.
+        // The set can throw on a phone that refuses the alarm. A reminder that
+        // cannot be armed is left for the next launch; it must never take the
+        // process down.
         runCatching {
-            when (plan.kind) {
-                DailyReminder.Kind.Exact ->
-                    alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, plan.triggerAtMillis, pending)
-                // The batched fallback is the one that can reach a sleeping
-                // phone, late. The exact path is the default on every phone now,
-                // so this branch is left for a reader who has turned the phone's
-                // own special access off. A windowed alarm is never used: the
-                // platform gives it a floor of ten minutes on Android 15 and
-                // never delivers it from Doze, so a window was measured and
-                // dropped.
-                DailyReminder.Kind.Batched ->
-                    alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, plan.triggerAtMillis, pending)
-            }
+            alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pending)
         }.onFailure {
             android.util.Log.w("DailyAyahScheduler", "the reminder could not be armed", it)
         }
@@ -233,48 +209,6 @@ object DailyAyahScheduler {
                 onFinished()
             }
         }
-    }
-
-    /**
-     * Whether this app may set an exact alarm on this phone.
-     *
-     * Android 12 and later gate it behind a special access that is not a
-     * runtime permission. Before Android 14 the install grants it; from
-     * Android 14 it starts out denied, and the answer is the reader's to
-     * give, in the phone's own screen, which the app asks for once at each
-     * of the two acts that set the reminder (owner decision, after Play
-     * rejected `USE_EXACT_ALARM`). It is asked for nowhere else, it is no
-     * row in the settings hub, and the reminder never wears an alarm icon.
-     * So this answer is asked where the alarm is armed and where the Daily
-     * page reads whether it is still being withheld, and nowhere else.
-     */
-    fun canScheduleExact(alarm: AlarmManager): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()
-
-    /**
-     * Whether the phone is withholding the exact alarm, which is what Android
-     * 14 and later do from the start for an app this one targets. Read where
-     * the page draws the state and where the ask is made, so the two never
-     * disagree about whether there is anything to ask.
-     */
-    fun exactGrantWithheld(context: Context): Boolean {
-        val alarm = context.getSystemService(AlarmManager::class.java) ?: return false
-        return !canScheduleExact(alarm)
-    }
-
-    /**
-     * The phone's own screen for the exact alarm grant, or null when this
-     * phone has nothing to ask for. It is the system's dialog, not the app's:
-     * the only answer it takes is the reader's, and it names itself.
-     */
-    fun exactGrantRequest(context: Context): Intent? {
-        if (!exactGrantWithheld(context)) return null
-        // The action string is a constant, so the platform copies it into the
-        // app and an older phone simply finds no screen for it: the guard above
-        // is the API check, and lint cannot see through it.
-        @SuppressLint("InlinedApi")
-        return Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-            .setData("package:${context.packageName}".toUri())
     }
 
     /** The reader's own day number, the one the alarm's request code is. */

@@ -1,7 +1,6 @@
 package io.github.muntasimulhaque.quran.benchmark
 
 import android.content.Intent
-import android.net.Uri
 import androidx.benchmark.macro.CompilationMode
 import androidx.benchmark.macro.ExperimentalMetricApi
 import androidx.benchmark.macro.FrameTimingMetric
@@ -151,12 +150,13 @@ class ReadingBenchmark {
         pressHome()
     }
 
-    /** The long surah the scroll test moves through, by the app's own link. */
+    /** The long surah the scroll test moves through, by the reminder's own extra. */
     private fun MacrobenchmarkScope.openAyah() {
         startActivityAndWait(
-            Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("quran://ayah/2:255")
+            Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_LAUNCHER)
                 setPackage(PACKAGE)
+                putExtra("io.github.muntasimulhaque.quran.extra.AYAH", 262)
             },
         )
         device.wait(Until.hasObject(By.desc("Reading")), 10_000)

@@ -1,18 +1,16 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -103,10 +101,8 @@ data class ReadingListActions(
     val onHearWord: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     /** The word sheet closed: a press still waiting on a pack is forgotten. */
     val onWordClosed: () -> Unit = {},
-    /** The surah's own name at a reference, for the places page's groups. */
+    /** The surah's own name at a reference, for the word sheet's head. */
     val surahNameOf: (Int) -> String = { "" },
-    /** A place the reader chose on the word sheet: the reading jumps there. */
-    val onOpenPlace: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     val onAddWords: () -> Unit = {},
     val onAyahMenu: (Ayah, IntRect) -> Unit,
     val onBackgroundTap: () -> Unit,
@@ -203,25 +199,8 @@ fun ReadingList(
     // The word the reader pressed and held. It is a sheet of its own, at the
     // reading's level rather than inside the ayah, so the page never grows
     // under the finger and the word survives the item being recycled (owner
-    // decision, 19.0). Its page and the row its places mark are part
-    // of the same state, so a sheet can be put back exactly as it was left
-    // (owner decision, 19.0).
-    var word by remember { mutableStateOf<OpenWordSheet?>(null) }
-    // The word sheet the reader left to take a place: the list they chose
-    // from, on the page and at the place they stood, one Back away. A place
-    // is the app's one arrival by which the reader leaves a sheet without
-    // leaving the reading, and Back from the ayah it landed on used to close
-    // the app (owner decision, 19.0).
-    var wordReturn by remember { mutableStateOf<OpenWordSheet?>(null) }
-    // Back gives the sheet back before it closes the reading, as it gives back
-    // the results a search result came from. The word sheet is a window of its
-    // own and takes Back there; this is the reading's window, which had no
-    // memory of it. A press on another word spends the return: the sheet Back
-    // holds is the one the reader was in, never the one before it.
-    BackHandler(enabled = word == null && wordReturn != null) {
-        word = wordReturn
-        wordReturn = null
-    }
+    // decision, 19.0).
+    var word by remember { mutableStateOf<OpenWord?>(null) }
     if (ayahs.isEmpty()) {
         // The paper is already there; the text is a frame away.
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
@@ -272,30 +251,12 @@ fun ReadingList(
         footnote = footnote,
         onFootnote = { footnote = it },
         word = word,
-        onWord = { next ->
-            word = next
-            // A press is a new question, so the list Back was holding is
-            // spent. A dismissal spends nothing: the place tap that put the
-            // sheet away set the return before it.
-            if (next != null) wordReturn = null
-        },
-        onWordPage = { page -> word = word?.copy(page = page) },
+        onWord = { next -> word = next },
         onHearWord = actions.onHearWord,
         wordVoice = state.wordVoice,
         wordAudio = state.wordAudio,
         onWordClosed = actions.onWordClosed,
         surahNameOf = actions.surahNameOf,
-        onOpenPlace = { ayah, position ->
-            // The reader's choice is the reading's next stop, and the sheet
-            // they chose it from stays one Back away, at the place they chose
-            // and on the page they stood on. The sheet's own voice is put
-            // away with it, exactly as a dismissal puts it away (owner
-            // decision, 19.0).
-            wordReturn = word?.copy(currentAyah = ayah, currentPosition = position)
-            word = null
-            actions.onWordClosed()
-            actions.onOpenPlace(ayah, position)
-        },
         modifier = modifier,
     )
 }

@@ -51,9 +51,11 @@ as a dead letter.
    word is decided beside the downloader, tagged `owner decision`.
 2. **Permissions: exactly `INTERNET`, `POST_NOTIFICATIONS`,
    `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`,
-   `FOREGROUND_SERVICE_DATA_SYNC`, `SCHEDULE_EXACT_ALARM`,
-   `RECEIVE_BOOT_COMPLETED`, and never `USE_EXACT_ALARM`**: Play accepts that
-   one for an alarm clock or a calendar only, and it rejected 3.9 over it. The
+   `FOREGROUND_SERVICE_DATA_SYNC`, `RECEIVE_BOOT_COMPLETED`, and never
+   `USE_EXACT_ALARM` or `SCHEDULE_EXACT_ALARM`**: Play accepts an exact alarm
+   for an alarm clock or a calendar only, and it rejected 3.9 over
+   `USE_EXACT_ALARM`. The daily ayah is an inexact nudge at an hour, not an
+   appointment, so both exact permissions left in 23.8. The
    dataSync service is the one transfer that outlives the window: a content
    pack, a surah's recitation, or a surah's word audio, started by the reader's
    tap and shown with progress and Cancel (owner decision, 23.1). Where the app

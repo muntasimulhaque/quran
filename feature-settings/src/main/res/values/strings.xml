@@ -15,9 +15,8 @@
     <string name="settings_theme_system">System</string>
 
     <string name="settings_daily_title">Daily ayah</string>
-    <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
+    <string name="settings_daily_subtitle_on">One ayah a day, around %1$s</string>
     <string name="settings_daily_subtitle_blocked">Notifications are off, so the daily ayah cannot arrive</string>
-    <string name="settings_daily_subtitle_late">Alarms and reminders are off, so the ayah can arrive late</string>
     <string name="settings_daily_time_title">Time</string>
     <string name="settings_daily_off">The daily ayah is off</string>
     <string name="settings_daily_blocked">Your phone is not showing notifications for this app, so the daily ayah cannot arrive.</string>
@@ -26,13 +25,9 @@
          kept and the door is not drawn, so nothing here is a word that opens
          nothing (owner decision, 19.3). -->
     <string name="settings_daily_no_notification_screen">Your phone is not showing notifications for this app, and this phone has no screen to change that, so the daily ayah cannot arrive.</string>
-    <string name="settings_daily_exact_blocked">Your phone has alarms and reminders off, so the ayah can arrive late.</string>
-    <string name="settings_daily_exact_action">Allow alarms and reminders</string>
-    <string name="settings_daily_no_alarm_screen">Your phone has alarms and reminders off, and this phone has no screen to change that, so the ayah can arrive late.</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
     <string name="settings_daily_picker_hour">Hour</string>
-    <string name="settings_daily_picker_minute">Minute</string>
-    <string name="settings_daily_picker_type">Type the time</string>
+    <string name="settings_daily_picker_around">The ayah arrives around this hour.</string>
     <string name="settings_cancel">Cancel</string>
     <string name="settings_set">Set</string>
     <string name="settings_follow_title">Follow the reciter</string>

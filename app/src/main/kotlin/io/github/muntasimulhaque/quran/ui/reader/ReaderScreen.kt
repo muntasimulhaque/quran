@@ -1,11 +1,8 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
@@ -19,7 +16,8 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -149,18 +147,14 @@ fun ReaderScreen(
     content: ContentDatabase,
     onReminderPermission: () -> Unit,
     notificationsBlocked: () -> Boolean,
-    exactGrantWithheld: () -> Boolean,
     /** Whether the phone has no screen for the notification settings at all. */
     notificationScreenMissing: () -> Boolean = { false },
-    /** Whether the phone has no screen for the exact alarm at all. */
-    alarmScreenMissing: () -> Boolean = { false },
     onOpenNotificationSettings: () -> Unit,
-    onAskExactAlarm: () -> Unit,
     /** The one permission answer the reading still has to say. */
     permissionNotice: PermissionNotice? = null,
     /** The notice has been handed to the Snackbar. */
     onPermissionNoticeShown: () -> Unit = {},
-    /** A shortcut or a deep link that asks for the search field once. */
+    /** A shortcut that asks for the search field once. */
     openSearch: Boolean = false,
 ) {
     val settings = viewModel.settings
@@ -310,11 +304,7 @@ fun ReaderScreen(
         )
         onPermissionNoticeShown()
         if (result == SnackbarResult.ActionPerformed) {
-            when (notice.kind) {
-                PermissionNotice.Kind.Notifications -> onOpenNotificationSettings()
-                PermissionNotice.Kind.ExactAlarm -> onAskExactAlarm()
-                null -> Unit
-            }
+            onOpenNotificationSettings()
         }
     }
     // What a Share is doing: the card the reader is looking at in the share
@@ -836,23 +826,6 @@ fun ReaderScreen(
                             viewModel.surahs.firstOrNull { it.number == number }?.nameSimple
                                 ?: number.toString()
                         },
-                        onOpenPlace = { ayah, position ->
-                            // The place the reader chose is the reading's next
-                            // stop: the word sheet has gone, and the word wears
-                            // the same reveal a search arrival gives it (owner
-                            // decision, 19.0). The sheet itself is one
-                            // Back away, and that memory is the reading's own
-                            // (ReadingList), because the word sheet is the
-                            // reading's surface and not one of this screen's
-                            // doors (owner decision, 19.0).
-                            reveal = ReadingReveal(ayah = ayah, words = setOf(position))
-                            viewModel.jumpToAyah(ayah)
-                            bar.showNow()
-                            menu = null
-                            cardAyah = null
-                            cardTafsirPack = null
-                            cardNote = null
-                        },
                         onAddWords = { openSheet(ReaderSheet.Settings, SettingsPage.Words) },
                         onAyahMenu = { ayah, anchor ->
                             menu = AyahMenuRequest(ayah, anchor)
@@ -1085,11 +1058,8 @@ fun ReaderScreen(
                 saved = saved,
                 lastRead = lastRead,
                 notificationsBlocked = notificationsBlocked,
-                exactGrantWithheld = exactGrantWithheld,
                 notificationScreenMissing = notificationScreenMissing,
-                alarmScreenMissing = alarmScreenMissing,
                 onOpenNotificationSettings = onOpenNotificationSettings,
-                onAskExactAlarm = onAskExactAlarm,
                 onReminderPermission = onReminderPermission,
                 onInteraction = woke,
                 onDismiss = { closeSheet() },

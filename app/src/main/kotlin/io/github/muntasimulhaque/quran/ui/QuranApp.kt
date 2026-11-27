@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
@@ -47,14 +47,10 @@ fun QuranApp(
     viewModel: ReaderViewModel = viewModel(),
     /** The ayah a reminder's tap asked for, before the reading is on screen. */
     initialAyah: Int? = null,
-    /** One verse a shortcut or a deep link asked for, by surah and ayah. */
-    initialReference: Pair<Int, Int>? = null,
-    /** A shortcut or a deep link that asks for the search field once. */
+    /** A shortcut that asks for the search field once. */
     openSearch: Boolean = false,
     /**
-     * What the two acts that set the reminder ask for: the notification,
-     * and then, on the phones that withhold it, the exact alarm in the
-     * phone's own screen.
+     * What the two acts that set the reminder ask for: the notification.
      */
     onReminderPermission: () -> Unit = {},
     /** The one permission answer the reading still has to say. */
@@ -63,8 +59,6 @@ fun QuranApp(
     onPermissionNoticeShown: () -> Unit = {},
     /** Whether the phone will show this app's notifications, read from the phone. */
     notificationsBlocked: () -> Boolean = { false },
-    /** Whether the phone is still withholding the exact alarm. */
-    exactGrantWithheld: () -> Boolean = { false },
     /**
      * Whether this phone has no notification settings screen at all, read
      * after a door the phone answered with nothing. The Daily page says it
@@ -72,12 +66,8 @@ fun QuranApp(
      * and not a moment (owner decision, 19.3).
      */
     notificationScreenMissing: () -> Boolean = { false },
-    /** The same, for the phone's own exact alarm screen. */
-    alarmScreenMissing: () -> Boolean = { false },
     /** Opens the phone's own page for this app's notifications. */
     onOpenNotificationSettings: () -> Unit = {},
-    /** Opens the phone's own screen for the exact alarm. */
-    onAskExactAlarm: () -> Unit = {},
     /**
      * The language this window speaks, resolved once in the Activity's own
      * `attachBaseContext` from the two doors that can set it (owner decision,
@@ -99,15 +89,6 @@ fun QuranApp(
         if (handledAyah || initialAyah == null || !viewModel.ready) return@LaunchedEffect
         handledAyah = true
         viewModel.jumpToAyahInReading(initialAyah)
-    }
-    // And the same for a link's own verse: it opens once, after the library
-    // is ready, and the reference it names is remembered as the place.
-    var handledReference by rememberSaveable(initialReference) { mutableStateOf(false) }
-    LaunchedEffect(initialReference, viewModel.ready) {
-        val (surah, ayah) = initialReference ?: return@LaunchedEffect
-        if (handledReference || !viewModel.ready) return@LaunchedEffect
-        handledReference = true
-        viewModel.jumpToReference(surah, ayah)
     }
     val settings = viewModel.settings
     // The reader's language is one choice with two doors since Android 13
@@ -162,11 +143,8 @@ fun QuranApp(
                     content,
                     onReminderPermission,
                     notificationsBlocked,
-                    exactGrantWithheld,
                     notificationScreenMissing,
-                    alarmScreenMissing,
                     onOpenNotificationSettings,
-                    onAskExactAlarm,
                     permissionNotice = permissionNotice,
                     onPermissionNoticeShown = onPermissionNoticeShown,
                     openSearch = openSearch,
