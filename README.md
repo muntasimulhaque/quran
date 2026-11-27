@@ -234,9 +234,16 @@ cards. `content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
-The signed bundle for 23.3 will be produced by the build run on this commit,
-and the hand-off record follows that run. The hand-off is for closed testing,
-not a public listing.
+The signed bundle comes from `build` run 45968593083, green on `main` for
+the commit `e0639328`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.3-vc235.aab` has SHA-256
+`3aab44a28770ac535c08981e3791f6641d4ad82bd4d272bc48fec44c3d94b4b4`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.3` and `versionCode 235`, and the upload certificate is
+the same key 21.4 through 23.2 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The hand-off copy is in `play-store/aab/` for Play's closed testing.
 
 **What changed in 23.3.** The close of the surah introduction is a return
 (owner decision, 23.3). The introduction is the list's first item, so reading
