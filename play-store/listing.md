@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 23.5 (versionCode 237)
+Version: 23.6 (versionCode 238)
 
 ## Listing
 
@@ -245,6 +245,9 @@ What each set shows, in order:
 The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
+
+## Release notes (23.6, 417 characters)
+23.6 moves About this surah up under the surah's name and place, above the basmalah, so the Quran's own first line now leads straight into the first ayah. Open the door and the introduction reads as a preface; close it and you are back at the head. Al-Fatiha and At-Tawbah already read this way. The Quran text, translations, tafsirs, recitations, and content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.5, 447 characters)
 About this surah now opens the verses it names. References that were plain text, including the common v. and vv. forms, are links now, and each reads verse 9 or verses 46-47 rather than an abbreviation. Tapping one takes you to its first verse, and Al-Isra's Night Journey reference now opens 17:1, the verse its sentence names. The Quran text, translations, tafsirs, recitations, and word meanings are unchanged. No ads, no trackers, no accounts.

@@ -211,58 +211,51 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**23.5 (versionCode 237).** About this surah opens every verse it names
-(owner decision, 23.5). The whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` were green on this machine.
-The introductions carried 446 references, and 261 of them were written with
-an unquoted `href` the old normalizer dropped, so most of the doors the
-source meant were plain words; four more were quran.com footnote links no
-reading surface can open. Those 261 now open, the four keep their words and
-lose the dead door, and the one wrong target, Al-Isra's Night Journey link
-that said v. 1 and opened 17:4, now opens 17:1. The source's two verse
-abbreviations read as words everywhere, `v.` to `verse` and `vv.` to
-`verses`, including the linked and doubled forms, so Al-Kahf's "v. 9" is
-"verse 9" and Al-A'raf's "vv. 46-47" is "verses 46-47". The printed
-introduction to Ar-Ra'd names 34-48 where the surah ends at 43; the link
-opens 34 and the content gate reports the overrun without failing. The
-source's letters are otherwise untouched. `contentVersion` is 1.9.1, the
-core pack is version 9, and the words-en pack's hash moves with the core,
-because both carry the introductions; no other pack changed. The raw export
-and every other dataset are unchanged. `content/quran.db` hashes
+**23.6 (versionCode 238).** The surah's head ends with the door of its
+introduction, and the basmalah opens the text (owner decision, 23.6). The
+whole JVM suite, `checkdb`, `search`, `storecards --check`, lint, and
+`assembleDebug` were green on this machine. The door and the expanded
+introduction now stand under the surah's name, place, and count, above the
+basmalah, instead of between the basmalah and the first ayah. The
+introduction is the prose of the name and the place; opened, it reads as a
+preface and the Quran's own lines stay contiguous; closed, the door is the
+head's last line. Al-Fatiha and At-Tawbah, which open without a separate
+basmalah, already kept the door in the head, so every surah now reads one
+way. The document takes the door's own 12 dp slot, and the opening's 14 dp
+foot now falls under the basmalah, 18 dp off the first verse. The Quran
+text, both translations, both tafsirs, the recitations, and the word lists
+are unchanged. `content/quran.db` hashes
 `15e4ac4a25388ddd7714b0c0b28522b6fa91f5fe7587581f25b8a5263f954208`
-and `checkdb` verified it. No permission, service, host, or store frame
-moved, and Play's foreground service declaration and its two recordings are
-unchanged. The app remains in closed testing, so no public launch work was
-done. The three committed store sets stand; About this surah is not one of
-the eight cards. The instrumented accessibility classes were not owed: the
-diff touches `tools/` and `content/`, and no path the trigger names.
+and `checkdb` verified it; no dataset moved, so no pack changed. No
+permission, service, host, or store frame moved, and Play's foreground
+service declaration and its two recordings are unchanged. The app remains
+in closed testing, so no public launch work was done.
 
-The signed bundle comes from `build` run 46009667334, green on `main` for
-the commit `af6f8880`: the whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
-`quran-23.5-vc237.aab` has SHA-256
-`dafc3c1c6a4359ab4d5da44ec094fcdcd1bb7652fe11581faa8284bd01a0b2f7`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 23.5` and `versionCode 237`, and the upload certificate is
-the same key 21.4 through 23.4 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 23.5 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
+`SurahIntroTest` ran on `quran_phone` as a clean install, with
+`AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`, and
+`KeyboardFocusTest` beside it. Its new order test measures the door above
+the basmalah above Al-Baqarah's first verse, and Al-Fatiha and At-Tawbah
+without a separate line and the door above their first verse. The first run
+of that test was red because it asked for `ayah-1:1` where Al-Baqarah's
+first verse is `ayah-2:1`; the app was right, the test was fixed, and the
+class reran green. `SurahHeadCaptureTest` photographed the head in English
+and Bangla at the shipped type and the top of the reading's ladder; the
+frames are evidence, not store frames. The head is not one of the eight
+store cards, so the three committed store sets stand, and the
+`storecards --check` command says the cards are current.
 
-**What changed in 23.5.** The introductions were a document with dead
-references (owner decision, 23.5). The source wrote most of its targets
-without quotes, and the build kept only a quoted target, so 261 of its 446
-references rendered as plain text while Al-Kahf's odd "v. 9" was one of the
-few that worked. The build now accepts either shape, keeps a link only when
-`ReferenceLink` can open it, and unwraps the rest to their words. The four
-quran.com footnote references are plain words now. Al-Isra's "v. 1" opened
-17:4 because the sentence was updated and the old Bani Israil target was
-left behind; it opens 17:1. `v.` and `vv.` are expanded to `verse` and
-`verses` across the document, so the reader meets one vocabulary, and the
-build fails if the source moves out from under its one correction. The
-audit reads every built introduction as the app would and refuses a missing
-target, an unopenable target, a verse that does not exist, or a label that
-disagrees with the verse it opens.
+**What changed in 23.6.** The introduction's door stood between the
+basmalah and the first ayah (owner decision, 23.6). The basmalah is read
+from the content and is the text's first line, so an app door there split
+the Quran's own two lines; opened, the introduction stood between them. The
+door and the document now close the surah's head, under the place, the way
+Al-Fatiha and At-Tawbah already read. The document takes the door's slot, so
+the top edge does not move when it opens, and closing it still hands back
+the head (owner decision, 23.3). The Add translation and Add words rows
+stay where they were, under the basmalah: they are asks that leave once the
+content is on the device, and moving them above the Quran would put two
+asks before the text. The Quran text, every dataset, and every pack are
+unchanged.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a

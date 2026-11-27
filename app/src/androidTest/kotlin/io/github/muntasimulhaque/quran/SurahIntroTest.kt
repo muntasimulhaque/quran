@@ -36,11 +36,12 @@ import org.junit.runner.RunWith
 /**
  * The surah's introduction is its own way out, and the way back.
  *
- * The introduction opens from the quiet door under the basmalah. Opened, the
- * door is gone: the introduction is the whole of what stands there, and a tap
- * anywhere on it puts it away. The tap is a standard click, so a drag that
- * starts on it belongs to the reading's list and a reader who scrolls through
- * a long introduction does not lose it to the press. The click's label is the
+ * The introduction opens from the quiet door above the basmalah, at the foot
+ * of the surah's head. Opened, the door is gone: the introduction is the
+ * whole of what stands there, and a tap anywhere on it puts it away. The tap
+ * is a standard click, so a drag that starts on it belongs to the reading's
+ * list and a reader who scrolls through a long introduction does not lose it
+ * to the press. The click's label is the
  * word a screen reader hears, so the one exit is spoken as Hide (owner
  * decision, 23.2).
  *
@@ -52,6 +53,11 @@ import org.junit.runner.RunWith
  * label, and the landing. The state is seeded and the activity launched
  * inside the test for the reason [ReadingVerseGapTest] states: the reading
  * reads its settings once while its library opens.
+ *
+ * The head's order is measured here too: the door closes the name, the
+ * place, and the count, and the basmalah opens the text, so the preface
+ * never stands between the Quran's own first line and the first ayah
+ * (owner decision, 23.6).
  */
 @RunWith(AndroidJUnit4::class)
 class SurahIntroTest {
@@ -195,6 +201,82 @@ class SurahIntroTest {
         }
     }
 
+    /**
+     * The head's order on the glass: the name, the place, and the count end
+     * with the introduction's door, and the basmalah, where the surah has a
+     * separate one, opens the text above the first ayah. Al-Fatiha and
+     * At-Tawbah open without that line, so the door is the head's last line
+     * there and the first verse follows it (owner decision, 23.6).
+     */
+    @Test
+    fun theDoorClosesTheHeadAndTheBasmalahOpensTheText() {
+        seed()
+        ActivityScenario.launch(MainActivity::class.java).use {
+            openTheHead()
+            val door = compose.onNodeWithText(about).getUnclippedBoundsInRoot()
+            val basmalah = compose.onNodeWithTag("surah-basmalah")
+                .getUnclippedBoundsInRoot()
+            compose.waitUntil(timeoutMillis = 10_000) {
+                compose.onAllNodesWithTag("ayah-2:1").fetchSemanticsNodes().isNotEmpty()
+            }
+            val first = compose.onNodeWithTag("ayah-2:1").getUnclippedBoundsInRoot()
+            assertTrue(
+                "the door must close the head, above the basmalah: " +
+                    "door=$door basmalah=$basmalah",
+                door.bottom <= basmalah.top,
+            )
+            assertTrue(
+                "the basmalah must open the text, above the first verse: " +
+                    "basmalah=$basmalah first=$first",
+                basmalah.bottom <= first.top,
+            )
+        }
+
+        // The two surahs with no separate line: the door is the head's last
+        // line, and the first verse follows it.
+        for ((surah, ayah) in listOf(1 to 1, 9 to 1236)) {
+            seed(ayah)
+            ActivityScenario.launch(MainActivity::class.java).use {
+                openTheHead()
+                assertTrue(
+                    "surah $surah opens without a separate basmalah",
+                    compose.onAllNodesWithTag("surah-basmalah").fetchSemanticsNodes().isEmpty(),
+                )
+                val firstTag = "ayah-$surah:1"
+                compose.waitUntil(timeoutMillis = 10_000) {
+                    compose.onAllNodesWithTag(firstTag).fetchSemanticsNodes().isNotEmpty()
+                }
+                val door = compose.onNodeWithText(about).getUnclippedBoundsInRoot()
+                val first = compose.onNodeWithTag(firstTag).getUnclippedBoundsInRoot()
+                assertTrue(
+                    "the door must close the head above the first verse of surah $surah: " +
+                        "door=$door first=$first",
+                    door.bottom <= first.top,
+                )
+            }
+        }
+    }
+
+    /**
+     * The reading's head at the list's own top. The page is asked for item
+     * zero because a scroll to the door stops where the door is visible and
+     * leaves the opening a little below the head. The door is drawn only
+     * after the introduction has loaded, so the wait stands on the door
+     * itself.
+     */
+    private fun openTheHead() {
+        val page = context.getString(ReadingR.string.reading_page_description)
+        compose.waitUntil(timeoutMillis = 180_000) {
+            compose.onAllNodesWithContentDescription(page).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithContentDescription(page).performScrollToIndex(0)
+        compose.waitForIdle()
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithText(about).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitForIdle()
+    }
+
     /** The opening's top, the place the head stands on the glass. */
     private fun openingTop() = compose.onNodeWithTag("surah-opening")
         .getUnclippedBoundsInRoot().top
@@ -222,19 +304,19 @@ class SurahIntroTest {
     }
 
     /**
-     * A reader on the shipped sizes, at Al-Baqarah's first verse, whose
-     * introduction is long enough to carry the reader several screens past
-     * the glass, with the opening item one row above the place the reading
-     * opens on.
+     * A reader on the shipped sizes at the verse asked for. Al-Baqarah's
+     * first verse is the default: its introduction is long enough to carry
+     * the reader several screens past the glass, and the opening item stands
+     * one row above the place the reading opens on.
      */
-    private fun seed() {
+    private fun seed(ayah: Int = 8) {
         LanguagePreference(context).set("en")
         runBlocking {
             SettingsStore(context).apply {
                 setUiLanguage("en")
-                // Al-Baqarah's first ayah, the global number after Al-Fatiha's
-                // seven: the long introduction the close must not lose.
-                setAyah(8)
+                // Al-Baqarah's first ayah is the global number after
+                // Al-Fatiha's seven.
+                setAyah(ayah)
                 setTheme(AppTheme.Light)
                 setShowTranslation(false)
                 setWordByWord(false)

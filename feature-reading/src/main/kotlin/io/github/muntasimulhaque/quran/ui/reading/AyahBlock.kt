@@ -242,8 +242,9 @@ internal fun AyahBlock(
     // was borrowing a list's rhythm).
     //
     // The surah's own opening above the first verse keeps its 14 dp foot, so
-    // the surah's name stands 18 dp off that verse, more than two verses
-    // stand from each other.
+    // the opening's last line, the basmalah or the introduction's door,
+    // stands 18 dp off that verse, more than two verses stand from each other
+    // (owner decision, 23.6).
     Column(
         modifier = Modifier
             .fillMaxWidth()

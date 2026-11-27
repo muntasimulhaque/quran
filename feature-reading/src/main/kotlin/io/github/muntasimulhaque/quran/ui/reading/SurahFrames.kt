@@ -61,13 +61,16 @@ import kotlinx.coroutines.withContext
 
 /**
  * The air the surah's arrival keeps at its own two ends: more above the
- * Arabic name than under the place, so the frame reads as the head of the
- * page and the verses below it keep the lesser gap. [SurahEnd] holds the
- * arithmetic between this frame, the reading's foot, and the turn of a page.
+ * Arabic name than under the opening's last line, so the frame reads as the
+ * head of the page and the verses below it keep the lesser gap. The last line
+ * is the basmalah where the surah has one and the introduction's door where
+ * it does not, so the frame ends at the same place either way (owner
+ * decision, 23.6). [SurahEnd] holds the arithmetic between this frame, the
+ * reading's foot, and the turn of a page.
  */
 private val OpeningTop = 40.dp
 
-/** The lesser end of the same frame, under the place. */
+/** The lesser end of the same frame, under the opening's last line. */
 private val OpeningBottom = 14.dp
 
 @Composable
@@ -153,32 +156,21 @@ internal fun SurahOpening(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Tight),
         )
-        basmalah?.let { line ->
-            // The basmalah is the Quran's own first ayah, so it reads in the
-            // Quran's own face and at the reader's own Arabic size, the same
-            // as every verse below it. It wore 26 sp Amiri, a fixed hand
-            // outside the reader's choice, and the opening read as two
-            // different texts stacked (owner decision, 7.6).
-            TajweedText(
-                text = AnnotatedString(line.text),
-                code = line.tajweed,
-                colors = palette.tajweed,
-                enabled = metrics.tajweed,
-                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, ink),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Space.Section)
-                    .semantics { contentDescription = Arabic.portableText(line.text) },
-            )
-        }
+        // The surah's head ends with the door of its introduction, and the
+        // basmalah opens the text. The introduction is the prose of the name
+        // and the place above it, so it stands with them: under the basmalah
+        // it split the Quran's own two lines, and opened it stood between
+        // them. Al-Fatiha and At-Tawbah, which open without a separate
+        // basmalah, already kept the door in the head, so every surah now
+        // reads the same way (owner decision, 23.6).
+        //
         // The introduction is drawn only once the reader opens it: closed,
-        // the door is the whole of what stands under the basmalah, so the
-        // surah's own first ayah keeps the page. The about is prose the
-        // reader asked for, not a preview to scroll past (owner decision,
-        // 6.7: the three-line teaser of 6.6, a side effect of the
-        // introduction loading as the surah opens so the door knows whether
-        // it has anything behind it, is removed).
+        // the door is the whole of what stands there, so the surah's own
+        // first ayah keeps the page. The about is prose the reader asked
+        // for, not a preview to scroll past (owner decision, 6.7: the
+        // three-line teaser of 6.6, a side effect of the introduction
+        // loading as the surah opens so the door knows whether it has
+        // anything behind it, is removed).
         if (expanded && info != null) {
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
@@ -197,8 +189,12 @@ internal fun SurahOpening(
                 // flattened every block to plain prose and lost the source's
                 // structure on the page that explains the surah (owner
                 // decision, 13.3).
+                //
+                // It takes the door's own slot, a row under the place, so
+                // the top edge of the page does not move when the door
+                // becomes the document.
                 modifier = Modifier
-                    .padding(top = Space.Block)
+                    .padding(top = Space.Row)
                     .clip(Radii.Card)
                     .background(palette.selected)
                     .focusRing(press, Radii.Card)
@@ -237,16 +233,39 @@ internal fun SurahOpening(
         // The door itself is a button like every other action in the app,
         // so a word that answers a tap never reads as plain type. It is
         // drawn only while the introduction is closed: opened, the
-        // introduction is the whole of what stands under the basmalah, and
-        // its own tap puts it away, so there is no second button at the
-        // foot to scroll to. The door exists only where the introduction
-        // does: a language with no introduction is not offered a button
-        // that opens nothing (owner decision, 23.2).
+        // introduction takes this slot and is its own close, so there is no
+        // second button at the foot to scroll to. The door exists only where
+        // the introduction does: a language with no introduction is not
+        // offered a button that opens nothing (owner decision, 23.2).
         if (!expanded && info != null) {
             TextButton(
                 label = stringResource(R.string.reading_about_surah),
                 onClick = { onExpandedChange(true) },
-                modifier = Modifier.padding(top = 10.dp),
+                modifier = Modifier.padding(top = Space.Row),
+            )
+        }
+        basmalah?.let { line ->
+            // The basmalah is the Quran's own first ayah, so it reads in the
+            // Quran's own face and at the reader's own Arabic size, the same
+            // as every verse below it. It wore 26 sp Amiri, a fixed hand
+            // outside the reader's choice, and the opening read as two
+            // different texts stacked (owner decision, 7.6).
+            //
+            // It is the text's first line: the head and its door stand above
+            // it, so the preface never comes between the basmalah and the
+            // first ayah (owner decision, 23.6).
+            TajweedText(
+                text = AnnotatedString(line.text),
+                code = line.tajweed,
+                colors = palette.tajweed,
+                enabled = metrics.tajweed,
+                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, ink),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Space.Section)
+                    .semantics { contentDescription = Arabic.portableText(line.text) }
+                    .testTag("surah-basmalah"),
             )
         }
     }
