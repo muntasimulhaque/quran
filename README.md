@@ -237,6 +237,18 @@ done. The three committed store sets stand; About this surah is not one of
 the eight cards. The instrumented accessibility classes were not owed: the
 diff touches `tools/` and `content/`, and no path the trigger names.
 
+The signed bundle comes from `build` run 46009667334, green on `main` for
+the commit `af6f8880`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.5-vc237.aab` has SHA-256
+`dafc3c1c6a4359ab4d5da44ec094fcdcd1bb7652fe11581faa8284bd01a0b2f7`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.5` and `versionCode 237`, and the upload certificate is
+the same key 21.4 through 23.4 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 23.5 bundle is in `play-store/aab/` for the upload, and that copy is
+deleted once Play has it.
+
 **What changed in 23.5.** The introductions were a document with dead
 references (owner decision, 23.5). The source wrote most of its targets
 without quotes, and the build kept only a quoted target, so 261 of its 446
