@@ -232,6 +232,18 @@ one of the eight cards. `content/quran.db` hashes
 `0c5d878e8240f014dea651b7912695092eb0eac1da071a6d55056fce9272904e`
 and `checkdb` verified it; no dataset moved, so no pack changed.
 
+The signed bundle comes from `build` run 45990506795, green on `main` for
+the commit `3d650a45`: the whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
+`quran-23.4-vc236.aab` has SHA-256
+`64c890f98fdd147045c0b188d5b987f54d2fde99854009ebd14177bac14ab336`.
+`jarsigner` reads `jar verified`, the bundle's own manifest reads
+`versionName 23.4` and `versionCode 236`, and the upload certificate is
+the same key 21.4 through 23.3 shipped under, SHA-256
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
+The 23.4 bundle is in `play-store/aab/` for the upload, and that copy is
+deleted once Play has it.
+
 **What changed in 23.4.** The settings hub is ten rows (owner decision,
 23.4). The Storage page was a report: it added the downloads up, showed the
 phone's free space, and offered two doors that cleared every recitation or
