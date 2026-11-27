@@ -13,6 +13,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -27,16 +28,16 @@ import java.util.Locale
 
 /**
  * The surah's head, photographed for review: the Arabic name, the Latin name,
- * the place and the count, the introduction's door, and the basmalah under
- * them.
+ * the place and the count, the introduction's door, the word meanings'
+ * invitation, and the basmalah under them.
  *
  * No store frame meets the head. The first opens on 2:256, and the recitation
  * frame opens on 1:1 with the head already above the glass, so the order the
- * door and the basmalah keep cannot be seen in the eight cards. This class is
- * the evidence for that one surface: the shipped type and the top of the
- * reading's ladder, in English and in Bangla, on the phone (owner decision,
- * 23.6). It is a review frame, not a store frame, and it is not part of a
- * release gate.
+ * door, the invitation, and the basmalah keep cannot be seen in the eight
+ * cards. This class is the evidence for that one surface: the shipped type
+ * and the top of the reading's ladder, in English and in Bangla, on the phone
+ * (owner decisions, 23.6 and 23.7). It is a review frame, not a store frame,
+ * and it is not part of a release gate.
  *
  * The phone is handed back as it was found, in a `finally`: every instrumented
  * class in a run shares one process and one set of settings, and a language
@@ -55,9 +56,19 @@ class SurahHeadCaptureTest {
         val review = ReviewState(context)
         review.save()
         try {
-            // The word lists are installed so the head is photographed alone:
-            // a missing list draws its Add row under the basmalah, and that
-            // row is the reading's invitation, not the head.
+            // The head is photographed in both of its states: the fresh
+            // install, where the word list's invitation stands under the
+            // introduction's door, and the steady reading, where the list is
+            // on the device and the head ends with the door (owner decision,
+            // 23.7). The invitation is the one thing the top of the ladder
+            // can break, so it is photographed at both ends in both
+            // languages.
+            PackStore(context).remove("words-en")
+            PackStore(context).remove("words-bn")
+            photograph("surah-head-invite", UiLanguage.English, TextSize.DEFAULT)
+            photograph("surah-head-invite-large", UiLanguage.English, TextSize.STEPS.last())
+            photograph("surah-head-invite-bn", UiLanguage.Bangla, TextSize.DEFAULT)
+            photograph("surah-head-invite-bn-large", UiLanguage.Bangla, TextSize.STEPS.last())
             review.install("words-en", "words-bn")
             photograph("surah-head", UiLanguage.English, TextSize.DEFAULT)
             photograph("surah-head-large", UiLanguage.English, TextSize.STEPS.last())

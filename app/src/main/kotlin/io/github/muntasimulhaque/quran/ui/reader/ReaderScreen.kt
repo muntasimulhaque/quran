@@ -740,16 +740,13 @@ fun ReaderScreen(
                 val revealForSurah = reveal?.takeIf {
                     viewModel.surahOf(it.ayah)?.number == surah.number
                 }
-                // Four answers the reading asks for, each of which walks a
-                // list to say one boolean or one set: whether a translation
-                // is on, whether the word list is on the device, the next
-                // surah's name, and the ayahs the reader wrote a note on.
-                // They are remembered against what they are made of, so a
-                // rebuild for any other reason does not walk the reader's
-                // saves and the pack list again (owner decision, 19.8).
-                val hasTranslation = remember(settings.translationPacks, viewModel.packs) {
-                    viewModel.enabledTranslationPacks.isNotEmpty()
-                }
+                // Three answers the reading asks for, each of which walks a
+                // list to say one boolean or one set: whether the word list
+                // is on the device, the next surah's name, and the ayahs the
+                // reader wrote a note on. They are remembered against what
+                // they are made of, so a rebuild for any other reason does
+                // not walk the reader's saves and the pack list again (owner
+                // decision, 19.8).
                 val wordsInstalled = remember(content, viewModel.readingLanguage) {
                     content.attachedPack(
                         ContentDatabase.wordsPackId(viewModel.readingLanguage),
@@ -770,12 +767,11 @@ fun ReaderScreen(
                         metrics = settings.readingMetrics(),
                         reveal = revealForSurah,
                         place = settings.ayah,
-                        hasTranslation = hasTranslation,
-                        // The word meanings are the reading's one undiscoverable
-                        // aid: a Settings row and nothing else. The door stands at
-                        // the surah's arrival while the list is not on the device,
-                        // and the tap lands on the page that has the pack (owner
-                        // decision, 19.1).
+                        // The word meanings are the reading's one aid a
+                        // Settings row alone hid. The head's invitation stands
+                        // under the surah's own door while the list is not on
+                        // the device, and the tap lands on the page that has
+                        // it (owner decisions, 19.1 and 23.7).
                         wordsInstalled = wordsInstalled,
                         contentLanguage = viewModel.readingLanguage,
                         nextSurahName = nextSurahName,
@@ -928,9 +924,6 @@ fun ReaderScreen(
                             // reader finishes, and the second is final
                             // (owner decision, 21.9).
                             viewModel.answerReminderNotNow(surah.number)
-                        },
-                        onAddContent = {
-                            openSheet(ReaderSheet.Settings, SettingsPage.Translations)
                         },
                         onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
                         onJumped = { ayah ->
@@ -1122,11 +1115,18 @@ fun ReaderScreen(
                 ?: stringResource(R.string.surah_fallback_name, ayah.surah),
             tafsirPacks = viewModel.enabledTafsirPacks,
             settings = settings,
-            tafsirOffer = viewModel.packs.firstOrNull {
-                it.type == PackType.Tafsir &&
-                    it.language == viewModel.readingLanguage &&
-                    !it.installed
-            },
+            // The card offers any tafsir of the reader's language that is
+            // not in the card yet, on the device or not: a pack that is
+            // installed and switched off is a passage waiting to be added,
+            // not a file list to go and find. The on-device pack leads, and
+            // Add is the one tap that turns it on (owner decision, 23.7).
+            tafsirOffer = viewModel.packs
+                .filter {
+                    it.type == PackType.Tafsir &&
+                        it.language == viewModel.readingLanguage &&
+                        it.id !in settings.tafsirPacks
+                }
+                .minByOrNull { if (it.installed) 0 else 1 },
             onInstallTafsir = { viewModel.installPack(it) },
             initialTafsirPack = cardTafsirPack,
             onAddContent = {

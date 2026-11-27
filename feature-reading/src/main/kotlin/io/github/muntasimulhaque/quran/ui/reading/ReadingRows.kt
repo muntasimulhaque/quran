@@ -27,7 +27,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -42,8 +41,6 @@ import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.WordAudioState
 import io.github.muntasimulhaque.quran.data.WordVoice
-import io.github.muntasimulhaque.quran.feature.reading.R
-import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.rememberPageSideMargins
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -106,9 +103,9 @@ internal fun ReadingRows(
     /** The reader's own word-by-word switch, before any arrival turns it on. */
     wordAid: Boolean,
     place: Int,
-    hasTranslation: Boolean,
     /** True when the reader's own word list is on the device. */
     wordsInstalled: Boolean = true,
+    /** The reader's tap on the head's invitation: the page with the list. */
     onAddWords: () -> Unit = {},
     contentLanguage: String,
     nextSurahName: String?,
@@ -152,7 +149,6 @@ internal fun ReadingRows(
     reminderOffer: Boolean = false,
     onReminderOn: () -> Unit = {},
     onReminderNotNow: () -> Unit = {},
-    onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
     /** The ayah a jump landed on, so the reading can announce the place. */
     onJumped: (Ayah) -> Unit = {},
@@ -420,34 +416,10 @@ internal fun ReadingRows(
                 expanded = aboutOpen,
                 onExpandedChange = { open -> if (open) aboutOpen = true else closeAbout() },
                 onOpenReference = onOpenReference,
+                showWordsDoor = !wordsInstalled,
+                onAddWords = onAddWords,
                 metrics = metrics,
             )
-            // The door asks for a translation only while translations
-            // are something the reading draws at all: a reader who hid
-            // them in Settings is not looking for one here.
-            if (metrics.showTranslation && !hasTranslation) {
-                AddDoor(
-                    text = stringResource(R.string.reading_add_translation),
-                    action = stringResource(R.string.reading_action_add),
-                    onClick = onAddContent,
-                    modifier = Modifier.padding(vertical = Space.Tight),
-                )
-            }
-            // The word meanings and the tafsir were the app's two
-            // undiscoverable features: both live behind a Settings row and
-            // neither is named anywhere in the reading, so a reader met an
-            // app that appeared to be text and a translation. The words'
-            // door stands where the reading arrives, on the one screen a
-            // reader always sees, and leaves for good once the list is on
-            // the device (owner decision, 19.1).
-            if (!wordsInstalled) {
-                AddDoor(
-                    text = stringResource(R.string.reading_add_words),
-                    action = stringResource(R.string.reading_action_add),
-                    onClick = onAddWords,
-                    modifier = Modifier.padding(vertical = Space.Tight),
-                )
-            }
             // The reading's whole navigation is one tap on the paper, and
             // nothing on a bare page says so. The bar is the page's head,
             // so the sentence that taught the tap retired with the tap

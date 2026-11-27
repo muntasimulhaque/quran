@@ -211,20 +211,20 @@ tagged `owner decision`, and a test measures the ones that can be measured, so
 
 ## Status
 
-**23.6 (versionCode 238).** The surah's head ends with the door of its
-introduction, and the basmalah opens the text (owner decision, 23.6). The
-whole JVM suite, `checkdb`, `search`, `storecards --check`, lint, and
-`assembleDebug` were green on this machine. The door and the expanded
-introduction now stand under the surah's name, place, and count, above the
-basmalah, instead of between the basmalah and the first ayah. The
-introduction is the prose of the name and the place; opened, it reads as a
-preface and the Quran's own lines stay contiguous; closed, the door is the
-head's last line. Al-Fatiha and At-Tawbah, which open without a separate
-basmalah, already kept the door in the head, so every surah now reads one
-way. The document takes the door's own 12 dp slot, and the opening's 14 dp
-foot now falls under the basmalah, 18 dp off the first verse. The Quran
-text, both translations, both tafsirs, the recitations, and the word lists
-are unchanged. `content/quran.db` hashes
+**23.7 (versionCode 239).** The word meanings' invitation closes the
+surah's head, and the basmalah is again the last line before the verse
+(owner decision, 23.7). The whole JVM suite, `checkdb`, `search`,
+`storecards --check`, lint, and `assembleDebug` were green on this machine.
+The invitation stands in the head, under the introduction's door and above
+the basmalah, instead of under the basmalah; while the preface is open it
+waits, because the head is then the surah's own prose. The translation's
+door is retired: it explained a page whose translation the reader had
+turned off, and keeping it would put two asks before the text. The words'
+door keeps its shape, its words, and its destination, and leaves for good
+once the list is on the device. A tafsir that is installed and switched off
+is now offered in the ayah card with one Add, and `AddDoor` speaks its
+action word. The Quran text, both translations, both tafsirs, the
+recitations, and the word lists are unchanged. `content/quran.db` hashes
 `15e4ac4a25388ddd7714b0c0b28522b6fa91f5fe7587581f25b8a5263f954208`
 and `checkdb` verified it; no dataset moved, so no pack changed. No
 permission, service, host, or store frame moved, and Play's foreground
@@ -233,41 +233,28 @@ in closed testing, so no public launch work was done.
 
 `SurahIntroTest` ran on `quran_phone` as a clean install, with
 `AccessibilityTest`, `LargeTextTest`, `ReadingSemanticsTest`, and
-`KeyboardFocusTest` beside it. Its new order test measures the door above
-the basmalah above Al-Baqarah's first verse, and Al-Fatiha and At-Tawbah
-without a separate line and the door above their first verse. The first run
-of that test was red because it asked for `ayah-1:1` where Al-Baqarah's
-first verse is `ayah-2:1`; the app was right, the test was fixed, and the
-class reran green. `SurahHeadCaptureTest` photographed the head in English
-and Bangla at the shipped type and the top of the reading's ladder; the
-frames are evidence, not store frames. The head is not one of the eight
-store cards, so the three committed store sets stand, and the
-`storecards --check` command says the cards are current.
+`KeyboardFocusTest` beside it. Its new test takes the word list off the
+phone, measures the invitation under the door and above the basmalah, the
+basmalah above Al-Baqarah's first verse, and the invitation put away while
+the preface is open; the pack is put back in a finally. `SurahHeadCaptureTest`
+photographed the head with the invitation and without it, in English and
+Bangla, at the shipped type and the top of the reading's ladder; the frames
+are evidence, not store frames. The head is not one of the eight store
+cards, so the three committed store sets stand, and `storecards --check`
+says the cards are current.
 
-The signed bundle comes from `build` run 46022157549, green on `main` for
-the commit `6169a3fb`: the whole JVM suite, `checkdb`, `search`,
-`storecards --check`, lint, and `assembleDebug` passed. The signed bundle
-`quran-23.6-vc238.aab` has SHA-256
-`baffc583638d1e53c73a720846ad8edb843bb44b1c410b3ca673df3b515d645c`.
-`jarsigner` reads `jar verified`, the bundle's own manifest reads
-`versionName 23.6` and `versionCode 238`, and the upload certificate is
-the same key 21.4 through 23.5 shipped under, SHA-256
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-The 23.6 bundle was submitted for Play review, and the hand-off copy in
-`play-store/aab/` was deleted once Play had it.
-
-**What changed in 23.6.** The introduction's door stood between the
-basmalah and the first ayah (owner decision, 23.6). The basmalah is read
-from the content and is the text's first line, so an app door there split
-the Quran's own two lines; opened, the introduction stood between them. The
-door and the document now close the surah's head, under the place, the way
-Al-Fatiha and At-Tawbah already read. The document takes the door's slot, so
-the top edge does not move when it opens, and closing it still hands back
-the head (owner decision, 23.3). The Add translation and Add words rows
-stay where they were, under the basmalah: they are asks that leave once the
-content is on the device, and moving them above the Quran would put two
-asks before the text. The Quran text, every dataset, and every pack are
-unchanged.
+**What changed in 23.7.** The surah's head promised the asks their own
+place and the basmalah the text (owner decision, 23.7). 23.6 kept the Add
+rows under the basmalah to avoid two asks before the text; the translation's
+door is retired, so one ask remains, and it closes the head under the
+introduction's door. The basmalah is the last line before the verse again,
+and the invitation waits while the preface is open. The card's shape, its
+sentence, its Add, and its one destination are unchanged, and it still
+leaves once the list is on the device (owner decision, 19.1). A tafsir on
+the device that is switched off is offered in the ayah card, with a sentence
+that names no download, and Add is the one tap that enables it. `AddDoor`
+speaks its action word, so a screen reader hears "Add" and not "activate".
+The Quran text, every dataset, and every pack are unchanged.
 
 **What changed in 22.7.** The page follows the reciter by measured time
 (owner decision, 22.7). The word timings of both recitations were cut against a

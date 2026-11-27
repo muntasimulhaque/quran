@@ -40,6 +40,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.feature.reading.R
+import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppChevron
 import io.github.muntasimulhaque.quran.ui.kit.ChevronRole
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -63,10 +64,10 @@ import kotlinx.coroutines.withContext
  * The air the surah's arrival keeps at its own two ends: more above the
  * Arabic name than under the opening's last line, so the frame reads as the
  * head of the page and the verses below it keep the lesser gap. The last line
- * is the basmalah where the surah has one and the introduction's door where
- * it does not, so the frame ends at the same place either way (owner
- * decision, 23.6). [SurahEnd] holds the arithmetic between this frame, the
- * reading's foot, and the turn of a page.
+ * is the basmalah where the surah has one and the head's own invitation (or
+ * the introduction's door) where it does not, so the frame ends at the same
+ * place either way (owner decisions, 23.6 and 23.7). [SurahEnd] holds the
+ * arithmetic between this frame, the reading's foot, and the turn of a page.
  */
 private val OpeningTop = 40.dp
 
@@ -83,6 +84,10 @@ internal fun SurahOpening(
     onExpandedChange: (Boolean) -> Unit,
     /** Opens an internal reference the introduction links to, when it does. */
     onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
+    /** True while the reader's own word list is not on the device. */
+    showWordsDoor: Boolean = false,
+    /** Opens the page that has the word list. */
+    onAddWords: () -> Unit = {},
     metrics: ReadingMetrics,
 ) {
     // The introduction is read as the surah opens, not when its door is
@@ -156,21 +161,21 @@ internal fun SurahOpening(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Tight),
         )
-        // The surah's head ends with the door of its introduction, and the
-        // basmalah opens the text. The introduction is the prose of the name
-        // and the place above it, so it stands with them: under the basmalah
-        // it split the Quran's own two lines, and opened it stood between
-        // them. Al-Fatiha and At-Tawbah, which open without a separate
-        // basmalah, already kept the door in the head, so every surah now
-        // reads the same way (owner decision, 23.6).
+        // The surah's head holds its doors, and the basmalah opens the
+        // text. The introduction is the prose of the name and the place
+        // above it, so it stands with them: under the basmalah it split the
+        // Quran's own two lines, and opened it stood between them. Al-Fatiha
+        // and At-Tawbah, which open without a separate basmalah, already
+        // kept the door in the head, so every surah now reads the same way
+        // (owner decision, 23.6).
         //
         // The introduction is drawn only once the reader opens it: closed,
-        // the door is the whole of what stands there, so the surah's own
-        // first ayah keeps the page. The about is prose the reader asked
-        // for, not a preview to scroll past (owner decision, 6.7: the
-        // three-line teaser of 6.6, a side effect of the introduction
-        // loading as the surah opens so the door knows whether it has
-        // anything behind it, is removed).
+        // the door is the whole of that place, so the surah's own first ayah
+        // keeps the page. The about is prose the reader asked for, not a
+        // preview to scroll past (owner decision, 6.7: the three-line
+        // teaser of 6.6, a side effect of the introduction loading as the
+        // surah opens so the door knows whether it has anything behind it,
+        // is removed).
         if (expanded && info != null) {
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
@@ -242,6 +247,24 @@ internal fun SurahOpening(
                 label = stringResource(R.string.reading_about_surah),
                 onClick = { onExpandedChange(true) },
                 modifier = Modifier.padding(top = Space.Row),
+            )
+        }
+        // The head holds every door (owner decision, 23.7). The invitation
+        // to the word meanings stands under the introduction's door and
+        // above the basmalah, so the Quran's own first line is the last thing
+        // before the verse, and it waits while the preface is open, because
+        // then the head is the surah's own prose. The word list is the one
+        // aid the reading never named: it lives behind a Settings row, and
+        // the door stands where the reader arrives and leaves for good once
+        // the list is on the device (owner decision, 19.1).
+        if (!expanded && showWordsDoor) {
+            AddDoor(
+                text = stringResource(R.string.reading_add_words),
+                action = stringResource(R.string.reading_action_add),
+                onClick = onAddWords,
+                modifier = Modifier
+                    .padding(top = Space.Row)
+                    .testTag("surah-add-words"),
             )
         }
         basmalah?.let { line ->

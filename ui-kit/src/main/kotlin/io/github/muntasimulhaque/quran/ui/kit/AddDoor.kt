@@ -40,6 +40,12 @@ private val DoorPad = 14.dp
  * and a reader meets the same door wearing two faces (owner decision, 6.5).
  * Each surface passes its own sentence and its own action word, so
  * the component owns the shape and the module owns the words.
+ *
+ * The door says what a tap does. The sentence is the node's name and the
+ * action word is drawn inside it, so without a click label a screen reader
+ * says "double tap to activate" and reads the word Add as the sentence's
+ * tail. The label is the action word itself, so the last thing the reader
+ * hears is the thing the tap will do (owner decision, 23.7).
  */
 @Composable
 fun AddDoor(
@@ -59,6 +65,7 @@ fun AddDoor(
                 interactionSource = press,
                 indication = null,
                 role = Role.Button,
+                onClickLabel = action,
                 onClick = onClick,
             )
             .minimumInteractiveComponentSize()

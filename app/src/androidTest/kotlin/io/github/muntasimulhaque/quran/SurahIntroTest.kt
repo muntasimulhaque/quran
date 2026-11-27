@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
@@ -22,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -57,7 +59,9 @@ import org.junit.runner.RunWith
  * The head's order is measured here too: the door closes the name, the
  * place, and the count, and the basmalah opens the text, so the preface
  * never stands between the Quran's own first line and the first ayah
- * (owner decision, 23.6).
+ * (owner decision, 23.6). The word meanings' invitation is measured with the
+ * same head: under the door, above the basmalah, and away while the preface
+ * is open (owner decision, 23.7).
  */
 @RunWith(AndroidJUnit4::class)
 class SurahIntroTest {
@@ -254,6 +258,65 @@ class SurahIntroTest {
                     door.bottom <= first.top,
                 )
             }
+        }
+    }
+
+    /**
+     * The invitation is part of the head (owner decision, 23.7).
+     *
+     * The word list's door stands under the introduction's door and above the
+     * basmalah, so the Quran's own first line is still the last thing before
+     * the verse. While the preface is open the ask waits, because the head is
+     * then the surah's own prose. The list is taken off the phone for the
+     * measurement, so the door is drawn whatever the class before this one
+     * left behind, and put back in the finally.
+     */
+    @Test
+    fun theInvitationStandsInTheHeadAboveTheBasmalah() {
+        val review = ReviewState(context)
+        review.save()
+        try {
+            PackStore(context).remove("words-en")
+            seed()
+            ActivityScenario.launch(MainActivity::class.java).use {
+                openTheHead()
+                compose.waitUntil(timeoutMillis = 10_000) {
+                    compose.onAllNodesWithTag("surah-add-words").fetchSemanticsNodes().isNotEmpty()
+                }
+                val door = compose.onNodeWithText(about).getUnclippedBoundsInRoot()
+                val invitation = compose.onNodeWithTag("surah-add-words").getUnclippedBoundsInRoot()
+                val basmalah = compose.onNodeWithTag("surah-basmalah").getUnclippedBoundsInRoot()
+                compose.waitUntil(timeoutMillis = 10_000) {
+                    compose.onAllNodesWithTag("ayah-2:1").fetchSemanticsNodes().isNotEmpty()
+                }
+                val first = compose.onNodeWithTag("ayah-2:1").getUnclippedBoundsInRoot()
+                assertTrue(
+                    "the invitation must stand under the surah's own door: " +
+                        "door=$door invitation=$invitation",
+                    door.bottom <= invitation.top,
+                )
+                assertTrue(
+                    "the invitation must stand above the basmalah, never between it and " +
+                        "the verse: invitation=$invitation basmalah=$basmalah",
+                    invitation.bottom <= basmalah.top,
+                )
+                assertTrue(
+                    "the basmalah must open the text above the first verse: " +
+                        "basmalah=$basmalah first=$first",
+                    basmalah.bottom <= first.top,
+                )
+
+                // Opened, the head is the surah's own prose: the ask waits
+                // until the preface closes.
+                compose.onNodeWithText(about).performClick()
+                compose.waitUntil(timeoutMillis = 10_000) {
+                    compose.onAllNodesWithTag("surah-about").fetchSemanticsNodes().isNotEmpty()
+                }
+                compose.onAllNodesWithTag("surah-add-words").assertCountEquals(0)
+                compose.onNodeWithTag("surah-basmalah").assertExists()
+            }
+        } finally {
+            review.restore()
         }
     }
 

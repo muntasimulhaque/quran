@@ -463,11 +463,13 @@ private fun TafsirPanel(
 }
 
 /**
- * The tafsir the reader does not have yet, offered where the reader asked for
- * it. The language, the pack's name, and its size are the whole of the
- * question; Add is the one act, and Not now closes the card. A language with
- * no offered pack falls back to the Settings door, so the card is never a
- * sheet with nothing in it (owner decision, 15.5).
+ * The tafsir the reader does not have in the card, offered where the reader
+ * asked for it. The language, the pack's name, and what it would cost are the
+ * whole of the question: a pack still to come names its size, and one already
+ * on the device says so and needs no download. Add is the one act, and Not
+ * now closes the card. A language with no offered pack falls back to the
+ * Settings door, so the card is never a sheet with nothing in it (owner
+ * decisions, 15.5 and 23.7).
  */
 @Composable
 private fun TafsirOffer(
@@ -505,10 +507,17 @@ private fun TafsirOffer(
             modifier = Modifier.padding(top = Space.Tight),
         )
         Text(
-            text = stringResource(
-                R.string.card_tafsir_offer_body,
-                formatBytes(pack.bytes),
-            ),
+            text = if (pack.installed) {
+                // A pack already on the device is one tap from the card, and
+                // naming a size it will not download would describe a
+                // transfer that never happens (owner decision, 23.7).
+                stringResource(R.string.card_tafsir_offer_on_device)
+            } else {
+                stringResource(
+                    R.string.card_tafsir_offer_body,
+                    formatBytes(pack.bytes),
+                )
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Line),

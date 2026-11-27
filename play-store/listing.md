@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 23.6 (versionCode 238)
+Version: 23.7 (versionCode 239)
 
 ## Listing
 
@@ -245,6 +245,9 @@ What each set shows, in order:
 The last frame is last on purpose. It is the one frame that leaves a player
 running, so every still page is taken before it and the player is stopped after
 the capture.
+
+## Release notes (23.7, 497 characters)
+Word meanings are now offered above the basmalah, in the surah's head, so nothing stands between the Quran's first line and its verse. The invitation keeps its shape and goes away once the word list is on your device. The translation ask is gone: both translations ship with the app, so it only appeared when you turned yours off. A tafsir you switched off is offered again in the ayah card. Text, translations, tafsirs, recitations, and word lists are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (23.6, 417 characters)
 23.6 moves About this surah up under the surah's name and place, above the basmalah, so the Quran's own first line now leads straight into the first ayah. Open the door and the introduction reads as a preface; close it and you are back at the head. Al-Fatiha and At-Tawbah already read this way. The Quran text, translations, tafsirs, recitations, and content database are unchanged. No ads, no trackers, no accounts.

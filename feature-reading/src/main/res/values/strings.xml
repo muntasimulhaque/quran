@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="reading_page_description">Reading</string>
-    <string name="reading_add_translation">Add a translation to read this surah in your language</string>
     <string name="reading_action_add">Add</string>
     <!-- The word meanings are the one aid the reading never mentions, because
-         they are a Settings row and nothing else. The door stands where the
-         reading arrives, and leaves for good once the list is on the device
-         (owner decision, 19.1). -->
+         they are a Settings row and nothing else. The door stands in the
+         surah's head, under the introduction's door, and leaves for good once
+         the list is on the device (owner decisions, 19.1 and 23.7). -->
     <string name="reading_add_words">Add word meanings to read each word on its own</string>
     <string name="reading_revelation_makki">Makki</string>
     <string name="reading_revelation_madani">Madani</string>
@@ -28,6 +27,7 @@
     <string name="card_opening_pack">Opening %1$s…</string>
     <string name="card_tafsir_missing">This tafsir has no passage for this ayah.</string>
     <string name="card_tafsir_offer_body">The commentary in this language. It is %1$s, downloads once, and then works offline.</string>
+    <string name="card_tafsir_offer_on_device">The commentary in this language, already on this device.</string>
     <string name="card_tafsir_add">Add</string>
     <string name="card_tafsir_not_now">Not now</string>
     <string name="card_note_take">Take a note</string>

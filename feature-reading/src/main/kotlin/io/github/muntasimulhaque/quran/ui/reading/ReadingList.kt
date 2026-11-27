@@ -50,7 +50,6 @@ data class ReadingListState(
     val wordAudio: WordAudioState? = null,
     /** The reader's place: the ayah, which the list shows and never corrects. */
     val place: Int,
-    val hasTranslation: Boolean,
     /** True when the reader's own word list is on the device. */
     val wordsInstalled: Boolean = true,
     /** The reader's language: the reading reads it, and so does the opening. */
@@ -125,7 +124,6 @@ data class ReadingListActions(
     val onOpenReference: (surah: Int, ayah: Int?) -> Unit = { _, _ -> },
     val onReminderOn: () -> Unit = {},
     val onReminderNotNow: () -> Unit = {},
-    val onAddContent: () -> Unit,
     val onPlaceChanged: (Int) -> Unit,
     /** The ayah a jump landed on, so the reading can announce the place. */
     val onJumped: (Ayah) -> Unit = {},
@@ -238,7 +236,6 @@ fun ReadingList(
         reveal = state.reveal,
         wordAid = state.wordAid,
         place = state.place,
-        hasTranslation = state.hasTranslation,
         wordsInstalled = state.wordsInstalled,
         onAddWords = actions.onAddWords,
         contentLanguage = state.contentLanguage,
@@ -266,7 +263,6 @@ fun ReadingList(
         reminderOffer = state.reminderOffer,
         onReminderOn = actions.onReminderOn,
         onReminderNotNow = actions.onReminderNotNow,
-        onAddContent = actions.onAddContent,
         onPlaceChanged = actions.onPlaceChanged,
         onJumped = actions.onJumped,
         startAtOpening = state.startAtOpening,

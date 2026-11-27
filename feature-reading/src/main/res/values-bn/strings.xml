@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="reading_page_description">পাঠ</string>
-    <string name="reading_add_translation">আপনার ভাষায় এই সূরা পড়তে একটি অনুবাদ যোগ করুন</string>
     <string name="reading_action_add">যোগ করুন</string>
     <string name="reading_add_words">প্রতিটি শব্দ আলাদা করে পড়তে শব্দের অর্থ যোগ করুন</string>
     <string name="reading_revelation_makki">মাক্কী</string>
@@ -24,6 +23,7 @@
     <string name="card_opening_pack">%1$s খোলা হচ্ছে…</string>
     <string name="card_tafsir_missing">এই আয়াতের জন্য এই তাফসীরে কোনো অংশ নেই।</string>
     <string name="card_tafsir_offer_body">এই ভাষার তাফসীর। এটি %1$s, একবার ডাউনলোড করলে পরে অফলাইনে কাজ করবে।</string>
+    <string name="card_tafsir_offer_on_device">এই ভাষার তাফসীরটি এই ডিভাইসেই আছে।</string>
     <string name="card_tafsir_add">যোগ করুন</string>
     <string name="card_tafsir_not_now">এখন নয়</string>
     <string name="card_note_take">নোট লিখুন</string>
